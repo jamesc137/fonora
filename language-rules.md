@@ -137,6 +137,12 @@ Examples:
 * Future revisions may introduce dedicated long-vowel forms if readability remains acceptable.
 * Existing consonant definitions remain unchanged.
 
+## Quiz
+
+The Quiz tab drills all encodable sounds: defined sound-grid cells, special derived sounds (`th`, `dh`), experimental derived sounds (`v`), and experimental vowels (`a`, `e`, `i`, `o`, `u`).
+
+Undefined cells (including plain throat `⊐`) are excluded.
+
 ## Experimental Derived Sounds
 
 This section is experimental and should not be considered finalized.

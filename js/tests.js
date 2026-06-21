@@ -1,4 +1,4 @@
-import { FALLBACK_RULES, parseLanguageRulesMarkdown, getQuizEntries } from './rules.js';
+import { FALLBACK_RULES, parseLanguageRulesMarkdown, getEncodableEntries, getQuizEntries } from './rules.js';
 import { encodeSounds } from './encode.js';
 import { decodeSymbols, decodeText } from './decode.js';
 import { normalizeIpa } from './ipa-normalize.js';
@@ -58,6 +58,14 @@ export function runTests() {
   });
   t('ʔ is not encodable', () => assert(enc('ʔ').symbols === '?'));
   t('plain ⊐ not in quiz', () => assert(!getQuizEntries(rules).some((c) => c.symbols === '⊐')));
+  t('quiz includes all encodable sounds', () => {
+    const encodable = getEncodableEntries(rules).filter((c) => c.sound && c.sound !== '?');
+    const quizSounds = new Set(getQuizEntries(rules).map((c) => c.sound));
+    for (const cell of encodable) {
+      assert(quizSounds.has(cell.sound), `missing sound ${cell.sound} (${cell.symbols})`);
+    }
+    assert(quizSounds.size === encodable.length);
+  });
   t('quiz includes all vowels', () => {
     for (const v of ['a', 'e', 'i', 'o', 'u']) {
       const entry = getQuizEntries(rules).find((c) => c.sound === v);

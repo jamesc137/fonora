@@ -26,7 +26,7 @@ flowchart LR
 - Place × manner sound grid
 - Live decode panel with spacing normalization
 - Reverse sound → symbol lookup
-- Simple decode/construct quiz mode (session stats only)
+- Simple decode/construct quiz mode for all encodable sounds (session stats only)
 - Mini dictionary with localStorage persistence
 - Translator with language selection
 - Pronunciation Testing tab for IPA → Fonora evaluation

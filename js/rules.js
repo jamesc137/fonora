@@ -46,11 +46,11 @@ export const FALLBACK_RULES = {
     { symbols: '∩⌔', sound: 'dh', ipa: '/ð/', status: 'defined', explanation: 'Voiced dental fricative, as in "this"' },
   ],
   experimentalVowels: [
-    { symbols: '⊐⊐', sound: 'a', vowel: 'a', ipa: '/a/', notes: 'open throat-centered vowel', status: 'experimental', explanation: 'Experimental vowel', experimental: true },
-    { symbols: '⊐∩', sound: 'e', vowel: 'e', ipa: '/e/', notes: 'front vowel', status: 'experimental', explanation: 'Experimental vowel', experimental: true },
-    { symbols: '⊐⌒', sound: 'i', vowel: 'i', ipa: '/i/', notes: 'high/front vowel', status: 'experimental', explanation: 'Experimental vowel', experimental: true },
-    { symbols: '⊐∪', sound: 'o', vowel: 'o', ipa: '/o/', notes: 'back vowel', status: 'experimental', explanation: 'Experimental vowel', experimental: true },
-    { symbols: '⊐○', sound: 'u', vowel: 'u', ipa: '/u/', notes: 'rounded lips vowel', status: 'experimental', explanation: 'Experimental vowel', experimental: true },
+    { symbols: '⊐⊐', sound: 'a', vowel: 'a', ipa: '/a/', notes: 'open throat-centered vowel', status: 'experimental', explanation: 'open throat-centered vowel', experimental: true },
+    { symbols: '⊐∩', sound: 'e', vowel: 'e', ipa: '/e/', notes: 'front vowel', status: 'experimental', explanation: 'front vowel', experimental: true },
+    { symbols: '⊐⌒', sound: 'i', vowel: 'i', ipa: '/i/', notes: 'high/front vowel', status: 'experimental', explanation: 'high/front vowel', experimental: true },
+    { symbols: '⊐∪', sound: 'o', vowel: 'o', ipa: '/o/', notes: 'back vowel', status: 'experimental', explanation: 'back vowel', experimental: true },
+    { symbols: '⊐○', sound: 'u', vowel: 'u', ipa: '/u/', notes: 'rounded lips vowel', status: 'experimental', explanation: 'rounded lips vowel', experimental: true },
   ],
   experimentalVowelCollapsed: [
     { sound: 'a / ā', symbols: '⊐⊐' },
@@ -226,7 +226,7 @@ function parseExperimentalDerivedSection(body) {
       ipa: r.ipa || '',
       status: r.status || 'experimental',
       explanation: r.explanation || 'Experimental derived sound',
-      experimental: true,
+      experimental: r.status !== 'defined',
     }));
 }
 

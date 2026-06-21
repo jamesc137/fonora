@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fonora — Phonetic Symbol Research Tool</title>
+  <title>Fonora | Universal Phonetic Writing System</title>
   <link rel="stylesheet" href="app.css">
 </head>
 <body>
@@ -12,23 +12,43 @@
   </div>
 
   <header class="site-header">
-    <h1>Fonora</h1>
-    <p class="tagline">Universal Phonetic Compression Language</p>
-  </header>
+    <div class="site-header-inner">
+      <div class="site-brand">
+        <h1>Fonora</h1>
+        <h2 class="tagline">Universal Phonetic Writing System</h2>
+      </div>
 
-  <nav class="tab-nav" aria-label="Sections">
-    <div class="tab-nav-inner">
-      <button type="button" class="tab-btn tab-btn--active" data-tab="translator">Translator</button>
-      <button type="button" class="tab-btn" data-tab="keyboard">Symbol Keyboard</button>
-      <button type="button" class="tab-btn" data-tab="mapping">Keyboard Mapping</button>
-      <button type="button" class="tab-btn" data-tab="grid">Sound Grid</button>
-      <button type="button" class="tab-btn" data-tab="decode">Decode</button>
-      <button type="button" class="tab-btn" data-tab="reverse">Reverse Lookup</button>
-      <button type="button" class="tab-btn" data-tab="dictionary">Dictionary</button>
-      <button type="button" class="tab-btn" data-tab="encoder-testing">Pronunciation Testing</button>
-      <button type="button" class="tab-btn" data-tab="quiz">Quiz</button>
+      <nav class="main-nav" aria-label="Sections">
+        <div class="main-nav-primary">
+          <button type="button" class="tab-btn tab-btn--active" data-tab="translator">Translator</button>
+          <button type="button" class="tab-btn" data-tab="grid">Sound Grid</button>
+          <button type="button" class="tab-btn" data-tab="quiz">Quiz</button>
+        </div>
+
+        <div class="nav-dropdown" id="nav-more">
+          <button
+            type="button"
+            class="nav-dropdown-trigger tab-btn"
+            id="nav-more-trigger"
+            aria-expanded="false"
+            aria-haspopup="true"
+            aria-controls="nav-more-menu"
+          >
+            More
+            <span class="nav-dropdown-chevron" aria-hidden="true">▾</span>
+          </button>
+          <div class="nav-dropdown-menu" id="nav-more-menu" role="menu" hidden>
+            <button type="button" class="tab-btn nav-dropdown-item" data-tab="keyboard" role="menuitem">Symbol Keyboard</button>
+            <button type="button" class="tab-btn nav-dropdown-item" data-tab="mapping" role="menuitem">Keyboard Mapping</button>
+            <button type="button" class="tab-btn nav-dropdown-item" data-tab="dictionary" role="menuitem">Dictionary</button>
+            <button type="button" class="tab-btn nav-dropdown-item" data-tab="decode" role="menuitem">Decode</button>
+            <button type="button" class="tab-btn nav-dropdown-item" data-tab="reverse" role="menuitem">Reverse Lookup</button>
+            <button type="button" class="tab-btn nav-dropdown-item" data-tab="encoder-testing" role="menuitem">Pronunciation Testing</button>
+          </div>
+        </div>
+      </nav>
     </div>
-  </nav>
+  </header>
 
   <main class="main-content">
     <!-- Translator -->
@@ -494,10 +514,6 @@
       </div>
     </section>
   </main>
-
-  <footer class="site-footer">
-    <p>Rules loaded from <code>language-rules.md</code>. Edit that file and reload to update the app.</p>
-  </footer>
 
   <script type="module" src="js/app.js"></script>
 </body>

@@ -751,20 +751,77 @@ function renderGlossaryList(filter = '') {
   });
 }
 
+const MORE_TAB_IDS = new Set(['keyboard', 'mapping', 'dictionary', 'decode', 'reverse', 'encoder-testing']);
+
+function closeNavDropdown() {
+  const dropdown = document.getElementById('nav-more');
+  const menu = document.getElementById('nav-more-menu');
+  const trigger = document.getElementById('nav-more-trigger');
+  if (!dropdown || !menu || !trigger) return;
+  dropdown.classList.remove('nav-dropdown--open');
+  menu.hidden = true;
+  trigger.setAttribute('aria-expanded', 'false');
+}
+
+function openNavDropdown() {
+  const dropdown = document.getElementById('nav-more');
+  const menu = document.getElementById('nav-more-menu');
+  const trigger = document.getElementById('nav-more-trigger');
+  if (!dropdown || !menu || !trigger) return;
+  dropdown.classList.add('nav-dropdown--open');
+  menu.hidden = false;
+  trigger.setAttribute('aria-expanded', 'true');
+}
+
 function showTab(tabId) {
-  document.querySelectorAll('.tab-btn').forEach((btn) => {
+  document.querySelectorAll('.tab-btn[data-tab]').forEach((btn) => {
     const active = btn.dataset.tab === tabId;
     btn.classList.toggle('tab-btn--active', active);
     btn.setAttribute('aria-selected', active ? 'true' : 'false');
   });
+
+  const dropdown = document.getElementById('nav-more');
+  if (dropdown) {
+    dropdown.classList.toggle('nav-dropdown--child-active', MORE_TAB_IDS.has(tabId));
+  }
+
   document.querySelectorAll('.tab-panel').forEach((panel) => {
     panel.hidden = panel.dataset.tabPanel !== tabId;
     panel.classList.toggle('tab-panel--active', panel.dataset.tabPanel === tabId);
   });
+
+  closeNavDropdown();
 }
 
 function setupTabs() {
-  document.querySelectorAll('.tab-btn').forEach((btn) => btn.addEventListener('click', () => showTab(btn.dataset.tab)));
+  document.querySelectorAll('.tab-btn[data-tab]').forEach((btn) => {
+    btn.addEventListener('click', () => showTab(btn.dataset.tab));
+  });
+
+  const trigger = document.getElementById('nav-more-trigger');
+  const dropdown = document.getElementById('nav-more');
+  if (trigger && dropdown) {
+    trigger.addEventListener('click', (event) => {
+      event.stopPropagation();
+      if (dropdown.classList.contains('nav-dropdown--open')) {
+        closeNavDropdown();
+      } else {
+        openNavDropdown();
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!dropdown.contains(event.target)) {
+        closeNavDropdown();
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeNavDropdown();
+      }
+    });
+  }
 }
 
 async function initApp() {

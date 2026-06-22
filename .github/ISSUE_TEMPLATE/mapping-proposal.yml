@@ -1,0 +1,57 @@
+name: Mapping proposal
+description: Propose a phoneme mapping or symbol grammar change with reasoning
+title: "[mapping] "
+labels:
+  - mapping-proposal
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Propose a change to IPA→Fonora mappings or `language-rules.md` symbol grammar.
+        Include linguistic motivation and test cases. See [CONTRIBUTING.md](https://github.com/jamesc137/fonora/blob/main/CONTRIBUTING.md).
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - vowel mapping
+        - consonant / grid cell
+        - derived sound
+        - supplemental IPA normalize rule
+        - vowel grammar (⚬X / ⚬XᵔY)
+        - reserved grid cell
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What should change and why
+    validations:
+      required: true
+
+  - type: textarea
+    id: ipa
+    attributes:
+      label: IPA tokens affected
+      placeholder: e.g. ɜː, χ, ʔ
+
+  - type: textarea
+    id: test-cases
+    attributes:
+      label: Test cases
+      description: Words, minimal pairs, before/after Fonora output
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: tradeoffs
+    attributes:
+      label: Tradeoffs considered
+      options:
+        - label: May affect existing encodings (breaking change)
+        - label: Uses a reserved grid cell
+        - label: Requires language-scoped behavior (not global)
+        - label: Collides with another phoneme key

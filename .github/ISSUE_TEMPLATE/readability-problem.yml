@@ -1,0 +1,51 @@
+name: Readability problem
+description: Report learner confusion, decoding difficulty, or visual clarity issues
+title: "[readability] "
+labels:
+  - readability
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Human readability is an open research area for Fonora. Describe what learners or readers find confusing.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Quiz, Translator, handwritten notes, classroom use, etc.
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is hard to read or learn?
+      description: Specific symbols, vowel recipes, density, similarity between glyphs, etc.
+    validations:
+      required: true
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples
+      description: Fonora strings, screenshots, or steps to reproduce confusion
+
+  - type: dropdown
+    id: audience
+    attributes:
+      label: Audience
+      options:
+        - native English speaker
+        - multilingual learner
+        - child / classroom
+        - typographer / designer
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggestions (optional)
+      description: Spacing, teaching aids, typography, or symbol changes

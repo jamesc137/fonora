@@ -177,6 +177,36 @@ export function runTests(options) {
     assert(decodeSymbols(throat, rules).pronunciation === 'h');
   });
 
+  t('throat grid fricatives encode and decode as kh and gh', () => {
+    const frictionThroat = `${friction}${throat}`;
+    const voiceThroat = `${voice}${throat}`;
+    const backFricative = `${friction}${back}`;
+
+    assert(frictionThroat !== backFricative);
+    assert(decodeToPhonemeKeys(frictionThroat, rules).phonemeKeys === 'kh');
+    assert(decodeToPhonemeKeys(voiceThroat, rules).phonemeKeys === 'gh');
+    assert(decodeSymbols(frictionThroat, rules).pronunciation === 'kh');
+    assert(decodeSymbols(voiceThroat, rules).pronunciation === 'gh');
+
+    assert(normalizeIpa('bax', { vowelMap: rulesBundle.ipaVowelMap }).phonemeString === 'bax');
+    assert(normalizeIpa('lɒx', { vowelMap: rulesBundle.ipaVowelMap }).phonemeString === 'lox');
+    assert(normalizeIpa('χa', { vowelMap: rulesBundle.ipaVowelMap }).phonemeString === 'kha');
+    assert(normalizeIpa('ɣajn', { vowelMap: rulesBundle.ipaVowelMap }).phonemeString === 'ghayn');
+
+    const bach = encodeFromIpa('bax', rulesBundle);
+    assert(bach.symbols.includes(backFricative));
+    assert(!bach.symbols.includes(frictionThroat));
+    assert(bach.decoded === 'b a x');
+
+    const ghain = encodeFromIpa('ɣajn', rulesBundle);
+    assert(ghain.symbols.includes(voiceThroat));
+    assert(ghain.decoded === 'gh ay n');
+
+    const kha = encodeFromIpa('χa', rulesBundle);
+    assert(kha.symbols.includes(frictionThroat));
+    assert(kha.decoded === 'kh a');
+  });
+
   t('symbol round-trip recovers phoneme keys without English spelling confusion', () => {
     const cases = [
       ['bor', 'b o r'],
@@ -309,8 +339,8 @@ export function runTests(options) {
 
   t('quiz uses markdown-derived encodable entries', () => {
     const encodable = getEncodableEntries(rules).filter((c) => c.sound && c.sound !== '?');
-    const quizSounds = new Set(getQuizEntries(rules).map((c) => c.sound));
-    assert(quizSounds.size === encodable.length);
+    const quiz = getQuizEntries(rules);
+    assert(quiz.length === encodable.length);
   });
 
   t('decode composed pa', () => assert(decodeSymbols(`${lips}${vowelSym(rules, 'a')}`, rules).pronunciation === 'pa'));

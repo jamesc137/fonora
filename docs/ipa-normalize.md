@@ -52,6 +52,8 @@ These IPA tokens appear in the Sound Grid or Derived Sounds tables. They are **b
 | s | s | grid friction front_tongue |
 | ʃ | sh | grid friction middle_tongue |
 | x | x | grid friction back_tongue |
+| χ | kh | grid friction throat |
+| gh | gh | grid voice throat |
 | m | m | grid nasal lips |
 | n | n | grid nasal front_tongue |
 | ɲ | ñ | grid nasal middle_tongue |
@@ -82,10 +84,10 @@ These entries live in `js/ipa-normalize.js` only — not separate rows in markdo
 | ɾ | t | Alveolar tap/flap (American intervocalic t/d → spelling-like `t`) |
 | ɽ | r | Retroflex flap |
 | ʁ | r | Voiced uvular fricative → r |
-| χ | x | Voiceless uvular fricative → x |
+| χ | kh | Voiceless uvular fricative → throat kh |
 | ɕ | sh | Alveolo-palatal fricative → sh |
 | ʐ | j | Retroflex sibilant → j |
-| ɣ | g | Voiced velar fricative → g |
+| ɣ | gh | Voiced velar fricative → throat gh |
 | ç | sh | Voiceless palatal fricative → sh |
 | ʈʃ | ch | Retroflex affricate → ch |
 | dʒ | j | Voiced affricate → j |

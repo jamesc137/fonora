@@ -524,7 +524,7 @@ function setupTranslator() {
       setStatus('Translate some text first.', true);
       return;
     }
-    loadReaderFromTranslation(symbols, lastTranslateWords);
+    loadReaderFromTranslation(symbols, lastTranslateWords, langEl.value);
     showTab('reader');
   });
 }

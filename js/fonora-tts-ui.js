@@ -1,6 +1,13 @@
 import { escapeHtml, deleteSymbolBeforeCursor } from './utils.js';
 import { normalizeSymbolInput } from './decode.js';
-import { ENGLISH_DIALECT_OPTIONS, loadEnglishDialectPreference } from './language-preferences.js';
+import {
+  ENGLISH_DIALECT_OPTIONS,
+  LANGUAGE_OPTIONS,
+  loadLanguagePreferences,
+  saveLanguagePreference,
+  saveEnglishDialectPreference,
+  resolveEspeakVoice,
+} from './language-preferences.js';
 import {
   tokenizeFonoraPhrase,
   speakFonoraPhrase,
@@ -8,7 +15,7 @@ import {
   looksLikePhonemeKeyText,
   setReaderWordSources,
 } from './fonora-tts.js';
-import { PIPER_VOICE_OPTIONS } from './piper-audio.js';
+import { getPiperVoiceForLang, PIPER_VOICE_OPTIONS } from './piper-audio.js';
 import { primeAudioContext } from './espeak-audio.js';
 import { initPiperAudio, isPiperAudioReady } from './piper-audio.js';
 
@@ -17,10 +24,45 @@ let playing = false;
 let cancelRequested = false;
 let readerUiBound = false;
 
+function getReaderLang() {
+  return document.getElementById('tts-lang')?.value || 'en';
+}
+
+function getReaderEnglishDialect() {
+  return document.getElementById('tts-dialect')?.value || undefined;
+}
+
+function getReaderPiperVoice(lang = getReaderLang()) {
+  if (lang === 'en') {
+    return document.getElementById('tts-piper-voice')?.value || getPiperVoiceForLang('en');
+  }
+  return getPiperVoiceForLang(lang);
+}
+
+function getReaderPlaybackOptions() {
+  const lang = getReaderLang();
+  const englishDialect = getReaderEnglishDialect();
+  return {
+    lang,
+    engine: 'auto',
+    piperVoice: getReaderPiperVoice(lang),
+    espeakVoice: resolveEspeakVoice(lang, { englishDialect }),
+  };
+}
+
+function populateLanguageSelect() {
+  const sel = document.getElementById('tts-lang');
+  if (!sel) return;
+  const saved = loadLanguagePreferences();
+  sel.innerHTML = LANGUAGE_OPTIONS.map(
+    (item) => `<option value="${escapeHtml(item.code)}"${item.code === saved.lang ? ' selected' : ''}>${escapeHtml(item.label)}</option>`,
+  ).join('');
+}
+
 function populateDialectSelect() {
   const sel = document.getElementById('tts-dialect');
   if (!sel) return;
-  const savedDialect = loadEnglishDialectPreference();
+  const savedDialect = loadLanguagePreferences().englishDialect;
   sel.innerHTML = ENGLISH_DIALECT_OPTIONS.map(
     (item) => `<option value="${escapeHtml(item.code)}"${item.code === savedDialect ? ' selected' : ''}>${escapeHtml(item.label)}</option>`,
   ).join('');
@@ -32,6 +74,31 @@ function populatePiperVoiceSelect() {
   sel.innerHTML = PIPER_VOICE_OPTIONS.map(
     (item, index) => `<option value="${escapeHtml(item.id)}"${index === 0 ? ' selected' : ''}>${escapeHtml(item.label)}</option>`,
   ).join('');
+}
+
+function syncReaderControls() {
+  const lang = getReaderLang();
+  const dialectWrap = document.getElementById('tts-dialect-wrap');
+  const piperWrap = document.getElementById('tts-piper-voice-wrap');
+  const voiceNote = document.getElementById('tts-voice-note');
+
+  if (dialectWrap) dialectWrap.hidden = lang !== 'en';
+  if (piperWrap) piperWrap.hidden = lang !== 'en';
+
+  if (!voiceNote) return;
+  if (lang === 'en') {
+    voiceNote.hidden = true;
+    voiceNote.textContent = '';
+    return;
+  }
+
+  const piperVoice = getPiperVoiceForLang(lang);
+  voiceNote.hidden = false;
+  if (piperVoice) {
+    voiceNote.textContent = `Neural voice: ${piperVoice.replace(/_/g, ' ')}. Falls back to eSpeak IPA if the voice fails to load.`;
+  } else {
+    voiceNote.textContent = 'No Piper neural voice for this language — playback uses eSpeak IPA.';
+  }
 }
 
 function renderWordDisplay(text) {
@@ -130,7 +197,7 @@ async function handlePlay() {
     return;
   }
 
-  const piperVoice = document.getElementById('tts-piper-voice')?.value || 'en_US-lessac-medium';
+  const playback = getReaderPlaybackOptions();
 
   primeAudioContext();
 
@@ -139,17 +206,21 @@ async function handlePlay() {
   renderWordDisplay(text);
   clearWordHighlight();
 
-  const needsLoad = !isPiperAudioReady(piperVoice);
+  const needsLoad = playback.piperVoice && !isPiperAudioReady(playback.piperVoice);
   if (needsLoad) {
     showLoading('Preparing…');
   }
 
   try {
     const result = await speakFonoraPhrase(text, rulesRef, {
-      piperVoice,
+      engine: playback.engine,
+      piperVoice: playback.piperVoice,
+      espeakVoice: playback.espeakVoice,
       shouldCancel: () => cancelRequested,
       onPrepare: (message) => {
-        if (needsLoad || !isPiperAudioReady(piperVoice)) showLoading(message);
+        if (needsLoad || (playback.piperVoice && !isPiperAudioReady(playback.piperVoice))) {
+          showLoading(message);
+        }
       },
       onWordStart: (index) => {
         hideLoading();
@@ -186,13 +257,23 @@ function handleStop() {
 
 function warmReaderResources() {
   if (!rulesRef) return;
-  const piperVoice = document.getElementById('tts-piper-voice')?.value || 'en_US-lessac-medium';
-  initPiperAudio(piperVoice).catch(() => {});
+  const piperVoice = getReaderPiperVoice();
+  if (piperVoice) initPiperAudio(piperVoice).catch(() => {});
 }
 
 function bindReaderUiOnce() {
   if (readerUiBound) return;
   readerUiBound = true;
+
+  document.getElementById('tts-lang')?.addEventListener('change', () => {
+    saveLanguagePreference(getReaderLang(), getReaderEnglishDialect());
+    syncReaderControls();
+    warmReaderResources();
+  });
+
+  document.getElementById('tts-dialect')?.addEventListener('change', () => {
+    saveEnglishDialectPreference(getReaderEnglishDialect());
+  });
 
   document.getElementById('tts-piper-voice')?.addEventListener('change', warmReaderResources);
 
@@ -218,7 +299,7 @@ function bindReaderUiOnce() {
   });
 }
 
-export function loadReaderFromTranslation(symbols, wordSources) {
+export function loadReaderFromTranslation(symbols, wordSources, lang) {
   const input = document.getElementById('tts-input');
   if (input) {
     input.value = symbols || '';
@@ -227,14 +308,22 @@ export function loadReaderFromTranslation(symbols, wordSources) {
   if (wordSources) {
     setReaderWordSources(wordSources);
   }
+  if (lang) {
+    const langEl = document.getElementById('tts-lang');
+    if (langEl) langEl.value = lang;
+    syncReaderControls();
+    warmReaderResources();
+  }
   hideLoading();
   showStatus('');
 }
 
 export function setupFonoraReader(rules) {
   rulesRef = rules;
+  populateLanguageSelect();
   populateDialectSelect();
   populatePiperVoiceSelect();
+  syncReaderControls();
   hideLoading();
   warmReaderResources();
   bindReaderUiOnce();

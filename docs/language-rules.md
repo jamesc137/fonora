@@ -46,12 +46,12 @@ Symbols are **composed** from Places + Modifiers at load time (`modifier + place
 | voice | front_tongue | d | /d/ | defined | Voiced front tongue sound |
 | voice | middle_tongue | j | /dʒ/ | defined | Voiced middle tongue sound |
 | voice | back_tongue | g | /g/ | defined | Voiced back tongue sound |
-| voice | throat | ? | ? | reserved | Open research gap |
+| voice | throat | gh | /ɣ/ | defined | Voiced throat sound (voiced velar/uvular fricative; Arabic غ) |
 | friction | lips | f | /f/ | defined | Friction lips sound |
 | friction | front_tongue | s | /s/ | defined | Friction front tongue sound |
 | friction | middle_tongue | sh | /ʃ/ | defined | Friction middle tongue sound |
-| friction | back_tongue | x | /x/ | defined | Friction back tongue sound |
-| friction | throat | ? | ? | reserved | Open research gap |
+| friction | back_tongue | x | /x/ | defined | Friction back tongue sound (German Bach, Scottish loch) |
+| friction | throat | kh | /χ/ | defined | Friction throat sound (deeper throat friction; Arabic خ) |
 | nasal | lips | m | /m/ | defined | Nasal lips sound |
 | nasal | front_tongue | n | /n/ | defined | Nasal front tongue sound |
 | nasal | middle_tongue | ñ | /ɲ/ | defined | Nasal middle tongue sound |

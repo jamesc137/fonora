@@ -1,14 +1,14 @@
 # Fonora Collision Audit
 
-Generated: 2026-06-22T04:31:27.388Z
+Generated: 2026-06-22T20:11:04.283Z
 Rules version: v3
 
 ## Executive summary
 
 - **Exact symbol collisions:** 0
 - **Concatenation → single-key collisions:** 4
-- **Concatenation → sequence collisions:** 12
-- **Greedy decoder hazards:** 17
+- **Concatenation → sequence collisions:** 15
+- **Greedy decoder hazards:** 20
 - **Word-level boundary issues:** 3 (none)
 - **v2 collision test scope:** 5 minimal-pair groups / 13 words — symbol distinctness only
 
@@ -18,15 +18,13 @@ The bar/boy/bor fix addressed **display labeling** and **boundary-aware round-tr
 
 | key | type | IPA | symbols | source | status | notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| ? | grid | ? | `⌇⊃` | sound grid (voice+throat) | reserved | Open research gap |
-| ? | grid | ? | `⌀⊃` | sound grid (friction+throat) | reserved | Open research gap |
 | ? | grid | ? | `⏌⊃` | sound grid (nasal+throat) | reserved | Open research gap |
 | ? | grid | ? | `ᵔ⊃` | sound grid (glide+throat) | reserved | Open research gap |
 | a | vowel | ʌ, ə, ɐ, a | `⚬⊃` | vowel recipe | defined | CUP / schwa / open |
 | ae | vowel | æ | `⚬⌀` | vowel recipe | defined | TRAP |
 | ay | vowel | eɪ | `⚬⌇ᵔ∪` | vowel recipe | defined | FACE |
 | b | grid | /b/ | `⌇∋` | sound grid (voice+lips) | defined | Voiced lips sound |
-| c | grid | /tʃ/ or /c/ | `⌓` | sound grid (plain+middle_tongue) | defined | Plain middle tongue stop/affricate place |
+| ch | grid | /tʃ/ | `⌓` | sound grid (plain+middle_tongue) | defined | Voiceless palato-alveolar affricate (Eng |
 | d | grid | /d/ | `⌇∩` | sound grid (voice+front_tongue) | defined | Voiced front tongue sound |
 | dh | derived | /ð/ | `∩⌇` | derived (reverse_front_tongue_voice) | defined | Voiced dental fricative |
 | e | vowel | ɛ, e, eː | `⚬⌇` | vowel recipe | defined | DRESS / FACE base |
@@ -34,10 +32,12 @@ The bar/boy/bor fix addressed **display labeling** and **boundary-aware round-tr
 | eye | vowel | aɪ | `⚬⊃ᵔ∪` | vowel recipe | defined | PRICE |
 | f | grid | /f/ | `⌀∋` | sound grid (friction+lips) | defined | Friction lips sound |
 | g | grid | /g/ | `⌇∪` | sound grid (voice+back_tongue) | defined | Voiced back tongue sound |
+| gh | grid | /ɣ/ | `⌇⊃` | sound grid (voice+throat) | defined | Voiced throat sound (voiced velar/uvular |
 | h | grid | /h/ | `⊃` | sound grid (plain+throat) | defined | Plain throat sound (glottal fricative) |
 | i | vowel | ɪ | `⚬⌓` | vowel recipe | defined | KIT |
 | j | grid | /dʒ/ | `⌇⌓` | sound grid (voice+middle_tongue) | defined | Voiced middle tongue sound |
 | k | grid | /k/ | `∪` | sound grid (plain+back_tongue) | defined | Plain back tongue stop |
+| kh | grid | /χ/ | `⌀⊃` | sound grid (friction+throat) | defined | Friction throat sound (deeper throat fri |
 | l | grid | /l/ | `ᵔ∩` | sound grid (glide+front_tongue) | defined | Glide front tongue sound (alveolar /l/) |
 | m | grid | /m/ | `⏌∋` | sound grid (nasal+lips) | defined | Nasal lips sound |
 | n | grid | /n/ | `⏌∩` | sound grid (nasal+front_tongue) | defined | Nasal front tongue sound |
@@ -56,7 +56,7 @@ The bar/boy/bor fix addressed **display labeling** and **boundary-aware round-tr
 | u | vowel | ʊ, u, uː, ʉ, ɯ | `⚬∋` | vowel recipe | defined | FOOT / GOOSE |
 | v | derived | /v/ | `∋⌇` | derived (reverse_lips_voice) | defined | Reversed lips+voice ordering |
 | w | grid | /w/ | `ᵔ∋` | sound grid (glide+lips) | defined | Glide lips sound |
-| x | grid | /x/ | `⌀∪` | sound grid (friction+back_tongue) | defined | Friction back tongue sound |
+| x | grid | /x/ | `⌀∪` | sound grid (friction+back_tongue) | defined | Friction back tongue sound (German Bach, |
 | y | grid | /j/ | `ᵔ∪` | sound grid (glide+back_tongue) | defined | Glide back tongue sound (/j/ without ton |
 | z | derived | /z/ | `⌀⌇` | derived (reverse_friction_voice) | defined | Voiced counterpart of /s/ |
 
@@ -74,18 +74,21 @@ No two distinct encodable phoneme keys share the exact same symbol string.
 | e + y | ay | `⚬⌇ᵔ∪` | sequence-equals-single | ey may encode as ay diphthong/composite | Known vowel+glide vs diphthong collision — requires symbol boundaries or recipe change (documented in language-rules homograph note) |
 | a + y | eye | `⚬⊃ᵔ∪` | sequence-equals-single | ay may encode as eye diphthong/composite | Known vowel+glide vs diphthong collision — requires symbol boundaries or recipe change (documented in language-rules homograph note) |
 | a + w | ow | `⚬⊃ᵔ∋` | sequence-equals-single | aw may encode as ow diphthong/composite | Known vowel+glide vs diphthong collision — requires symbol boundaries or recipe change (documented in language-rules homograph note) |
+| th + ch | t + sh | `∩⌀⌓` | sequence-equals-sequence | thch vs tsh share symbols | Language-design decision — distinct phoneme sequences indistinguishable without boundaries |
 | th + t | t + s | `∩⌀∩` | sequence-equals-sequence | tht vs ts share symbols | Language-design decision — distinct phoneme sequences indistinguishable without boundaries |
 | th + p | t + f | `∩⌀∋` | sequence-equals-sequence | thp vs tf share symbols | Language-design decision — distinct phoneme sequences indistinguishable without boundaries |
 | th + k | t + x | `∩⌀∪` | sequence-equals-sequence | thk vs tx share symbols | Language-design decision — distinct phoneme sequences indistinguishable without boundaries |
-| th + c | t + sh | `∩⌀⌓` | sequence-equals-sequence | thc vs tsh share symbols | Language-design decision — distinct phoneme sequences indistinguishable without boundaries |
+| th + h | t + kh | `∩⌀⊃` | sequence-equals-sequence | thh vs tkh share symbols | Language-design decision — distinct phoneme sequences indistinguishable without boundaries |
+| dh + ch | t + j | `∩⌇⌓` | sequence-equals-sequence | dhch vs tj share symbols | Language-design decision — distinct phoneme sequences indistinguishable without boundaries |
 | dh + t | t + d | `∩⌇∩` | sequence-equals-sequence | dht vs td share symbols | Language-design decision — distinct phoneme sequences indistinguishable without boundaries |
 | dh + p | t + b | `∩⌇∋` | sequence-equals-sequence | dhp vs tb share symbols | Language-design decision — distinct phoneme sequences indistinguishable without boundaries |
 | dh + k | t + g | `∩⌇∪` | sequence-equals-sequence | dhk vs tg share symbols | Language-design decision — distinct phoneme sequences indistinguishable without boundaries |
-| dh + c | t + j | `∩⌇⌓` | sequence-equals-sequence | dhc vs tj share symbols | Language-design decision — distinct phoneme sequences indistinguishable without boundaries |
+| dh + h | t + gh | `∩⌇⊃` | sequence-equals-sequence | dhh vs tgh share symbols | Language-design decision — distinct phoneme sequences indistinguishable without boundaries |
+| v + ch | p + j | `∋⌇⌓` | sequence-equals-sequence | vch vs pj share symbols | Language-design decision — distinct phoneme sequences indistinguishable without boundaries |
 | v + t | p + d | `∋⌇∩` | sequence-equals-sequence | vt vs pd share symbols | Language-design decision — distinct phoneme sequences indistinguishable without boundaries |
 | v + p | p + b | `∋⌇∋` | sequence-equals-sequence | vp vs pb share symbols | Language-design decision — distinct phoneme sequences indistinguishable without boundaries |
 | v + k | p + g | `∋⌇∪` | sequence-equals-sequence | vk vs pg share symbols | Language-design decision — distinct phoneme sequences indistinguishable without boundaries |
-| v + c | p + j | `∋⌇⌓` | sequence-equals-sequence | vc vs pj share symbols | Language-design decision — distinct phoneme sequences indistinguishable without boundaries |
+| v + h | p + gh | `∋⌇⊃` | sequence-equals-sequence | vh vs pgh share symbols | Language-design decision — distinct phoneme sequences indistinguishable without boundaries |
 
 ## 4. Greedy decoder hazards
 
@@ -93,16 +96,19 @@ No two distinct encodable phoneme keys share the exact same symbol string.
 
 | symbols | expected keys | greedy keys | spaced keys | spacing fixes? | notes |
 | --- | --- | --- | --- | --- | --- |
-| `∩⌀⌓` | t sh | th c | t sh | yes | phoneme keys [t sh] |
+| `∩⌀⌓` | t sh | th ch | t sh | yes | phoneme keys [t sh] |
+| `∩⌀⊃` | t kh | th h | t kh | yes | phoneme keys [t kh] |
+| `∩⌇⊃` | t gh | dh h | t gh | yes | phoneme keys [t gh] |
 | `∩⌀⌇` | t z | th ? | t z | yes | phoneme keys [t z] |
 | `∩⌀∪` | t x | th k | t x | yes | phoneme keys [t x] |
 | `∩⌀∩` | t s | th t | t s | yes | phoneme keys [t s] |
-| `∩⌇⌓` | t j | dh c | t j | yes | phoneme keys [t j] |
+| `∩⌇⌓` | t j | dh ch | t j | yes | phoneme keys [t j] |
 | `∩⌇∪` | t g | dh k | t g | yes | phoneme keys [t g] |
 | `∩⌀∋` | t f | th p | t f | yes | phoneme keys [t f] |
 | `∩⌇∩` | t d | dh t | t d | yes | phoneme keys [t d] |
 | `∩⌇∋` | t b | dh p | t b | yes | phoneme keys [t b] |
-| `∋⌇⌓` | p j | v c | p j | yes | phoneme keys [p j] |
+| `∋⌇⊃` | p gh | v h | p gh | yes | phoneme keys [p gh] |
+| `∋⌇⌓` | p j | v ch | p j | yes | phoneme keys [p j] |
 | `∋⌇∪` | p g | v k | p g | yes | phoneme keys [p g] |
 | `∋⌇∩` | p d | v t | p d | yes | phoneme keys [p d] |
 | `∋⌇∋` | p b | v p | p b | yes | phoneme keys [p b] |

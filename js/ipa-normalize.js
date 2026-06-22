@@ -130,6 +130,7 @@ export function normalizeIpa(rawIpa, options = {}) {
   const multigraphs = sortedMultigraphs(vowelMap);
   const cleaned = stripStressAndMarks(String(rawIpa || '').trim());
   const phonemes = [];
+  const ipaSegments = [];
   const unmapped = [];
   const warnings = [];
   let i = 0;
@@ -146,6 +147,7 @@ export function normalizeIpa(rawIpa, options = {}) {
       if (cleaned.slice(i, i + graph.length) !== graph) continue;
       const result = mapToken(graph, vowelMap);
       phonemes.push(...result.phonemes);
+      ipaSegments.push(graph);
       if (result.unmapped.length) {
         unmapped.push(...result.unmapped);
         warnings.push(`Unmapped IPA "${graph}" → ?`);
@@ -160,6 +162,7 @@ export function normalizeIpa(rawIpa, options = {}) {
     const single = cleaned[i];
     const result = mapToken(single, vowelMap);
     phonemes.push(...result.phonemes);
+    ipaSegments.push(result.unmapped.length ? '?' : single);
     if (result.unmapped.length) {
       unmapped.push(single);
       warnings.push(`Unmapped IPA "${single}" → ?`);
@@ -172,6 +175,8 @@ export function normalizeIpa(rawIpa, options = {}) {
     phonemes,
     phonemeString,
     display: phonemes.join(' '),
+    ipaSegments,
+    ipaFromSegments: ipaSegments.join(''),
     warnings,
     unmapped: [...new Set(unmapped)],
   };

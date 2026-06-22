@@ -10,7 +10,9 @@
     "start": "node server.js",
     "test": "node js/tests.js",
     "test:vowels": "node scripts/vowel-readability-report.js",
-    "test:v2-collisions": "node scripts/vowel-v2-collision-report.js"
+    "test:v2-collisions": "node scripts/vowel-v2-collision-report.js",
+    "audit:collisions": "node scripts/collision-audit.js",
+    "test:pronunciation-validation": "node scripts/pronunciation-validation-report.js"
   },
   "dependencies": {
     "espeak-ng": "^1.0.2"

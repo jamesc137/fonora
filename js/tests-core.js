@@ -1,9 +1,19 @@
 import { getEncodableEntries, getQuizEntries, getVowelPhonemeKeys, vowelSymbolForKey } from './rules.js';
 import { encodeSounds } from './encode.js';
-import { decodeSymbols, decodeText } from './decode.js';
+import { decodeSymbols, decodeText, decodeToPhonemeKeys, normalizeSymbolInput } from './decode.js';
 import { normalizeIpa, registerIpaVowelMap, setActiveIpaVowelMap } from './ipa-normalize.js';
 import { applyPrimarySymbols } from './symbol-compose.js';
 import { encodeFromIpa } from './ipa-encode-helper.js';
+import { ipaPhonemesToFonora } from './ipa-to-fonora.js';
+import { findConcatenationCollisions } from './collision-audit.js';
+import {
+  groupsToIpa,
+  normalizeIpaForComparison,
+  symbolsToRecoveredIpa,
+  phonemeKeysToRecoveredIpa,
+  detectCollisionWarnings,
+  summarizeValidationResults,
+} from './pronunciation-validation.js';
 import { V2_COLLISION_GROUPS } from './vowel-v2-collision-groups.js';
 import { ASCII_EQUALS } from './load-language-rules.js';
 
@@ -116,6 +126,29 @@ export function runTests(options) {
     assert(decodeSymbols(throat, rules).pronunciation === 'h');
   });
 
+  t('symbol round-trip recovers phoneme keys without English spelling confusion', () => {
+    const cases = [
+      ['bor', 'b o r'],
+      ['boy', 'b oy'],
+      ['bohr', 'b oh r'],
+    ];
+    for (const [phonemes, expected] of cases) {
+      const result = ipaPhonemesToFonora(phonemes, rules);
+      assert(result.decoded === expected, `${phonemes} recovered "${result.decoded}", expected "${expected}"`);
+    }
+    assert(
+      ipaPhonemesToFonora('bor', rules).decoded !== ipaPhonemesToFonora('boy', rules).decoded,
+      'bar-like b o r must not recover as b oy',
+    );
+  });
+
+  t('decodeToPhonemeKeys keeps diphthong oy distinct from o + r', () => {
+    const barLike = ipaPhonemesToFonora('bor', rules).symbols;
+    const boyLike = ipaPhonemesToFonora('boy', rules).symbols;
+    assert(decodeToPhonemeKeys(barLike, rules).phonemeKeys === 'b o r');
+    assert(decodeToPhonemeKeys(boyLike, rules).phonemeKeys === 'b oy');
+  });
+
   t('schwa vowel encodes as ⚬⊃', () => assert(enc('a', rules).symbols === vowelSym(rules, 'a')));
   t('FLEECE vowel encodes as ⚬∩', () => assert(enc('ee', rules).symbols === vowelSym(rules, 'ee')));
   t('pa uses lips + schwa', () => assert(enc('pa', rules).symbols === `${lips}${vowelSym(rules, 'a')}`));
@@ -167,7 +200,7 @@ export function runTests(options) {
     for (const ipa of ['zuː', 'zɪɹoʊ', 'zɪp']) {
       const result = encodeFromIpa(ipa, v2Bundle);
       assert(result.symbols.includes(zSym), `IPA ${ipa} should encode z as ${zSym}`);
-      assert(result.decoded.includes('z'), `IPA ${ipa} should decode with z phoneme`);
+      assert(result.decoded.includes('z'), `IPA ${ipa} should recover z phoneme key`);
     }
   });
 
@@ -175,9 +208,8 @@ export function runTests(options) {
     const zSym = rules.specialDerivedSounds.find((d) => d.sound === 'z').symbols;
     const result = encodeFromIpa('bʌz', v2Bundle);
     assert(result.symbols.includes(zSym));
-    assert(result.decoded === 'baz');
-    const decoded = decodeSymbols(result.symbols, rules);
-    assert(decoded.pronunciation === 'baz');
+    assert(result.decoded === 'b a z');
+    assert(decodeToPhonemeKeys(result.symbols, rules).phonemeKeys === 'b a z');
   });
 
   t('music encoding remains unaffected by z derived sound', () => {
@@ -186,8 +218,8 @@ export function runTests(options) {
     const result = encodeFromIpa('mjuzɪk', v2Bundle);
     assert(result.symbols.includes(zSym), 'music should still encode medial /z/');
     assert(!result.symbols.includes(sSym), 'music should not gain spurious /s/ symbols');
-    const roundTrip = decodeSymbols(result.symbols, rules);
-    assert(roundTrip.pronunciation.includes('z'));
+    const roundTrip = decodeToPhonemeKeys(result.symbols, rules);
+    assert(roundTrip.phonemeKeys.includes('z'));
     assert(roundTrip.warnings.length === 0);
   });
 
@@ -231,7 +263,30 @@ export function runTests(options) {
   });
 
   t('decode composed pa', () => assert(decodeSymbols(`${lips}${vowelSym(rules, 'a')}`, rules).pronunciation === 'pa'));
-  t('normalize collapses symbol spaces', () => assert(decodeSymbols(`${voice} ${lips}`, rules).pronunciation === 'b'));
+  t('normalize collapses errant spaces within one phoneme symbol', () => {
+    assert(decodeSymbols(`${voice} ${lips}`, rules).pronunciation === 'b');
+  });
+
+  t('normalize preserves spaces between defined phoneme symbol groups', () => {
+    const spaced = ipaPhonemesToFonora('bor', rules).symbols;
+    assert(normalizeSymbolInput(spaced, rules) === spaced);
+    assert(decodeToPhonemeKeys(normalizeSymbolInput(spaced, rules), rules).phonemeKeys === 'b o r');
+  });
+
+  t('collision audit: o+r vs oy is boundary-dependent not display-only', () => {
+    const barLike = ipaPhonemesToFonora('bor', rules);
+    const boyLike = ipaPhonemesToFonora('boy', rules);
+    assert(barLike.decoded === 'b o r');
+    assert(boyLike.decoded === 'b oy');
+    assert(barLike.symbols.replace(/\s+/g, '') === boyLike.symbols.replace(/\s+/g, ''));
+    assert(decodeToPhonemeKeys(barLike.symbols.replace(/\s+/g, ''), rules).phonemeKeys === 'b oy');
+  });
+
+  t('collision audit: th+t and t+s share symbols (sequence collision)', () => {
+    const sym = enc('tht', rules).symbols;
+    const hits = findConcatenationCollisions(rules).filter((h) => h.symbols === sym);
+    assert(hits.some((h) => h.sequenceA === 'th + t' && h.sequenceB === 't + s'));
+  });
 
   t('IPA normalization maps TRAP vowel to ae phoneme', () => {
     const n = normalizeIpa('kæt', { vowelMap: v2Bundle.ipaVowelMap });
@@ -260,6 +315,43 @@ export function runTests(options) {
   });
 
   t('collision groups defined', () => assert(V2_COLLISION_GROUPS.length === 5));
+
+  t('pronunciation validation: groupsToIpa joins cell IPA', () => {
+    const ipa = groupsToIpa([
+      { sound: 'b', ipa: '/b/' },
+      { sound: 'oy', ipa: '/ɔɪ/' },
+    ]);
+    assert(ipa === 'bɔɪ');
+    assert(normalizeIpaForComparison('bˈɔɪ') === 'bɔɪ');
+    assert(normalizeIpaForComparison('bɔɪ') === normalizeIpaForComparison('bˈɔɪ'));
+  });
+
+  t('pronunciation validation: symbols round-trip IPA for boy', () => {
+    const encoded = ipaPhonemesToFonora('boy', rules);
+    const recovery = symbolsToRecoveredIpa(encoded.symbols, rules);
+    const normalized = normalizeIpa('bɔɪ', { vowelMap: v2Bundle.ipaVowelMap });
+    const recoveredIpa = recovery.phonemeKeys === normalized.display
+      ? normalized.ipaFromSegments
+      : phonemeKeysToRecoveredIpa(recovery.phonemeKeys, rules, 'bɔɪ');
+    assert(normalizeIpaForComparison(recoveredIpa) === normalizeIpaForComparison('bɔɪ'));
+  });
+
+  t('pronunciation validation: detectCollisionWarnings for o+r sequence', () => {
+    const warnings = detectCollisionWarnings('b o r', rules);
+    assert(warnings.some((w) => w.label.includes('o + r')));
+  });
+
+  t('pronunciation validation: summarizeValidationResults', () => {
+    const summary = summarizeValidationResults([
+      { ipaMatch: true, phonemeKeysMatch: true, collisionWarnings: [] },
+      { ipaMatch: false, phonemeKeysMatch: false, collisionWarnings: [{}] },
+    ]);
+    assert(summary.wordsTested === 2);
+    assert(summary.exactIpaMatches === 1);
+    assert(summary.mismatches === 1);
+    assert(summary.collisionWarnings === 1);
+    assert(summary.recoverySuccessRate === 50);
+  });
 
   const passed = results.filter((r) => r.ok).length;
   const failed = results.filter((r) => !r.ok);

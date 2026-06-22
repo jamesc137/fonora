@@ -111,6 +111,11 @@ export function runTests(options) {
     assert(enc('b', rules).symbols === `${voice}${lips}`);
   });
 
+  t('plain throat /h/ encodes as ⊃ per sound grid', () => {
+    assert(enc('h', rules).symbols === throat);
+    assert(decodeSymbols(throat, rules).pronunciation === 'h');
+  });
+
   t('schwa vowel encodes as ⚬⊃', () => assert(enc('a', rules).symbols === vowelSym(rules, 'a')));
   t('FLEECE vowel encodes as ⚬∩', () => assert(enc('ee', rules).symbols === vowelSym(rules, 'ee')));
   t('pa uses lips + schwa', () => assert(enc('pa', rules).symbols === `${lips}${vowelSym(rules, 'a')}`));

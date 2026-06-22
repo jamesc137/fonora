@@ -26,7 +26,7 @@ Rules version: **v3** (`language-rules.md` — vowel grammar `⚬X`, diphthong `
 - IPA pipeline: eSpeak NG → IPA → Fonora phonemes → symbols (no dictionary bypass)
 - **Keyboard** — symbol input, clickable buttons, and keyboard mapping table
 - Place × manner sound grid
-- **Alphabet** — primary symbol experiments + A–Z reference chart
+- **Alphabet** — primary symbol experiments + phoneme inventory (consonants, derived, vowels)
 - Reverse sound → symbol lookup
 - Decode/construct quiz (session stats; construct mode includes symbol keyboard)
 - Translator with language selection and full-width editing
@@ -41,7 +41,7 @@ See [docs/README.md](docs/README.md) for the full documentation index.
 | --- | --- | --- |
 | Translator | Primary nav | Text → IPA → Fonora; editable output |
 | Sound Grid | Primary nav | Place × manner reference |
-| Alphabet | Primary nav | Primary symbol overrides + A–Z chart |
+| Alphabet | Primary nav | Primary symbol overrides + phoneme inventory |
 | Quiz | Primary nav | Decode or construct encodable sounds |
 | Keyboard | More | Type symbols; mapping table |
 | Reverse Lookup | More | Sound → symbol |

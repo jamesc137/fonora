@@ -1,4 +1,4 @@
-import { getEncodableEntries, getQuizEntries, getVowelPhonemeKeys, vowelSymbolForKey } from './rules.js';
+import { getEncodableEntries, getQuizEntries, getVowelPhonemeKeys, vowelSymbolForKey, buildPhonemeInventory } from './rules.js';
 import { encodeSounds } from './encode.js';
 import { decodeSymbols, decodeText, decodeToPhonemeKeys, normalizeSymbolInput } from './decode.js';
 import { normalizeIpa, registerIpaVowelMap, setActiveIpaVowelMap, registerConsonantMapFromRules, findConsonantMapSyncIssues, buildConsonantMapFromRules } from './ipa-normalize.js';
@@ -114,6 +114,26 @@ export function runTests(options) {
     const bCell = rules.soundGrid.find((c) => c.sound === 'b');
     assert(bCell.symbols === `${voice}${lips}`);
     assert(rules.places.every((p) => ['lips', 'front_tongue', 'middle_tongue', 'back_tongue', 'throat'].includes(p.id)));
+  });
+
+  t('phoneme inventory groups encodable sounds accurately', () => {
+    const inventory = buildPhonemeInventory(rules);
+    const bRow = inventory.consonants.find((r) => r.key === 'b');
+    assert(bRow, 'b consonant row missing');
+    assert(bRow.symbols === `${voice}${lips}`, `b should be ${voice}${lips}, got ${bRow.symbols}`);
+    assert(bRow.symbols !== voice, 'b must not be voice modifier alone');
+
+    const shRow = inventory.consonants.find((r) => r.key === 'sh');
+    assert(shRow, 'sh consonant row missing');
+    assert(shRow.symbols === `${friction}${middle}`);
+
+    const thRow = inventory.derived.find((r) => r.key === 'th');
+    assert(thRow, 'th derived row missing');
+
+    const eeRow = inventory.vowels.find((r) => r.key === 'ee');
+    assert(eeRow, 'ee vowel row missing');
+    assert(eeRow.symbols === `${vowelMarker}${front}`);
+    assert(eeRow.symbols.length === 2, 'ee should be 2-symbol vowel spelling');
   });
 
   t('core vowels composed from recipes', () => {

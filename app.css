@@ -1380,16 +1380,25 @@ code {
   margin-bottom: 1.5rem;
 }
 
-.alphabet-chart-table .alphabet-chart-letter {
-  font-weight: 600;
-  width: 3rem;
+.alphabet-inventory-group {
+  margin-bottom: 1.5rem;
 }
 
-.alphabet-chart-table .alphabet-chart-symbol {
+.alphabet-inventory-group .examples-heading {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.alphabet-inventory-table .alphabet-inventory-key {
+  font-weight: 600;
+  font-family: ui-monospace, monospace;
+}
+
+.alphabet-inventory-table .alphabet-inventory-symbol {
   font-size: 1.35rem;
 }
 
-.alphabet-chart-notes {
+.alphabet-inventory-notes {
   font-size: 0.85rem;
   color: #555;
 }

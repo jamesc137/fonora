@@ -3,7 +3,7 @@ import {
   applyPrimarySymbols,
 } from './symbol-compose.js';
 import { escapeHtml } from './utils.js';
-import { buildKeyboardMap, getEncodableEntries } from './rules.js';
+import { buildPhonemeInventory } from './rules.js';
 import {
   loadAlphabetOverrides,
   saveAlphabetOverrides,
@@ -11,55 +11,18 @@ import {
   hasAlphabetOverrides,
 } from './alphabet-overrides.js';
 
-const ALPHABET_LETTERS = 'abcdefghijklmnopqrstuvwxyz'.split('');
-
-function buildAlphabetChart(rules) {
-  const encodable = getEncodableEntries(rules).filter((c) => c.sound && c.sound !== '?');
-  const keyboard = buildKeyboardMap(rules);
-  const primaryEntries = [...rules.places, ...rules.modifiers];
-
-  return ALPHABET_LETTERS.map((letter) => {
-    const keyboardSymbol = keyboard.byLetter[letter];
-    if (keyboardSymbol) {
-      const primary = primaryEntries.find((e) => e.symbol === keyboardSymbol);
-      return {
-        letter: letter.toUpperCase(),
-        symbol: keyboardSymbol,
-        sound: primary?.label || '—',
-        notes: 'Keyboard shortcut',
-      };
-    }
-
-    const exact = encodable.find((c) => c.sound === letter);
-    if (exact) {
-      return {
-        letter: letter.toUpperCase(),
-        symbol: exact.symbols,
-        sound: exact.sound,
-        notes: exact.explanation || exact.lexicalSet || '',
-      };
-    }
-
-    const candidates = encodable
-      .filter((c) => c.sound.startsWith(letter))
-      .sort((a, b) => a.symbols.length - b.symbols.length || a.sound.length - b.sound.length);
-    if (candidates.length) {
-      const best = candidates[0];
-      return {
-        letter: letter.toUpperCase(),
-        symbol: best.symbols,
-        sound: best.sound,
-        notes: best.explanation || best.lexicalSet || '',
-      };
-    }
-
-    return {
-      letter: letter.toUpperCase(),
-      symbol: '—',
-      sound: '—',
-      notes: '',
-    };
-  });
+function renderInventoryRows(rows) {
+  return rows
+    .map(
+      (row) => `
+      <tr>
+        <td class="alphabet-inventory-key">${escapeHtml(row.key)}</td>
+        <td class="symbol-text alphabet-inventory-symbol">${escapeHtml(row.symbols)}</td>
+        <td>${escapeHtml(row.ipa)}</td>
+        <td class="alphabet-inventory-notes">${escapeHtml(row.notes)}</td>
+      </tr>`,
+    )
+    .join('');
 }
 
 /**
@@ -73,7 +36,9 @@ export function setupAlphabetLab({ getRules, getMarkdownPrimarySymbols, onApplyO
   if (!panel) return;
 
   const gridEl = document.getElementById('alphabet-primary-grid');
-  const chartBody = document.getElementById('alphabet-chart-body');
+  const consonantsBody = document.getElementById('alphabet-inventory-consonants');
+  const derivedBody = document.getElementById('alphabet-inventory-derived');
+  const vowelsBody = document.getElementById('alphabet-inventory-vowels');
   const statusEl = document.getElementById('alphabet-status');
 
   /** @type {Record<string, string>} */
@@ -156,27 +121,18 @@ export function setupAlphabetLab({ getRules, getMarkdownPrimarySymbols, onApplyO
           draftOverrides[entry.id] = val;
         }
         renderPrimaryEditor();
-        renderAlphabetChart();
+        renderPhonemeInventory();
       });
 
       gridEl.appendChild(card);
     }
   }
 
-  function renderAlphabetChart() {
-    if (!chartBody) return;
-    const rows = buildAlphabetChart(previewRules());
-    chartBody.innerHTML = rows
-      .map(
-        (row) => `
-      <tr>
-        <td class="alphabet-chart-letter">${escapeHtml(row.letter)}</td>
-        <td class="symbol-text alphabet-chart-symbol">${escapeHtml(row.symbol)}</td>
-        <td>${escapeHtml(row.sound)}</td>
-        <td class="alphabet-chart-notes">${escapeHtml(row.notes)}</td>
-      </tr>`,
-      )
-      .join('');
+  function renderPhonemeInventory() {
+    const { consonants, derived, vowels } = buildPhonemeInventory(previewRules());
+    if (consonantsBody) consonantsBody.innerHTML = renderInventoryRows(consonants);
+    if (derivedBody) derivedBody.innerHTML = renderInventoryRows(derived);
+    if (vowelsBody) vowelsBody.innerHTML = renderInventoryRows(vowels);
   }
 
   document.getElementById('alphabet-apply')?.addEventListener('click', () => {
@@ -195,13 +151,13 @@ export function setupAlphabetLab({ getRules, getMarkdownPrimarySymbols, onApplyO
       'success',
     );
     renderPrimaryEditor();
-    renderAlphabetChart();
+    renderPhonemeInventory();
   });
 
   document.getElementById('alphabet-reset-draft')?.addEventListener('click', () => {
     draftOverrides = { ...loadAlphabetOverrides() };
     renderPrimaryEditor();
-    renderAlphabetChart();
+    renderPhonemeInventory();
     setStatus('Draft reset to last saved overrides.', 'info');
   });
 
@@ -211,7 +167,7 @@ export function setupAlphabetLab({ getRules, getMarkdownPrimarySymbols, onApplyO
     onApplyOverrides({});
     setStatus('Cleared overrides. Reloaded symbols from language-rules.md.', 'success');
     renderPrimaryEditor();
-    renderAlphabetChart();
+    renderPhonemeInventory();
   });
 
   if (hasAlphabetOverrides()) {
@@ -219,5 +175,5 @@ export function setupAlphabetLab({ getRules, getMarkdownPrimarySymbols, onApplyO
   }
 
   renderPrimaryEditor();
-  renderAlphabetChart();
+  renderPhonemeInventory();
 }

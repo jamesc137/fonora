@@ -1,6 +1,6 @@
 import { escapeHtml, deleteSymbolBeforeCursor } from './utils.js';
 import { normalizeSymbolInput } from './decode.js';
-import { ENGLISH_DIALECT_OPTIONS } from './language-preferences.js';
+import { ENGLISH_DIALECT_OPTIONS, loadEnglishDialectPreference } from './language-preferences.js';
 import {
   tokenizeFonoraPhrase,
   speakFonoraPhrase,
@@ -15,12 +15,14 @@ import { initPiperAudio, isPiperAudioReady } from './piper-audio.js';
 let rulesRef = null;
 let playing = false;
 let cancelRequested = false;
+let readerUiBound = false;
 
 function populateDialectSelect() {
   const sel = document.getElementById('tts-dialect');
   if (!sel) return;
+  const savedDialect = loadEnglishDialectPreference();
   sel.innerHTML = ENGLISH_DIALECT_OPTIONS.map(
-    (item) => `<option value="${escapeHtml(item.code)}"${item.code === 'en-us' ? ' selected' : ''}>${escapeHtml(item.label)}</option>`,
+    (item) => `<option value="${escapeHtml(item.code)}"${item.code === savedDialect ? ' selected' : ''}>${escapeHtml(item.label)}</option>`,
   ).join('');
 }
 
@@ -188,35 +190,13 @@ function warmReaderResources() {
   initPiperAudio(piperVoice).catch(() => {});
 }
 
-export function loadReaderFromTranslation(symbols, wordSources) {
-  const input = document.getElementById('tts-input');
-  if (input) {
-    input.value = symbols || '';
-    renderWordDisplay(input.value);
-  }
-  if (wordSources) {
-    setReaderWordSources(wordSources);
-  }
-  hideLoading();
-  showStatus('');
-}
-
-export function setupFonoraReader(rules) {
-  rulesRef = rules;
-  populateDialectSelect();
-  populatePiperVoiceSelect();
-  hideLoading();
-  warmReaderResources();
+function bindReaderUiOnce() {
+  if (readerUiBound) return;
+  readerUiBound = true;
 
   document.getElementById('tts-piper-voice')?.addEventListener('change', warmReaderResources);
 
   const input = document.getElementById('tts-input');
-  if (input && !input.value.trim()) {
-    input.value = '';
-  }
-
-  renderWordDisplay(input?.value || '');
-
   input?.addEventListener('input', () => {
     if (!playing) renderWordDisplay(input.value);
   });
@@ -236,4 +216,33 @@ export function setupFonoraReader(rules) {
     deleteSymbolBeforeCursor(input);
     renderWordDisplay(input.value);
   });
+}
+
+export function loadReaderFromTranslation(symbols, wordSources) {
+  const input = document.getElementById('tts-input');
+  if (input) {
+    input.value = symbols || '';
+    renderWordDisplay(input.value);
+  }
+  if (wordSources) {
+    setReaderWordSources(wordSources);
+  }
+  hideLoading();
+  showStatus('');
+}
+
+export function setupFonoraReader(rules) {
+  rulesRef = rules;
+  populateDialectSelect();
+  populatePiperVoiceSelect();
+  hideLoading();
+  warmReaderResources();
+  bindReaderUiOnce();
+
+  const input = document.getElementById('tts-input');
+  if (input && !input.value.trim()) {
+    input.value = '';
+  }
+
+  renderWordDisplay(input?.value || '');
 }

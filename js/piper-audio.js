@@ -127,8 +127,34 @@ async function loadPiperModule() {
   return import('/vendor/piper-tts-web/piper-tts-web.js');
 }
 
-async function probeOnnxWasmBase(basePath) {
-  const url = new URL('ort-wasm-simd-threaded.wasm', basePath).href;
+/** Turn a site-relative or absolute path into a URL base suitable for `new URL(relative, base)`. */
+function resolveAssetBaseUrl(path) {
+  const withSlash = path.endsWith('/') ? path : `${path}/`;
+  if (/^https?:\/\//i.test(withSlash)) {
+    return withSlash;
+  }
+  if (typeof window === 'undefined' || !window.location?.href) {
+    return withSlash;
+  }
+  if (window.location.protocol === 'file:') {
+    return null;
+  }
+  const rooted = withSlash.startsWith('/')
+    ? `${window.location.origin}${withSlash}`
+    : new URL(withSlash, window.location.href).href;
+  return rooted.endsWith('/') ? rooted : `${rooted}/`;
+}
+
+async function probeOnnxWasmBase(resolvedBaseUrl) {
+  if (!resolvedBaseUrl) return false;
+
+  let url;
+  try {
+    url = new URL('ort-wasm-simd-threaded.wasm', resolvedBaseUrl).href;
+  } catch {
+    return false;
+  }
+
   try {
     const res = await fetch(url, { method: 'HEAD', cache: 'no-store' });
     return res.ok;
@@ -139,14 +165,19 @@ async function probeOnnxWasmBase(basePath) {
 
 async function resolveOnnxWasmBasePath() {
   if (onnxWasmBasePath) return onnxWasmBasePath;
-  if (await probeOnnxWasmBase(ONNX_WASM_BASE_PATH)) {
-    onnxWasmBasePath = ONNX_WASM_BASE_PATH;
+
+  const localBase = resolveAssetBaseUrl(ONNX_WASM_BASE_PATH);
+  if (localBase && (await probeOnnxWasmBase(localBase))) {
+    onnxWasmBasePath = localBase;
     return onnxWasmBasePath;
   }
-  if (await probeOnnxWasmBase(ONNX_WASM_CDN_BASE)) {
-    onnxWasmBasePath = ONNX_WASM_CDN_BASE;
+
+  const cdnBase = resolveAssetBaseUrl(ONNX_WASM_CDN_BASE);
+  if (cdnBase && (await probeOnnxWasmBase(cdnBase))) {
+    onnxWasmBasePath = cdnBase;
     return onnxWasmBasePath;
   }
+
   throw new Error('ONNX Runtime WASM not found at /vendor/onnx/ or CDN fallback');
 }
 

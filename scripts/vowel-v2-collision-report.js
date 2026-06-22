@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * V1 vs V2 collision comparison report.
+ * Vowel minimal-pair collision report (current language-rules.md).
  * Run: node scripts/vowel-v2-collision-report.js
  *      npm run test:v2-collisions
  */

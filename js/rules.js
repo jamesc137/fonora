@@ -60,49 +60,14 @@ export function findGridCell(r, modifierId, placeId) {
   return r.soundGrid.find((c) => c.modifierId === modifierId && c.placeId === placeId);
 }
 
-/**
- * Grid cells used by encode/decode/quiz. Plain throat may document /h/ on ⊃ in the
- * chart while vowels retain ⊃ for encoding; /h/ stays on friction+throat symbols.
- */
 function getEncoderGridCells(r) {
-  const defined = (r.soundGrid || []).filter((c) => c.status === 'defined');
-  const plainThroat = findGridCell(r, 'plain', 'throat');
-  const frictionThroat = findGridCell(r, 'friction', 'throat');
-
-  const cells = defined.filter((c) => c.modifierId !== 'plain' || c.placeId !== 'throat');
-
-  if (plainThroat?.sound === 'h' && frictionThroat?.status === 'reserved') {
-    cells.push({
-      ...frictionThroat,
-      sound: 'h',
-      ipa: plainThroat.ipa || '/h/',
-      status: 'defined',
-      explanation: frictionThroat.explanation,
-    });
-  }
-
-  return cells;
+  return (r.soundGrid || []).filter((c) => c.status === 'defined');
 }
 
 function getDecoderGridCells(r) {
-  const cells = (r.soundGrid || []).filter(
+  return (r.soundGrid || []).filter(
     (c) => c.status !== 'undefined' && c.status !== 'reserved',
   );
-  const plainThroat = findGridCell(r, 'plain', 'throat');
-  const frictionThroat = findGridCell(r, 'friction', 'throat');
-
-  const decoderCells = cells.filter((c) => c.modifierId !== 'plain' || c.placeId !== 'throat');
-
-  if (plainThroat?.sound === 'h' && frictionThroat?.status === 'reserved') {
-    decoderCells.push({
-      ...frictionThroat,
-      sound: 'h',
-      ipa: plainThroat.ipa || '/h/',
-      status: 'defined',
-    });
-  }
-
-  return decoderCells;
 }
 
 export function getDecodableEntries(r) {

@@ -2,6 +2,7 @@ import {
   MODIFIER_ROW_ORDER,
   GRID_PLACE_IDS,
   getPrimarySymbolEntries,
+  modifierSymbol,
 } from './symbol-compose.js';
 import {
   getVowelEntries,
@@ -120,6 +121,53 @@ function bindInsertableRow(tr, symbols) {
       insert();
     }
   });
+}
+
+const HOME_MANNER_ROWS = [
+  { id: 'voice', label: 'Voice' },
+  { id: 'friction', label: 'Friction' },
+  { id: 'nasal', label: 'Nasal' },
+  { id: 'glide', label: 'Glide', note: 'X → Y transition' },
+];
+
+function renderHomeSymbolCard({ symbol, label, note, kind }) {
+  const glyph = symbol
+    ? `<span class="home-symbol-glyph symbol-text" aria-hidden="true">${escapeHtml(symbol)}</span>`
+    : '<span class="home-symbol-glyph home-symbol-glyph--empty" aria-hidden="true">—</span>';
+  const noteHtml = note ? `<span class="home-symbol-note">${escapeHtml(note)}</span>` : '';
+  return `
+    <div class="home-symbol-card home-symbol-card--${kind}" role="listitem">
+      ${glyph}
+      <span class="home-symbol-label">${escapeHtml(label)}</span>
+      ${noteHtml}
+    </div>`;
+}
+
+function renderHomeHowItWorks() {
+  const placesEl = document.getElementById('home-places');
+  const modifiersEl = document.getElementById('home-modifiers');
+  if (!placesEl || !modifiersEl || !rules) return;
+
+  const gridPlaces = rules.places.filter((p) => GRID_PLACE_IDS.includes(p.id));
+
+  placesEl.innerHTML = gridPlaces
+    .map((place) =>
+      renderHomeSymbolCard({
+        symbol: place.symbol,
+        label: place.label,
+        kind: 'place',
+      }),
+    )
+    .join('');
+
+  modifiersEl.innerHTML = HOME_MANNER_ROWS.map(({ id, label, note }) =>
+    renderHomeSymbolCard({
+      symbol: modifierSymbol(rules.modifiers, id),
+      label,
+      note,
+      kind: 'manner',
+    }),
+  ).join('');
 }
 
 function renderSoundGrid() {
@@ -641,7 +689,21 @@ function updateQuizStats() {
   document.getElementById('quiz-stats').textContent = `Attempts: ${quizStats.attempts} · Correct: ${quizStats.correct} · Accuracy: ${acc}%`;
 }
 
-const MORE_TAB_IDS = new Set(['keyboard', 'reverse', 'encoder-testing', 'pronunciation-validation']);
+const MORE_TAB_IDS = new Set(['quiz', 'keyboard', 'reverse', 'encoder-testing', 'pronunciation-validation']);
+
+function getTabFromHash() {
+  const id = window.location.hash.replace(/^#/, '');
+  if (!id || id === 'home') return 'home';
+  const panel = document.querySelector(`[data-tab-panel="${id}"]`);
+  return panel ? id : 'home';
+}
+
+function setHashForTab(tabId) {
+  const hash = tabId === 'home' ? '' : `#${tabId}`;
+  if (window.location.hash !== hash) {
+    history.replaceState(null, '', `${window.location.pathname}${window.location.search}${hash}`);
+  }
+}
 
 function closeNavDropdown() {
   const dropdown = document.getElementById('nav-more');
@@ -668,6 +730,10 @@ function showTab(tabId) {
     const active = btn.dataset.tab === tabId;
     btn.classList.toggle('tab-btn--active', active);
     btn.setAttribute('aria-selected', active ? 'true' : 'false');
+    if (btn.closest('.main-nav-primary')) {
+      if (active) btn.setAttribute('aria-current', 'page');
+      else btn.removeAttribute('aria-current');
+    }
   });
 
   const dropdown = document.getElementById('nav-more');
@@ -680,12 +746,16 @@ function showTab(tabId) {
     panel.classList.toggle('tab-panel--active', panel.dataset.tabPanel === tabId);
   });
 
+  setHashForTab(tabId);
   closeNavDropdown();
 }
 
 function setupTabs() {
-  document.querySelectorAll('.tab-btn[data-tab]').forEach((btn) => {
-    btn.addEventListener('click', () => showTab(btn.dataset.tab));
+  document.querySelectorAll('[data-tab]').forEach((el) => {
+    el.addEventListener('click', (event) => {
+      if (el.tagName === 'A') event.preventDefault();
+      showTab(el.dataset.tab);
+    });
   });
 
   const trigger = document.getElementById('nav-more-trigger');
@@ -712,6 +782,9 @@ function setupTabs() {
       }
     });
   }
+
+  window.addEventListener('hashchange', () => showTab(getTabFromHash()));
+  showTab(getTabFromHash());
 }
 
 /** @type {Record<string, string>} — primary symbols from language-rules.md before overrides */
@@ -764,6 +837,7 @@ function applyRulesBundle(loaded) {
   showFallbackBanner();
   updateAlphabetBanner(loaded.symbolsFromOverrides);
   setupTabs();
+  renderHomeHowItWorks();
   renderKeyboardSection();
   renderSoundGrid();
   renderSupplementalSoundTables();

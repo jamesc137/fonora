@@ -3,7 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fonora | Universal Phonetic Writing System</title>
+  <title>Fonora | Open Source Phonetic Oral Script Language</title>
+  <meta name="description" content="Fonora is an open-source phonetic writing system designed around nine simple symbols that visually represent how speech sounds are produced.">
+  <meta name="keywords" content="fonora, phonetic language, phonetic writing system, universal writing system, constructed language, conlang, speech symbols, oral language, phonetic alphabet, open source language">
+  <meta property="og:title" content="Fonora | Open Source Phonetic Oral Script Language">
+  <meta property="og:description" content="Fonora is an open-source phonetic writing system designed around nine simple symbols that visually represent how speech sounds are produced.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://fonora.org/">
+  <meta property="og:site_name" content="Fonora">
+  <link rel="canonical" href="https://fonora.org/">
+  <!-- Social preview image — set og:image when a sharing asset is ready:
+  <meta property="og:image" content="https://fonora.org/og-image.png">
+  <meta property="og:image:alt" content="Fonora — open-source phonetic oral script language">
+  -->
   <link rel="stylesheet" href="app.css">
 </head>
 <body>
@@ -13,18 +25,18 @@
 
   <header class="site-header">
     <div class="site-header-inner">
-      <div class="site-brand">
-        <h1>Fonora</h1>
-        <h2 class="tagline">Universal Phonetic Writing System</h2>
-      </div>
+      <a href="#home" class="site-brand" data-tab="home" aria-label="Fonora — go to home">
+        <span class="site-name">Fonora</span>
+        <span class="tagline">A Phonetic Oral Script Language</span>
+      </a>
 
-      <nav class="main-nav" aria-label="Sections">
+      <nav class="main-nav" aria-label="Main navigation">
         <div class="main-nav-primary">
-          <button type="button" class="tab-btn tab-btn--active" data-tab="translator">Translator</button>
+          <button type="button" class="tab-btn tab-btn--active" data-tab="home" aria-current="page">Home</button>
+          <button type="button" class="tab-btn" data-tab="translator">Translator</button>
           <button type="button" class="tab-btn" data-tab="reader">Reader</button>
           <button type="button" class="tab-btn" data-tab="grid">Sound Grid</button>
           <button type="button" class="tab-btn" data-tab="alphabet">Alphabet</button>
-          <button type="button" class="tab-btn" data-tab="quiz">Quiz</button>
         </div>
 
         <div class="nav-dropdown" id="nav-more">
@@ -40,6 +52,7 @@
             <span class="nav-dropdown-chevron" aria-hidden="true">▾</span>
           </button>
           <div class="nav-dropdown-menu" id="nav-more-menu" role="menu" hidden>
+            <button type="button" class="tab-btn nav-dropdown-item" data-tab="quiz" role="menuitem">Quiz</button>
             <button type="button" class="tab-btn nav-dropdown-item" data-tab="keyboard" role="menuitem">Keyboard</button>
             <button type="button" class="tab-btn nav-dropdown-item" data-tab="reverse" role="menuitem">Reverse Lookup</button>
             <button type="button" class="tab-btn nav-dropdown-item" data-tab="encoder-testing" role="menuitem">Pronunciation Testing</button>
@@ -50,9 +63,99 @@
     </div>
   </header>
 
-  <main class="main-content">
+  <main class="main-content" id="main-content">
+    <!-- Home -->
+    <section class="home-page tab-panel tab-panel--active" id="tab-home" data-tab-panel="home" aria-labelledby="home-title">
+      <header class="home-hero">
+        <h1 id="home-title">Fonora</h1>
+        <p class="home-subtitle">A Phonetic Oral Script Language</p>
+        <p class="home-intro">
+          Fonora is an experimental open-source writing system designed to represent spoken language using a small set of intuitive symbols.
+        </p>
+        <p class="home-intro">
+          Unlike traditional alphabets, each symbol is based on how a sound is physically produced in the mouth, helping readers understand both how a sound is written and how it is spoken.
+        </p>
+        <div class="home-cta">
+          <button type="button" class="btn btn--primary" data-tab="translator">Try the Translator</button>
+          <button type="button" class="btn" data-tab="grid">Explore the Sound Grid</button>
+        </div>
+      </header>
+
+      <article class="home-section" aria-labelledby="about-heading">
+        <h2 id="about-heading">What is Fonora?</h2>
+        <p>Fonora is an open-source project created by <a href="https://jamescalhoun.co" target="_blank" rel="noopener">James Calhoun</a>.</p>
+  
+        <p>The goal is to develop a universal phonetic writing system built from only nine core symbols.</p>
+        <p>These symbols represent locations and actions within the human vocal system, allowing written text to visually describe how sounds are produced.</p>
+        <p>Rather than memorizing arbitrary letters, readers learn a small set of symbols that correspond to physical speech mechanics.</p>
+      </article>
+
+      <section class="home-section" aria-labelledby="principles-heading">
+        <h2 id="principles-heading">Core Principles</h2>
+        <div class="home-principles">
+          <article class="home-principle">
+            <h3>Universal</h3>
+            <p>Fonora is designed to represent spoken sounds rather than English spelling rules, allowing words from many languages to be written using the same system.</p>
+          </article>
+          <article class="home-principle">
+            <h3>Phonetic</h3>
+            <p>Words are written according to pronunciation rather than traditional spelling. For example, words that sound identical may share the same Fonora spelling regardless of their conventional spelling.</p>
+          </article>
+          <article class="home-principle">
+            <h3>Oral</h3>
+            <p>The symbols are based on where and how sounds are created within the mouth and vocal tract.</p>
+          </article>
+          <article class="home-principle">
+            <h3>Minimal</h3>
+            <p>The system is intentionally constrained to a small number of visual primitives to maximize learnability and simplicity.</p>
+          </article>
+          <article class="home-principle">
+            <h3>Open Source</h3>
+            <p>Fonora is an experimental community project that can evolve through research, testing, and contribution.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="home-section" aria-labelledby="how-heading">
+        <h2 id="how-heading">How It Works</h2>
+        <p>Fonora is built around nine fundamental symbols.</p>
+
+        <h3 class="home-how-subheading">Places of articulation</h3>
+        <p>The symbols represent where sounds are produced in the mouth and vocal tract:</p>
+        <div id="home-places" class="home-symbol-grid" role="list" aria-label="Place symbols"></div>
+
+        <h3 class="home-how-subheading">Sound modifiers</h3>
+        <p>Each place combines with sound modifiers — voicing, friction, nasal airflow, and glide transitions between positions:</p>
+        <div id="home-modifiers" class="home-symbol-grid" role="list" aria-label="Modifier symbols"></div>
+
+        <p>These combinations generate the core sound inventory used to construct words.</p>
+        <p>
+          <button type="button" class="btn" data-tab="grid">Explore the Sound Grid</button>
+        </p>
+      </section>
+
+      <section class="home-section" aria-labelledby="goals-heading">
+        <h2 id="goals-heading">Project Goals</h2>
+        <ul class="home-list home-list--goals">
+          <li>Create a highly learnable writing system</li>
+          <li>Minimize memorization</li>
+          <li>Encode pronunciation directly</li>
+          <li>Work across multiple languages</li>
+          <li>Remain visually simple</li>
+          <li>Stay open and accessible</li>
+        </ul>
+      </section>
+
+      <section class="home-section home-section--status" aria-labelledby="status-heading">
+        <h2 id="status-heading">Experimental Research Project</h2>
+        <p>Fonora is currently an active research and development project.</p>
+        <p>The language, symbols, encoding rules, and tooling may evolve as testing and experimentation continue.</p>
+        <p>This website serves as both documentation and a testing platform for the language.</p>
+      </section>
+    </section>
+
     <!-- Translator -->
-    <section class="panel tab-panel tab-panel--active" id="tab-translator" data-tab-panel="translator">
+    <section class="panel tab-panel" id="tab-translator" data-tab-panel="translator" hidden>
       <h2>Translator</h2>
 
       <p class="section-desc">Type a word or phrase to get a Fonora spelling via the IPA pipeline. Each word is translated separately. Edit the result with the symbol keyboard.</p>

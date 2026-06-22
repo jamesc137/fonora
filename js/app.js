@@ -30,6 +30,7 @@ import { escapeHtml, insertAtCursor, deleteSymbolBeforeCursor } from './utils.js
 import { setupEncoderTesting } from './encoder-testing.js';
 import { setupPronunciationValidation } from './pronunciation-validation-ui.js';
 import { setupFonoraReader, loadReaderFromTranslation } from './fonora-tts-ui.js';
+import { setupBreakdown, prefillBreakdownFromWordSources } from './breakdown-ui.js';
 import { setupSamples, setupHomeSample, ensureSamplesLoaded } from './samples.js';
 import { setReaderWordSources } from './fonora-tts.js';
 
@@ -690,7 +691,7 @@ function updateQuizStats() {
   document.getElementById('quiz-stats').textContent = `Attempts: ${quizStats.attempts} · Correct: ${quizStats.correct} · Accuracy: ${acc}%`;
 }
 
-const MORE_TAB_IDS = new Set(['samples', 'quiz', 'keyboard', 'reverse', 'encoder-testing', 'pronunciation-validation']);
+const MORE_TAB_IDS = new Set(['breakdown', 'samples', 'quiz', 'keyboard', 'reverse', 'encoder-testing', 'pronunciation-validation']);
 
 function getTabFromHash() {
   const id = window.location.hash.replace(/^#/, '');
@@ -758,6 +759,13 @@ function showTab(tabId) {
 
   if (tabId === 'samples') {
     ensureSamplesLoaded().catch(() => {});
+  }
+
+  if (tabId === 'breakdown') {
+    const input = document.getElementById('breakdown-input');
+    if (input && !input.value.trim()) {
+      prefillBreakdownFromWordSources();
+    }
   }
 }
 
@@ -858,6 +866,7 @@ function applyRulesBundle(loaded) {
   setupEncoderTesting(rules);
   setupPronunciationValidation(rules);
   setupFonoraReader(rules);
+  setupBreakdown(rules);
   setupSamples(rules);
   setupHomeSample(rules);
   const ttsInput = document.getElementById('tts-input');

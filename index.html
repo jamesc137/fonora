@@ -52,6 +52,7 @@
             <span class="nav-dropdown-chevron" aria-hidden="true">▾</span>
           </button>
           <div class="nav-dropdown-menu" id="nav-more-menu" role="menu" hidden>
+          <button type="button" class="tab-btn nav-dropdown-item" data-tab="breakdown" role="menuitem">Breakdown</button>
             <button type="button" class="tab-btn nav-dropdown-item" data-tab="samples" role="menuitem">Samples</button>
             <button type="button" class="tab-btn nav-dropdown-item" data-tab="quiz" role="menuitem">Quiz</button>
             <button type="button" class="tab-btn nav-dropdown-item" data-tab="keyboard" role="menuitem">Keyboard</button>
@@ -604,6 +605,45 @@
 
       <div id="tts-display" class="tts-display symbol-text" aria-live="polite"></div>
       <div id="tts-status" class="tts-status" hidden></div>
+    </section>
+
+    <!-- Breakdown -->
+    <section class="panel tab-panel" id="tab-breakdown" data-tab-panel="breakdown" hidden>
+      <h2>Fonora Breakdown</h2>
+
+        <p class="section-desc">Learn how spoken sounds become Fonora symbols — see pronunciation, symbol components, and how each sound is physically produced. Hover or tap to link sounds across the word.</p>
+
+      <div class="translate-controls">
+        <div class="translate-control">
+          <label for="breakdown-lang">Language</label>
+          <select id="breakdown-lang" class="text-input text-input--full">
+            <option value="en">English</option>
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+            <option value="ja">Japanese</option>
+            <option value="ar">Arabic</option>
+            <option value="zh">Mandarin</option>
+          </select>
+        </div>
+        <div class="translate-control" id="breakdown-dialect-wrap">
+          <label for="breakdown-dialect">English dialect</label>
+          <select id="breakdown-dialect" class="text-input text-input--full"></select>
+        </div>
+      </div>
+
+      <label for="breakdown-input">Text</label>
+      <textarea id="breakdown-input" class="text-input text-input--full" rows="3" placeholder="e.g. human, all, hola, la maison" autocomplete="off"></textarea>
+
+      <div class="button-row">
+        <button type="button" id="breakdown-analyze" class="btn btn--primary">Analyze</button>
+      </div>
+
+      <div id="breakdown-status" class="tts-status" hidden></div>
+
+      <div id="breakdown-legend" class="breakdown-legend" aria-label="Chunk color key"></div>
+
+      <div id="breakdown-output" class="breakdown-output" aria-live="polite"></div>
     </section>
 
     <!-- Language Samples -->

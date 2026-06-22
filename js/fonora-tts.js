@@ -51,6 +51,7 @@ export function setReaderWordSources(words) {
     symbols: word.symbols,
     phonemeKeys: word.normalizedPhonemes,
     sourceIpa: word.ipa || '',
+    sourceWord: word.original || word.input || '',
   }));
 }
 

@@ -1,0 +1,16 @@
+{
+  "name": "Fonora",
+  "description": "Open-source phonetic oral script language",
+  "website": "https://fonora.org",
+  "repository": "https://github.com/jamesc137/fonora",
+  "keywords": ["fonora", "phonetic", "language", "conlang"],
+  "stack": "heroku-24",
+  "buildpacks": [
+    { "url": "heroku/nodejs" }
+  ],
+  "env": {
+    "NODE_ENV": {
+      "value": "production"
+    }
+  }
+}

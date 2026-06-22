@@ -17,7 +17,7 @@ import {
   getQuizEntries,
   reverseLookup,
 } from './rules.js';
-import { setActiveLanguageRulesBundle } from './fonora-config.js';
+import { setActiveLanguageRulesBundle, LANGUAGE_RULES_PATH } from './fonora-config.js';
 import { registerIpaVowelMap, setActiveIpaVowelMap, registerConsonantMapFromRules } from './ipa-normalize.js';
 import { loadAlphabetOverrides } from './alphabet-overrides.js';
 import { setupAlphabetLab } from './alphabet-lab.js';
@@ -793,7 +793,7 @@ let markdownPrimarySymbols = {};
 async function initApp() {
   let loaded;
   try {
-    const res = await fetch('language-rules.md');
+    const res = await fetch(LANGUAGE_RULES_PATH);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     markdownSource = await res.text();
     const baseBundle = loadLanguageRulesFromString(markdownSource, { primaryOverrides: {} });

@@ -76,7 +76,7 @@ export function ipaToPiperPhonemeIds(ipa, phonemeIdMap) {
 }
 
 async function loadPiperModule() {
-  return import('/node_modules/piper-tts-web/dist/piper-tts-web.js');
+  return import('/vendor/piper-tts-web/piper-tts-web.js');
 }
 
 function createOnnxRuntime(mod) {

@@ -86,12 +86,10 @@
         </div>
       </section>
 
-      <section class="home-section home-section--sample" aria-labelledby="home-sample-lang">
+      <section class="home-section home-section--sample" aria-labelledby="sample-heading">
+        <h2 id="sample-heading">See Fonora in Action</h2>
+
         <article class="home-sample-preview">
-          <header class="home-sample-preview__header">
-            <h2 class="home-sample-preview__lang" id="home-sample-lang">English</h2>
-            <p class="home-sample-preview__source" id="home-sample-source"></p>
-          </header>
 
           <div class="home-sample-preview__block">
             <h3 class="home-sample-preview__label">Original text</h3>
@@ -119,8 +117,10 @@
       <section class="home-section" aria-labelledby="how-heading">
         <h2 id="how-heading">How It Works</h2>
         <p>Fonora is built from only <b>nine</b> core symbols.</p>
-        <p>Five symbols represent where sounds are produced in the mouth and vocal tract.</p>
-        <p>Four symbols modify those locations to create different sound types.</p>
+        <ul>
+          <li>Five symbols represent where sounds are produced in the mouth and vocal tract.</li>
+          <li>Four symbols modify those locations to create different sound types.</li>
+        </ul>
         <p>Together they form a compact system capable of representing a wide range of human speech sounds.</p>
 
         <h3 class="home-how-subheading">Places of Articulation</h3>
@@ -132,6 +132,11 @@
         <div id="home-modifiers" class="home-symbol-grid" role="list" aria-label="Modifier symbols"></div>
 
         <p>By combining locations and modifiers, Fonora generates its complete sound inventory.</p>
+
+        <div class="home-section-actions">
+          <button type="button" class="btn btn--primary" data-tab="grid">See Sound Grid</button>
+          <button type="button" class="btn" data-tab="alphabet">See Full Alphabet</button>
+        </div>
       </section>
 
       <section class="home-section" aria-labelledby="why-heading">

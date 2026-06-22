@@ -17,6 +17,7 @@ import { runTests } from './tests-core.js';
 import { initEspeak, textToIpa } from './ipa.js';
 import { normalizeIpa } from './ipa-normalize.js';
 import { encodeFromIpa } from './ipa-encode-helper.js';
+import { translateIpaPhrase } from './ipa-pipeline.js';
 import { TEST_CATEGORIES } from './encoder-test-sets.js';
 import {
   resolveEspeakVoice,
@@ -197,6 +198,20 @@ const flapResult = await (async () => {
   }
 })();
 
+const perroResult = await (async () => {
+  try {
+    await initEspeak();
+    const bundle = loadActiveRulesFixture();
+    applyBundleMaps(bundle);
+    const result = await translateIpaPhrase('perro', bundle.rules, 'es', { lang: 'es', voice: 'es' });
+    assert(result.symbols === '∋⚬⌇ᵔ⌓⚬⏌', `symbols: ${result.symbols}`);
+    assert(result.normalizedPhonemes === 'p e r oh', `phonemes: ${result.normalizedPhonemes}`);
+    return { name: 'Spanish perro encodes with oh vowel ending', ok: true };
+  } catch (e) {
+    return { name: 'Spanish perro encodes with oh vowel ending', ok: false, error: e.message };
+  }
+})();
+
 const voiceResult = test('resolveEspeakVoice defaults and dialect overrides', () => {
   assert(resolveEspeakVoice('en') === DEFAULT_ENGLISH_VOICE);
   assert(resolveEspeakVoice('en', {}) === DEFAULT_ENGLISH_VOICE);
@@ -275,6 +290,7 @@ const allFailed = [
   ...(vendorOnnxResult.ok ? [] : [vendorOnnxResult]),
   ...(outsideResult.ok ? [] : [outsideResult]),
   ...(flapResult.ok ? [] : [flapResult]),
+  ...(perroResult.ok ? [] : [perroResult]),
   ...(ipaFormatResult.ok ? [] : [ipaFormatResult]),
   ...(voiceResult.ok ? [] : [voiceResult]),
 ];
@@ -292,8 +308,9 @@ const allPassed =
   + (vendorOnnxResult.ok ? 1 : 0)
   + (outsideResult.ok ? 1 : 0)
   + (flapResult.ok ? 1 : 0)
+  + (perroResult.ok ? 1 : 0)
   + (voiceResult.ok ? 1 : 0);
-const allTotal = total + corpusResults.length + 12;
+const allTotal = total + corpusResults.length + 13;
 
 for (const f of allFailed) console.error('FAIL:', f.name, '-', f.error);
 console.log(`${allPassed}/${allTotal} tests passed`);

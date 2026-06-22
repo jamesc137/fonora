@@ -166,6 +166,7 @@ export async function validatePronunciation(word, rules, bundle, options = {}) {
   const normalized = normalizeIpa(ipa, {
     vowelMode: bundle?.ipaVowelMode,
     vowelMap: bundle?.ipaVowelMap,
+    lang,
   });
   const fonora = ipaPhonemesToFonora(normalized.phonemeString, rules);
   const recovery = symbolsToRecoveredIpa(fonora.symbols, rules);

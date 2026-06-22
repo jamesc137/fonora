@@ -437,6 +437,13 @@ export function runTests(options) {
     assert(normalizeIpa('wˈɔːɾɚ', map).display === 'w o t a');
   });
 
+  t('Spanish perro final o uses rules oh vowel (not English LOT o)', () => {
+    const map = { vowelMap: rulesBundle.ipaVowelMap, lang: 'es' };
+    assert(normalizeIpa('pˈero', map).phonemeString === 'peroh');
+    assert(normalizeIpa('pˈero', map).display === 'p e r oh');
+    assert(normalizeIpa('pˈero', { vowelMap: rulesBundle.ipaVowelMap, lang: 'en' }).phonemeString === 'pero');
+  });
+
   t('English flapped ɾ encodes as plain t symbol (not glide r)', () => {
     const tSym = enc('t', rules).symbols;
     const rSym = enc('r', rules).symbols;

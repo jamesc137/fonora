@@ -232,11 +232,14 @@ export function mergeEnglishVowelNormalization(baseMap = {}) {
 
 /**
  * Effective vowel map used by normalizeIpa unless skipEnglishNormalization is set.
- * @param {{ vowelMode?: string, vowelMap?: Record<string, string | string[]>, skipEnglishNormalization?: boolean }} [options]
+ * English engineering overlays apply only when lang is en (default).
+ * @param {{ lang?: string, vowelMode?: string, vowelMap?: Record<string, string | string[]>, skipEnglishNormalization?: boolean }} [options]
  */
 export function buildEffectiveVowelMap(options = {}) {
   const base = resolveBaseVowelMap(options);
   if (options.skipEnglishNormalization) return base;
+  const lang = options.lang || 'en';
+  if (lang !== 'en') return base;
   return mergeEnglishVowelNormalization(base);
 }
 
@@ -306,7 +309,7 @@ export function lookupIpaTokenMapping(token, options = {}) {
 /**
  * Convert raw IPA into Fonora-reduced phoneme inventory.
  * @param {string} rawIpa
- * @param {{ vowelMode?: string, vowelMap?: Record<string, string | string[]>, skipEnglishNormalization?: boolean, fallbackPhoneme?: string }} [options]
+ * @param {{ lang?: string, vowelMode?: string, vowelMap?: Record<string, string | string[]>, skipEnglishNormalization?: boolean, fallbackPhoneme?: string }} [options]
  */
 export function normalizeIpa(rawIpa, options = {}) {
   const vowelMap = resolveVowelMap(options);

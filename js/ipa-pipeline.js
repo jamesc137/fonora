@@ -30,6 +30,7 @@ export async function runIpaPipeline(input, rules, options = {}) {
   const normalized = normalizeIpa(ipa, {
     vowelMode: pipelineOptions.vowelMode,
     vowelMap: pipelineOptions.vowelMap ?? activeBundle?.ipaVowelMap,
+    lang,
   });
   const fonora = ipaPhonemesToFonora(normalized.phonemeString, rules);
   const { source, hasFallback, primarySource } = resolveSource(fonora, normalized.unmapped, 'ipa');

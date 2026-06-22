@@ -79,7 +79,7 @@ These entries live in `js/ipa-normalize.js` only — not separate rows in markdo
 | ʒ | j | Voiced post-alveolar → middle tongue j |
 | ʎ | l | Palatal lateral → l |
 | ɹ | r | English approximant |
-| ɾ | r | Tap |
+| ɾ | t | Alveolar tap/flap (American intervocalic t/d → spelling-like `t`) |
 | ɽ | r | Retroflex flap |
 | ʁ | r | Voiced uvular fricative → r |
 | χ | x | Voiceless uvular fricative → x |

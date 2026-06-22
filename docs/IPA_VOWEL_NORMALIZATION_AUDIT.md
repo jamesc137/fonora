@@ -44,7 +44,7 @@ Still unmapped (fallback only): 0
 | dʒ | 9 | j | j |
 | tʃ | 9 | c | c |
 | ɚ | 7 | a+r | a |
-| ɾ | 6 | r | r |
+| ɾ | 6 | t | t |
 | i | 5 | ee | i |
 | θ | 5 | th | th |
 | ᵻ | 5 | ? ⚠ | i |

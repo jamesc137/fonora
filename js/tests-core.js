@@ -399,6 +399,40 @@ export function runTests(options) {
     assert(normalizeIpa('eː', { vowelMap: rulesBundle.ipaVowelMap }).phonemeString === 'e');
   });
 
+  t('English flapped ɾ normalizes to t (not glide r)', () => {
+    const map = { vowelMap: rulesBundle.ipaVowelMap };
+    assert(normalizeIpa('dˈɪɡnᵻɾi', map).display === 'd i g n i t i');
+    assert(normalizeIpa('sˈɪɾi', map).display === 's i t i');
+    assert(normalizeIpa('pɹˈɪɾi', map).display === 'p r i t i');
+    assert(normalizeIpa('wˈɔːɾɚ', map).display === 'w o t a');
+  });
+
+  t('English flapped ɾ encodes as plain t symbol (not glide r)', () => {
+    const tSym = enc('t', rules).symbols;
+    const rSym = enc('r', rules).symbols;
+    assert(tSym === front);
+
+    const dignity = encodeFromIpa('dˈɪɡnᵻɾi', rulesBundle);
+    assert(dignity.decoded === 'd i g n i t i');
+    assert(dignity.symbols === `${enc('d', rules).symbols}${vowelSym(rules, 'i')}${enc('g', rules).symbols}${enc('n', rules).symbols}${vowelSym(rules, 'i')}${tSym}${vowelSym(rules, 'i')}`);
+    assert(!dignity.symbols.includes(rSym));
+
+    const city = encodeFromIpa('sˈɪɾi', rulesBundle);
+    assert(city.decoded === 's i t i');
+    assert(city.symbols === `${enc('s', rules).symbols}${vowelSym(rules, 'i')}${tSym}${vowelSym(rules, 'i')}`);
+    assert(!city.symbols.includes(rSym));
+
+    const pretty = encodeFromIpa('pɹˈɪɾi', rulesBundle);
+    assert(pretty.decoded === 'p r i t i');
+    assert(pretty.symbols.includes(tSym));
+    assert(pretty.symbols === `${enc('p', rules).symbols}${rSym}${vowelSym(rules, 'i')}${tSym}${vowelSym(rules, 'i')}`);
+
+    const water = encodeFromIpa('wˈɔːɾɚ', rulesBundle);
+    assert(water.decoded === 'w o t a');
+    assert(water.symbols.includes(tSym));
+    assert(!water.symbols.includes(rSym));
+  });
+
   t('vowel architecture word set uses v3 symbols only', () => {
     const ipaFixtures = {
       cat: 'kæt',

@@ -1,6 +1,9 @@
 /** Default markdown paths — symbols are never hardcoded here. */
 export const LANGUAGE_RULES_PATH = 'language-rules.md';
 
+/** Production site origin for canonical URLs and sharing metadata. */
+export const SITE_ORIGIN = 'https://fonora.org';
+
 /** Active rules bundle set at app startup from markdown. */
 let activeBundle = null;
 

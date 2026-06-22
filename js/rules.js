@@ -95,6 +95,59 @@ export function getQuizEntries(r) {
   return getEncodableEntries(r).filter((c) => c.sound && c.sound !== '?');
 }
 
+function phonemeInventoryRow(cell, category) {
+  return {
+    key: cell.sound || cell.key || '',
+    symbols: cell.symbols || '',
+    ipa: cell.ipa || '',
+    notes: cell.explanation || cell.lexicalSet || cell.example || '',
+    category,
+  };
+}
+
+/** Grouped phoneme inventory for the Alphabet tab (consonants, derived, vowels). */
+export function buildPhonemeInventory(r) {
+  const encodable = getEncodableEntries(r).filter((c) => c.sound && c.sound !== '?');
+
+  const consonants = [];
+  const derived = [];
+  const vowelCells = [];
+
+  for (const cell of encodable) {
+    if (cell.modifierId && cell.placeId) {
+      consonants.push(phonemeInventoryRow(cell, 'consonant'));
+    } else if (cell.composition) {
+      derived.push(phonemeInventoryRow(cell, 'derived'));
+    } else {
+      vowelCells.push(cell);
+    }
+  }
+
+  consonants.sort((a, b) => {
+    if (b.key.length !== a.key.length) return b.key.length - a.key.length;
+    return a.key.localeCompare(b.key);
+  });
+
+  derived.sort((a, b) => a.key.localeCompare(b.key));
+
+  const vowelOrder = getVowelEntries(r).map((v) => v.key || v.vowel || v.sound || '');
+  const vowelByKey = new Map(
+    vowelCells.map((cell) => {
+      const key = cell.sound || cell.key || '';
+      return [key, phonemeInventoryRow(cell, 'vowel')];
+    }),
+  );
+  const vowels = vowelOrder.filter((k) => vowelByKey.has(k)).map((k) => vowelByKey.get(k));
+  for (const cell of vowelCells) {
+    const key = cell.sound || cell.key || '';
+    if (!vowelOrder.includes(key)) {
+      vowels.push(phonemeInventoryRow(cell, 'vowel'));
+    }
+  }
+
+  return { consonants, derived, vowels };
+}
+
 export function buildSoundToSymbolsMap(r) {
   const map = {};
   for (const cell of getEncodableEntries(r)) {

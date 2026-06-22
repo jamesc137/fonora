@@ -726,6 +726,8 @@ function openNavDropdown() {
 }
 
 function showTab(tabId) {
+  const previousTab = document.querySelector('.tab-panel--active')?.dataset.tabPanel;
+
   document.querySelectorAll('.tab-btn[data-tab]').forEach((btn) => {
     const active = btn.dataset.tab === tabId;
     btn.classList.toggle('tab-btn--active', active);
@@ -748,6 +750,10 @@ function showTab(tabId) {
 
   setHashForTab(tabId);
   closeNavDropdown();
+
+  if (previousTab !== tabId) {
+    window.scrollTo(0, 0);
+  }
 }
 
 function setupTabs() {

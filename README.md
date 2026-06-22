@@ -49,7 +49,7 @@ Browsers block `fetch()` and WASM loading when opening HTML files directly (`fil
 
 Edit `language-rules.md` and reload the browser. Changes to symbols, keyboard mappings, sounds, labels, and undefined cells update automatically.
 
-If the Markdown file cannot be loaded, the app falls back to embedded rules and shows a warning banner.
+If the Markdown file cannot be loaded, the app shows a warning banner and most features are unavailable until the file loads successfully.
 
 ## eSpeak NG
 
@@ -89,7 +89,7 @@ Glossary entries are stored in browser `localStorage` under the key `fonora-glos
 ```bash
 npm test
 npm run test:vowels          # vowel readability report → reports/
-npm run test:v2-collisions   # v1 vs v2 collision comparison → reports/
+npm run test:v2-collisions   # vowel minimal-pair collision report → reports/
 ```
 
 Or open the app with `?test` in the URL to log test results in the browser console.

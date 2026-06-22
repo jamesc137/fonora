@@ -150,6 +150,53 @@ const outsideResult = await (async () => {
   }
 })();
 
+const flapResult = await (async () => {
+  try {
+    await initEspeak();
+    const bundle = loadActiveRulesFixture();
+    applyBundleMaps(bundle);
+    const cases = [
+      {
+        word: 'dignity',
+        phonemes: 'd i g n i t i',
+        symbols: '⌇∩⚬⌓⌇∪⏌∩⚬⌓∩⚬⌓',
+      },
+      {
+        word: 'city',
+        phonemes: 's i t i',
+        symbols: '⌀∩⚬⌓∩⚬⌓',
+      },
+      {
+        word: 'pretty',
+        phonemes: 'p r i t i',
+        symbols: '∋ᵔ⌓⚬⌓∩⚬⌓',
+      },
+      {
+        word: 'water',
+        phonemes: 'w o t a',
+        symbols: 'ᵔ∋⚬∪∩⚬⊃',
+      },
+    ];
+    for (const { word, phonemes, symbols } of cases) {
+      const ipa = await textToIpa(word, 'en', { englishDialect: 'en-us' });
+      assert(ipa.includes('ɾ'), `${word} IPA should contain flapped ɾ from eSpeak: ${ipa}`);
+      const normalized = normalizeIpa(ipa, {
+        vowelMode: bundle.ipaVowelMode,
+        vowelMap: bundle.ipaVowelMap,
+      });
+      const encoded = encodeFromIpa(ipa, bundle);
+      assert(normalized.display === phonemes, `${word} keys: ${normalized.display}`);
+      assert(encoded.symbols === symbols, `${word} symbols: ${encoded.symbols}`);
+      if (word === 'dignity' || word === 'city') {
+        assert(!normalized.display.includes(' r '), `${word} must not map ɾ to glide r`);
+      }
+    }
+    return { name: 'English flapped t (ɾ) encodes as plain t not glide r', ok: true };
+  } catch (e) {
+    return { name: 'English flapped t (ɾ) encodes as plain t not glide r', ok: false, error: e.message };
+  }
+})();
+
 const voiceResult = test('resolveEspeakVoice defaults and dialect overrides', () => {
   assert(resolveEspeakVoice('en') === DEFAULT_ENGLISH_VOICE);
   assert(resolveEspeakVoice('en', {}) === DEFAULT_ENGLISH_VOICE);
@@ -227,6 +274,7 @@ const allFailed = [
   ...(samplePlanResult.ok ? [] : [samplePlanResult]),
   ...(vendorOnnxResult.ok ? [] : [vendorOnnxResult]),
   ...(outsideResult.ok ? [] : [outsideResult]),
+  ...(flapResult.ok ? [] : [flapResult]),
   ...(ipaFormatResult.ok ? [] : [ipaFormatResult]),
   ...(voiceResult.ok ? [] : [voiceResult]),
 ];
@@ -243,8 +291,9 @@ const allPassed =
   + (samplePlanResult.ok ? 1 : 0)
   + (vendorOnnxResult.ok ? 1 : 0)
   + (outsideResult.ok ? 1 : 0)
+  + (flapResult.ok ? 1 : 0)
   + (voiceResult.ok ? 1 : 0);
-const allTotal = total + corpusResults.length + 11;
+const allTotal = total + corpusResults.length + 12;
 
 for (const f of allFailed) console.error('FAIL:', f.name, '-', f.error);
 console.log(`${allPassed}/${allTotal} tests passed`);

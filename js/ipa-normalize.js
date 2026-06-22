@@ -50,7 +50,8 @@ export const SUPPLEMENTAL_CONSONANT_MAP = {
   ʒ: 'j',
   ʎ: 'l',
   ɹ: 'r',
-  ɾ: 'r',
+  /** American English intervocalic flap — preserve spelling-like /t/ in Fonora keys. */
+  ɾ: 't',
   ɽ: 'r',
   ʁ: 'r',
   χ: 'x',

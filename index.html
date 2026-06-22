@@ -60,6 +60,7 @@
             <button type="button" class="tab-btn nav-dropdown-item" data-tab="encoder-testing" role="menuitem">Pronunciation Testing</button>
             <button type="button" class="tab-btn nav-dropdown-item" data-tab="pronunciation-validation" role="menuitem">Pronunciation Validation</button>
             <button type="button" class="tab-btn nav-dropdown-item" data-tab="open-problems" role="menuitem">Open Problems</button>
+            <button type="button" class="tab-btn nav-dropdown-item" data-tab="docs" role="menuitem">Docs</button>
           </div>
         </div>
       </nav>
@@ -688,6 +689,25 @@
       <p class="samples-footer">
         These samples are for visual and phonetic testing only. Fonora mappings may evolve over time. Excerpts are from the Universal Declaration of Human Rights, Article 1 (public domain).
       </p>
+    </section>
+
+    <!-- Docs viewer -->
+    <section class="doc-viewer-page tab-panel" id="tab-docs" data-tab-panel="docs" hidden aria-labelledby="docs-viewer-title">
+      <div class="doc-viewer-layout">
+        <aside class="doc-viewer-sidebar" id="docs-viewer-sidebar" aria-label="Documentation index"></aside>
+        <div class="doc-viewer-main">
+          <header class="doc-viewer-toolbar">
+            <div class="doc-viewer-toolbar-text">
+              <h2 id="docs-viewer-title">Documentation</h2>
+              <p id="docs-viewer-path" class="doc-viewer-path"></p>
+            </div>
+            <a id="docs-viewer-github" class="btn" href="https://github.com/jamesc137/fonora/blob/main/docs/README.md" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a>
+          </header>
+          <article id="docs-viewer-content" class="doc-viewer-content markdown-body" aria-live="polite">
+            <p class="doc-viewer-loading">Select a document from the sidebar.</p>
+          </article>
+        </div>
+      </div>
     </section>
 
     <!-- Open Problems -->

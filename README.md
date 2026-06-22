@@ -41,6 +41,7 @@ See [docs/README.md](docs/README.md) for the full documentation index. Multiling
 | Pronunciation Testing | More | Manual review + export |
 | Pronunciation Validation | More | Automated IPA round-trip |
 | Open Problems | More | Known limitations + contribution guide |
+| Docs | More | Rendered markdown documentation viewer |
 
 ## Run locally
 

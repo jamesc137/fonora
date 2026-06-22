@@ -18,6 +18,8 @@ import {
 import { V2_COLLISION_GROUPS } from './vowel-v2-collision-groups.js';
 import { containsDoubleVowelMarker, validateVowelSymbolString } from './vowel-grammar.js';
 import { VOWEL_ARCHITECTURE_WORDS } from './vowel-architecture-set.js';
+import { docViewerHref, githubDocUrl, normalizeDocPath } from './doc-urls.js';
+import { renderMarkdown } from './markdown-render.js';
 import { ASCII_EQUALS } from './load-language-rules.js';
 
 function assert(cond, msg) {
@@ -552,6 +554,33 @@ export function runTests(options) {
     assert(summary.mismatches === 1);
     assert(summary.collisionWarnings === 1);
     assert(summary.recoverySuccessRate === 50);
+  });
+
+  t('doc viewer allows docs paths only', () => {
+    assert(normalizeDocPath('docs/language-rules.md') === 'docs/language-rules.md');
+    assert(normalizeDocPath('CONTRIBUTING.md') === 'CONTRIBUTING.md');
+    let threw = false;
+    try {
+      normalizeDocPath('../secrets.md');
+    } catch {
+      threw = true;
+    }
+    assert(threw);
+  });
+
+  t('doc viewer builds GitHub and in-app URLs', () => {
+    assert(githubDocUrl('docs/foo.md').includes('github.com/jamesc137/fonora/blob/main/docs/foo.md'));
+    assert(docViewerHref('docs/foo.md') === '?path=docs%2Ffoo.md#docs');
+    assert(docViewerHref('docs/foo.md#section') === '?path=docs%2Ffoo.md&anchor=section#docs');
+  });
+
+  t('markdown renderer handles headings and tables', () => {
+    const html = renderMarkdown('# Title\n\n| a | b |\n| --- | --- |\n| 1 | 2 |', {
+      docPath: 'docs/README.md',
+    });
+    assert(html.includes('<h1 id="title">Title</h1>'));
+    assert(html.includes('<table'));
+    assert(html.includes('<td>1</td>'));
   });
 
   const passed = results.filter((r) => r.ok).length;

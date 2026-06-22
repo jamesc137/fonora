@@ -1,4 +1,5 @@
 import { escapeHtml } from './utils.js';
+import { docViewerHref, githubDocUrl } from './doc-urls.js';
 import {
   CONTRIBUTION_TYPES,
   GITHUB_ISSUES_URL,
@@ -14,14 +15,16 @@ function statusBadge(status) {
   return `<span class="op-status op-status--${escapeHtml(status)}">${escapeHtml(label)}</span>`;
 }
 
+function renderDocLinkPair(label, path) {
+  return `<span class="op-doc-link-wrap">
+    <a class="op-doc-link op-doc-link--view" href="${escapeHtml(docViewerHref(path))}">${escapeHtml(label)}</a>
+    <a class="op-doc-link op-doc-link--gh" href="${escapeHtml(githubDocUrl(path))}" target="_blank" rel="noopener noreferrer" title="View on GitHub" aria-label="View ${escapeHtml(label)} on GitHub">↗</a>
+  </span>`;
+}
+
 function renderDocLinks(docs) {
   if (!docs?.length) return '';
-  const items = docs
-    .map(
-      (doc) =>
-        `<a class="op-doc-link" href="${escapeHtml(doc.href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(doc.label)}</a>`,
-    )
-    .join('');
+  const items = docs.map((doc) => renderDocLinkPair(doc.label, doc.href)).join('');
   return `<div class="op-card-docs"><span class="op-card-docs-label">Docs:</span><span class="op-card-docs-links">${items}</span></div>`;
 }
 
@@ -76,14 +79,26 @@ function renderLanguageCard(lang) {
 
 function renderHowToHelp() {
   return HOW_TO_HELP.map((item) => {
-    const attrs = item.external
-      ? 'target="_blank" rel="noopener noreferrer"'
-      : item.tab
-        ? `data-tab="${escapeHtml(item.tab)}"`
-        : 'target="_blank" rel="noopener noreferrer"';
-    const href = item.tab ? `#${item.tab}` : item.href;
+    if (item.tab) {
+      return `
+      <a class="op-cta-card" href="#${escapeHtml(item.tab)}" data-tab="${escapeHtml(item.tab)}">
+        <h3 class="op-cta-card-title">${escapeHtml(item.title)}</h3>
+        <p class="op-cta-card-desc">${escapeHtml(item.description)}</p>
+      </a>
+    `;
+    }
+    if (item.href?.endsWith('.md') || item.href?.includes('.md#')) {
+      return `
+      <a class="op-cta-card" href="${escapeHtml(docViewerHref(item.href))}">
+        <h3 class="op-cta-card-title">${escapeHtml(item.title)}</h3>
+        <p class="op-cta-card-desc">${escapeHtml(item.description)}</p>
+      </a>
+    `;
+    }
+    const external = item.external || /^https?:\/\//i.test(item.href);
+    const attrs = external ? 'target="_blank" rel="noopener noreferrer"' : '';
     return `
-      <a class="op-cta-card" href="${escapeHtml(href)}" ${attrs}>
+      <a class="op-cta-card" href="${escapeHtml(item.href)}" ${attrs}>
         <h3 class="op-cta-card-title">${escapeHtml(item.title)}</h3>
         <p class="op-cta-card-desc">${escapeHtml(item.description)}</p>
       </a>
@@ -120,7 +135,7 @@ export function renderOpenProblemsPage() {
         <span aria-hidden="true">·</span>
         <a href="${escapeHtml(GITHUB_ISSUES_URL)}" target="_blank" rel="noopener noreferrer">Browse issues</a>
         <span aria-hidden="true">·</span>
-        <a href="CONTRIBUTING.md" target="_blank" rel="noopener noreferrer">Contributing guide</a>
+        <a href="${escapeHtml(docViewerHref('CONTRIBUTING.md'))}">Contributing guide</a>
       </p>
     </section>
 

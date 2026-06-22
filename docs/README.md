@@ -23,7 +23,9 @@ Index of project docs and how they relate to the running app (`index.html` + `js
 
 Primary nav: **Home**, **Translator**, **Reader**, **Breakdown**, **Sound Grid**, **Alphabet**.
 
-More menu: **Samples**, **Quiz**, **Keyboard** (symbol input + keyboard mapping table), **Reverse Lookup**, **Pronunciation Testing** (manual review), **Pronunciation Validation** (automated round-trip), **Open Problems** (known limitations + contribution guide).
+More menu: **Samples**, **Quiz**, **Keyboard** (symbol input + keyboard mapping table), **Reverse Lookup**, **Pronunciation Testing** (manual review), **Pronunciation Validation** (automated round-trip), **Open Problems** (known limitations + contribution guide), **Docs** (rendered markdown viewer; raw `.md` URLs still serve source for the app pipeline).
+
+Doc links in the app open the **Docs** viewer (`?path=docs/foo.md#docs`). A **View on GitHub ↗** link is available on each page and beside Open Problems doc references.
 
 Multilingual behavior (language selector, vowel overlays, Reader voices): [multilingual-support.md](multilingual-support.md).
 

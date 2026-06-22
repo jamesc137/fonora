@@ -33,6 +33,7 @@ import { setupFonoraReader, loadReaderFromTranslation } from './fonora-tts-ui.js
 import { setupBreakdown, prefillBreakdownFromWordSources } from './breakdown-ui.js';
 import { setupSamples, setupHomeSample, ensureSamplesLoaded } from './samples.js';
 import { setupOpenProblems } from './open-problems-ui.js';
+import { setupDocsViewer, onDocsTabActivated } from './docs-viewer-ui.js';
 import { setReaderWordSources } from './fonora-tts.js';
 
 let rules = null;
@@ -692,13 +693,18 @@ function updateQuizStats() {
   document.getElementById('quiz-stats').textContent = `Attempts: ${quizStats.attempts} · Correct: ${quizStats.correct} · Accuracy: ${acc}%`;
 }
 
-const MORE_TAB_IDS = new Set(['breakdown', 'samples', 'quiz', 'keyboard', 'reverse', 'encoder-testing', 'pronunciation-validation', 'open-problems']);
+const MORE_TAB_IDS = new Set(['breakdown', 'samples', 'quiz', 'keyboard', 'reverse', 'encoder-testing', 'pronunciation-validation', 'open-problems', 'docs']);
 
 function getTabFromHash() {
   const id = window.location.hash.replace(/^#/, '');
-  if (!id || id === 'home') return 'home';
-  const panel = document.querySelector(`[data-tab-panel="${id}"]`);
-  return panel ? id : 'home';
+  if (id && id !== 'home') {
+    const panel = document.querySelector(`[data-tab-panel="${id}"]`);
+    if (panel) return id;
+  }
+  if (new URLSearchParams(window.location.search).has('path')) {
+    return 'docs';
+  }
+  return 'home';
 }
 
 function setHashForTab(tabId) {
@@ -767,6 +773,10 @@ function showTab(tabId) {
     if (input && !input.value.trim()) {
       prefillBreakdownFromWordSources();
     }
+  }
+
+  if (tabId === 'docs') {
+    onDocsTabActivated();
   }
 }
 
@@ -873,6 +883,7 @@ function applyRulesBundle(loaded) {
   setupSamples(rules);
   setupHomeSample(rules);
   setupOpenProblems();
+  setupDocsViewer();
   const ttsInput = document.getElementById('tts-input');
   if (ttsInput) {
     renderSymbolButtons(document.getElementById('tts-keyboard'), ttsInput);

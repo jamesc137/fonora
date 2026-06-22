@@ -6,6 +6,8 @@ Fonora is an experimental, open-source research project. This page documents kno
 
 **Live page:** More → **Open Problems** on [fonora.org](https://fonora.org/#open-problems)
 
+Rendered docs: More → **Docs** on [fonora.org](https://fonora.org/?path=docs%2FREADME.md#docs), or [view on GitHub](https://github.com/jamesc137/fonora/tree/main/docs).
+
 ## Introduction
 
 Fonora is a compact phonetic writing system built from nine core symbols. Limitations are expected and documented openly. The project offers broad phonetic approximation through an eSpeak-driven IPA pipeline — not a finished universal script. Human readability still needs testing.

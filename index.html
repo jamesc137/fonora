@@ -52,6 +52,7 @@
             <span class="nav-dropdown-chevron" aria-hidden="true">▾</span>
           </button>
           <div class="nav-dropdown-menu" id="nav-more-menu" role="menu" hidden>
+            <button type="button" class="tab-btn nav-dropdown-item" data-tab="samples" role="menuitem">Samples</button>
             <button type="button" class="tab-btn nav-dropdown-item" data-tab="quiz" role="menuitem">Quiz</button>
             <button type="button" class="tab-btn nav-dropdown-item" data-tab="keyboard" role="menuitem">Keyboard</button>
             <button type="button" class="tab-btn nav-dropdown-item" data-tab="reverse" role="menuitem">Reverse Lookup</button>
@@ -86,7 +87,7 @@
 
       <article class="home-section" aria-labelledby="about-heading">
         <h2 id="about-heading">What Is Fonora?</h2>
-        <p>Fonora is an open-source research project that explores the question:</p>
+        <p>Fonora is an open-source research project that explores a simple question:</p>
         <p class="home-pullquote"><strong>What if writing was based on how speech is produced rather than how words are traditionally spelled?</strong></p>
         <p>Most writing systems evolved over centuries and often contain complex spelling rules, silent letters, and historical inconsistencies.</p>
         <p>Fonora takes a different approach. Every symbol is derived from a physical action inside the human vocal system. Written text becomes a visual representation of speech itself.</p>
@@ -576,6 +577,31 @@
 
       <div id="tts-display" class="tts-display symbol-text" aria-live="polite"></div>
       <div id="tts-status" class="tts-status" hidden></div>
+    </section>
+
+    <!-- Language Samples -->
+    <section class="samples-page tab-panel" id="tab-samples" data-tab-panel="samples" hidden aria-labelledby="samples-title">
+      <header class="samples-header">
+        <h2 id="samples-title">Fonora Samples</h2>
+        <p class="samples-subtitle">Speech-based writing across languages</p>
+      </header>
+
+      <p class="samples-intro">
+        Fonora is designed to represent speech, not spelling. These samples show how paragraph-length text from different languages may appear when rendered through the Fonora phonetic system.
+      </p>
+      <p class="samples-intro">
+        The goal is to visually demonstrate how Fonora can represent speech across languages and dialects — using the same symbol inventory regardless of the source writing system.
+      </p>
+
+      <p class="samples-disclaimer" role="note">
+        Fonora is experimental. Samples may change as the phonetic mapping system improves.
+      </p>
+
+      <div id="samples-list" class="samples-list" aria-live="polite"></div>
+
+      <p class="samples-footer">
+        These samples are for visual and phonetic testing only. Fonora mappings may evolve over time. Excerpts are from the Universal Declaration of Human Rights, Article 1 (public domain).
+      </p>
     </section>
 
     <!-- Quiz -->

@@ -30,6 +30,7 @@ import { escapeHtml, insertAtCursor, deleteSymbolBeforeCursor } from './utils.js
 import { setupEncoderTesting } from './encoder-testing.js';
 import { setupPronunciationValidation } from './pronunciation-validation-ui.js';
 import { setupFonoraReader, loadReaderFromTranslation } from './fonora-tts-ui.js';
+import { setupSamples, ensureSamplesLoaded } from './samples.js';
 import { setReaderWordSources } from './fonora-tts.js';
 
 let rules = null;
@@ -689,7 +690,7 @@ function updateQuizStats() {
   document.getElementById('quiz-stats').textContent = `Attempts: ${quizStats.attempts} · Correct: ${quizStats.correct} · Accuracy: ${acc}%`;
 }
 
-const MORE_TAB_IDS = new Set(['quiz', 'keyboard', 'reverse', 'encoder-testing', 'pronunciation-validation']);
+const MORE_TAB_IDS = new Set(['samples', 'quiz', 'keyboard', 'reverse', 'encoder-testing', 'pronunciation-validation']);
 
 function getTabFromHash() {
   const id = window.location.hash.replace(/^#/, '');
@@ -753,6 +754,10 @@ function showTab(tabId) {
 
   if (previousTab !== tabId) {
     window.scrollTo(0, 0);
+  }
+
+  if (tabId === 'samples') {
+    ensureSamplesLoaded().catch(() => {});
   }
 }
 
@@ -853,6 +858,7 @@ function applyRulesBundle(loaded) {
   setupEncoderTesting(rules);
   setupPronunciationValidation(rules);
   setupFonoraReader(rules);
+  setupSamples(rules);
   const ttsInput = document.getElementById('tts-input');
   if (ttsInput) {
     renderSymbolButtons(document.getElementById('tts-keyboard'), ttsInput);

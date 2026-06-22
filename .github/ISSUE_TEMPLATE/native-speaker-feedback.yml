@@ -1,0 +1,54 @@
+name: Native speaker feedback
+description: Share pronunciation review of Fonora output for your language
+title: "[native] "
+labels:
+  - native-speaker
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Review Fonora Translator or Reader output as a native or fluent speaker.
+        No phonetics background required — describe what sounds right or wrong.
+
+  - type: input
+    id: language
+    attributes:
+      label: Your language / dialect
+      placeholder: e.g. Mexican Spanish, Levantine Arabic
+    validations:
+      required: true
+
+  - type: textarea
+    id: words
+    attributes:
+      label: Words or phrases reviewed
+      description: Source text and Fonora output if available
+    validations:
+      required: true
+
+  - type: dropdown
+    id: verdict
+    attributes:
+      label: Overall impression
+      options:
+        - mostly accurate
+        - mixed — some words wrong
+        - mostly wrong
+        - cannot judge (need audio / more context)
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Which sounds are wrong, missing, or merged incorrectly
+
+  - type: checkboxes
+    id: followup
+    attributes:
+      label: Follow-up
+      options:
+        - label: I can test more words
+        - label: I can record reference pronunciations
+        - label: I am open to a short call / async review

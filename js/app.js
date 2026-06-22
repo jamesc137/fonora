@@ -32,6 +32,7 @@ import { setupPronunciationValidation } from './pronunciation-validation-ui.js';
 import { setupFonoraReader, loadReaderFromTranslation } from './fonora-tts-ui.js';
 import { setupBreakdown, prefillBreakdownFromWordSources } from './breakdown-ui.js';
 import { setupSamples, setupHomeSample, ensureSamplesLoaded } from './samples.js';
+import { setupOpenProblems } from './open-problems-ui.js';
 import { setReaderWordSources } from './fonora-tts.js';
 
 let rules = null;
@@ -691,7 +692,7 @@ function updateQuizStats() {
   document.getElementById('quiz-stats').textContent = `Attempts: ${quizStats.attempts} · Correct: ${quizStats.correct} · Accuracy: ${acc}%`;
 }
 
-const MORE_TAB_IDS = new Set(['breakdown', 'samples', 'quiz', 'keyboard', 'reverse', 'encoder-testing', 'pronunciation-validation']);
+const MORE_TAB_IDS = new Set(['breakdown', 'samples', 'quiz', 'keyboard', 'reverse', 'encoder-testing', 'pronunciation-validation', 'open-problems']);
 
 function getTabFromHash() {
   const id = window.location.hash.replace(/^#/, '');
@@ -768,6 +769,8 @@ function showTab(tabId) {
     }
   }
 }
+
+window.showTab = showTab;
 
 function setupTabs() {
   document.querySelectorAll('[data-tab]').forEach((el) => {
@@ -869,6 +872,7 @@ function applyRulesBundle(loaded) {
   setupBreakdown(rules);
   setupSamples(rules);
   setupHomeSample(rules);
+  setupOpenProblems();
   const ttsInput = document.getElementById('tts-input');
   if (ttsInput) {
     renderSymbolButtons(document.getElementById('tts-keyboard'), ttsInput);

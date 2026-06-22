@@ -1,0 +1,53 @@
+name: Symbol collision
+description: Report distinct sounds that share the same Fonora symbol sequence
+title: "[collision] "
+labels:
+  - symbol-collision
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Report cases where two different phoneme sequences produce identical symbols, or greedy decode fails without spacing.
+        See [FONORA_COLLISION_AUDIT.md](https://github.com/jamesc137/fonora/blob/main/docs/FONORA_COLLISION_AUDIT.md).
+
+  - type: textarea
+    id: sequences
+    attributes:
+      label: Conflicting phoneme sequences
+      description: e.g. "o + y" vs "oy", or "th + t" vs "t + s"
+      placeholder: |
+        Sequence A: o + y
+        Sequence B: oy
+    validations:
+      required: true
+
+  - type: textarea
+    id: symbols
+    attributes:
+      label: Shared Fonora symbols
+      description: Symbol string both sequences produce
+    validations:
+      required: true
+
+  - type: textarea
+    id: words
+    attributes:
+      label: Example words (if any)
+      description: Real words or pseudowords that demonstrate the collision
+
+  - type: dropdown
+    id: decode
+    attributes:
+      label: Spacing fixes greedy decode?
+      options:
+        - "yes"
+        - "no"
+        - not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed fix (optional)
+      description: Boundary markers, recipe change, reserved cell use, etc.

@@ -40,6 +40,7 @@ See [docs/README.md](docs/README.md) for the full documentation index. Multiling
 | Reverse Lookup | More | Sound → symbol |
 | Pronunciation Testing | More | Manual review + export |
 | Pronunciation Validation | More | Automated IPA round-trip |
+| Open Problems | More | Known limitations + contribution guide |
 
 ## Run locally
 

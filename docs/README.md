@@ -13,6 +13,7 @@ Index of project docs and how they relate to the running app (`index.html` + `js
 | Multilingual encoding & playback | [multilingual-support.md](multilingual-support.md) |
 | Pronunciation Validation (automated round-trip) | [pronunciation-validation.md](pronunciation-validation.md) |
 | Symbol collision analysis | [FONORA_COLLISION_AUDIT.md](FONORA_COLLISION_AUDIT.md) |
+| Open problems / research bounties | [open-problems.md](open-problems.md) · app: More → **Open Problems** |
 | Language-system audit (June 2026) | [FONORA_CLEANUP_AUDIT.md](FONORA_CLEANUP_AUDIT.md) |
 | Historical v2 vowel analysis | [FONORA_VOWEL_DECISION_REPORT.md](FONORA_VOWEL_DECISION_REPORT.md) — **superseded by v3** |
 
@@ -22,7 +23,7 @@ Index of project docs and how they relate to the running app (`index.html` + `js
 
 Primary nav: **Home**, **Translator**, **Reader**, **Breakdown**, **Sound Grid**, **Alphabet**.
 
-More menu: **Samples**, **Quiz**, **Keyboard** (symbol input + keyboard mapping table), **Reverse Lookup**, **Pronunciation Testing** (manual review), **Pronunciation Validation** (automated round-trip).
+More menu: **Samples**, **Quiz**, **Keyboard** (symbol input + keyboard mapping table), **Reverse Lookup**, **Pronunciation Testing** (manual review), **Pronunciation Validation** (automated round-trip), **Open Problems** (known limitations + contribution guide).
 
 Multilingual behavior (language selector, vowel overlays, Reader voices): [multilingual-support.md](multilingual-support.md).
 

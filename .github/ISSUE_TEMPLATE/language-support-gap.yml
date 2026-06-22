@@ -1,0 +1,82 @@
+name: Language support gap
+description: Report missing or incorrect phoneme mappings for a language
+title: "[lang] "
+labels:
+  - language-support
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe a phoneme or word that Fonora encodes incorrectly or cannot represent.
+        See [multilingual-support.md](https://github.com/jamesc137/fonora/blob/main/docs/multilingual-support.md) and [open-problems.md](https://github.com/jamesc137/fonora/blob/main/docs/open-problems.md).
+
+  - type: input
+    id: language
+    attributes:
+      label: Language
+      description: ISO-style code or language name (e.g. Hindi, fr, ar)
+      placeholder: e.g. Hindi
+    validations:
+      required: true
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Example words or phrases
+      description: One per line, with native script if applicable
+      placeholder: |
+        perro
+        मक्खन
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: Expected IPA, Fonora phoneme keys, or symbols
+      placeholder: |
+        Word: perro
+        Expected IPA: pˈero
+        Expected Fonora: p e r oh
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What the Translator or pipeline produces today
+    validations:
+      required: true
+
+  - type: dropdown
+    id: ui-language
+    attributes:
+      label: UI language selected in Translator
+      options:
+        - en
+        - es
+        - fr
+        - de
+        - ja
+        - ar
+        - zh
+        - not tested / language not in UI
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Native speaker or reference notes
+      description: Optional dialect, minimal pairs, or source dictionary
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: I can help with
+      options:
+        - label: Submit more test words
+        - label: Review mappings as a native speaker
+        - label: Propose a mapping change

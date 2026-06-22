@@ -22,10 +22,10 @@ import { loadAlphabetOverrides } from './alphabet-overrides.js';
 import { setupAlphabetLab } from './alphabet-lab.js';
 import { normalizeSymbolInput, decodeSymbols, decodeText } from './decode.js';
 import { encodeSounds } from './encode.js';
-import { translateIpaWord, translateIpaPhrase } from './ipa-pipeline.js';
+import { translateIpaPhrase } from './ipa-pipeline.js';
 import { initEspeak, getEspeakInitError } from './ipa.js';
 import { loadLanguagePreference, loadEnglishDialectPreference, saveLanguagePreference, saveEnglishDialectPreference, ENGLISH_DIALECT_OPTIONS } from './language-preferences.js';
-import { loadGlossary, saveGlossary, migrateSampleGlossary, addGlossaryEntry, findDictionaryEntry, findDictionaryBySpelling } from './glossary.js';
+import { loadGlossary, saveGlossary, migrateSampleGlossary, addGlossaryEntry } from './glossary.js';
 import { escapeHtml, insertAtCursor, deleteSymbolBeforeCursor } from './utils.js';
 import { setupEncoderTesting } from './encoder-testing.js';
 
@@ -277,6 +277,34 @@ function updateDecodePanel() {
 function formatIpaResult(result) {
   if (!result) return '';
   let html = '';
+
+  if (result.words?.length > 1) {
+    html += '<span class="translate-badge translate-badge--encoded">IPA Pipeline</span> ';
+    html += `<div class="encode-step"><strong>Original Text:</strong> ${escapeHtml(result.original || '')}</div>`;
+    if (result.voice) {
+      html += `<div class="encode-step"><strong>eSpeak Voice:</strong> <code>${escapeHtml(result.voice)}</code></div>`;
+    }
+    html += `<div class="encode-step"><strong>Combined IPA:</strong> <code>${escapeHtml(result.ipa || '')}</code></div>`;
+    html += `<div class="encode-step"><strong>Combined Fonora Phonemes:</strong> <code>${escapeHtml(result.normalizedPhonemes || '')}</code></div>`;
+    html += `<div class="encode-step"><strong>Decoded Back:</strong> <code>${escapeHtml(result.decoded || '')}</code></div>`;
+    html += '<div class="encode-step"><strong>Per word:</strong></div>';
+    for (const word of result.words) {
+      html += `<div class="encode-step translate-result--nested">`;
+      html += `<strong>${escapeHtml(word.original || word.input || '')}</strong>`;
+      if (word.source === 'dictionary') {
+        html += ' <span class="translate-badge translate-badge--dict">Dictionary</span>';
+      }
+      html += `<div>IPA: <code>${escapeHtml(word.ipa || '')}</code></div>`;
+      html += `<div>Phonemes: <code>${escapeHtml(word.normalizedPhonemes || '')}</code></div>`;
+      html += `<div>Symbols: <span class="symbol-text">${escapeHtml(word.symbols || '')}</span></div>`;
+      html += `</div>`;
+    }
+    if (result.warnings?.length) {
+      html += `<div class="encode-step"><strong>Warnings:</strong>${result.warnings.map((w) => `<div class="warning-item">${escapeHtml(w)}</div>`).join('')}</div>`;
+    }
+    return html;
+  }
+
   if (result.source === 'dictionary') {
     html += '<span class="translate-badge translate-badge--dict">Dictionary override</span> ';
   } else {
@@ -308,310 +336,149 @@ function bindTranslateDetailsToggle(toggleEl, metaEl) {
 
 function setupTranslator() {
   const savedPrefs = { lang: loadLanguagePreference(), englishDialect: loadEnglishDialectPreference() };
-  let wordApplyGeneration = 0;
-  let phraseApplyGeneration = 0;
+  let applyGeneration = 0;
+  let outputDirty = false;
 
-  document.querySelectorAll('.sub-tab-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const id = btn.dataset.subTab;
-      document.querySelectorAll('.sub-tab-btn').forEach((b) => b.classList.toggle('sub-tab-btn--active', b.dataset.subTab === id));
-      document.querySelectorAll('.sub-tab-panel').forEach((p) => {
-        p.hidden = p.dataset.subTabPanel !== id;
-        p.classList.toggle('sub-tab-panel--active', p.dataset.subTabPanel === id);
-      });
-    });
-  });
+  const inputEl = document.getElementById('translate-input');
+  const outputEl = document.getElementById('translate-output');
+  const pronEl = document.getElementById('translate-pronunciation');
+  const metaEl = document.getElementById('translate-meta');
+  const detailsToggle = document.getElementById('translate-show-details');
+  const decodeEl = document.getElementById('translate-decode');
+  const statusEl = document.getElementById('translate-status');
+  const langEl = document.getElementById('translate-lang');
+  const dialectWrap = document.getElementById('translate-dialect-wrap');
+  const dialectEl = document.getElementById('translate-dialect');
 
-  const wordInput = document.getElementById('word-translate-input');
-  const wordOutput = document.getElementById('word-translate-output');
-  const wordPron = document.getElementById('word-translate-pronunciation');
-  const wordMeta = document.getElementById('word-translate-meta');
-  const wordDetailsToggle = document.getElementById('word-translate-show-details');
-  const wordDecode = document.getElementById('word-translate-decode');
-  const wordActions = document.getElementById('word-translate-actions');
-  const wordStatus = document.getElementById('word-translate-status');
-  const wordLang = document.getElementById('word-translate-lang');
-  const wordDialectWrap = document.getElementById('word-translate-dialect-wrap');
-  const wordDialect = document.getElementById('word-translate-dialect');
-  let wordDirty = false;
-
-  wordLang.value = savedPrefs.lang;
-  if (wordDialect) {
-    wordDialect.innerHTML = ENGLISH_DIALECT_OPTIONS.map(
+  langEl.value = savedPrefs.lang;
+  if (dialectEl) {
+    dialectEl.innerHTML = ENGLISH_DIALECT_OPTIONS.map(
       (opt) => `<option value="${escapeHtml(opt.code)}">${escapeHtml(opt.label)}</option>`,
     ).join('');
-    wordDialect.value = savedPrefs.englishDialect;
+    dialectEl.value = savedPrefs.englishDialect;
   }
 
-  function syncWordDialectVisibility() {
-    if (!wordDialectWrap) return;
-    wordDialectWrap.hidden = wordLang.value !== 'en';
+  function syncDialectVisibility() {
+    if (!dialectWrap) return;
+    dialectWrap.hidden = langEl.value !== 'en';
   }
 
-  function englishPipelineOptions(lang, dialectEl) {
-    if (lang !== 'en') return {};
+  function englishPipelineOptions() {
+    if (langEl.value !== 'en') return {};
     const dialect = dialectEl?.value;
     return dialect ? { englishDialect: dialect } : {};
   }
 
-  syncWordDialectVisibility();
+  syncDialectVisibility();
 
-  function setWordStatus(message, isError = false) {
-    if (!wordStatus) return;
+  function setStatus(message, isError = false) {
+    if (!statusEl) return;
     if (!message) {
-      wordStatus.hidden = true;
-      wordStatus.textContent = '';
+      statusEl.hidden = true;
+      statusEl.textContent = '';
       return;
     }
-    wordStatus.hidden = false;
-    wordStatus.textContent = message;
-    wordStatus.className = isError ? 'translate-status translate-status--error' : 'translate-status';
+    statusEl.hidden = false;
+    statusEl.textContent = message;
+    statusEl.className = isError ? 'translate-status translate-status--error' : 'translate-status';
   }
 
-  renderSymbolButtons(document.getElementById('word-translate-keyboard'), wordOutput);
-  attachKeyboardShortcuts(wordOutput);
-
-  bindTranslateDetailsToggle(wordDetailsToggle, wordMeta);
-
-  function refreshWordActions() {
-    const english = wordInput.value.trim();
-    wordActions.innerHTML = '';
-    if (!english) return;
-    renderDictionaryActions(wordActions, {
-      english,
-      languageSpelling: wordOutput.value,
-      pronunciation: wordPron.value,
-      notes: '',
-    });
+  function isSingleWord(text) {
+    return text.trim().split(/\s+/).filter(Boolean).length === 1;
   }
 
-  async function applyWord() {
-    wordActions.innerHTML = '';
-    const english = wordInput.value.trim();
-    const generation = ++wordApplyGeneration;
-
-    if (!english) {
-      setTranslateDetails(wordMeta, wordDetailsToggle, '');
-      setWordStatus('');
-      if (!wordDirty) {
-        wordOutput.value = '';
-        wordPron.value = '';
-      }
-      wordDecode.textContent = '';
-      return;
-    }
-
-    const lang = wordLang.value || 'en';
-    const pipelineOptions = englishPipelineOptions(lang, wordDialect);
-
-    try {
-      setWordStatus('Loading IPA…');
-      const result = await translateIpaWord(english, rules, lang, pipelineOptions);
-
-      if (generation !== wordApplyGeneration) return;
-
-      setTranslateDetails(wordMeta, wordDetailsToggle, formatIpaResult(result));
-      setWordStatus('');
-
-      if (!wordDirty) {
-        wordOutput.value = result.symbols;
-        wordPron.value = result.normalizedPhonemes || result.normalized || result.sounds || '';
-      }
-
-      const dec = decodeSymbols(wordOutput.value, rules);
-      wordDecode.textContent = `Decodes to: ${dec.pronunciation || '(empty)'}`;
-      refreshWordActions();
-    } catch (err) {
-      if (generation !== wordApplyGeneration) return;
-      setWordStatus(err.message || 'IPA pipeline failed.', true);
-      setTranslateDetails(wordMeta, wordDetailsToggle, `<div class="warning-item">${escapeHtml(err.message || 'IPA pipeline failed.')}</div>`);
-    }
+  function refreshDecodePreview() {
+    const dec = decodeText(outputEl.value, rules);
+    decodeEl.textContent = `Decodes to: ${dec.pronunciation || '(empty)'}`;
   }
 
-  wordInput.addEventListener('input', () => {
-    wordDirty = false;
-    applyWord();
-  });
+  renderSymbolButtons(document.getElementById('translate-keyboard'), outputEl);
+  attachKeyboardShortcuts(outputEl);
+  bindTranslateDetailsToggle(detailsToggle, metaEl);
 
-  wordLang.addEventListener('change', () => {
-    saveLanguagePreference(wordLang.value);
-    phraseLang.value = wordLang.value;
-    phraseDialectWrap.hidden = phraseLang.value !== 'en';
-    syncWordDialectVisibility();
-    wordDirty = false;
-    applyWord();
-  });
-
-  wordDialect?.addEventListener('change', () => {
-    saveEnglishDialectPreference(wordDialect.value);
-    if (phraseDialect) phraseDialect.value = wordDialect.value;
-    wordDirty = false;
-    applyWord();
-  });
-
-  wordOutput.addEventListener('input', () => {
-    wordDirty = true;
-    wordPron.value = decodeSymbols(wordOutput.value, rules).pronunciation;
-    wordDecode.textContent = `Decodes to: ${wordPron.value || '(empty)'}`;
-    refreshWordActions();
-  });
-
-  wordPron.addEventListener('input', () => {
-    wordOutput.value = encodeSounds(wordPron.value, rules).symbols;
-    wordDirty = true;
-    wordDecode.textContent = `Decodes to: ${wordPron.value || '(empty)'}`;
-    refreshWordActions();
-  });
-
-  document.getElementById('word-translate-normalize').addEventListener('click', () => {
-    wordOutput.value = normalizeSymbolInput(wordOutput.value, rules);
-    wordOutput.dispatchEvent(new Event('input'));
-  });
-
-  document.getElementById('word-translate-backspace').addEventListener('click', () => {
-    deleteSymbolBeforeCursor(wordOutput);
-    wordDirty = true;
-  });
-
-  const phraseInput = document.getElementById('phrase-translate-input');
-  const phraseOutput = document.getElementById('phrase-translate-output');
-  const phraseMeta = document.getElementById('phrase-translate-meta');
-  const phraseDetailsToggle = document.getElementById('phrase-translate-show-details');
-  const phraseDecode = document.getElementById('phrase-translate-decode');
-  const phraseLang = document.getElementById('phrase-translate-lang');
-  const phraseDialectWrap = document.getElementById('phrase-translate-dialect-wrap');
-  const phraseDialect = document.getElementById('phrase-translate-dialect');
-  let phraseDirty = false;
-
-  phraseLang.value = savedPrefs.lang;
-  if (phraseDialect) {
-    phraseDialect.innerHTML = ENGLISH_DIALECT_OPTIONS.map(
-      (opt) => `<option value="${escapeHtml(opt.code)}">${escapeHtml(opt.label)}</option>`,
-    ).join('');
-    phraseDialect.value = savedPrefs.englishDialect;
-    phraseDialectWrap.hidden = phraseLang.value !== 'en';
-  }
-
-  renderSymbolButtons(document.getElementById('phrase-translate-keyboard'), phraseOutput);
-  attachKeyboardShortcuts(phraseOutput);
-
-  bindTranslateDetailsToggle(phraseDetailsToggle, phraseMeta);
-
-  async function applyPhrase() {
-    const text = phraseInput.value.trim();
-    const generation = ++phraseApplyGeneration;
+  async function applyTranslate() {
+    const text = inputEl.value.trim();
+    const generation = ++applyGeneration;
 
     if (!text) {
-      setTranslateDetails(phraseMeta, phraseDetailsToggle, '');
-      if (!phraseDirty) phraseOutput.value = '';
-      phraseDecode.textContent = '';
+      setTranslateDetails(metaEl, detailsToggle, '');
+      setStatus('');
+      if (!outputDirty) {
+        outputEl.value = '';
+        pronEl.value = '';
+      }
+      decodeEl.textContent = '';
       return;
     }
 
-    const lang = phraseLang.value || 'en';
-    const pipelineOptions = englishPipelineOptions(lang, phraseDialect);
+    const lang = langEl.value || 'en';
+    const pipelineOptions = englishPipelineOptions();
 
     try {
+      setStatus('Loading IPA…');
       const result = await translateIpaPhrase(text, rules, lang, pipelineOptions);
 
-      if (generation !== phraseApplyGeneration) return;
+      if (generation !== applyGeneration) return;
 
-      setTranslateDetails(phraseMeta, phraseDetailsToggle, formatIpaResult(result));
-      if (!phraseDirty) phraseOutput.value = result.symbols;
-      phraseDecode.textContent = `Decodes to: ${decodeText(phraseOutput.value, rules).pronunciation || '(empty)'}`;
+      const detailResult = result.words?.length === 1 ? result.words[0] : result;
+      setTranslateDetails(metaEl, detailsToggle, formatIpaResult(detailResult));
+      setStatus('');
+
+      if (!outputDirty) {
+        outputEl.value = result.symbols;
+        pronEl.value = result.normalizedPhonemes || '';
+      }
+
+      refreshDecodePreview();
     } catch (err) {
-      if (generation !== phraseApplyGeneration) return;
-      setTranslateDetails(phraseMeta, phraseDetailsToggle, `<div class="warning-item">${escapeHtml(err.message || 'IPA pipeline failed.')}</div>`);
+      if (generation !== applyGeneration) return;
+      setStatus(err.message || 'IPA pipeline failed.', true);
+      setTranslateDetails(metaEl, detailsToggle, `<div class="warning-item">${escapeHtml(err.message || 'IPA pipeline failed.')}</div>`);
     }
   }
 
-  phraseInput.addEventListener('input', () => {
-    phraseDirty = false;
-    applyPhrase();
+  inputEl.addEventListener('input', () => {
+    outputDirty = false;
+    applyTranslate();
   });
 
-  phraseLang.addEventListener('change', () => {
-    saveLanguagePreference(phraseLang.value);
-    wordLang.value = phraseLang.value;
-    wordDialectWrap.hidden = wordLang.value !== 'en';
-    phraseDialectWrap.hidden = phraseLang.value !== 'en';
-    phraseDirty = false;
-    applyPhrase();
+  langEl.addEventListener('change', () => {
+    saveLanguagePreference(langEl.value);
+    syncDialectVisibility();
+    outputDirty = false;
+    applyTranslate();
   });
 
-  phraseDialect?.addEventListener('change', () => {
-    saveEnglishDialectPreference(phraseDialect.value);
-    if (wordDialect) wordDialect.value = phraseDialect.value;
-    phraseDirty = false;
-    applyPhrase();
+  dialectEl?.addEventListener('change', () => {
+    saveEnglishDialectPreference(dialectEl.value);
+    outputDirty = false;
+    applyTranslate();
   });
 
-  phraseOutput.addEventListener('input', () => {
-    phraseDirty = true;
-    phraseDecode.textContent = `Decodes to: ${decodeText(phraseOutput.value, rules).pronunciation || '(empty)'}`;
-  });
-
-  document.getElementById('phrase-translate-normalize').addEventListener('click', () => {
-    phraseOutput.value = normalizeSymbolInput(phraseOutput.value, rules);
-    phraseOutput.dispatchEvent(new Event('input'));
-  });
-
-  document.getElementById('phrase-translate-backspace').addEventListener('click', () => {
-    deleteSymbolBeforeCursor(phraseOutput);
-    phraseDirty = true;
-  });
-
-  const lookupEn = document.getElementById('lookup-en');
-  const lookupLang = document.getElementById('lookup-lang');
-
-  lookupEn.addEventListener('input', () => {
-    const q = lookupEn.value.trim();
-    const out = document.getElementById('lookup-en-result');
-    if (!q) {
-      out.innerHTML = '';
-      return;
+  outputEl.addEventListener('input', () => {
+    outputDirty = true;
+    if (isSingleWord(inputEl.value)) {
+      pronEl.value = decodeSymbols(outputEl.value, rules).pronunciation;
     }
-    const match = findDictionaryEntry(q);
-    out.innerHTML = match
-      ? `<span class="translate-badge translate-badge--dict">Found</span> <span class="symbol-text">${escapeHtml(match.languageSpelling)}</span> <span class="translate-meta">(${escapeHtml(match.pronunciation)})</span>`
-      : '<em>Not in dictionary.</em>';
+    refreshDecodePreview();
   });
 
-  lookupLang.addEventListener('input', () => {
-    const q = normalizeSymbolInput(lookupLang.value.trim(), rules);
-    const out = document.getElementById('lookup-lang-result');
-    if (!q) {
-      out.innerHTML = '';
-      return;
-    }
-    const match = findDictionaryBySpelling(q);
-    out.innerHTML = match
-      ? `<span class="translate-badge translate-badge--dict">Found</span> ${escapeHtml(match.english)} <span class="translate-meta">(${escapeHtml(match.pronunciation)})</span>`
-      : '<em>Not in dictionary.</em>';
+  pronEl.addEventListener('input', () => {
+    if (!isSingleWord(inputEl.value)) return;
+    outputEl.value = encodeSounds(pronEl.value, rules).symbols;
+    outputDirty = true;
+    refreshDecodePreview();
   });
-}
 
-function renderDictionaryActions(container, data) {
-  container.innerHTML = `
-    <div class="translate-actions">
-      <button type="button" class="btn btn--primary btn-add-dict">Add to dictionary</button>
-      <button type="button" class="btn btn-edit-dict">Edit &amp; add</button>
-    </div>`;
-  container.querySelector('.btn-add-dict').addEventListener('click', () => {
-    if (addGlossaryEntry(data)) {
-      renderGlossaryList(document.getElementById('glossary-search').value);
-      container.innerHTML = '<p class="translate-saved">Saved to dictionary.</p>';
-    }
+  document.getElementById('translate-normalize').addEventListener('click', () => {
+    outputEl.value = normalizeSymbolInput(outputEl.value, rules);
+    outputEl.dispatchEvent(new Event('input'));
   });
-  container.querySelector('.btn-edit-dict').addEventListener('click', () => prefillDictionaryForm(data));
-}
 
-function prefillDictionaryForm({ english, languageSpelling, pronunciation, notes }) {
-  document.getElementById('dict-english').value = english ?? '';
-  document.getElementById('dict-spelling').value = languageSpelling ?? '';
-  document.getElementById('dict-pronunciation').value = pronunciation ?? '';
-  document.getElementById('dict-notes').value = notes ?? '';
-  showTab('dictionary');
+  document.getElementById('translate-backspace').addEventListener('click', () => {
+    deleteSymbolBeforeCursor(outputEl);
+    outputDirty = true;
+  });
 }
 
 function setupUtilityButtons() {

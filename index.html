@@ -56,126 +56,52 @@
     <section class="panel tab-panel tab-panel--active" id="tab-translator" data-tab-panel="translator">
       <h2>Translator</h2>
 
-      <nav class="sub-tab-nav" aria-label="Translator modes">
-        <button type="button" class="sub-tab-btn sub-tab-btn--active" data-sub-tab="word">Translate a word</button>
-        <button type="button" class="sub-tab-btn" data-sub-tab="phrase">Translate phrases</button>
-        <button type="button" class="sub-tab-btn" data-sub-tab="lookup">Dictionary lookup</button>
-      </nav>
+      <div class="translate-layout">
+        <div class="translate-main">
+          <p class="section-desc">Type a word or phrase to get a Fonora spelling via the IPA pipeline. Each word is translated separately. Edit the result with the symbol keyboard.</p>
 
-      <!-- Translate a word -->
-      <div class="sub-tab-panel sub-tab-panel--active" id="sub-tab-word" data-sub-tab-panel="word">
-        <div class="translate-layout">
-          <div class="translate-main">
-            <p class="section-desc">Type text to get a Fonora spelling via the IPA pipeline. Edit the result with the symbol keyboard, then save to the dictionary.</p>
+          <label for="translate-lang">Language</label>
+          <select id="translate-lang" class="text-input">
+            <option value="en">English</option>
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+            <option value="ja">Japanese</option>
+            <option value="ar">Arabic</option>
+            <option value="zh">Mandarin</option>
+          </select>
 
-            <label for="word-translate-lang">Language</label>
-            <select id="word-translate-lang" class="text-input">
-              <option value="en">English</option>
-              <option value="es">Spanish</option>
-              <option value="fr">French</option>
-              <option value="de">German</option>
-              <option value="ja">Japanese</option>
-              <option value="ar">Arabic</option>
-              <option value="zh">Mandarin</option>
-            </select>
-
-            <div id="word-translate-dialect-wrap">
-              <label for="word-translate-dialect">English dialect</label>
-              <select id="word-translate-dialect" class="text-input"></select>
-            </div>
-
-            <label for="word-translate-input">Text</label>
-            <input type="text" id="word-translate-input" class="text-input" placeholder="e.g. knife, hola, bonjour" autocomplete="off">
-
-            <div id="word-translate-status" class="translate-status" hidden></div>
-
-            <label for="word-translate-output">Fonora spelling</label>
-            <textarea id="word-translate-output" class="symbol-text symbol-input translate-output" rows="2" placeholder="Fonora symbols appear here…"></textarea>
-            <div id="word-translate-keyboard" class="symbol-buttons symbol-buttons--compact"></div>
-            <div class="button-row">
-              <button type="button" id="word-translate-normalize" class="btn">Normalize spacing</button>
-              <button type="button" id="word-translate-backspace" class="btn">Backspace</button>
-            </div>
-
-            <label for="word-translate-pronunciation">Normalized Fonora phonemes</label>
-            <input type="text" id="word-translate-pronunciation" class="text-input" placeholder="IPA-derived phonemes, editable">
-
-            <div id="word-translate-decode" class="translate-decode-preview"></div>
-            <div id="word-translate-actions"></div>
+          <div id="translate-dialect-wrap">
+            <label for="translate-dialect">English dialect</label>
+            <select id="translate-dialect" class="text-input"></select>
           </div>
 
-          <aside class="translate-details-panel">
-            <label class="translate-details-toggle">
-              <input type="checkbox" id="word-translate-show-details" checked>
-              Show encoding details
-            </label>
-            <div id="word-translate-meta" class="translate-meta-panel"></div>
-          </aside>
-        </div>
-      </div>
+          <label for="translate-input">Text</label>
+          <textarea id="translate-input" class="text-input" rows="3" placeholder="e.g. knife, hola, the big dog" autocomplete="off"></textarea>
 
-      <!-- Translate phrases -->
-      <div class="sub-tab-panel" id="sub-tab-phrase" data-sub-tab-panel="phrase" hidden>
-        <div class="translate-layout">
-          <div class="translate-main">
-            <p class="section-desc">Type text. Each word is translated separately via the IPA pipeline; edit the full Fonora phrase below.</p>
+          <div id="translate-status" class="translate-status" hidden></div>
 
-            <label for="phrase-translate-lang">Language</label>
-            <select id="phrase-translate-lang" class="text-input">
-              <option value="en">English</option>
-              <option value="es">Spanish</option>
-              <option value="fr">French</option>
-              <option value="de">German</option>
-              <option value="ja">Japanese</option>
-              <option value="ar">Arabic</option>
-              <option value="zh">Mandarin</option>
-            </select>
-
-            <div id="phrase-translate-dialect-wrap">
-              <label for="phrase-translate-dialect">English dialect</label>
-              <select id="phrase-translate-dialect" class="text-input"></select>
-            </div>
-
-            <label for="phrase-translate-input">Text</label>
-            <textarea id="phrase-translate-input" class="text-input" rows="3" placeholder="e.g. the big dog"></textarea>
-
-            <label for="phrase-translate-output">Fonora phrase</label>
-            <textarea id="phrase-translate-output" class="symbol-text symbol-input translate-output" rows="3" placeholder="Fonora symbols appear here…"></textarea>
-            <div id="phrase-translate-keyboard" class="symbol-buttons symbol-buttons--compact"></div>
-            <div class="button-row">
-              <button type="button" id="phrase-translate-normalize" class="btn">Normalize spacing</button>
-              <button type="button" id="phrase-translate-backspace" class="btn">Backspace</button>
-            </div>
-
-            <div id="phrase-translate-decode" class="translate-decode-preview"></div>
-            <p class="encode-hint">Phrase mode translates word-by-word via the IPA pipeline.</p>
+          <label for="translate-output">Fonora spelling</label>
+          <textarea id="translate-output" class="symbol-text symbol-input translate-output" rows="3" placeholder="Fonora symbols appear here…"></textarea>
+          <div id="translate-keyboard" class="symbol-buttons symbol-buttons--compact"></div>
+          <div class="button-row">
+            <button type="button" id="translate-normalize" class="btn">Normalize spacing</button>
+            <button type="button" id="translate-backspace" class="btn">Backspace</button>
           </div>
 
-          <aside class="translate-details-panel">
-            <label class="translate-details-toggle">
-              <input type="checkbox" id="phrase-translate-show-details" checked>
-              Show encoding details
-            </label>
-            <div id="phrase-translate-meta" class="translate-meta-panel"></div>
-          </aside>
-        </div>
-      </div>
+          <label for="translate-pronunciation">Normalized Fonora phonemes</label>
+          <input type="text" id="translate-pronunciation" class="text-input" placeholder="IPA-derived phonemes, editable for single words">
 
-      <!-- Dictionary lookup -->
-      <div class="sub-tab-panel" id="sub-tab-lookup" data-sub-tab-panel="lookup" hidden>
-        <p class="section-desc">Strict dictionary search only. No auto-translation or encoding.</p>
-
-        <div class="translator-block">
-          <h3>English → Fonora</h3>
-          <input type="text" id="lookup-en" class="text-input" placeholder="English word" autocomplete="off">
-          <div id="lookup-en-result" class="translate-result"></div>
+          <div id="translate-decode" class="translate-decode-preview"></div>
         </div>
 
-        <div class="translator-block">
-          <h3>Fonora → English</h3>
-          <input type="text" id="lookup-lang" class="text-input symbol-text" placeholder="Fonora spelling">
-          <div id="lookup-lang-result" class="translate-result"></div>
-        </div>
+        <aside class="translate-details-panel">
+          <label class="translate-details-toggle">
+            <input type="checkbox" id="translate-show-details" checked>
+            Show encoding details
+          </label>
+          <div id="translate-meta" class="translate-meta-panel"></div>
+        </aside>
       </div>
     </section>
 

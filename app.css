@@ -834,14 +834,16 @@ code {
   border-bottom-color: #111;
 }
 
-.sub-tab-panel label {
+.sub-tab-panel label,
+.translate-main label {
   display: block;
   font-size: 0.85rem;
   color: #444;
   margin: 0.75rem 0 0.35rem;
 }
 
-.sub-tab-panel label:first-of-type {
+.sub-tab-panel label:first-of-type,
+.translate-main label:first-of-type {
   margin-top: 0;
 }
 

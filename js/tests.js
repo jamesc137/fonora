@@ -12,6 +12,7 @@ import {
 import { composeGridSymbol, applyPrimarySymbols, composeDerivedSymbol, composeVowelFromRecipe } from './symbol-compose.js';
 import { getVowelEntries } from './vowel-display.js';
 import { loadActiveRulesFixture, applyBundleMaps } from './load-rules-fixture.js';
+import { LANGUAGE_RULES_PATH } from './fonora-config.js';
 import { runTests } from './tests-core.js';
 import { initEspeak, textToIpa } from './ipa.js';
 import { normalizeIpa } from './ipa-normalize.js';
@@ -39,7 +40,7 @@ function test(name, fn) {
   }
 }
 
-const mdPath = join(dirname(fileURLToPath(import.meta.url)), '..', 'language-rules.md');
+const mdPath = join(dirname(fileURLToPath(import.meta.url)), '..', LANGUAGE_RULES_PATH);
 const markdown = readFileSync(mdPath, 'utf8');
 
 const parserResult = test('parseLanguageRulesMarkdown builds composed registry', () => {

@@ -7,6 +7,7 @@ import { getVowelEntries, vowelPhonemeKey } from './vowel-display.js';
 import { applyPrimarySymbols, getPrimaryInventory } from './symbol-compose.js';
 import { assertVowelInventoryGrammar, containsDoubleVowelMarker } from './vowel-grammar.js';
 import { buildConsonantMapFromRules, mergeConsonantMaps } from './ipa-normalize.js';
+import { LANGUAGE_RULES_PATH } from './fonora-config.js';
 
 const ASCII_EQUALS = '=';
 const FULLWIDTH_EQUALS = '＝';
@@ -472,7 +473,7 @@ export function loadLanguageRulesFromMarkdown(markdown, options = {}) {
   };
 }
 
-export async function loadLanguageRules(url = 'language-rules.md') {
+export async function loadLanguageRules(url = LANGUAGE_RULES_PATH) {
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);

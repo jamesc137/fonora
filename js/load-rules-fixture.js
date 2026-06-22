@@ -3,6 +3,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadLanguageRulesFromString } from './load-language-rules.js';
 import { registerIpaVowelMap, setActiveIpaVowelMap, registerConsonantMapFromRules } from './ipa-normalize.js';
+import { LANGUAGE_RULES_PATH } from './fonora-config.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -16,7 +17,7 @@ export function loadRulesFixture(relativePath, options = {}) {
 }
 
 export function loadActiveRulesFixture(options = {}) {
-  return loadRulesFixture('language-rules.md', options);
+  return loadRulesFixture(LANGUAGE_RULES_PATH, options);
 }
 
 export function applyIpaVowelMap(bundle) {

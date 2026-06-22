@@ -6,7 +6,7 @@ Index of project docs and how they relate to the running app (`index.html` + `js
 
 | Topic | Document |
 | --- | --- |
-| Run locally, tests, file map | [../README.md](../README.md) |
+| Run locally, tests, deploy | [../README.md](../README.md) · [deploy.md](deploy.md) |
 | eSpeak NG / WASM | [espeak-integration.md](espeak-integration.md) |
 | IPA pipeline architecture | [IPA-PIPELINE-REPORT.md](IPA-PIPELINE-REPORT.md) |
 | Consonant IPA normalization | [ipa-normalize.md](ipa-normalize.md) |
@@ -15,13 +15,13 @@ Index of project docs and how they relate to the running app (`index.html` + `js
 | Language-system audit (June 2026) | [FONORA_CLEANUP_AUDIT.md](FONORA_CLEANUP_AUDIT.md) |
 | Historical v2 vowel analysis | [FONORA_VOWEL_DECISION_REPORT.md](FONORA_VOWEL_DECISION_REPORT.md) — **superseded by v3** |
 
-**Authoritative symbol rules:** [`language-rules.md`](../language-rules.md) (`fonora_version: v3`, `ipa_vowel_mode: v3`).
+**Authoritative symbol rules:** [`language-rules.md`](language-rules.md) (`fonora_version: v3`, `ipa_vowel_mode: v3`) — loaded at runtime by the app; edit this file to change symbols, the sound grid, and vowel mappings.
 
 ## App sections (UI)
 
-Primary nav: **Translator**, **Sound Grid**, **Alphabet**, **Quiz**.
+Primary nav: **Home**, **Translator**, **Reader**, **Sound Grid**, **Alphabet**.
 
-More menu: **Keyboard** (symbol input + keyboard mapping table), **Reverse Lookup**, **Pronunciation Testing** (manual review), **Pronunciation Validation** (automated round-trip).
+More menu: **Quiz**, **Keyboard** (symbol input + keyboard mapping table), **Reverse Lookup**, **Pronunciation Testing** (manual review), **Pronunciation Validation** (automated round-trip).
 
 Removed from the UI (June 2026 cleanup): Mini Dictionary, Decode panel, separate Keyboard Mapping tab (mapping now lives on Keyboard).
 

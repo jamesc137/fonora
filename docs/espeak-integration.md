@@ -16,7 +16,7 @@ Serve the project over HTTP (not `file://`):
 npm start
 ```
 
-On Heroku, `npm start` binds to `$PORT` automatically via [`server.js`](../server.js).
+On Heroku, `npm start` binds to `$PORT` automatically via [`server.js`](../server.js). See [deploy.md](deploy.md) for full production setup.
 
 ## How it works
 

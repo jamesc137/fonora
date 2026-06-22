@@ -14,7 +14,7 @@ Raw eSpeak IPA passes through `normalizeIpa()` before encoding.
 
 ## English vowel engineering table (`ENGLISH_IPA_VOWEL_NORMALIZATION`)
 
-Temporary mappings in `js/ipa-normalize.js` — consistency over linguistic perfection. Overrides conflicting supplemental entries (e.g. `ɚ → a` instead of `a + r`). Applied **only when pipeline language is English** (`lang: en`). Other languages use vowel tokens from `language-rules.md` directly. Full audit: [IPA_VOWEL_NORMALIZATION_AUDIT.md](IPA_VOWEL_NORMALIZATION_AUDIT.md).
+Temporary mappings in `js/ipa-normalize.js` — consistency over linguistic perfection. Overrides conflicting supplemental entries (e.g. `ɚ → a` instead of `a + r`). Applied **only when pipeline language is English** (`lang: en`). Other languages use vowel tokens from `language-rules.md` directly. See [multilingual-support.md](multilingual-support.md). Full audit: [IPA_VOWEL_NORMALIZATION_AUDIT.md](IPA_VOWEL_NORMALIZATION_AUDIT.md).
 
 | IPA token | Fonora phoneme | Notes |
 | --- | --- | --- |

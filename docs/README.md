@@ -10,6 +10,7 @@ Index of project docs and how they relate to the running app (`index.html` + `js
 | eSpeak NG / WASM | [espeak-integration.md](espeak-integration.md) |
 | IPA pipeline architecture | [IPA-PIPELINE-REPORT.md](IPA-PIPELINE-REPORT.md) |
 | Consonant IPA normalization | [ipa-normalize.md](ipa-normalize.md) |
+| Multilingual encoding & playback | [multilingual-support.md](multilingual-support.md) |
 | Pronunciation Validation (automated round-trip) | [pronunciation-validation.md](pronunciation-validation.md) |
 | Symbol collision analysis | [FONORA_COLLISION_AUDIT.md](FONORA_COLLISION_AUDIT.md) |
 | Language-system audit (June 2026) | [FONORA_CLEANUP_AUDIT.md](FONORA_CLEANUP_AUDIT.md) |
@@ -19,9 +20,11 @@ Index of project docs and how they relate to the running app (`index.html` + `js
 
 ## App sections (UI)
 
-Primary nav: **Home**, **Translator**, **Reader**, **Sound Grid**, **Alphabet**.
+Primary nav: **Home**, **Translator**, **Reader**, **Breakdown**, **Sound Grid**, **Alphabet**.
 
-More menu: **Quiz**, **Keyboard** (symbol input + keyboard mapping table), **Reverse Lookup**, **Pronunciation Testing** (manual review), **Pronunciation Validation** (automated round-trip).
+More menu: **Samples**, **Quiz**, **Keyboard** (symbol input + keyboard mapping table), **Reverse Lookup**, **Pronunciation Testing** (manual review), **Pronunciation Validation** (automated round-trip).
+
+Multilingual behavior (language selector, vowel overlays, Reader voices): [multilingual-support.md](multilingual-support.md).
 
 Removed from the UI (June 2026 cleanup): Mini Dictionary, Decode panel, separate Keyboard Mapping tab (mapping now lives on Keyboard).
 
@@ -29,7 +32,7 @@ Removed from the UI (June 2026 cleanup): Mini Dictionary, Decode panel, separate
 
 | Command / entry | What it runs | UI equivalent |
 | --- | --- | --- |
-| `npm test` | 61 unit/integration assertions (`js/tests-core.js` + integration) | `?test` in URL → console |
+| `npm test` | 67 unit/integration assertions (`js/tests-core.js` + integration) | `?test` in URL → console |
 | `npm run test:pronunciation-validation` | Batch IPA round-trip report | Pronunciation Validation tab |
 | `npm run test:vowels` | Vowel readability report → `reports/` | — |
 | `npm run test:minimal-pairs` | Minimal-pair distinctness report | — |

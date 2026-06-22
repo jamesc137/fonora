@@ -20,7 +20,12 @@ export const TEST_CATEGORIES = [
   {
     id: 'single-consonants',
     label: 'Single consonants',
-    words: ['p', 'b', 't', 'd', 'k', 'g', 'f', 's', 'sh', 'h', 'm', 'n', 'ng', 'w', 'y', 'r', 'l'],
+    words: ['p', 'b', 't', 'd', 'k', 'g', 'f', 's', 'sh', 'x', 'kh', 'gh', 'h', 'm', 'n', 'ng', 'w', 'y', 'r', 'l'],
+  },
+  {
+    id: 'throat-fricatives',
+    label: 'Throat fricatives',
+    words: ['bach', 'loch'],
   },
   {
     id: 'simple-vowels',

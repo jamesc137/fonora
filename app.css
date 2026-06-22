@@ -1247,6 +1247,7 @@ code {
   margin: 0.75rem 0 0.35rem;
 }
 
+#tab-reader > .section-desc + .translate-controls ~ label:first-of-type,
 #tab-translator > .section-desc + .translate-controls ~ label:first-of-type,
 #tab-translator > label:first-of-type {
   margin-top: 0;

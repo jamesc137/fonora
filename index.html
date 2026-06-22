@@ -578,13 +578,31 @@
     <!-- Reader -->
     <section class="panel tab-panel" id="tab-reader" data-tab-panel="reader" hidden>
       <h2>Fonora Reader</h2>
+      <p class="section-desc">Play Fonora symbols aloud. Choose the source language so playback uses the matching neural or eSpeak voice for recovered IPA.</p>
 
-      <div class="tts-controls">
-        <label for="tts-piper-voice">Neural voice</label>
-        <select id="tts-piper-voice" class="text-input"></select>
-        <label for="tts-dialect">Dialect</label>
-        <select id="tts-dialect" class="text-input"></select>
+      <div class="translate-controls">
+        <div class="translate-control">
+          <label for="tts-lang">Language</label>
+          <select id="tts-lang" class="text-input text-input--full">
+            <option value="en">English</option>
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+            <option value="ja">Japanese</option>
+            <option value="ar">Arabic</option>
+            <option value="zh">Mandarin</option>
+          </select>
+        </div>
+        <div class="translate-control" id="tts-dialect-wrap">
+          <label for="tts-dialect">English dialect</label>
+          <select id="tts-dialect" class="text-input text-input--full"></select>
+        </div>
+        <div class="translate-control" id="tts-piper-voice-wrap">
+          <label for="tts-piper-voice">Neural voice</label>
+          <select id="tts-piper-voice" class="text-input text-input--full"></select>
+        </div>
       </div>
+      <p id="tts-voice-note" class="section-desc" hidden></p>
 
       <label for="tts-input">Fonora text</label>
       <textarea id="tts-input" class="symbol-text symbol-input text-input--full" rows="4" placeholder="Type or insert Fonora symbols…" autocomplete="off"></textarea>

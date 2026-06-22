@@ -20,7 +20,7 @@ import { setActiveLanguageRulesBundle } from './fonora-config.js';
 import { registerIpaVowelMap, setActiveIpaVowelMap } from './ipa-normalize.js';
 import { loadAlphabetOverrides } from './alphabet-overrides.js';
 import { setupAlphabetLab } from './alphabet-lab.js';
-import { normalizeSymbolInput, decodeSymbols, decodeText } from './decode.js';
+import { normalizeSymbolInput, decodeSymbols, decodeText, decodeToPhonemeKeys } from './decode.js';
 import { encodeSounds } from './encode.js';
 import { translateIpaPhrase } from './ipa-pipeline.js';
 import { initEspeak, getEspeakInitError } from './ipa.js';
@@ -28,6 +28,7 @@ import { loadLanguagePreference, loadEnglishDialectPreference, saveLanguagePrefe
 import { loadGlossary, saveGlossary, migrateSampleGlossary, addGlossaryEntry } from './glossary.js';
 import { escapeHtml, insertAtCursor, deleteSymbolBeforeCursor } from './utils.js';
 import { setupEncoderTesting } from './encoder-testing.js';
+import { setupPronunciationValidation } from './pronunciation-validation-ui.js';
 
 let rules = null;
 let usingFallback = false;
@@ -286,7 +287,7 @@ function formatIpaResult(result) {
     }
     html += `<div class="encode-step"><strong>Combined IPA:</strong> <code>${escapeHtml(result.ipa || '')}</code></div>`;
     html += `<div class="encode-step"><strong>Combined Fonora Phonemes:</strong> <code>${escapeHtml(result.normalizedPhonemes || '')}</code></div>`;
-    html += `<div class="encode-step"><strong>Decoded Back:</strong> <code>${escapeHtml(result.decoded || '')}</code></div>`;
+    html += `<div class="encode-step"><strong>Recovered Phoneme Keys:</strong> <code>${escapeHtml(result.decoded || '')}</code></div>`;
     html += '<div class="encode-step"><strong>Per word:</strong></div>';
     for (const word of result.words) {
       html += `<div class="encode-step translate-result--nested">`;
@@ -296,7 +297,6 @@ function formatIpaResult(result) {
       }
       html += `<div>IPA: <code>${escapeHtml(word.ipa || '')}</code></div>`;
       html += `<div>Phonemes: <code>${escapeHtml(word.normalizedPhonemes || '')}</code></div>`;
-      html += `<div>Symbols: <span class="symbol-text">${escapeHtml(word.symbols || '')}</span></div>`;
       html += `</div>`;
     }
     if (result.warnings?.length) {
@@ -316,7 +316,7 @@ function formatIpaResult(result) {
   }
   html += `<div class="encode-step"><strong>IPA Output:</strong> <code>${escapeHtml(result.ipa || '')}</code></div>`;
   html += `<div class="encode-step"><strong>Normalized Fonora Phonemes:</strong> <code>${escapeHtml(result.normalizedPhonemes || result.normalized || '')}</code></div>`;
-  html += `<div class="encode-step"><strong>Decoded Back:</strong> <code>${escapeHtml(result.decoded || '')}</code></div>`;
+  html += `<div class="encode-step"><strong>Recovered Phoneme Keys:</strong> <code>${escapeHtml(result.decoded || '')}</code></div>`;
   if (result.warnings?.length) {
     html += `<div class="encode-step"><strong>Warnings:</strong>${result.warnings.map((w) => `<div class="warning-item">${escapeHtml(w)}</div>`).join('')}</div>`;
   }
@@ -388,8 +388,8 @@ function setupTranslator() {
   }
 
   function refreshDecodePreview() {
-    const dec = decodeText(outputEl.value, rules);
-    decodeEl.textContent = `Decodes to: ${dec.pronunciation || '(empty)'}`;
+    const keys = decodeToPhonemeKeys(outputEl.value, rules).phonemeKeys;
+    decodeEl.textContent = `Recovered phoneme keys: ${keys || '(empty)'}`;
   }
 
   renderSymbolButtons(document.getElementById('translate-keyboard'), outputEl);
@@ -458,7 +458,7 @@ function setupTranslator() {
   outputEl.addEventListener('input', () => {
     outputDirty = true;
     if (isSingleWord(inputEl.value)) {
-      pronEl.value = decodeSymbols(outputEl.value, rules).pronunciation;
+      pronEl.value = decodeToPhonemeKeys(outputEl.value, rules).phonemeKeys;
     }
     refreshDecodePreview();
   });
@@ -697,7 +697,7 @@ function renderGlossaryList(filter = '') {
   });
 }
 
-const MORE_TAB_IDS = new Set(['keyboard', 'mapping', 'dictionary', 'decode', 'reverse', 'encoder-testing']);
+const MORE_TAB_IDS = new Set(['keyboard', 'mapping', 'dictionary', 'decode', 'reverse', 'encoder-testing', 'pronunciation-validation']);
 
 function closeNavDropdown() {
   const dropdown = document.getElementById('nav-more');
@@ -827,6 +827,7 @@ function applyRulesBundle(loaded) {
   setupTestMode();
   setupDictionary();
   setupEncoderTesting(rules);
+  setupPronunciationValidation(rules);
   setupTranslator();
   updateDecodePanel();
   setupAlphabetLab({

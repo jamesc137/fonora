@@ -30,6 +30,7 @@ flowchart LR
 - Mini dictionary with localStorage persistence
 - Translator with language selection
 - Pronunciation Testing tab for IPA → Fonora evaluation
+- Pronunciation Validation Mode for encode/decode IPA round-trip testing
 
 ## Run locally
 
@@ -77,6 +78,8 @@ Glossary entries are stored in browser `localStorage` under the key `fonora-glos
 | `js/encode.js` | Sounds → Fonora symbols |
 | `js/decode.js` | Fonora symbols → sounds (longest-match) |
 | `js/encoder-testing.js` | Pronunciation Testing tab UI |
+| `js/pronunciation-validation.js` | Pronunciation Validation Mode core logic |
+| `js/pronunciation-validation-ui.js` | Pronunciation Validation tab UI |
 | `js/encoder-test-sets.js` | Curated and multilingual test word lists |
 | `js/app.js` | UI wiring |
 | `js/tests.js` | Node test runner |
@@ -90,7 +93,10 @@ Glossary entries are stored in browser `localStorage` under the key `fonora-glos
 npm test
 npm run test:vowels          # vowel readability report → reports/
 npm run test:v2-collisions   # vowel minimal-pair collision report → reports/
+npm run test:pronunciation-validation  # IPA round-trip validation report → reports/
 ```
+
+See [docs/pronunciation-validation.md](docs/pronunciation-validation.md) for how validation works.
 
 Or open the app with `?test` in the URL to log test results in the browser console.
 

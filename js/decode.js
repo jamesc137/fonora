@@ -1,7 +1,20 @@
 import {
   buildSymbolPatterns,
+  findCellBySymbols,
   getAllSymbols,
 } from './rules.js';
+
+function isDefinedPhonemeCell(symbols, rules) {
+  const cell = findCellBySymbols(rules, symbols);
+  return cell?.status === 'defined' && cell.sound && cell.sound !== '?';
+}
+
+function shouldPreserveSymbolBoundary(left, right, rules) {
+  const leftLast = left.trim().split(/\s+/).pop() || '';
+  const rightFirst = right.trim().split(/\s+/)[0] || '';
+  if (!leftLast || !rightFirst) return true;
+  return isDefinedPhonemeCell(leftLast, rules) && isDefinedPhonemeCell(rightFirst, rules);
+}
 
 export function normalizeSymbolInput(text, rules) {
   const symSet = new Set(getAllSymbols(rules));
@@ -16,6 +29,9 @@ export function normalizeSymbolInput(text, rules) {
       const prev = result.length > 0 ? [...result].pop() : null;
       const next = j < text.length ? text[j] : null;
       if (prev && next && symSet.has(prev) && symSet.has(next)) {
+        if (shouldPreserveSymbolBoundary(result, text.slice(j), rules)) {
+          if (!result.endsWith(' ')) result += ' ';
+        }
         i = j;
         continue;
       }
@@ -84,6 +100,19 @@ function decodeSegment(text, rules) {
 /** Decode symbol string (no word spaces). */
 export function decodeSymbols(text, rules) {
   return decodeSegment(text, rules);
+}
+
+/**
+ * Recover Fonora phoneme keys from symbols (space-separated groups when present).
+ * Returns keys like `b o r`, not English spellings like `boy`.
+ */
+export function decodeToPhonemeKeys(text, rules) {
+  const result = decodeText(text, rules);
+  const phonemeKeys = result.groups.map((g) => g.sound).join(' ').trim();
+  return {
+    phonemeKeys,
+    ...result,
+  };
 }
 
 /** Decode text preserving word spacing in pronunciation output. */

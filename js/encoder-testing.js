@@ -1,7 +1,7 @@
 import { escapeHtml } from './utils.js';
 import { runIpaPipeline } from './ipa-pipeline.js';
 import { encodeSounds } from './encode.js';
-import { decodeSymbols } from './decode.js';
+import { decodeSymbols, decodeText, decodeToPhonemeKeys } from './decode.js';
 import { pickCuratedWords, TEST_CATEGORIES, getMultilingualTestEntries, getEnglishDialectComparisonEntries } from './encoder-test-sets.js';
 import { ENGLISH_DIALECT_CODES } from './language-preferences.js';
 import { getDefinedSounds, isVowelPhonemeKey } from './rules.js';
@@ -286,7 +286,8 @@ async function ensureCardResult(card) {
 async function runIpaForCard(card) {
   if (card.testMode === 'random') {
     const encoded = encodeSounds(card.input, rulesRef);
-    const decoded = decodeSymbols(encoded.symbols, rulesRef);
+    const symbols = encoded.groups.map((g) => g.symbols).join(' ');
+    const recovered = decodeToPhonemeKeys(symbols, rulesRef);
     const hasFallback = encoded.symbols.includes('?') || encoded.warnings.length > 0;
     return {
       id: card.id,
@@ -297,14 +298,14 @@ async function runIpaForCard(card) {
       original: card.input,
       lang: card.lang || 'en',
       ipa: '—',
-      normalizedPhonemes: card.input.split('').join(' '),
+      normalizedPhonemes: recovered.phonemeKeys || card.input.split('').join(' '),
       phonemeString: card.input,
       sounds: card.input,
-      phoneticParse: card.input.split('').join(' + '),
-      symbols: encoded.symbols,
-      decoded: decoded.pronunciation,
+      phoneticParse: (recovered.phonemeKeys || card.input).replace(/ /g, ' + '),
+      symbols,
+      decoded: recovered.phonemeKeys,
       breakdown: encoded.groups,
-      warnings: [...encoded.warnings, ...decoded.warnings],
+      warnings: [...encoded.warnings, ...recovered.warnings],
       unmapped: [],
       source: hasFallback ? 'fallback' : 'sound',
       primarySource: 'sound',
@@ -335,7 +336,7 @@ function renderPipelineRow(result) {
       <div><dt>IPA</dt><dd><code>${escapeHtml(result.ipa || '—')}</code></dd></div>
       <div><dt>Normalized Phonemes</dt><dd><code>${escapeHtml(result.normalizedPhonemes || result.phoneticParse || result.sounds || '—')}</code></dd></div>
       <div><dt>Fonora</dt><dd><span class="symbol-text">${escapeHtml(result.symbols)}</span></dd></div>
-      <div><dt>Decoded</dt><dd><code>${escapeHtml(result.decoded)}</code></dd></div>
+      <div><dt>Recovered phoneme keys</dt><dd><code>${escapeHtml(result.decoded)}</code></dd></div>
     </dl>`;
 }
 

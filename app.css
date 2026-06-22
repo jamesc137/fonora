@@ -1420,3 +1420,189 @@ code {
   font-size: 1.1rem;
   padding: 0.35rem 0.5rem;
 }
+
+/* Pronunciation Validation Mode */
+.pv-dashboard {
+  margin-bottom: 1rem;
+}
+
+.pv-controls {
+  margin-bottom: 1rem;
+}
+
+.pv-controls label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+}
+
+.pv-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .pv-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pv-single-panel h3,
+.pv-batch-panel h3 {
+  margin-top: 0;
+  font-size: 1rem;
+}
+
+.pv-input-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.pv-input-row .text-input {
+  flex: 1;
+}
+
+.pv-batch-input {
+  width: 100%;
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.pv-empty {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.pv-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 1rem;
+  background: #fafafa;
+}
+
+.pv-card--match {
+  border-left: 4px solid #15803d;
+}
+
+.pv-card--mismatch {
+  border-left: 4px solid #b91c1c;
+}
+
+.pv-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.pv-word {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.pv-audio-row {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.pv-section {
+  margin-bottom: 0.75rem;
+}
+
+.pv-section h4 {
+  margin: 0 0 0.35rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #555;
+}
+
+.pv-comparison-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-family: ui-monospace, monospace;
+  font-size: 0.9rem;
+}
+
+.pv-comparison-label {
+  color: #555;
+}
+
+.pv-status {
+  font-weight: 600;
+}
+
+.pv-status--match {
+  color: #15803d;
+}
+
+.pv-status--mismatch {
+  color: #b91c1c;
+}
+
+.pv-key-note {
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.pv-collision-warnings {
+  margin: 0.5rem 0;
+}
+
+.pv-collision-item {
+  font-size: 0.85rem;
+}
+
+.pv-investigation {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.pv-decoder-path {
+  word-break: break-word;
+  white-space: normal;
+}
+
+.pv-meta-note {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.pv-notes-list {
+  margin: 0.5rem 0 0 1.25rem;
+  padding: 0;
+  font-size: 0.85rem;
+}
+
+.pv-batch-table-wrap {
+  margin-top: 1rem;
+}
+
+.pv-batch-table .pv-word-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: #2563eb;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.pv-row--match {
+  background: #f0fdf4;
+}
+
+.pv-row--mismatch {
+  background: #fef2f2;
+}
+
+.pv-row--error {
+  background: #fff7ed;
+}

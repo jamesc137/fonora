@@ -45,6 +45,7 @@
             <button type="button" class="tab-btn nav-dropdown-item" data-tab="decode" role="menuitem">Decode</button>
             <button type="button" class="tab-btn nav-dropdown-item" data-tab="reverse" role="menuitem">Reverse Lookup</button>
             <button type="button" class="tab-btn nav-dropdown-item" data-tab="encoder-testing" role="menuitem">Pronunciation Testing</button>
+            <button type="button" class="tab-btn nav-dropdown-item" data-tab="pronunciation-validation" role="menuitem">Pronunciation Validation</button>
           </div>
         </div>
       </nav>
@@ -367,6 +368,48 @@
       </div>
 
       <div id="encoder-card-list" class="encoder-card-list"></div>
+    </section>
+
+    <!-- Pronunciation Validation Mode -->
+    <section class="panel tab-panel" id="tab-pronunciation-validation" data-tab-panel="pronunciation-validation" hidden>
+      <h2>Pronunciation Validation Mode</h2>
+      <p class="section-desc">
+        Validate whether Fonora preserves pronunciation through the full pipeline:
+        English → IPA → Fonora phonemes → symbols → recovered phonemes → recovered IPA.
+        Dictionary overrides are bypassed so eSpeak IPA is always the source.
+      </p>
+
+      <div id="pv-dashboard" class="encoder-dashboard pv-dashboard"></div>
+
+      <div class="pv-controls">
+        <label for="pv-dialect">English dialect (eSpeak)</label>
+        <select id="pv-dialect" class="text-input"></select>
+      </div>
+
+      <div class="pv-layout">
+        <div class="pv-single-panel">
+          <h3>Single word</h3>
+          <label for="pv-single-input">English word</label>
+          <div class="pv-input-row">
+            <input type="text" id="pv-single-input" class="text-input" placeholder="e.g. boy" autocomplete="off">
+            <button type="button" id="pv-validate-single" class="btn btn--primary">Validate</button>
+          </div>
+          <div id="pv-single-status" class="translate-status" hidden></div>
+          <div id="pv-single-result" class="pv-single-result"></div>
+        </div>
+
+        <div class="pv-batch-panel">
+          <h3>Batch testing</h3>
+          <label for="pv-batch-input">Word list (one per line)</label>
+          <textarea id="pv-batch-input" class="text-input pv-batch-input" rows="12"></textarea>
+          <div class="encoder-generate-row">
+            <button type="button" id="pv-run-batch" class="btn btn--primary">Run batch validation</button>
+            <button type="button" id="pv-load-default-words" class="btn">Load default word list</button>
+          </div>
+          <div id="pv-batch-status" class="translate-status" hidden></div>
+          <div id="pv-batch-table" class="pv-batch-table-wrap"></div>
+        </div>
+      </div>
     </section>
 
     <!-- Alphabet Lab -->

@@ -2,7 +2,6 @@ import { textToIpa } from './ipa.js';
 import { normalizeIpa } from './ipa-normalize.js';
 import { ipaPhonemesToFonora } from './ipa-to-fonora.js';
 import { findDictionaryEntry } from './glossary.js';
-import { decodeSymbols } from './decode.js';
 import { resolvePipelineOptions, getActiveLanguageRulesBundle } from './fonora-config.js';
 import { resolveEspeakVoice } from './language-preferences.js';
 
@@ -30,7 +29,6 @@ export async function runIpaPipeline(input, rules, options = {}) {
   const dictMatch = findDictionaryEntry(trimmed);
   if (dictMatch) {
     const fonora = ipaPhonemesToFonora(dictMatch.pronunciation, rules);
-    const decoded = decodeSymbols(dictMatch.languageSpelling, rules);
     const { source, hasFallback, primarySource } = resolveSource(fonora, [], 'dictionary');
     return {
       id,
@@ -42,12 +40,12 @@ export async function runIpaPipeline(input, rules, options = {}) {
       lang,
       voice: null,
       ipa: dictMatch.pronunciation,
-      normalizedPhonemes: dictMatch.pronunciation.split('').join(' '),
+      normalizedPhonemes: fonora.decoded || dictMatch.pronunciation.split('').join(' '),
       phonemeString: dictMatch.pronunciation,
       sounds: dictMatch.pronunciation,
-      phoneticParse: dictMatch.pronunciation.split('').join(' + '),
+      phoneticParse: (fonora.decoded || dictMatch.pronunciation).replace(/ /g, ' + '),
       symbols: dictMatch.languageSpelling,
-      decoded: decoded.pronunciation,
+      decoded: fonora.decoded,
       breakdown: fonora.groups,
       warnings: fonora.warnings,
       unmapped: [],

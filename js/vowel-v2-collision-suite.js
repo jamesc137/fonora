@@ -117,13 +117,15 @@ export function formatV2CollisionReport(suiteResult) {
   const lines = [];
   lines.push('# Fonora Vowel-Plane Collision Report');
   lines.push('');
+  lines.push('> **Scope note:** This report checks whether words in each minimal-pair group produce **distinct Fonora symbol strings**. It does **not** audit full symbol-system collisions (exact, concatenation, or greedy decode). Run `npm run audit:collisions` for that.');
+  lines.push('');
   lines.push('Pipeline: eSpeak NG → IPA → markdown-derived normalize → Fonora symbols');
   lines.push('Rules: language-rules.md');
   lines.push('');
 
   lines.push('## Word Table');
   lines.push('');
-  lines.push('| Word | IPA | Phonemes | Fonora | Decoded | Collision Group |');
+  lines.push('| Word | IPA | Phonemes | Fonora | Recovered keys | Collision Group |');
   lines.push('| ---- | --- | -------- | ------ | ------- | --------------- |');
   for (const row of suiteResult.rows) {
     lines.push(

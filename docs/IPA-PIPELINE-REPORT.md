@@ -69,7 +69,7 @@ Retroflexes, tones, Arabic emphatics, uvulars, and other sounds outside the Fono
 ## Recommendations (future work)
 
 1. Native script input for better CJK/Arabic IPA quality
-2. Per-language normalize tweaks in `ipa-normalize.js`
+2. Per-language normalize tweaks — English overlay exists; see [multilingual-support.md](multilingual-support.md)
 3. Extend `SUPPLEMENTAL_CONSONANT_MAP` when eSpeak emits IPA not covered by markdown cells
 4. Document or encode throat `/h/` behavior explicitly in `language-rules.md` if behavior changes
 5. Consider `@echogarden/espeak-ng-emscripten` if the npm package stalls

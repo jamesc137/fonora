@@ -36,7 +36,8 @@ npm test
 | --- | --- |
 | Authoritative symbol rules | `docs/language-rules.md` |
 | App UI | `index.html`, `app.css`, `js/app.js` |
-| IPA → Fonora pipeline | `js/ipa*.js`, `js/encode.js`, `js/decode.js` |
+| IPA pipeline | `js/ipa*.js`, `js/encode.js`, `js/decode.js` |
+| Multilingual behavior | [docs/multilingual-support.md](docs/multilingual-support.md) |
 | WASM assets (generated) | `vendor/` via `npm install` |
 | Research docs | `docs/` |
 

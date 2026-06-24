@@ -1,6 +1,7 @@
 import { escapeHtml } from './utils.js';
 import {
   DOC_CATALOG,
+  DOC_LAYER_ORDER,
   docViewerHref,
   githubDocUrl,
   normalizeDocPath,
@@ -14,12 +15,17 @@ let currentPath = null;
 function renderSidebar(activePath) {
   const sidebar = document.getElementById('docs-viewer-sidebar');
   if (!sidebar) return;
-  sidebar.innerHTML = `
-    <h3 class="doc-viewer-sidebar-title">Docs</h3>
-    <nav class="doc-viewer-nav" aria-label="Documentation">
-      <ul class="doc-viewer-nav-list">
-        ${DOC_CATALOG.map(
-          (entry) => `
+
+  const sections = DOC_LAYER_ORDER.map((layer) => {
+    const entries = DOC_CATALOG.filter((e) => e.layer === layer.id);
+    if (!entries.length) return '';
+    return `
+      <section class="doc-viewer-nav-group">
+        <h4 class="doc-viewer-nav-group-title">${escapeHtml(layer.label)}</h4>
+        <ul class="doc-viewer-nav-list">
+          ${entries
+            .map(
+              (entry) => `
             <li>
               <a
                 href="${escapeHtml(docViewerHref(entry.path))}"
@@ -27,8 +33,16 @@ function renderSidebar(activePath) {
                 data-doc-path="${escapeHtml(entry.path)}"
               >${escapeHtml(entry.label)}</a>
             </li>`,
-        ).join('')}
-      </ul>
+            )
+            .join('')}
+        </ul>
+      </section>`;
+  }).join('');
+
+  sidebar.innerHTML = `
+    <h3 class="doc-viewer-sidebar-title">Docs</h3>
+    <nav class="doc-viewer-nav" aria-label="Documentation">
+      ${sections}
     </nav>
   `;
 }

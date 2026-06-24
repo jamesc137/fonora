@@ -1,8 +1,16 @@
 # Fonora
 
-**[fonora.org](https://fonora.org)** — an open-source phonetic oral script language.
+**[fonora.org](https://fonora.org)** — an open-source phonetic writing platform.
 
-Fonora is an experimental writing system built from nine core symbols that represent where and how speech sounds are produced. This repository contains the language rules, research documentation, and the interactive web app used to test translation, reading, and validation.
+This repository contains the **Fonora script**, the **Fonoran experimental language**, and the **Language Builder Tools** used to create and evolve Fonoran — plus research documentation and interactive web apps.
+
+See **[docs/platform-overview.md](docs/platform-overview.md)** for the full platform map and architecture diagram.
+
+## Three layers
+
+### 1. Fonora — the script
+
+**Fonora** is a phonetic **writing system** built from nine core symbols that represent where and how speech sounds are produced. It is not a spoken language — it is the script used to write pronunciation.
 
 ```
 Text → eSpeak NG → IPA → ipa-normalize.js → encodeSounds() → Fonora symbols
@@ -10,40 +18,51 @@ Text → eSpeak NG → IPA → ipa-normalize.js → encodeSounds() → Fonora sy
 
 Rules version: **v3** ([`docs/language-rules.md`](docs/language-rules.md) — vowel grammar `⚬X`, diphthong `⚬XᵔY`).
 
+| Script tool | Purpose |
+| --- | --- |
+| [Sound Grid](https://fonora.org/#grid) | Place × manner reference |
+| [Alphabet](https://fonora.org/#alphabet) | Primary symbols + phoneme inventory |
+| [Translator](https://fonora.org/#translator) | Text → IPA → Fonora |
+| [Reader](https://fonora.org/#reader) | Neural TTS from Fonora |
+| [Breakdown](https://fonora.org/#breakdown) | Per-word phonetic analysis |
+| [Samples](https://fonora.org/#samples) | Multilingual paragraph demos |
+| [Quiz](https://fonora.org/#quiz) | Decode / construct practice |
+
+Docs: [language-rules.md](docs/language-rules.md) · [multilingual-support.md](docs/multilingual-support.md) · [IPA pipeline report](docs/IPA-PIPELINE-REPORT.md)
+
+### 2. Fonoran — the language
+
+**Fonoran** is an **experimental constructed language** built using Fonora. It has primitive root syllables, compound words, English meanings, derivation trees, and a semantic coordinate system (DDA).
+
+| Language asset | Purpose |
+| --- | --- |
+| [Dictionary](/fonoran/#dictionary) | Browse roots and compounds |
+| [fonoran.md](docs/fonoran.md) | Vocabulary model and API |
+| [fonoran-gen3.md](docs/fonoran-gen3.md) | DDA semantics reference |
+| Live data | `data/fonoran-sound-bucket.json` (your vocabulary) |
+
+### 3. Language Builder Tools
+
+The **Language Builder Tools** at [`/fonoran/`](fonoran/) are the suite used to **create, review, test, and explore** languages written in Fonora.
+
+| Builder tool | Purpose |
+| --- | --- |
+| [Root Creator](fonoran/) | Create primitive syllables (CV / CVC) |
+| [Compound Creator](fonoran/) | Stack roots and approved words |
+| [Review](fonoran/) | Approve, reject, or revise pending items |
+| [Language Explorer](fonoran/) | Derivation trees and family graphs |
+| [Semantic Analysis](fonoran/) | Health scores + Run DDA (Advanced) |
+
+CLI generators and audits: `npm run fonoran:gen3`, `fonoran:canonical:init`, `fonoran:stress-test`, etc.
+
 ## Live site
 
-**https://fonora.org**
+**https://fonora.org** — main script app  
+**https://fonora.org/fonoran/** — language builder
 
-## Features
+## Development
 
-- Project homepage with live symbol reference
-- **Translator** — text → IPA → Fonora (multilingual)
-- **Reader** — neural Piper TTS from Fonora IPA
-- **Sound Grid** — place × manner reference
-- **Alphabet** — primary symbol experiments + phoneme inventory
-- **Quiz** — decode or construct practice
-- Pronunciation testing and automated IPA round-trip validation
-
-See [docs/README.md](docs/README.md) for the full documentation index. Multilingual encoding and playback: [docs/multilingual-support.md](docs/multilingual-support.md).
-
-## App navigation
-
-| Section | Location | Purpose |
-| --- | --- | --- |
-| Home | Primary nav | Project introduction |
-| Translator | Primary nav | Text → IPA → Fonora; editable output |
-| Reader | Primary nav | Neural TTS playback |
-| Sound Grid | Primary nav | Place × manner reference |
-| Alphabet | Primary nav | Primary symbol overrides + phoneme inventory |
-| Quiz | More | Decode or construct encodable sounds |
-| Keyboard | More | Symbol input + mapping table |
-| Reverse Lookup | More | Sound → symbol |
-| Pronunciation Testing | More | Manual review + export |
-| Pronunciation Validation | More | Automated IPA round-trip |
-| Open Problems | More | Known limitations + contribution guide |
-| Docs | More | Rendered markdown documentation viewer |
-
-## Run locally
+### Run locally
 
 ```bash
 git clone https://github.com/jamesc137/fonora.git
@@ -52,13 +71,13 @@ npm install
 npm start
 ```
 
-Open [http://localhost:8000](http://localhost:8000).
+Open [http://localhost:8000](http://localhost:8000) (script app) and [http://localhost:8000/fonoran/](http://localhost:8000/fonoran/) (builder).
 
 Browsers block `fetch()` and WASM when opening HTML directly (`file://`). Always use the HTTP server.
 
-## Deploy
+### Deploy
 
-Production uses the included Node static server (`npm start`). See **[docs/deploy.md](docs/deploy.md)** for Heroku setup, custom domain (`fonora.org`), and hosting notes.
+Production uses the included Node static server (`npm start`). See **[docs/deploy.md](docs/deploy.md)** for Heroku setup, PostgreSQL, custom domain (`fonora.org`), and hosting notes.
 
 Quick Heroku deploy:
 
@@ -67,28 +86,30 @@ heroku create
 git push heroku main
 ```
 
-## Contributing
-
-Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## Editing rules
+### Editing rules
 
 Edit [`docs/language-rules.md`](docs/language-rules.md) and reload the browser. Changes to symbols, keyboard mappings, sounds, and grid cells update automatically.
 
-## Tests
+### Tests
 
 ```bash
-npm test                              # 67 unit/integration assertions
+npm test                              # unit/integration assertions
 npm run test:vowels                   # vowel readability report → reports/
 npm run test:minimal-pairs            # minimal-pair distinctness report → reports/
 npm run audit:collisions              # collision audit → docs/FONORA_COLLISION_AUDIT.md
 npm run test:pronunciation-validation # IPA round-trip batch report → reports/
+npm run fonoran:import                # import local JSON bucket → PostgreSQL (if configured)
+npm run fonoran:export                # export PostgreSQL bucket → JSON backup
 ```
 
 | Command | UI equivalent |
 | --- | --- |
 | `npm test` | Append `?test` to the app URL (browser console) |
 | `npm run test:pronunciation-validation` | Pronunciation Validation tab |
+
+### Contributing
+
+Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). Full documentation index: [docs/README.md](docs/README.md).
 
 ## License
 

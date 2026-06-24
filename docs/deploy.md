@@ -62,8 +62,41 @@ Use for uptime monitors.
 | --- | --- | --- |
 | `PORT` | `8000` | HTTP port (set by Heroku) |
 | `HOST` | `0.0.0.0` | Bind address |
+| `DATABASE_URL` | — | PostgreSQL connection string for Fonoran lab data |
+| `FONORAN_STORAGE` | `postgres` if `DATABASE_URL` set, else `json` | Force `json` or `postgres` storage |
+| `FONORAN_SKIP_JSON_MIRROR` | — | Set to `1` to skip writing JSON mirror when using PostgreSQL |
+| `PGSSLMODE` | — | Set to `disable` for local PostgreSQL without SSL |
 
-No secrets are required for the public site.
+No secrets are required for the public script app. Fonoran lab data uses PostgreSQL in production when configured.
+
+## PostgreSQL (Fonoran lab data)
+
+Live Fonoran vocabulary (roots, compounds, review state) can be stored in **PostgreSQL** instead of `data/fonoran-sound-bucket.json`.
+
+### Heroku Postgres
+
+```bash
+heroku addons:create heroku-postgresql:essential-0
+heroku config:get DATABASE_URL
+```
+
+On first boot with an empty database, the server **imports** local `data/fonoran-sound-bucket.json` if present — your JSON file is **not deleted**.
+
+### Manual import / export
+
+```bash
+# Import local JSON → PostgreSQL (requires DATABASE_URL)
+npm run fonoran:import
+
+# Export PostgreSQL → JSON backup
+npm run fonoran:export
+```
+
+### Local development
+
+Without `DATABASE_URL`, storage falls back to JSON at `data/fonoran-sound-bucket.json` (gitignored). Reference generator JSON (Gen 3 configs, canonical registry) remains file-based.
+
+See [platform-overview.md](platform-overview.md) for the data architecture overview.
 
 ## Static hosting alternatives
 

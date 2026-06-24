@@ -3,6 +3,8 @@ import { existsSync } from 'node:fs';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { handleFonoranApi } from './tools/fonoran-api.js';
+import { maybeAutoImportOnStartup } from './tools/fonoran-store.js';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const host = process.env.HOST || '0.0.0.0';
@@ -109,6 +111,7 @@ function cacheControl(pathname) {
 createServer(async (req, res) => {
   try {
     const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
+    const method = req.method ?? 'GET';
 
     if (url.pathname === '/health') {
       const onnxWasm = findOnnxWasmPath();
@@ -119,6 +122,14 @@ createServer(async (req, res) => {
       }
       res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8', ...SECURITY_HEADERS });
       res.end('ok');
+      return;
+    }
+
+    if (url.pathname.startsWith('/api/fonoran/')) {
+      const handled = await handleFonoranApi(req, res, url.pathname, method);
+      if (handled) return;
+      res.writeHead(404, { 'Content-Type': 'application/json', ...SECURITY_HEADERS });
+      res.end(JSON.stringify({ error: 'Not found' }));
       return;
     }
 
@@ -149,6 +160,11 @@ createServer(async (req, res) => {
     res.writeHead(404, SECURITY_HEADERS);
     res.end('Not found');
   }
-}).listen(port, host, () => {
+}).listen(port, host, async () => {
   console.log(`Fonora listening on http://${host}:${port}`);
+  try {
+    await maybeAutoImportOnStartup();
+  } catch (err) {
+    console.warn('Fonoran auto-import skipped:', err instanceof Error ? err.message : err);
+  }
 });

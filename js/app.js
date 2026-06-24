@@ -33,7 +33,9 @@ import { setupFonoraReader, loadReaderFromTranslation } from './fonora-tts-ui.js
 import { setupBreakdown, prefillBreakdownFromWordSources } from './breakdown-ui.js';
 import { setupSamples, setupHomeSample, ensureSamplesLoaded } from './samples.js';
 import { setupOpenProblems } from './open-problems-ui.js';
-import { setupDocsViewer, onDocsTabActivated } from './docs-viewer-ui.js';
+import { setupDocsViewer, onDocsTabActivated, loadDocViewer } from './docs-viewer-ui.js';
+import { openDocViewer } from './doc-urls.js';
+import { initUniversalNav, setActiveTab, closeNavDropdown, MORE_TAB_IDS } from './universal-nav.js';
 import { setReaderWordSources } from './fonora-tts.js';
 
 let rules = null;
@@ -693,8 +695,6 @@ function updateQuizStats() {
   document.getElementById('quiz-stats').textContent = `Attempts: ${quizStats.attempts} · Correct: ${quizStats.correct} · Accuracy: ${acc}%`;
 }
 
-const MORE_TAB_IDS = new Set(['breakdown', 'samples', 'quiz', 'keyboard', 'reverse', 'encoder-testing', 'pronunciation-validation', 'open-problems', 'docs']);
-
 function getTabFromHash() {
   const id = window.location.hash.replace(/^#/, '');
   if (id && id !== 'home') {
@@ -714,43 +714,10 @@ function setHashForTab(tabId) {
   }
 }
 
-function closeNavDropdown() {
-  const dropdown = document.getElementById('nav-more');
-  const menu = document.getElementById('nav-more-menu');
-  const trigger = document.getElementById('nav-more-trigger');
-  if (!dropdown || !menu || !trigger) return;
-  dropdown.classList.remove('nav-dropdown--open');
-  menu.hidden = true;
-  trigger.setAttribute('aria-expanded', 'false');
-}
-
-function openNavDropdown() {
-  const dropdown = document.getElementById('nav-more');
-  const menu = document.getElementById('nav-more-menu');
-  const trigger = document.getElementById('nav-more-trigger');
-  if (!dropdown || !menu || !trigger) return;
-  dropdown.classList.add('nav-dropdown--open');
-  menu.hidden = false;
-  trigger.setAttribute('aria-expanded', 'true');
-}
-
 function showTab(tabId) {
   const previousTab = document.querySelector('.tab-panel--active')?.dataset.tabPanel;
 
-  document.querySelectorAll('.tab-btn[data-tab]').forEach((btn) => {
-    const active = btn.dataset.tab === tabId;
-    btn.classList.toggle('tab-btn--active', active);
-    btn.setAttribute('aria-selected', active ? 'true' : 'false');
-    if (btn.closest('.main-nav-primary')) {
-      if (active) btn.setAttribute('aria-current', 'page');
-      else btn.removeAttribute('aria-current');
-    }
-  });
-
-  const dropdown = document.getElementById('nav-more');
-  if (dropdown) {
-    dropdown.classList.toggle('nav-dropdown--child-active', MORE_TAB_IDS.has(tabId));
-  }
+  setActiveTab(tabId);
 
   document.querySelectorAll('.tab-panel').forEach((panel) => {
     panel.hidden = panel.dataset.tabPanel !== tabId;
@@ -781,39 +748,32 @@ function showTab(tabId) {
 }
 
 window.showTab = showTab;
+window.openDocViewer = openDocViewer;
 
 function setupTabs() {
-  document.querySelectorAll('[data-tab]').forEach((el) => {
+  initUniversalNav({ context: 'script', activeTab: getTabFromHash() });
+
+  document.querySelectorAll('main [data-tab], .home-page [data-tab]').forEach((el) => {
     el.addEventListener('click', (event) => {
       if (el.tagName === 'A') event.preventDefault();
+      const docPath = el.getAttribute('data-doc-path');
+      if (docPath && el.dataset.tab === 'docs') {
+        openDocViewer(docPath);
+        loadDocViewer(docPath).catch(() => {});
+      }
       showTab(el.dataset.tab);
     });
   });
 
-  const trigger = document.getElementById('nav-more-trigger');
-  const dropdown = document.getElementById('nav-more');
-  if (trigger && dropdown) {
-    trigger.addEventListener('click', (event) => {
-      event.stopPropagation();
-      if (dropdown.classList.contains('nav-dropdown--open')) {
-        closeNavDropdown();
-      } else {
-        openNavDropdown();
-      }
-    });
-
-    document.addEventListener('click', (event) => {
-      if (!dropdown.contains(event.target)) {
-        closeNavDropdown();
-      }
-    });
-
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') {
-        closeNavDropdown();
-      }
-    });
-  }
+  const header = document.getElementById('app-header-root');
+  header?.addEventListener('universal-nav:tab', (event) => {
+    const { tab } = event.detail;
+    if (tab === 'docs') {
+      openDocViewer('docs/platform-overview.md');
+      loadDocViewer('docs/platform-overview.md').catch(() => {});
+    }
+    showTab(tab);
+  });
 
   window.addEventListener('hashchange', () => showTab(getTabFromHash()));
   showTab(getTabFromHash());

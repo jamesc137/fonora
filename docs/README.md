@@ -1,52 +1,114 @@
 # Fonora documentation
 
-Index of project docs and how they relate to the running app (`index.html` + `js/`).
+Index of project docs organized by platform layer. See **[platform-overview.md](platform-overview.md)** for the architecture diagram and audience paths.
 
-## Quick reference
+**Authoritative symbol rules:** [`language-rules.md`](language-rules.md) (`fonora_version: v3`) — loaded at runtime; edit to change symbols, sound grid, and vowel mappings.
 
-| Topic | Document |
-| --- | --- |
-| Run locally, tests, deploy | [../README.md](../README.md) · [deploy.md](deploy.md) |
-| eSpeak NG / WASM | [espeak-integration.md](espeak-integration.md) |
-| IPA pipeline architecture | [IPA-PIPELINE-REPORT.md](IPA-PIPELINE-REPORT.md) |
-| Consonant IPA normalization | [ipa-normalize.md](ipa-normalize.md) |
-| Multilingual encoding & playback | [multilingual-support.md](multilingual-support.md) |
-| Pronunciation Validation (automated round-trip) | [pronunciation-validation.md](pronunciation-validation.md) |
-| Symbol collision analysis | [FONORA_COLLISION_AUDIT.md](FONORA_COLLISION_AUDIT.md) |
-| Open problems / research bounties | [open-problems.md](open-problems.md) · app: More → **Open Problems** |
-| Language-system audit (June 2026) | [FONORA_CLEANUP_AUDIT.md](FONORA_CLEANUP_AUDIT.md) |
-| Historical v2 vowel analysis | [FONORA_VOWEL_DECISION_REPORT.md](FONORA_VOWEL_DECISION_REPORT.md) — **superseded by v3** |
+---
 
-**Authoritative symbol rules:** [`language-rules.md`](language-rules.md) (`fonora_version: v3`, `ipa_vowel_mode: v3`) — loaded at runtime by the app; edit this file to change symbols, the sound grid, and vowel mappings.
+## Script Layer
 
-## App sections (UI)
+The Fonora phonetic writing system — symbols, encoding rules, transliteration, and validation.
 
-Primary nav: **Home**, **Translator**, **Reader**, **Breakdown**, **Sound Grid**, **Alphabet**.
+| Topic | Document | App tab |
+| --- | --- | --- |
+| **Encoding rules** (authoritative) | [language-rules.md](language-rules.md) | Docs |
+| Sound Grid | — | `#grid` |
+| Symbols / Alphabet | — | `#alphabet` |
+| Transliteration | [multilingual-support.md](multilingual-support.md) | `#translator`, `#reader`, `#breakdown`, `#samples` |
+| Symbol input | — | `#keyboard`, `#reverse` |
+| Script learning | — | `#quiz` |
+| IPA pipeline architecture | [IPA-PIPELINE-REPORT.md](IPA-PIPELINE-REPORT.md) | Docs |
+| Consonant IPA normalization | [ipa-normalize.md](ipa-normalize.md) | Docs |
+| eSpeak NG / WASM | [espeak-integration.md](espeak-integration.md) | Docs |
+| Pronunciation Validation (automated round-trip) | [pronunciation-validation.md](pronunciation-validation.md) | `#pronunciation-validation` |
+| Pronunciation Testing (manual review) | — | `#encoder-testing` |
+| Symbol collision analysis | [FONORA_COLLISION_AUDIT.md](FONORA_COLLISION_AUDIT.md) | Docs |
+| Vowel normalization audit | [IPA_VOWEL_NORMALIZATION_AUDIT.md](IPA_VOWEL_NORMALIZATION_AUDIT.md) | Docs |
+| Historical v2 vowel analysis | [FONORA_VOWEL_DECISION_REPORT.md](FONORA_VOWEL_DECISION_REPORT.md) — **superseded by v3** | Docs |
 
-More menu: **Samples**, **Quiz**, **Keyboard** (symbol input + keyboard mapping table), **Reverse Lookup**, **Pronunciation Testing** (manual review), **Pronunciation Validation** (automated round-trip), **Open Problems** (known limitations + contribution guide), **Docs** (rendered markdown viewer; raw `.md` URLs still serve source for the app pipeline).
+---
 
-Doc links in the app open the **Docs** viewer (`?path=docs/foo.md#docs`). A **View on GitHub ↗** link is available on each page and beside Open Problems doc references.
+## Language Layer
 
-Multilingual behavior (language selector, vowel overlays, Reader voices): [multilingual-support.md](multilingual-support.md).
+**Fonoran** — the experimental constructed language written in Fonora.
 
-Removed from the UI (June 2026 cleanup): Mini Dictionary, Decode panel, separate Keyboard Mapping tab (mapping now lives on Keyboard).
+| Topic | Document | App |
+| --- | --- | --- |
+| Fonoran language overview | [fonoran.md](fonoran.md) | `/fonoran/` |
+| Root words | [fonoran.md](fonoran.md#language-model) | `/fonoran/` (Roots) |
+| Compounds | [fonoran.md](fonoran.md#language-model) | `/fonoran/` (Create Words) |
+| Dictionary | [fonoran.md](fonoran.md#ui-tabs) | `/fonoran/#dictionary` |
+| DDA semantics (Gen 3) | [fonoran-gen3.md](fonoran-gen3.md) | Docs |
+| DDA phonetic layer (Gen 3.1) | [fonoran-gen3-1.md](fonoran-gen3-1.md) | Docs |
+| Generator history (Gen 1/2 archive) | [fonoran-generator-archive.md](fonoran-generator-archive.md) | Docs |
+
+Live vocabulary: `data/fonoran-sound-bucket.json` (gitignored). Reference Gen 3/3.1 JSON is read-only seed data for DDA and the English meaning picker.
+
+---
+
+## Language Builder Tools
+
+Suite for creating, reviewing, testing, and exploring Fonoran.
+
+| Tool | Document | App |
+| --- | --- | --- |
+| Root Creator | [fonoran.md](fonoran.md#ui-tabs) | `/fonoran/` (Roots) |
+| Compound Creator | [fonoran.md](fonoran.md#ui-tabs) | `/fonoran/` (Create Words) |
+| Review Tools | [fonoran.md](fonoran.md#ui-tabs) | `/fonoran/` (Review) |
+| Language Explorer | [fonoran.md](fonoran.md#ui-tabs) | `/fonoran/` (Dictionary, Roots) |
+| Semantic Analysis (Health, Run DDA) | [fonoran.md](fonoran.md#ui-tabs) | `/fonoran/` (Health, Advanced) |
+| Story Mode | [fonoran-generator-archive.md](fonoran-generator-archive.md) — **planned / archived** | — |
+
+CLI: `npm run fonoran:gen3`, `fonoran:gen3:1`, `fonoran:canonical:init`, `fonoran:stress-test`, etc.
+
+---
+
+## Platform & operations
+
+| Topic | Document | App |
+| --- | --- | --- |
+| Platform overview | [platform-overview.md](platform-overview.md) | Docs |
+| Run locally, tests | [../README.md](../README.md) | — |
+| Deploy & PostgreSQL | [deploy.md](deploy.md) | — |
+| Open problems / research | [open-problems.md](open-problems.md) | `#open-problems` |
+| Contributing | [../CONTRIBUTING.md](../CONTRIBUTING.md) | Docs |
+| Language-system audit (June 2026) | [FONORA_CLEANUP_AUDIT.md](FONORA_CLEANUP_AUDIT.md) | Docs |
+
+---
+
+## App navigation (main script app)
+
+Universal header: context pills **Fonora Script** · **Fonoran** · **Research** · **Docs** (row 1); context-specific tool tabs (row 2).
+
+Primary tabs: **Home**, **Translator**, **Reader**, **Sound Grid**, **Alphabet**.
+
+More menu (grouped): transliteration tools (**Breakdown**, **Samples**, **Keyboard**, **Reverse Lookup**), script QA (**Quiz**, **Pronunciation Testing**, **Pronunciation Validation**), platform (**Open Problems**, **Docs**).
+
+Doc links open the **Docs** viewer (`?path=docs/foo.md#docs`). **View on GitHub ↗** on each page.
+
+Multilingual behavior: [multilingual-support.md](multilingual-support.md).
+
+---
 
 ## Tests: CLI vs browser
 
 | Command / entry | What it runs | UI equivalent |
 | --- | --- | --- |
-| `npm test` | 67 unit/integration assertions (`js/tests-core.js` + integration) | `?test` in URL → console |
+| `npm test` | Unit/integration assertions (`js/tests-core.js` + integration) | `?test` in URL → console |
 | `npm run test:pronunciation-validation` | Batch IPA round-trip report | Pronunciation Validation tab |
 | `npm run test:vowels` | Vowel readability report → `reports/` | — |
 | `npm run test:minimal-pairs` | Minimal-pair distinctness report | — |
 | `npm run test:v2-collisions` | Deprecated alias for `test:minimal-pairs` | — |
 | `npm run audit:collisions` | Full collision audit → `docs/FONORA_COLLISION_AUDIT.md` | Warnings inside Validation results |
+| `npm run fonoran:import` | Import JSON bucket → PostgreSQL | — |
+| `npm run fonoran:export` | Export PostgreSQL bucket → JSON | — |
 
 Pronunciation **Testing** is manual only (Correct / Wrong / Unsure, export JSON/CSV). Pronunciation **Validation** is automated pass/fail on IPA round-trip.
 
-## Known code ↔ markdown gaps
+---
 
-Minor remaining items:
+## Known code ↔ markdown gaps
 
 1. **`fonora-config.js`** — `vowelMode` falls back to `'default'` when bundle metadata is missing (markdown always sets `v3`).
 

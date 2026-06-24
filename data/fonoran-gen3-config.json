@@ -1,0 +1,251 @@
+{
+  "version": "0.3-gen3",
+  "description": "Grid-native semantic architecture. No human-language primitives. Meaning emerges from Fonora articulation topology.",
+
+  "philosophy": {
+    "premise": "Speech production is a journey from inner source (throat) through articulation to outer interface (lips). Meaning inherits this topology.",
+    "inversion": "Gen 1–2 asked what sound represents a concept. Gen 3 asks what concepts the grid makes inevitable.",
+    "constraint": "No Indo-European collision repair. Roots are justified only by coordinates."
+  },
+
+  "articulation_map": {
+    "places": {
+      "1": {
+        "symbol": "∋",
+        "key": "p",
+        "name": "interface",
+        "semantic_core": "The outer contact surface — where inner and outer meet, where form becomes perceptible to the world.",
+        "questions_answered": ["What is bounded?", "What touches the exterior?", "Where does inside end?"],
+        "not": "Not 'physical objects' — abstraction can sit at the interface (a threshold is abstract yet lip-positioned)."
+      },
+      "2": {
+        "symbol": "∩",
+        "key": "t",
+        "name": "index",
+        "semantic_core": "Pinpoint selection — this-here, singularity, the act of pointing at one distinguishable locus.",
+        "questions_answered": ["Which one?", "Where exactly?", "What is designated?"],
+        "not": "Not 'nearness' alone — nearness is a relation; index is the zero-dimensional pointer."
+      },
+      "3": {
+        "symbol": "⌓",
+        "key": "c",
+        "name": "junction",
+        "semantic_core": "Articulation and combination — where elements meet, bind, pattern, and compose structure.",
+        "questions_answered": ["How do parts combine?", "What is the grammar of assembly?", "Where is linkage?"],
+        "not": "Not 'organization' in a social sense — junction is pre-social combinatorics."
+      },
+      "4": {
+        "symbol": "∪",
+        "key": "k",
+        "name": "emanation",
+        "semantic_core": "Projection and field extension — force, wave, or presence radiating outward from a center.",
+        "questions_answered": ["What spreads?", "What reaches beyond?", "What propagates?"],
+        "not": "Not 'movement' alone — movement is dynamic; emanation is the locus of propagation."
+      },
+      "5": {
+        "symbol": "⊃",
+        "key": "h",
+        "name": "origin",
+        "semantic_core": "Generative source before full articulation — breath, potential, the pre-form from which form emerges.",
+        "questions_answered": ["Where does it come from?", "What precedes shape?", "What is not yet articulated?"],
+        "not": "Not 'abstract concept' as a catch-all — origin is specifically pre-articulate generativity."
+      }
+    },
+    "manners": {
+      "plain": {
+        "symbol": "(none)",
+        "key": "0",
+        "name": "packet",
+        "semantic_core": "Discrete bounded unit — a stasis with edges, countable, separable.",
+        "hypothesis": "Stops = things-as-units. A packet can be still."
+      },
+      "voice": {
+        "symbol": "⌇",
+        "key": "6",
+        "name": "live",
+        "semantic_core": "Self-sustaining activation — what maintains itself, acts, persists through voicing.",
+        "hypothesis": "Voicing = animation without specifying biology."
+      },
+      "friction": {
+        "symbol": "⌀",
+        "key": "7",
+        "name": "flux",
+        "semantic_core": "Continuous transformation — unbroken change, flow, wearing, becoming without discrete jumps.",
+        "hypothesis": "Fricatives = process that never fully stops."
+      },
+      "nasal": {
+        "symbol": "⏌",
+        "key": "8",
+        "name": "hollow",
+        "semantic_core": "Resonant interior — contained space that participates in what surrounds it; cavity, collective volume.",
+        "hypothesis": "Nasals = inside that is not sealed — containment with permeability."
+      },
+      "glide": {
+        "symbol": "ᵔ",
+        "key": "9",
+        "name": "passage",
+        "semantic_core": "Transition between states — path, relay, crossing, approach without arrival.",
+        "hypothesis": "Glides = neither A nor B; the between."
+      }
+    },
+    "vowel_roles": {
+      "description": "Vowel class (⚬X) qualifies the consonant skeleton — what KIND of presence the coordinate has.",
+      "classes": {
+        "contact": { "fonora": "⚬∋", "roman": "u", "meaning": "surface-touch quality; tactile presence" },
+        "focal": { "fonora": "⚬∩", "roman": "ee", "meaning": "particular, indexed, this-one quality" },
+        "struct": { "fonora": "⚬⌓", "roman": "i", "meaning": "relational, patterned, compositional quality" },
+        "field": { "fonora": "⚬∪", "roman": "o", "meaning": "extended, distributed, spreading quality" },
+        "source": { "fonora": "⚬⊃", "roman": "a", "meaning": "originary, potential, pre-formed quality" },
+        "animated": { "fonora": "⚬⌇", "roman": "e", "meaning": "activated, will-bearing quality" },
+        "turbulent": { "fonora": "⚬⌀", "roman": "ae", "meaning": "continuously changing quality" },
+        "resonant": { "fonora": "⚬⏌", "roman": "oh", "meaning": "collective, cavity-resonant quality" }
+      }
+    }
+  },
+
+  "coordinate_system": {
+    "name": "DDA",
+    "axes": {
+      "D": { "name": "depth", "range": ["interface", "index", "junction", "emanation", "origin"], "maps_to": "place 1–5" },
+      "M": { "name": "mode", "range": ["packet", "live", "flux", "hollow", "passage"], "maps_to": "manner modifier" },
+      "A": { "name": "aspect", "range": ["contact", "focal", "struct", "field", "source", "animated", "turbulent", "resonant"], "maps_to": "vowel class (⚬X)" }
+    },
+    "notation": "⟨D:depth, M:mode, A:aspect⟩ — e.g. ⟨emanation, flux, turbulent⟩ = propagating continuous change",
+    "compound_notation": "root₁ + root₂ + … — general → specific (same as Gen 1 compounding rule, grid-native roots only)"
+  },
+
+  "depth_to_place": { "interface": "1", "index": "2", "junction": "3", "emanation": "4", "origin": "5" },
+  "mode_to_manner": { "packet": "plain", "live": "voice", "flux": "friction", "hollow": "nasal", "passage": "glide" },
+
+  "sound_grid": {
+    "plain": { "1": "p", "2": "t", "3": "ch", "4": "k", "5": "h" },
+    "voice": { "1": "b", "2": "d", "3": "j", "4": "g", "5": "gh" },
+    "friction": { "1": "f", "2": "s", "3": "sh", "4": "x", "5": "kh" },
+    "nasal": { "1": "m", "2": "n", "3": "ñ", "4": "ng", "5": null },
+    "glide": { "1": "w", "2": "l", "3": "r", "4": "y", "5": null }
+  },
+
+  "aspect_vowel": {
+    "contact": "u",
+    "focal": "ee",
+    "struct": "i",
+    "field": "o",
+    "source": "a",
+    "animated": "e",
+    "turbulent": "ae",
+    "resonant": "oh"
+  },
+
+  "primitives": [
+    { "id": "bound", "gloss": "limit; edge; what marks termination", "D": "interface", "M": "packet", "A": "focal" },
+    { "id": "surface", "gloss": "contact plane; outer face", "D": "interface", "M": "packet", "A": "contact" },
+    { "id": "threshold", "gloss": "liminal crossing; doorway state", "D": "interface", "M": "passage", "A": "focal" },
+    { "id": "envelope", "gloss": "wrapping containment at boundary", "D": "interface", "M": "hollow", "A": "contact" },
+
+    { "id": "here", "gloss": "indexical locus; this-point", "D": "index", "M": "packet", "A": "focal" },
+    { "id": "mark", "gloss": "intentional sign; deliberate index", "D": "index", "M": "flux", "A": "focal" },
+    { "id": "probe", "gloss": "directed extension from a point", "D": "index", "M": "passage", "A": "focal" },
+    { "id": "agent", "gloss": "activated locus; point that acts", "D": "index", "M": "live", "A": "animated" },
+    { "id": "identity", "gloss": "discrete self-same; repeatable unit", "D": "index", "M": "packet", "A": "struct" },
+
+    { "id": "bond", "gloss": "structural connection; what holds together", "D": "junction", "M": "passage", "A": "struct" },
+    { "id": "form", "gloss": "articulated shape; composed figure", "D": "junction", "M": "packet", "A": "struct" },
+    { "id": "weave", "gloss": "interlaced change; pattern in motion", "D": "junction", "M": "flux", "A": "struct" },
+    { "id": "lattice", "gloss": "organized cavity; structured interior", "D": "junction", "M": "hollow", "A": "struct" },
+    { "id": "container", "gloss": "held interior; volume that receives", "D": "junction", "M": "hollow", "A": "resonant" },
+
+    { "id": "field", "gloss": "extended presence; spread without discrete edges", "D": "emanation", "M": "packet", "A": "field" },
+    { "id": "wave", "gloss": "propagating flux; disturbance that travels", "D": "emanation", "M": "flux", "A": "field" },
+    { "id": "pulse", "gloss": "rhythmic activation; repeating live emanation", "D": "emanation", "M": "live", "A": "field" },
+    { "id": "reach", "gloss": "extension toward; directed spread", "D": "emanation", "M": "passage", "A": "field" },
+    { "id": "signal", "gloss": "discrete emission; packet projected outward", "D": "emanation", "M": "packet", "A": "focal" },
+    { "id": "flow", "gloss": "unbounded change; continuous passage of state", "D": "emanation", "M": "flux", "A": "turbulent" },
+
+    { "id": "source", "gloss": "generative point; where form begins", "D": "origin", "M": "packet", "A": "source" },
+    { "id": "breath", "gloss": "continuous origin; pre-articulate stream", "D": "origin", "M": "flux", "A": "source" },
+    { "id": "will", "gloss": "originary activation; intent before action", "D": "origin", "M": "live", "A": "source" },
+    { "id": "void", "gloss": "inner absence; hollow at the source", "D": "origin", "M": "hollow", "A": "source" },
+    { "id": "cycle", "gloss": "return path; departure that comes back", "D": "origin", "M": "passage", "A": "resonant" },
+
+    { "id": "path", "gloss": "directed passage through space", "D": "index", "M": "passage", "A": "struct" },
+    { "id": "material", "gloss": "stuff-at-boundary; substance at interface", "D": "interface", "M": "packet", "A": "contact" },
+    { "id": "change", "gloss": "state transformation at junction", "D": "junction", "M": "flux", "A": "turbulent" },
+    { "id": "group", "gloss": "collective cavity; many in one volume", "D": "junction", "M": "hollow", "A": "resonant" },
+    { "id": "collective", "gloss": "many-as-one field; distributed plurality", "D": "emanation", "M": "hollow", "A": "field" },
+
+    { "id": "near", "gloss": "proximal index; within reach of pointer", "D": "index", "M": "packet", "A": "contact" },
+    { "id": "far", "gloss": "distal field; beyond indexical grasp", "D": "emanation", "M": "packet", "A": "field" },
+    { "id": "static", "gloss": "without change; stable junction", "D": "junction", "M": "packet", "A": "struct" },
+    { "id": "motion", "gloss": "undergoing passage; index in transit", "D": "index", "M": "passage", "A": "animated" },
+
+    { "id": "known", "gloss": "indexed certainty; designated and stable", "D": "index", "M": "packet", "A": "focal" },
+    { "id": "unknown", "gloss": "opaque origin; source not indexed", "D": "origin", "M": "hollow", "A": "source" }
+  ],
+
+  "example_derivations": [
+    {
+      "concept": "river",
+      "not_primitive": true,
+      "composition": ["flow", "path"],
+      "gloss": "continuous change along directed passage",
+      "coordinate_gloss": "⟨emanation,flux,turbulent⟩ + ⟨index,passage,struct⟩"
+    },
+    {
+      "concept": "planet",
+      "not_primitive": true,
+      "composition": ["bound", "field", "motion"],
+      "gloss": "edge + extended presence + index in transit",
+      "coordinate_gloss": "⟨interface,packet,focal⟩ + ⟨emanation,packet,field⟩ + ⟨index,passage,animated⟩"
+    },
+    {
+      "concept": "speaker",
+      "not_primitive": true,
+      "composition": ["signal", "agent"],
+      "gloss": "discrete emission + activated locus",
+      "coordinate_gloss": "⟨emanation,packet,focal⟩ + ⟨index,live,animated⟩"
+    },
+    {
+      "concept": "language",
+      "not_primitive": true,
+      "composition": ["signal", "bond", "group"],
+      "gloss": "emission + structural connection + collective cavity",
+      "coordinate_gloss": "signal + bond + group"
+    },
+    {
+      "concept": "memory",
+      "not_primitive": true,
+      "composition": ["mark", "container", "static"],
+      "gloss": "sign + held interior + stability",
+      "coordinate_gloss": "mark + container + static"
+    },
+    {
+      "concept": "storm",
+      "not_primitive": true,
+      "composition": ["wave", "change", "field"],
+      "gloss": "propagating flux + state transformation + extended presence",
+      "coordinate_gloss": "wave + change + field"
+    },
+    {
+      "concept": "community",
+      "not_primitive": true,
+      "composition": ["group", "bond", "identity"],
+      "gloss": "collective cavity + connection + discrete self-same",
+      "coordinate_gloss": "group + bond + identity"
+    },
+    {
+      "concept": "question",
+      "not_primitive": true,
+      "composition": ["probe", "unknown"],
+      "gloss": "directed extension + opaque origin",
+      "coordinate_gloss": "probe + unknown"
+    }
+  ],
+
+  "generation": {
+    "syllable_template": "CV",
+    "max_repair_steps": 20,
+    "manner_rotation": ["plain", "voice", "friction", "nasal", "glide"],
+    "repair_triggers": ["null_onset", "duplicate_root"],
+    "no_human_lexicon_repair": true
+  }
+}

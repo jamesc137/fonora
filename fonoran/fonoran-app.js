@@ -1044,7 +1044,7 @@
         startOnLoad: false,
         theme: 'base',
         themeVariables: {
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          fontFamily: 'ui-monospace, Menlo, monospace',
           lineColor: '#a89f95',
           clusterBkg: '#faf8f5',
           clusterBorder: '#e8e2da',

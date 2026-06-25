@@ -115,8 +115,11 @@ export function slugToRepoPath(slug) {
  */
 export function docViewerHref(repoPath) {
   const { path, anchor } = splitDocRef(repoPath);
-  const slug = repoPathToSlug(path);
-  const base = slug === repoPathToSlug(DEFAULT_DOC_PATH) ? '/docs' : `/docs/${encodeURIComponent(slug)}`;
+  if (path === DEFAULT_DOC_PATH && !anchor) {
+    return '/#docs';
+  }
+  const params = new URLSearchParams({ path });
+  const base = `/?${params.toString()}`;
   return anchor ? `${base}#${anchor}` : base;
 }
 
@@ -127,6 +130,17 @@ export function repoPathFromViewerHref(href) {
   if (!href) return null;
   try {
     const normalized = String(href).replace(/^\.\.\//, '/').replace(/^\.\//, '/');
+    if (normalized.startsWith('/?') || normalized.startsWith('?')) {
+      const parsed = parseDocFromLocation({
+        pathname: '/',
+        search: normalized.startsWith('?') ? normalized : normalized.slice(1),
+        hash: normalized.includes('#') ? normalized.slice(normalized.indexOf('#')) : '',
+      });
+      return parsed?.path ?? null;
+    }
+    if (normalized === '/#docs' || normalized.endsWith('#docs')) {
+      return DEFAULT_DOC_PATH;
+    }
     if (normalized.startsWith('/docs')) {
       const pathname = normalized.split('#')[0];
       const hash = normalized.includes('#') ? normalized.slice(normalized.indexOf('#')) : '';
@@ -147,7 +161,20 @@ export function repoPathFromViewerHref(href) {
  */
 export function parseDocFromLocation(loc = window.location) {
   const pathname = loc.pathname.replace(/\/$/, '') || '/';
+  const params = new URLSearchParams(loc.search);
 
+  if (params.has('path')) {
+    const path = normalizeDocPath(params.get('path'));
+    const hash = loc.hash.replace(/^#/, '');
+    const anchor = params.get('anchor') || (hash && hash !== 'docs' ? hash : '');
+    return { path, anchor };
+  }
+
+  if (loc.hash.replace(/^#/, '') === 'docs') {
+    return { path: DEFAULT_DOC_PATH, anchor: '' };
+  }
+
+  // Legacy /docs/* paths — still parsed so old links can redirect client-side.
   if (pathname === '/docs') {
     return { path: DEFAULT_DOC_PATH, anchor: loc.hash.replace(/^#/, '') };
   }
@@ -156,17 +183,6 @@ export function parseDocFromLocation(loc = window.location) {
     const slug = decodeURIComponent(pathname.slice('/docs/'.length));
     const path = slugToRepoPath(slug);
     return { path, anchor: loc.hash.replace(/^#/, '') };
-  }
-
-  const params = new URLSearchParams(loc.search);
-  if (params.has('path')) {
-    const path = normalizeDocPath(params.get('path'));
-    const anchor = params.get('anchor') || loc.hash.replace(/^#/, '');
-    return { path, anchor: anchor === 'docs' ? '' : anchor };
-  }
-
-  if (loc.hash.replace(/^#/, '') === 'docs') {
-    return { path: DEFAULT_DOC_PATH, anchor: '' };
   }
 
   return null;

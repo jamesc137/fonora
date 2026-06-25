@@ -738,15 +738,6 @@
       box-shadow:0 16px 48px rgba(0,0,0,.14);
     }
     .sheet.open { visibility:visible; pointer-events:auto; opacity:1; transform:translate(-50%,-50%) scale(1); }
-    html.sheet-open,
-    body.sheet-open { overflow:hidden; }
-    body.sheet-open {
-      position:fixed;
-      width:100%;
-      left:0;
-      right:0;
-    }
-    .sheet.open { overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
 
     /* --- Fonoran lander (shared intro/section typography in app.css) --- */
     .fonoran-showcase { padding:1.25rem 1.35rem; background:var(--surface); border:1px solid var(--border); border-radius:var(--layout-card-radius); }

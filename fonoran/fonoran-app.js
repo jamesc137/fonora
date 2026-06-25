@@ -145,7 +145,7 @@
       editing: false, editMeaning: '', clearAffected: false,
       justSaved: null,
       recipe: null, recipeFilter: '',
-      dictFilter: 'all', dictQuery: '',
+      dictFilter: 'all', dictQuery: '', dictSelection: null,
       wordComposer: [], wordComposerFilter: '',
       showUnapprovedWords: false,
       showDebugDda: false,
@@ -1144,10 +1144,11 @@
     /* ---------- WORD COMPOSER + REVIEW ---------- */
     function renderWordComposer() {
       if (!STATE.lab) return;
+      ensureSplitStickyObserver();
       const picks = STATE.wordComposer;
       $('wc-pick').innerHTML = picks.length
         ? picks.map((c, i) => `<span class="tok" data-idx="${i}" data-write>${typeBadge(c.type)} <span class="mono">${escapeHtml(c.spelling || c.ref)}</span> = ${escapeHtml(compDisplayLabel(c))} ×</span>`).join('')
-        : '<span class="sans" style="color:var(--muted);font-size:0.84rem">Tap roots or approved words below…</span>';
+        : '<span class="sans" style="color:var(--muted);font-size:0.84rem">Tap roots or approved words on the left…</span>';
       $('wc-pick').querySelectorAll('.tok').forEach(t => t.addEventListener('click', () => { STATE.wordComposer.splice(Number(t.dataset.idx), 1); renderWordComposer(); }));
       const spelling = picks.length ? resolveComposerSpelling(picks) : '';
       $('wc-spell').textContent = spelling || '-';
@@ -1180,6 +1181,7 @@
         STATE.wordComposer.push({ type: 'word', ref: w.id, spelling: w.spelling, meaning: w.meaning });
         renderWordComposer();
       }));
+      requestAnimationFrame(syncSplitStickyOffsets);
     }
 
     function openExplorerPreview(composer, spelling) {
@@ -1191,7 +1193,7 @@
       });
     }
 
-    function bindMermaidGraphClicks(svgEl, graphNodes) {
+    function bindMermaidGraphClicks(svgEl, graphNodes, onNavigate) {
       if (!svgEl || !graphNodes?.length) return;
       const byId = Object.fromEntries(graphNodes.map(n => [n.id, n]));
       svgEl.querySelectorAll('g.node').forEach(g => {
@@ -1203,17 +1205,18 @@
         g.style.cursor = 'pointer';
         g.addEventListener('click', (e) => {
           e.stopPropagation();
-          openExplorer(meta.kind, meta.ref);
+          if (onNavigate) onNavigate(meta.kind, meta.ref);
+          else openExplorer(meta.kind, meta.ref);
         });
       });
     }
 
-    async function renderExplorerMermaidIn(rootEl, mermaidSource, graphNodes) {
+    async function renderExplorerMermaidIn(rootEl, mermaidSource, graphNodes, onNavigate) {
       if (!window.mermaid || !mermaidSource || !rootEl) return;
       window.mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' });
       await window.mermaid.run({ nodes: rootEl.querySelectorAll('.mermaid') });
       const wrap = rootEl.querySelector('.mermaid-wrap');
-      bindMermaidGraphClicks(wrap?.querySelector('svg'), graphNodes);
+      bindMermaidGraphClicks(wrap?.querySelector('svg'), graphNodes, onNavigate);
     }
 
     function labItemDda(type, ref) {
@@ -1328,6 +1331,10 @@
 
       const html = `
         <div class="showcase-hero">
+          <div class="showcase-hero__meta">
+            ${typeBadge('word')} ${badge(f.state || 'draft')}
+            <span class="showcase-hero__kind">Approved word</span>
+          </div>
           ${pronBlock(speakParts)}
           <div class="showcase-hero__word">
             <p class="review-word">${escapeHtml(f.spelling)}</p>
@@ -1341,19 +1348,18 @@
             <div class="explorer-section"><h4>Built from</h4><ul class="explorer-list">${builtFrom}</ul></div>
             <div class="explorer-section"><h4>Derivation tree</h4><div class="explorer-tree">${escapeHtml(treeText)}</div></div>
           </div>
-          <div class="showcase-panel showcase-panel--dda">
-            ${buildDdaPanelHtml(word?.dda, f.components)}
-          </div>
         </div>
         ${buildUsedInChipsHtml(data.used_in)}
-        ${data.mermaid ? `<div class="explorer-section showcase-graph"><h4>Family graph</h4><p class="sans graph-hint">Tap a node to explore that root or word.</p><div class="mermaid-wrap"><pre class="mermaid">${escapeHtml(data.mermaid)}</pre></div></div>` : ''}`;
+        ${data.mermaid ? `<div class="explorer-section showcase-graph"><h4>Family graph</h4><p class="sans graph-hint">Tap a node to explore that root or word.</p><div class="mermaid-wrap"><pre class="mermaid">${escapeHtml(data.mermaid)}</pre></div></div>` : ''}
+        <div class="showcase-dda-section">
+          ${buildDdaPanelHtml(word?.dda, f.components)}
+        </div>`;
 
       return { html, speakParts };
     }
 
     function buildExplorerHtml(data, explorerKind, { preview = false, compact = false } = {}) {
       const f = data.focus;
-      const kindLabel = explorerKind === 'root' ? 'Primitive root' : (preview ? 'Draft word (preview)' : 'Approved word');
       const builtFrom = buildBuiltFromList(f.components);
 
       const treeText = f.derivation?.direct?.length
@@ -1366,11 +1372,16 @@
 
       let html = `
         <div class="explorer-hero">
+          <div class="explorer-hero__flags" aria-label="Word status">
+            ${typeBadge(explorerKind === 'root' ? 'root' : 'word')} ${badge(f.state || 'draft')}
+          </div>
           ${pronBlock(speakParts)}
-          <p class="review-word">${escapeHtml(f.spelling)}</p>
-          <p class="review-meaning">${f.meaning ? escapeHtml(f.meaning) : '<span style="color:var(--draft);font-style:italic">unnamed</span>'}</p>
-          <p>${typeBadge(explorerKind === 'root' ? 'root' : 'word')} ${badge(f.state || 'draft')} · <span class="sans" style="font-size:0.84rem;color:var(--muted)">${kindLabel}</span></p>
-          ${preview ? '<p class="sans" style="font-size:0.82rem;color:var(--muted);margin:0.35rem 0 0">Preview: save the word to explore downstream links. Tap nodes in the graph to jump to saved roots and words.</p>' : ''}
+          <div class="explorer-hero__word">
+            <p class="review-word">${escapeHtml(f.spelling)}</p>
+            <p class="review-meaning">${f.meaning ? escapeHtml(f.meaning) : '<span style="color:var(--draft);font-style:italic">unnamed</span>'}</p>
+            <button type="button" class="hear-min explorer-hear-btn" aria-label="Listen to pronunciation">▶ Listen</button>
+          </div>
+          ${preview ? '<p class="sans explorer-hero__note">Preview: save the word to explore downstream links. Tap nodes in the graph to jump to saved roots and words.</p>' : ''}
         </div>
         <div class="explorer-section"><h4>Built from</h4><ul class="explorer-list">${builtFrom}</ul></div>
         <div class="explorer-section"><h4>Derivation tree</h4><div class="explorer-tree">${escapeHtml(treeText)}</div></div>
@@ -1385,8 +1396,7 @@
           : '<li class="sans" style="color:var(--muted)">No sibling words share the same components.</li>';
         html += `
           <div class="explorer-section"><h4>Used in</h4><ul class="explorer-list">${usedIn}</ul></div>
-          <div class="explorer-section"><h4>Related words</h4><ul class="explorer-list">${related}</ul></div>
-          <div class="actions" style="justify-content:center;margin-top:0.75rem"><button type="button" class="hear-min" id="ch-hear">▶ Listen</button></div>`;
+          <div class="explorer-section"><h4>Related words</h4><ul class="explorer-list">${related}</ul></div>`;
       }
 
       return { html, speakParts };
@@ -1538,9 +1548,6 @@
       }
     }
 
-    async function renderExplorerMermaid(mermaidSource, graphNodes) {
-      await renderExplorerMermaidIn($('sheet-body'), mermaidSource, graphNodes);
-    }
 
     function renderWords() {
       if (!STATE.lab) return;
@@ -1792,26 +1799,33 @@
     }
 
     /* ---------- Language Explorer ---------- */
+    async function fetchExplorerData(kind, id, preview = null) {
+      if (preview?.preview) {
+        return api('/api/fonoran/lab/graph/preview', {
+          method: 'POST',
+          body: JSON.stringify({
+            spelling: preview.spelling,
+            meaning: preview.meaning,
+            components: composerToApi(preview.components),
+          }),
+        });
+      }
+      return api(`/api/fonoran/lab/graph/${kind}/${encodeURIComponent(id)}`);
+    }
+
+    async function mountExplorer(containerEl, kind, id, preview = null, { onNavigate } = {}) {
+      const data = await fetchExplorerData(kind, id, preview);
+      const explorerKind = preview?.preview ? 'word' : kind;
+      const { html, speakParts } = buildExplorerHtml(data, explorerKind, { preview: !!preview?.preview });
+      containerEl.innerHTML = html;
+      containerEl.querySelector('.explorer-hear-btn')?.addEventListener('click', () => speakNeural(speakParts));
+      await renderExplorerMermaidIn(containerEl, data.mermaid, data.graph_nodes, onNavigate);
+      return data;
+    }
+
     async function openExplorer(kind, id, preview = null) {
       try {
-        let data;
-        if (preview?.preview) {
-          data = await api('/api/fonoran/lab/graph/preview', {
-            method: 'POST',
-            body: JSON.stringify({
-              spelling: preview.spelling,
-              meaning: preview.meaning,
-              components: composerToApi(preview.components),
-            }),
-          });
-        } else {
-          data = await api(`/api/fonoran/lab/graph/${kind}/${encodeURIComponent(id)}`);
-        }
-        const explorerKind = preview?.preview ? 'word' : kind;
-        const { html, speakParts } = buildExplorerHtml(data, explorerKind, { preview: !!preview?.preview });
-        $('sheet-body').innerHTML = html;
-        $('ch-hear')?.addEventListener('click', () => speakNeural(speakParts));
-        await renderExplorerMermaid(data.mermaid, data.graph_nodes);
+        await mountExplorer($('sheet-body'), kind, id, preview);
         $('sheet').classList.add('open');
       } catch (e) { toast(e.message); }
     }
@@ -1851,22 +1865,117 @@
       if (q) list = list.filter(e => `${e.word} ${e.english} ${e.hint}`.toLowerCase().includes(q));
       return list.sort((a, b) => a.word.localeCompare(b.word));
     }
+    function dictExplorerKind(entryKind) {
+      return entryKind === 'sound' ? 'root' : 'word';
+    }
+
+    function dictDetailEmptyHtml() {
+      return `<div class="fonoran-split-empty"><p>Select a word or root on the left to explore its derivation tree, family graph, and related words.</p></div>`;
+    }
+
+    function showDictDetailEmpty() {
+      const panel = $('dict-detail');
+      if (panel) panel.innerHTML = dictDetailEmptyHtml();
+    }
+
+    let dictDetailToken = 0;
+    async function loadDictionaryDetail(entryKind, id) {
+      const panel = $('dict-detail');
+      if (!panel) return;
+      const token = ++dictDetailToken;
+      panel.innerHTML = '<p class="fonoran-split-loading">Loading…</p>';
+      try {
+        await mountExplorer(panel, dictExplorerKind(entryKind), id, null, {
+          onNavigate: (navKind, ref) => {
+            const kind = navKind === 'root' ? 'sound' : 'compound';
+            STATE.dictSelection = { kind, id: ref };
+            renderDictionaryList();
+            loadDictionaryDetail(kind, ref);
+          },
+        });
+        if (token !== dictDetailToken) return;
+      } catch (e) {
+        if (token !== dictDetailToken) return;
+        panel.innerHTML = `<p class="empty">${escapeHtml(e.message)}</p>`;
+      }
+    }
+
+    function selectDictionaryEntry(entryKind, id) {
+      STATE.dictSelection = { kind: entryKind, id };
+      renderDictionaryList();
+      loadDictionaryDetail(entryKind, id);
+    }
+
+    function syncDictSelection() {
+      if (!STATE.dictSelection) {
+        showDictDetailEmpty();
+        return;
+      }
+      const list = dictEntries();
+      const still = list.some(e => e.kind === STATE.dictSelection.kind && e.id === STATE.dictSelection.id);
+      if (!still) {
+        STATE.dictSelection = null;
+        showDictDetailEmpty();
+      }
+    }
+
+    function renderDictionaryList() {
+      const list = dictEntries();
+      const sel = STATE.dictSelection;
+      $('dict-list').innerHTML = list.length ? list.map(e => {
+        const selected = sel && sel.kind === e.kind && sel.id === e.id;
+        return `
+        <button type="button" class="word-item${selected ? ' is-selected' : ''}" data-kind="${e.kind}" data-id="${escapeHtml(e.id)}">
+          <div class="row"><span class="fonoran">${escapeHtml(e.word)}</span><span>${badge(e.type)} ${badge(e.state)}</span></div>
+          <div class="row" style="margin-top:0.15rem"><span class="english">${escapeHtml(e.english)}</span></div>
+          <div class="hint">${escapeHtml(e.hint)}</div>
+        </button>`;
+      }).join('') : '<p class="empty">Nothing matches.</p>';
+      $('dict-list').querySelectorAll('.word-item').forEach(b => b.addEventListener('click', () => {
+        selectDictionaryEntry(b.dataset.kind, b.dataset.id);
+      }));
+    }
+
+    function syncSplitStickyOffsets() {
+      const header = document.getElementById('app-header-root');
+      if (header) {
+        const { bottom } = header.getBoundingClientRect();
+        document.documentElement.style.setProperty('--fonoran-header-offset', `${Math.ceil(bottom)}px`);
+      }
+      const shell = document.querySelector('.fonoran-split-page.active [data-split-shell]');
+      if (shell) {
+        document.documentElement.style.setProperty('--fonoran-split-chrome-offset', `${shell.offsetHeight}px`);
+      }
+    }
+
+    let splitStickyObserver = null;
+    function ensureSplitStickyObserver() {
+      const header = document.getElementById('app-header-root');
+      if (!header) return;
+      if (!splitStickyObserver) {
+        splitStickyObserver = new ResizeObserver(() => syncSplitStickyOffsets());
+        splitStickyObserver.observe(header);
+      }
+      document.querySelectorAll('[data-split-shell]').forEach((shell) => {
+        if (!shell.dataset.stickyObserved) {
+          shell.dataset.stickyObserved = '1';
+          splitStickyObserver.observe(shell);
+        }
+      });
+    }
+
     function renderDictionary() {
       if (!STATE.lab) return;
+      ensureSplitStickyObserver();
       const s = STATE.lab.stats;
       $('dict-stats').innerHTML = `
         <div><strong>${s.sounds}</strong> sounds</div>
         <div><strong>${s.compounds}</strong> compounds</div>
         <div><strong>${s.sound_states.approved + s.sound_states.revised + s.compound_states.approved + s.compound_states.revised}</strong> approved</div>
         <div><strong>${s.sound_states.needs_review + s.compound_states.needs_review}</strong> need review</div>`;
-      const list = dictEntries();
-      $('dict-list').innerHTML = list.length ? list.map(e => `
-        <button type="button" class="word-item" data-kind="${e.kind}" data-id="${escapeHtml(e.id)}">
-          <div class="row"><span class="fonoran">${escapeHtml(e.word)}</span><span>${badge(e.type)} ${badge(e.state)}</span></div>
-          <div class="row" style="margin-top:0.15rem"><span class="english">${escapeHtml(e.english)}</span></div>
-          <div class="hint">${escapeHtml(e.hint)}</div>
-        </button>`).join('') : '<p class="empty">Nothing matches.</p>';
-      $('dict-list').querySelectorAll('.word-item').forEach(b => b.addEventListener('click', () => openChain(b.dataset.kind, b.dataset.id)));
+      renderDictionaryList();
+      syncDictSelection();
+      requestAnimationFrame(syncSplitStickyOffsets);
     }
 
     /* ---------- HEALTH + TIMELINE ---------- */
@@ -1949,7 +2058,13 @@
       }
       renderActivePage();
       scrollPageTop();
-      requestAnimationFrame(scrollPageTop);
+      requestAnimationFrame(() => {
+        scrollPageTop();
+        if (name === 'dictionary' || name === 'create') {
+          syncSplitStickyOffsets();
+          requestAnimationFrame(syncSplitStickyOffsets);
+        }
+      });
     }
 
     const header = document.getElementById('app-header-root');
@@ -2084,7 +2199,9 @@
         if (page !== STATE.page) switchPage(page);
       });
       wireLander();
+      window.addEventListener('resize', syncSplitStickyOffsets);
       await load();
+      syncSplitStickyOffsets();
     }
 
     boot();

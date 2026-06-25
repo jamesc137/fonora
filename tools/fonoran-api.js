@@ -21,6 +21,11 @@ import {
   recomposeCompound,
 } from './fonoran-sound-bucket.js';
 import { loadEnglishLexicon } from './fonoran-english-lexicon.js';
+import {
+  getSessionUser,
+  isWriteAuthRequired,
+  unauthorizedResponse,
+} from './fonoran-auth.js';
 
 export function jsonResponse(res, status, body) {
   const payload = JSON.stringify(body);
@@ -44,6 +49,10 @@ export async function handleFonoranApi(req, res, pathname, method) {
     jsonResponse(res, status, body);
     return true;
   };
+  if (isWriteAuthRequired(pathname, method) && !getSessionUser(req)) {
+    unauthorizedResponse(res);
+    return true;
+  }
   try {
     if (pathname === '/api/fonoran/lab' && method === 'GET') {
       return done(200, await getLab());

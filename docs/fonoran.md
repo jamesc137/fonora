@@ -31,28 +31,31 @@ See [platform-overview.md](platform-overview.md) for storage details and [deploy
 
 ## UI tabs (Language Builder Tools)
 
-| Tab | Builder tool | Purpose |
-| --- | --- | --- |
-| **Root Creator** (Roots) | Root Creator | Browse and create primitive syllables |
-| **Compound Creator** (Create Words) | Compound Creator | Stack **roots** + **approved words** → preview → name → save |
-| **Review** | Review Tools | Approve, reject, or edit pending items |
-| **Dictionary** | Dictionary + Language Explorer | Browse everything; click any item for derivation trees and family graphs |
+| Tab | Builder tool | Access | Purpose |
+| --- | --- | --- | --- |
+| **Home** | Lander | Public | Overview, live showcase, health summary |
+| **Dictionary** | Dictionary + Language Explorer | **Public (read-only)** | Browse vocabulary; click any item for derivation trees and family graphs |
+| **Root Creator** (Roots) | Root Creator | Sign-in required | Create primitive syllables |
+| **Compound Creator** (Create Words) | Compound Creator | Sign-in required | Stack **roots** + **approved words** → preview → name → save |
+| **Review** | Review Tools | Sign-in required | Approve, reject, or edit pending items |
+| **Health** | Semantic Analysis | Public (read-only) | Readability scores and warnings |
+| **Advanced** | DDA / lab tools | Sign-in required | Run DDA, reset lab, destructive ops |
 
-**Language Explorer** shows: Built from · Derivation tree · Used in · Related words · Mermaid family graph.
+**Language Explorer** (from Dictionary) shows: Built from · Derivation tree · Used in · Related words · Mermaid family graph. Explorer uses read-only API routes — no sign-in needed.
 
-**Advanced:** Run DDA, compound parser, health metrics, optional debug DDA fields, lab reset.
+**Advanced:** Run DDA, compound parser, health metrics, optional debug DDA fields, lab reset. Parser (`GET /parse`) is read-only; DDA and resets require sign-in.
 
 ## API
 
-| Endpoint | Method |
-| --- | --- |
-| `/api/fonoran/lab` | GET |
-| `/api/fonoran/lab/compounds` | POST `{ components: [{type, ref}], meaning }` |
-| `/api/fonoran/lab/graph/:kind/:ref` | GET — `kind` = `root` or `word` |
-| `/api/fonoran/lab/graph/preview` | POST `{ components, spelling?, meaning? }` — draft explorer graph |
-| `/api/fonoran/lab/run-dda` | POST `{ scope: "pending" \| "stale" \| "all" }` |
-| `/api/fonoran/lab/parse/:spelling` | GET |
-| `/api/fonoran/lab/health` | GET |
+| Endpoint | Method | Auth |
+| --- | --- | --- |
+| `/api/fonoran/lab` | GET | Public |
+| `/api/fonoran/lab/health` | GET | Public |
+| `/api/fonoran/lab/graph/:kind/:ref` | GET — `kind` = `root` or `word` | Public |
+| `/api/fonoran/lab/graph/preview` | POST — draft explorer graph (no save) | Public |
+| `/api/fonoran/lab/parse/:spelling` | GET | Public |
+| `/api/fonoran/lab/compounds` | POST `{ components: [{type, ref}], meaning }` | Sign-in |
+| `/api/fonoran/lab/run-dda` | POST `{ scope: "pending" \| "stale" \| "all" }` | Sign-in |
 
 Legacy `parts: ["ka","so"]` is still accepted; stored as typed components internally.
 

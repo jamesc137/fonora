@@ -66,8 +66,15 @@ Use for uptime monitors.
 | `FONORAN_STORAGE` | `postgres` if `DATABASE_URL` set, else `json` | Force `json` or `postgres` storage |
 | `FONORAN_SKIP_JSON_MIRROR` | — | Set to `1` to skip writing JSON mirror when using PostgreSQL |
 | `PGSSLMODE` | — | Set to `disable` for local PostgreSQL without SSL |
+| `GOOGLE_CLIENT_ID` | — | Google OAuth client ID (Fonoran write auth) |
+| `GOOGLE_CLIENT_SECRET` | — | Google OAuth client secret |
+| `SESSION_SECRET` | — | Random secret for signing session cookies (32+ chars) |
+| `ALLOWED_DOMAIN` | `fonora.org` | Only `@domain` Google accounts may edit Fonoran |
+| `ADMIN_EMAILS` | — | Optional comma-separated allowlist instead of domain |
+| `AUTH_CALLBACK_URL` | derived from request | OAuth redirect URI override |
+| `FONORAN_AUTH` | — | Set to `off` to disable auth locally |
 
-No secrets are required for the public script app. Fonoran lab data uses PostgreSQL in production when configured.
+No secrets are required for the **public script app** alone. When all three OAuth vars are set (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `SESSION_SECRET`), Fonoran **write** routes require a signed-in `@fonora.org` Google account. Copy [`.env.example`](../.env.example) for local testing.
 
 ## PostgreSQL (Fonoran lab data)
 
@@ -111,11 +118,22 @@ Because WASM assets are large (~90 MB in `vendor/` after install), a Node static
 
 ## Production checklist
 
+### Fonora (script app)
+
 - [ ] `npm install && npm test` pass
 - [ ] `npm start` — Translator, Reader, and Sound Grid work
 - [ ] `https://fonora.org` serves with valid TLS
 - [ ] Canonical URL and Open Graph tags point to `https://fonora.org/` (see `index.html`)
 - [ ] Custom domain redirects `www` → apex or vice versa (your preference)
+
+### Fonoran (language builder)
+
+- [ ] Google Workspace + OAuth credentials configured ([fonoran-auth-and-release.md](fonoran-auth-and-release.md))
+- [ ] `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `SESSION_SECRET`, `ALLOWED_DOMAIN` set on Heroku
+- [ ] Write API requires `@fonora.org` session; unsigned users can browse dictionary only
+- [ ] `DATABASE_URL` set; live bucket imported or seeded once
+- [ ] Contributor Google Form linked from `/fonoran/` lander
+- [ ] Backup: `npm run fonoran:export` after significant changes
 
 ## CI
 

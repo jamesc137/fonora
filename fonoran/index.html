@@ -123,12 +123,12 @@
               <select id="wc-lex-word" aria-label="English word"><option value="">Pick a word…</option></select>
             </div>
           </div>
-          <input type="text" id="wc-meaning" placeholder="Type or pick from English list…">
+          <input type="text" id="wc-meaning" placeholder="Type or pick from English list…" data-write-input>
           <div class="actions" style="margin-top:0.7rem">
-            <button type="button" class="btn btn-primary" id="wc-save" disabled>Save word</button>
-            <button type="button" class="btn" id="wc-clear">Clear</button>
+            <button type="button" class="btn btn-primary" id="wc-save" disabled data-write>Save word</button>
+            <button type="button" class="btn" id="wc-clear" data-write>Clear</button>
           </div>
-          <label class="sans wc-toggle"><input type="checkbox" id="wc-show-unapproved"> Show unapproved word candidates</label>
+          <label class="sans wc-toggle"><input type="checkbox" id="wc-show-unapproved" data-write-input> Show unapproved word candidates</label>
           <input type="search" id="wc-filter" placeholder="Search roots and words by spelling or meaning…" style="margin-top:0.85rem">
           <h4 class="picker-h">Primitive roots</h4>
           <div class="sound-grid" id="wc-roots"></div>
@@ -142,7 +142,7 @@
       <section id="page-roots" class="page"><div id="roots-body"></div></section>
 
       <section id="page-dictionary" class="page">
-        <p class="page-intro">Browse everything you have named so far.</p>
+        <p class="page-intro">Public read-only — browse the vocabulary and open derivation trees.</p>
         <input type="search" id="dict-search" class="search-bar" placeholder="Search Fonoran or English…" autocomplete="off">
         <div class="toolbar" id="dict-filters">
           <button type="button" class="chip active" data-filter="all">All</button>
@@ -169,7 +169,7 @@
           <h3>Semantic analysis (DDA)</h3>
           <p class="sans" style="font-size:0.86rem;color:var(--muted);margin:0 0 0.5rem">Runs in the background on new or changed words. Surfaces through health warnings, related words, and the explorer, never during creation.</p>
           <div class="actions">
-            <button type="button" class="btn btn-primary" id="adv-run-dda">Run DDA</button>
+            <button type="button" class="btn btn-primary" id="adv-run-dda" data-write>Run DDA</button>
           </div>
           <p id="adv-dda-status" class="sans" style="font-size:0.84rem;color:var(--muted);margin:0.5rem 0 0"></p>
           <h3>Compound parser</h3>
@@ -182,16 +182,32 @@
           <div class="actions">
             <button type="button" class="btn" id="adv-dictionary">Full dictionary</button>
             <button type="button" class="btn" id="adv-health">Language health</button>
-            <button type="button" class="btn" id="adv-reset-review">Reset all review states (keep meanings)</button>
-            <button type="button" class="btn danger" id="adv-reseed">Reset lab (blank slate)</button>
+            <button type="button" class="btn" id="adv-reset-review" data-write>Reset all review states (keep meanings)</button>
+            <button type="button" class="btn danger" id="adv-reseed" data-write>Reset lab (blank slate)</button>
           </div>
-          <label class="sans wc-toggle" style="display:block;margin-top:1rem"><input type="checkbox" id="adv-debug-dda"> Show debug DDA fields</label>
+          <label class="sans wc-toggle" style="display:block;margin-top:1rem"><input type="checkbox" id="adv-debug-dda" data-write-input> Show debug DDA fields</label>
           <pre id="adv-debug-panel" class="debug-panel" hidden></pre>
           <p class="sans" style="font-size:0.86rem;color:var(--muted);margin:1rem 0 0">Historical bulk generators (Gen 1/2) are archived in <a href="../docs/fonoran-generator-archive.md">fonoran-generator-archive.md</a>.</p>
         </div>
       </section>
     </main>
   </div>
+
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <p class="site-footer-copy sans">
+        © 2026 <a href="https://jamescalhoun.co" target="_blank" rel="noopener noreferrer">James Calhoun</a>.
+        Released under the <a href="https://github.com/jamesc137/fonora/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>.
+      </p>
+      <p class="site-footer-links sans">
+        <a href="../#home">Fonora Script</a>
+        <span class="site-footer-sep" aria-hidden="true">·</span>
+        <a href="https://fonora.org/fonoran/">fonora.org</a>
+        <span class="site-footer-sep" aria-hidden="true">·</span>
+        <a href="https://github.com/jamesc137/fonora" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </p>
+    </div>
+  </footer>
 
   <div id="sheet" class="sheet explorer-sheet"><button type="button" class="close" id="sheet-close">×</button><div id="sheet-body"></div></div>
   <div id="toast" class="toast"></div>

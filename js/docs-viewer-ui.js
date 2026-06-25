@@ -91,8 +91,10 @@ export async function loadDocViewer(repoPath) {
     contentEl.innerHTML = renderMarkdown(markdown, { docPath: path });
     setViewerState({ title, path });
     if (anchor) {
-      const target = document.getElementById(anchor);
-      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      requestAnimationFrame(() => {
+        const target = document.getElementById(anchor);
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

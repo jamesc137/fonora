@@ -21,22 +21,113 @@
 
     gtag('config', 'G-KJWS8ZZFJB');
   </script>
-  <!-- Social preview image — set og:image when a sharing asset is ready:
-  <meta property="og:image" content="https://fonora.org/og-image.png">
-  <meta property="og:image:alt" content="Fonora — universal phonetic script">
-  -->
+  <script src="js/nav-boot.js"></script>
   <link rel="stylesheet" href="app.css">
+  <link rel="prefetch" href="fonoran/">
 </head>
 <body>
   <div id="fallback-banner" class="fallback-banner" hidden>
     docs/language-rules.md could not be loaded. Start a local HTTP server and reload.
   </div>
 
-  <header id="app-header-root" class="app-header app-header--script"></header>
+  <header id="app-header-root" class="app-header" data-nav-shell="static">
+    <div class="app-header__tabstrip">
+      <div class="app-header__row app-header__row--platform">
+        <div class="app-header__start">
+          <nav class="platform-tabs" role="tablist" aria-label="Fonora sections">
+            <a href="./#about" class="platform-tab" data-nav-tab="platform">Fonora</a>
+            <a href="./#home" class="platform-tab" data-nav-tab="script">Script</a>
+            <a href="fonoran/" class="platform-tab" data-nav-tab="language">Language</a>
+          </nav>
+        </div>
+      </div>
+    </div>
+    <div class="app-header__row app-header__row--tools" data-nav-row="platform-tools">
+      <nav class="main-nav" aria-label="Fonora">
+        <div class="main-nav-primary">
+          <button type="button" class="tab-btn" data-platform-tab="platform">About</button>
+          <button type="button" class="tab-btn" data-platform-tab="open-problems">Research</button>
+          <button type="button" class="tab-btn" data-platform-tab="docs">Docs</button>
+        </div>
+      </nav>
+    </div>
+    <div class="app-header__row app-header__row--tools" data-nav-row="script-tools">
+      <nav class="main-nav" aria-label="Script tools">
+        <div class="main-nav-primary">
+          <button type="button" class="tab-btn" data-tab="home">Home</button>
+          <button type="button" class="tab-btn" data-tab="translator">Translator</button>
+          <button type="button" class="tab-btn" data-tab="reader">Reader</button>
+          <button type="button" class="tab-btn" data-tab="grid">Sound Grid</button>
+          <button type="button" class="tab-btn" data-tab="alphabet">Alphabet</button>
+        </div>
+        <div class="nav-dropdown" id="nav-more">
+          <button type="button" class="nav-dropdown-trigger tab-btn" id="nav-more-trigger" aria-expanded="false" aria-haspopup="true" aria-controls="nav-more-menu">
+            More
+            <span class="nav-dropdown-chevron" aria-hidden="true">▾</span>
+          </button>
+          <div class="nav-dropdown-menu" id="nav-more-menu" role="menu" hidden>
+            <p class="nav-dropdown-label" role="presentation">Transliteration</p>
+            <button type="button" class="tab-btn nav-dropdown-item" data-tab="breakdown" role="menuitem">Breakdown</button>
+            <button type="button" class="tab-btn nav-dropdown-item" data-tab="samples" role="menuitem">Samples</button>
+            <button type="button" class="tab-btn nav-dropdown-item" data-tab="keyboard" role="menuitem">Keyboard</button>
+            <button type="button" class="tab-btn nav-dropdown-item" data-tab="reverse" role="menuitem">Reverse Lookup</button>
+            <p class="nav-dropdown-label" role="presentation">Script QA</p>
+            <button type="button" class="tab-btn nav-dropdown-item" data-tab="quiz" role="menuitem">Quiz</button>
+            <button type="button" class="tab-btn nav-dropdown-item" data-tab="encoder-testing" role="menuitem">Pronunciation Testing</button>
+            <button type="button" class="tab-btn nav-dropdown-item" data-tab="pronunciation-validation" role="menuitem">Pronunciation Validation</button>
+            <p class="nav-dropdown-label" role="presentation">Platform</p>
+            <button type="button" class="tab-btn nav-dropdown-item" data-tab="open-problems" role="menuitem">Open Problems</button>
+            <button type="button" class="tab-btn nav-dropdown-item" data-tab="docs" role="menuitem">Docs</button>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
 
   <main class="main-content" id="main-content">
-    <!-- Home -->
-    <section class="home-page content-page tab-panel tab-panel--active" id="tab-home" data-tab-panel="home" aria-labelledby="home-title">
+    <!-- Platform home -->
+    <section class="platform-home content-page tab-panel" id="tab-platform" data-tab-panel="platform" aria-labelledby="platform-title">
+      <section class="content-section content-section--intro" aria-labelledby="platform-title">
+        <header class="home-intro-header">
+          <h1 id="platform-title">Fonora</h1>
+          <p class="home-subtitle">An open platform for phonetic writing and constructed language.</p>
+        </header>
+        <div class="home-prose">
+          <p>
+            Fonora brings together a universal phonetic script, an experimental constructed language, and tools for building and documenting new languages on a shared phonetic foundation.
+          </p>
+          <p>
+            Start with the script to learn how sounds are written, explore Fonoran to see a language built in Fonora, or jump into the language builder to create vocabulary of your own.
+          </p>
+        </div>
+      </section>
+
+      <section class="home-section home-section--layers content-section" aria-labelledby="explore-heading">
+        <h2 id="explore-heading">Explore</h2>
+        <div class="home-layer-cards">
+          <article class="home-layer-card">
+            <p class="home-layer-card__tag">Script</p>
+            <h3>Fonora Script</h3>
+            <p>A phonetic writing system built from nine core symbols that represent where and how speech sounds are produced.</p>
+            <div class="home-layer-card__actions">
+              <button type="button" class="btn btn--primary" data-tab="home">Explore Script</button>
+              <button type="button" class="btn" data-tab="translator">Translator</button>
+            </div>
+          </article>
+          <article class="home-layer-card">
+            <p class="home-layer-card__tag">Language</p>
+            <h3>Fonoran</h3>
+            <p>An experimental constructed language written in Fonora — roots, compounds, semantic coordinates, and a growing dictionary.</p>
+            <div class="home-layer-card__actions">
+              <a href="fonoran/" class="btn btn--primary">Explore Language</a>
+            </div>
+          </article>
+        </div>
+      </section>
+    </section>
+
+    <!-- Script home -->
+    <section class="home-page content-page tab-panel" id="tab-home" data-tab-panel="home" hidden aria-labelledby="home-title">
       <section class="home-section home-section--intro content-section content-section--intro" aria-labelledby="home-title">
         <header class="home-intro-header">
           <h1 id="home-title">Fonora</h1>

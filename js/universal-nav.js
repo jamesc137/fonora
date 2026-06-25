@@ -1,5 +1,5 @@
 /**
- * Unified two-row navigation shell for Fonora Script and Fonoran.
+ * Unified two-row navigation shell for Fonora platform, Script, and Language.
  * Mount into #app-header-root.
  */
 
@@ -64,9 +64,18 @@ const FONORAN_TITLES = {
 };
 
 const MORE_TAB_IDS = new Set(MORE_MENU.filter((i) => i.id).map((i) => i.id));
+const FONORAN_MORE_IDS = new Set(['health', 'advanced']);
+
+const PLATFORM_TABS = [
+  { id: 'platform', label: 'About' },
+  { id: 'open-problems', label: 'Research' },
+  { id: 'docs', label: 'Docs' },
+];
+
+/** @typedef {'platform' | 'script' | 'language'} NavContext */
 
 let state = {
-  context: 'script',
+  context: /** @type {NavContext} */ ('script'),
   activeTab: 'home',
   mountId: 'app-header-root',
 };
@@ -88,48 +97,77 @@ function escapeHtml(s) {
     .replace(/>/g, '&gt;');
 }
 
-function scriptBase(context) {
-  return context === 'fonoran' ? '..' : '.';
+function rootPath(context) {
+  return context === 'language' ? '..' : '.';
 }
 
 function docHref(context, path) {
-  return `${scriptBase(context)}/?path=${encodeURIComponent(path)}#docs`;
+  return `${rootPath(context)}/?path=${encodeURIComponent(path)}#docs`;
 }
 
-function renderFonoranAuthTools() {
+function platformTabHref(context, tabId) {
+  const root = rootPath(context);
+  if (tabId === 'platform') return `${root}/#about`;
+  if (tabId === 'script') return `${root}/#home`;
+  return context === 'language' ? './' : 'fonoran/';
+}
+
+function renderLanguageAuthTools() {
   if (!fonoranAuthState?.required || !fonoranAuthState.authenticated) return '';
   const email = escapeAttr(fonoranAuthState.email ?? 'Signed in');
   return `
         <span class="fonoran-auth-user" title="${email}">${escapeHtml(fonoranAuthState.email ?? 'Signed in')}</span>
-        <button type="button" class="app-header__global-link app-header__global-link--button" id="fonoran-sign-out">Sign out</button>`;
+        <button type="button" class="app-header__sign-out-btn" id="fonoran-sign-out">Sign out</button>`;
+}
+
+function renderPlatformTabs(context) {
+  const tabs = [
+    { id: 'platform', label: 'Fonora' },
+    { id: 'script', label: 'Script' },
+    { id: 'language', label: 'Language' },
+  ];
+
+  return tabs
+    .map((tab) => {
+      const active = context === tab.id;
+      const href = escapeAttr(platformTabHref(context, tab.id));
+      if (active) {
+        return `<span class="platform-tab platform-tab--active" aria-current="page">${tab.label}</span>`;
+      }
+      return `<a href="${href}" class="platform-tab">${tab.label}</a>`;
+    })
+    .join('');
 }
 
 function renderRow1(context) {
-  const base = scriptBase(context);
-  const scriptActive = context === 'script';
-  const fonoranActive = context === 'fonoran';
+  const authSlot =
+    context === 'language'
+      ? `<nav class="app-header__global" aria-label="Account" data-nav-auth></nav>`
+      : '';
 
   return `
-    <div class="app-header__row app-header__row--platform">
-      <div class="app-header__start">
-        <a href="${escapeAttr(base)}/#home" class="app-header__brand">Fonora</a>
-        <div class="context-pills" role="group" aria-label="Application context">
-          ${
-            scriptActive
-              ? `<span class="context-pill context-pill--active context-pill--script">Fonora Script</span>`
-              : `<a href="${escapeAttr(base)}/#home" class="context-pill context-pill--script">Fonora Script</a>`
-          }
-          ${
-            fonoranActive
-              ? `<a href="${escapeAttr(base)}/fonoran/" class="context-pill context-pill--active context-pill--fonoran">Fonoran</a>`
-              : `<a href="${escapeAttr(base)}/fonoran/" class="context-pill context-pill--fonoran">Fonoran</a>`
-          }
+    <div class="app-header__tabstrip">
+      <div class="app-header__row app-header__row--platform">
+        <div class="app-header__start">
+          <nav class="platform-tabs" role="tablist" aria-label="Fonora sections">${renderPlatformTabs(context)}</nav>
         </div>
+        ${authSlot}
       </div>
-      <nav class="app-header__global" aria-label="Platform links">
-        <a href="${escapeAttr(base)}/#open-problems" class="app-header__global-link" data-script-tab="open-problems">Research</a>
-        <a href="${docHref(context, 'docs/platform-overview.md')}" class="app-header__global-link" data-script-tab="docs">Docs</a>
-        ${context === 'fonoran' ? renderFonoranAuthTools() : ''}
+    </div>`;
+}
+
+function renderPlatformRow2(activeTab) {
+  const tabs = PLATFORM_TABS.map((t) => {
+    const active = t.id === activeTab;
+    return `<button type="button" class="tab-btn${active ? ' tab-btn--active' : ''}" data-platform-tab="${t.id}"${
+      active ? ' aria-current="page"' : ''
+    }>${t.label}</button>`;
+  }).join('');
+
+  return `
+    <div class="app-header__row app-header__row--tools" data-nav-row="platform-tools">
+      <nav class="main-nav" aria-label="Fonora">
+        <div class="main-nav-primary">${tabs}</div>
       </nav>
     </div>`;
 }
@@ -147,7 +185,7 @@ function renderScriptRow2(activeTab) {
       return `<p class="nav-dropdown-label" role="presentation">${item.text}</p>`;
     }
     const active = item.id === activeTab;
-    return `<button type="button" class="tab-btn nav-dropdown-item" data-tab="${item.id}" role="menuitem"${
+    return `<button type="button" class="tab-btn nav-dropdown-item${active ? ' tab-btn--active' : ''}" data-tab="${item.id}" role="menuitem"${
       active ? ' aria-current="page"' : ''
     }>${item.label}</button>`;
   }).join('');
@@ -155,7 +193,7 @@ function renderScriptRow2(activeTab) {
   const moreActive = MORE_TAB_IDS.has(activeTab);
 
   return `
-    <div class="app-header__row app-header__row--tools">
+    <div class="app-header__row app-header__row--tools" data-nav-row="script-tools">
       <nav class="main-nav" aria-label="Script tools">
         <div class="main-nav-primary">${primary}</div>
         <div class="nav-dropdown${moreActive ? ' nav-dropdown--child-active' : ''}" id="nav-more">
@@ -179,136 +217,243 @@ function renderScriptRow2(activeTab) {
 function renderFonoranRow2(activeTab) {
   const tabs = FONORAN_TABS.map(
     (t) => `
-      <button type="button" class="fonoran-tab-btn${t.id === activeTab ? ' active' : ''}" data-fonoran-page="${t.id}"${
+      <button type="button" class="tab-btn${t.id === activeTab ? ' tab-btn--active' : ''}" data-fonoran-page="${t.id}"${
         t.id === activeTab ? ' aria-current="page"' : ''
       }>${t.label}</button>`,
   ).join('');
 
+  const moreActive = FONORAN_MORE_IDS.has(activeTab);
+  const moreItems = ['health', 'advanced']
+    .map((id) => {
+      const active = id === activeTab;
+      const label = id === 'health' ? 'Health' : 'Advanced';
+      return `<button type="button" class="tab-btn nav-dropdown-item${active ? ' tab-btn--active' : ''}" data-fonoran-page="${id}" role="menuitem"${
+        active ? ' aria-current="page"' : ''
+      }>${label}</button>`;
+    })
+    .join('');
+
   return `
-    <div class="app-header__row app-header__row--tools app-header__row--fonoran">
-      <nav class="fonoran-tabs" aria-label="Fonoran tools">${tabs}</nav>
-      <div class="app-header__tools">
-        <button type="button" class="icon-btn" id="health-btn" data-fonoran-action="health">Health</button>
-        <button type="button" class="icon-btn" id="advanced-btn" data-fonoran-action="advanced">⚙ Advanced</button>
-      </div>
+    <div class="app-header__row app-header__row--tools" data-nav-row="language-tools">
+      <nav class="main-nav" aria-label="Fonoran tools">
+        <div class="main-nav-primary">${tabs}</div>
+        <div class="nav-dropdown${moreActive ? ' nav-dropdown--child-active' : ''}" id="fonoran-nav-more">
+          <button
+            type="button"
+            class="nav-dropdown-trigger tab-btn"
+            id="fonoran-nav-more-trigger"
+            aria-expanded="false"
+            aria-haspopup="true"
+            aria-controls="fonoran-nav-more-menu"
+          >
+            More
+            <span class="nav-dropdown-chevron" aria-hidden="true">▾</span>
+          </button>
+          <div class="nav-dropdown-menu" id="fonoran-nav-more-menu" role="menu" hidden>${moreItems}</div>
+        </div>
+      </nav>
     </div>`;
 }
 
 function updateDocumentTitle() {
-  if (state.context === 'script') {
+  if (state.context === 'platform') {
+    if (state.activeTab === 'open-problems') {
+      document.title = 'Fonora — Research';
+    } else if (state.activeTab === 'docs') {
+      document.title = 'Fonora — Docs';
+    } else {
+      document.title = 'Fonora | Phonetic Writing Platform';
+    }
+  } else if (state.context === 'script') {
     const label = SCRIPT_TITLES[state.activeTab] ?? 'Fonora';
-    document.title = state.activeTab === 'home' ? 'Fonora | Universal Phonetic Script' : `Fonora — ${label}`;
+    document.title = state.activeTab === 'home' ? 'Fonora Script | Universal Phonetic Writing' : `Fonora Script — ${label}`;
   } else {
     const label = FONORAN_TITLES[state.activeTab] ?? 'Fonoran';
-    document.title = state.activeTab === 'home' ? 'Fonoran: Experimental Language' : `Fonoran: ${label}`;
+    document.title = state.activeTab === 'home' ? 'Fonoran | Experimental Language' : `Fonoran — ${label}`;
   }
+}
+
+function syncBootAttributes() {
+  const html = document.documentElement;
+  html.setAttribute('data-fonora-nav', state.context);
+  if (state.context === 'language') {
+    html.setAttribute('data-fonora-tab', state.activeTab);
+    html.setAttribute('data-fonora-page', state.activeTab);
+    return;
+  }
+  html.setAttribute('data-fonora-tab', state.activeTab);
+  html.removeAttribute('data-fonora-page');
+}
+
+function patchStaticNav(root) {
+  root.className = `app-header app-header--${state.context}`;
+
+  root.querySelectorAll('[data-nav-tab]').forEach((el) => {
+    el.classList.toggle('platform-tab--active', el.dataset.navTab === state.context);
+  });
+
+  root.querySelectorAll('[data-tab].tab-btn').forEach((el) => {
+    const active = el.dataset.tab === state.activeTab;
+    el.classList.toggle('tab-btn--active', active);
+    if (active) el.setAttribute('aria-current', 'page');
+    else el.removeAttribute('aria-current');
+  });
+
+  root.querySelectorAll('[data-platform-tab].tab-btn').forEach((el) => {
+    const active = el.dataset.platformTab === state.activeTab;
+    el.classList.toggle('tab-btn--active', active);
+    if (active) el.setAttribute('aria-current', 'page');
+    else el.removeAttribute('aria-current');
+  });
+
+  root.querySelectorAll('[data-fonoran-page].tab-btn').forEach((el) => {
+    const active = el.dataset.fonoranPage === state.activeTab;
+    el.classList.toggle('tab-btn--active', active);
+    if (active) el.setAttribute('aria-current', 'page');
+    else el.removeAttribute('aria-current');
+  });
+
+  const moreDropdown = root.querySelector('#nav-more');
+  if (moreDropdown) {
+    moreDropdown.classList.toggle('nav-dropdown--child-active', MORE_TAB_IDS.has(state.activeTab));
+  }
+
+  const fonoranMore = root.querySelector('#fonoran-nav-more');
+  if (fonoranMore) {
+    fonoranMore.classList.toggle('nav-dropdown--child-active', FONORAN_MORE_IDS.has(state.activeTab));
+  }
+
+  const authSlot = root.querySelector('[data-nav-auth]');
+  if (authSlot) {
+    authSlot.innerHTML = state.context === 'language' ? renderLanguageAuthTools() : '';
+  }
+
+  syncBootAttributes();
 }
 
 function render() {
   const root = document.getElementById(state.mountId);
   if (!root) return;
 
-  const contextClass = state.context === 'fonoran' ? 'app-header--fonoran' : 'app-header--script';
-  const row2 =
-    state.context === 'fonoran'
-      ? renderFonoranRow2(state.activeTab)
-      : renderScriptRow2(state.activeTab);
+  if (root.dataset.navShell === 'static') {
+    patchStaticNav(root);
+  } else {
+    const contextClass = `app-header--${state.context}`;
+    const row2 =
+      state.context === 'language'
+        ? renderFonoranRow2(state.activeTab)
+        : state.context === 'script'
+          ? renderScriptRow2(state.activeTab)
+          : state.context === 'platform'
+            ? renderPlatformRow2(state.activeTab)
+            : '';
 
-  root.className = `app-header ${contextClass}`;
-  root.innerHTML = `${renderRow1(state.context)}${row2}`;
+    root.className = `app-header ${contextClass}`;
+    root.innerHTML = `${renderRow1(state.context)}${row2}`;
+  }
+
   updateDocumentTitle();
+  syncBootAttributes();
+  bindNavListeners();
 }
 
-function closeNavDropdown() {
-  const dropdown = document.getElementById('nav-more');
-  const menu = document.getElementById('nav-more-menu');
-  const trigger = document.getElementById('nav-more-trigger');
+function closeNavDropdown(dropdownId = 'nav-more') {
+  const dropdown = document.getElementById(dropdownId);
+  const menu = document.getElementById(`${dropdownId}-menu`);
+  const trigger = document.getElementById(`${dropdownId}-trigger`);
   if (!dropdown || !menu || !trigger) return;
   dropdown.classList.remove('nav-dropdown--open');
   menu.hidden = true;
   trigger.setAttribute('aria-expanded', 'false');
 }
 
-function openNavDropdown() {
-  const dropdown = document.getElementById('nav-more');
-  const menu = document.getElementById('nav-more-menu');
-  const trigger = document.getElementById('nav-more-trigger');
+function openNavDropdown(dropdownId = 'nav-more') {
+  const dropdown = document.getElementById(dropdownId);
+  const menu = document.getElementById(`${dropdownId}-menu`);
+  const trigger = document.getElementById(`${dropdownId}-trigger`);
   if (!dropdown || !menu || !trigger) return;
   dropdown.classList.add('nav-dropdown--open');
   menu.hidden = false;
   trigger.setAttribute('aria-expanded', 'true');
 }
 
-function setupScriptHeaderListeners() {
+/** @type {AbortController | null} */
+let navListenersAbort = null;
+
+function bindNavListeners() {
+  navListenersAbort?.abort();
+  navListenersAbort = new AbortController();
+  const { signal } = navListenersAbort;
+
   const root = document.getElementById(state.mountId);
   if (!root) return;
 
   root.querySelectorAll('[data-tab]').forEach((el) => {
-    el.addEventListener('click', (event) => {
-      event.preventDefault();
-      const tab = el.dataset.tab;
-      if (!tab) return;
-      root.dispatchEvent(new CustomEvent('universal-nav:tab', { detail: { tab }, bubbles: true }));
-    });
+    el.addEventListener(
+      'click',
+      (event) => {
+        event.preventDefault();
+        const tab = el.dataset.tab;
+        if (!tab) return;
+        closeNavDropdown('nav-more');
+        root.dispatchEvent(new CustomEvent('universal-nav:tab', { detail: { tab }, bubbles: true }));
+      },
+      { signal },
+    );
   });
 
-  root.querySelectorAll('[data-script-tab]').forEach((el) => {
-    el.addEventListener('click', (event) => {
-      if (state.context !== 'script') return;
-      const tab = el.dataset.scriptTab;
-      if (!tab) return;
-      event.preventDefault();
-      root.dispatchEvent(new CustomEvent('universal-nav:tab', { detail: { tab }, bubbles: true }));
-    });
+  root.querySelectorAll('[data-platform-tab]').forEach((el) => {
+    el.addEventListener(
+      'click',
+      (event) => {
+        event.preventDefault();
+        const tab = el.dataset.platformTab;
+        if (!tab) return;
+        root.dispatchEvent(new CustomEvent('universal-nav:platform-tab', { detail: { tab }, bubbles: true }));
+      },
+      { signal },
+    );
   });
-
-  const trigger = document.getElementById('nav-more-trigger');
-  const dropdown = document.getElementById('nav-more');
-  if (trigger && dropdown) {
-    trigger.addEventListener('click', (event) => {
-      event.stopPropagation();
-      if (dropdown.classList.contains('nav-dropdown--open')) closeNavDropdown();
-      else openNavDropdown();
-    });
-  }
-}
-
-function setupFonoranHeaderListeners() {
-  const root = document.getElementById(state.mountId);
-  if (!root) return;
 
   root.querySelectorAll('[data-fonoran-page]').forEach((el) => {
-    el.addEventListener('click', () => {
-      const page = el.dataset.fonoranPage;
-      if (page) {
+    el.addEventListener(
+      'click',
+      (event) => {
+        event.preventDefault();
+        const page = el.dataset.fonoranPage;
+        if (!page) return;
+        closeNavDropdown('fonoran-nav-more');
         root.dispatchEvent(new CustomEvent('universal-nav:page', { detail: { page }, bubbles: true }));
-      }
-    });
-  });
-
-  root.querySelectorAll('[data-fonoran-action]').forEach((el) => {
-    el.addEventListener('click', () => {
-      const action = el.dataset.fonoranAction;
-      if (action) {
-        root.dispatchEvent(new CustomEvent('universal-nav:action', { detail: { action }, bubbles: true }));
-      }
-    });
+      },
+      { signal },
+    );
   });
 
   const signOut = document.getElementById('fonoran-sign-out');
-  if (signOut) {
-    signOut.addEventListener('click', () => {
+  signOut?.addEventListener(
+    'click',
+    (event) => {
+      event.preventDefault();
       root.dispatchEvent(new CustomEvent('universal-nav:sign-out', { bubbles: true }));
-    });
-  }
-}
+    },
+    { signal },
+  );
 
-function bindListeners() {
-  if (state.context === 'script') {
-    setupScriptHeaderListeners();
-  } else {
-    setupFonoranHeaderListeners();
-  }
+  ['nav-more', 'fonoran-nav-more'].forEach((dropdownId) => {
+    const trigger = document.getElementById(`${dropdownId}-trigger`);
+    const dropdown = document.getElementById(dropdownId);
+    if (!trigger || !dropdown) return;
+    trigger.addEventListener(
+      'click',
+      (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (dropdown.classList.contains('nav-dropdown--open')) closeNavDropdown(dropdownId);
+        else openNavDropdown(dropdownId);
+      },
+      { signal },
+    );
+  });
 }
 
 let listenersBound = false;
@@ -318,27 +463,53 @@ function bindGlobalDismiss() {
   listenersBound = true;
 
   document.addEventListener('click', (event) => {
-    const dropdown = document.getElementById('nav-more');
-    if (dropdown && !dropdown.contains(event.target)) closeNavDropdown();
+    const el = event.target instanceof Element ? event.target : event.target?.parentElement;
+    if (!el) return;
+    ['nav-more', 'fonoran-nav-more'].forEach((id) => {
+      const dropdown = document.getElementById(id);
+      if (dropdown && !dropdown.contains(el)) closeNavDropdown(id);
+    });
   });
 
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') closeNavDropdown();
+    if (event.key === 'Escape') {
+      closeNavDropdown('nav-more');
+      closeNavDropdown('fonoran-nav-more');
+    }
   });
 }
 
+export function wireUniversalNav() {
+  bindGlobalDismiss();
+}
+
 /**
- * @param {{ context?: 'script' | 'fonoran', activeTab?: string, mountId?: string }} [options]
+ * @param {{ context?: NavContext, activeTab?: string, mountId?: string }} [options]
  */
 export function initUniversalNav(options = {}) {
   state.context =
-    options.context ?? (window.location.pathname.includes('/fonoran') ? 'fonoran' : 'script');
-  state.activeTab = options.activeTab ?? 'home';
+    options.context ??
+    (window.location.pathname.includes('/fonoran')
+      ? 'language'
+      : !window.location.hash && !new URLSearchParams(window.location.search).has('path')
+        ? 'platform'
+        : 'script');
+  state.activeTab =
+    options.activeTab ??
+    (state.context === 'platform' ? 'platform' : 'home');
   state.mountId = options.mountId ?? 'app-header-root';
 
   render();
-  bindListeners();
-  bindGlobalDismiss();
+  wireUniversalNav();
+}
+
+/**
+ * @param {NavContext} context
+ */
+export function setNavContext(context) {
+  if (state.context === context) return;
+  state.context = context;
+  render();
 }
 
 /**
@@ -347,11 +518,11 @@ export function initUniversalNav(options = {}) {
 export function setActiveTab(tabOrPage) {
   if (state.activeTab === tabOrPage) {
     updateDocumentTitle();
+    syncBootAttributes();
     return;
   }
   state.activeTab = tabOrPage;
   render();
-  bindListeners();
 }
 
 /** @param {boolean} disabled */
@@ -370,9 +541,8 @@ export function setFonoranAuth(auth) {
     email: auth.email ?? null,
     loginUrl: auth.loginUrl ?? '/auth/google?returnTo=/fonoran/',
   };
-  if (state.context === 'fonoran') {
+  if (state.context === 'language') {
     render();
-    bindListeners();
   }
 }
 

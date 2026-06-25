@@ -206,6 +206,7 @@
       background:var(--layout-page-bg, var(--bg));
       margin:0;
     }
+    .fonoran-split-chrome > .auth-gate { margin-top:0; }
     .fonoran-split-chrome__intro { margin:0 0 0.65rem; font-size:0.86rem; color:var(--muted); line-height:1.4; }
     .fonoran-split-chrome .search-bar { margin-bottom:0.65rem; }
     .fonoran-split-chrome .toolbar { margin:0 0 0.65rem; }

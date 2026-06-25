@@ -1,5 +1,4 @@
-import { escapeHtml, deleteSymbolBeforeCursor } from './utils.js';
-import { normalizeSymbolInput } from './decode.js';
+import { escapeHtml } from './utils.js';
 import {
   ENGLISH_DIALECT_OPTIONS,
   LANGUAGE_OPTIONS,
@@ -12,8 +11,6 @@ import {
   tokenizeFonoraPhrase,
   speakFonoraPhrase,
   cancelSpeech,
-  looksLikePhonemeKeyText,
-  setReaderWordSources,
 } from './fonora-tts.js';
 import { getPiperVoiceForLang, PIPER_VOICE_OPTIONS } from './piper-audio.js';
 import { primeAudioContext } from './espeak-audio.js';
@@ -22,19 +19,36 @@ import { initPiperAudio, isPiperAudioReady } from './piper-audio.js';
 let rulesRef = null;
 let playing = false;
 let cancelRequested = false;
-let readerUiBound = false;
+let playbackUiBound = false;
+let currentSymbols = '';
+
+const EMPTY_OUTPUT_HTML =
+  '<span class="tts-empty">Words appear here as you type. Press Play to hear them spoken.</span>';
+
+function getOutputDisplay() {
+  return document.getElementById('translate-output');
+}
+
+export function getTranslateSymbols() {
+  return currentSymbols;
+}
+
+export function setTranslateSymbols(text) {
+  currentSymbols = String(text || '').trim();
+  renderTranslateOutput(currentSymbols);
+}
 
 function getReaderLang() {
-  return document.getElementById('tts-lang')?.value || 'en';
+  return document.getElementById('translate-lang')?.value || 'en';
 }
 
 function getReaderEnglishDialect() {
-  return document.getElementById('tts-dialect')?.value || undefined;
+  return document.getElementById('translate-dialect')?.value || undefined;
 }
 
 function getReaderPiperVoice(lang = getReaderLang()) {
   if (lang === 'en') {
-    return document.getElementById('tts-piper-voice')?.value || getPiperVoiceForLang('en');
+    return document.getElementById('translate-piper-voice')?.value || getPiperVoiceForLang('en');
   }
   return getPiperVoiceForLang(lang);
 }
@@ -51,7 +65,7 @@ function getReaderPlaybackOptions() {
 }
 
 function populateLanguageSelect() {
-  const sel = document.getElementById('tts-lang');
+  const sel = document.getElementById('translate-lang');
   if (!sel) return;
   const saved = loadLanguagePreferences();
   sel.innerHTML = LANGUAGE_OPTIONS.map(
@@ -60,7 +74,7 @@ function populateLanguageSelect() {
 }
 
 function populateDialectSelect() {
-  const sel = document.getElementById('tts-dialect');
+  const sel = document.getElementById('translate-dialect');
   if (!sel) return;
   const savedDialect = loadLanguagePreferences().englishDialect;
   sel.innerHTML = ENGLISH_DIALECT_OPTIONS.map(
@@ -69,18 +83,18 @@ function populateDialectSelect() {
 }
 
 function populatePiperVoiceSelect() {
-  const sel = document.getElementById('tts-piper-voice');
+  const sel = document.getElementById('translate-piper-voice');
   if (!sel) return;
   sel.innerHTML = PIPER_VOICE_OPTIONS.map(
     (item, index) => `<option value="${escapeHtml(item.id)}"${index === 0 ? ' selected' : ''}>${escapeHtml(item.label)}</option>`,
   ).join('');
 }
 
-function syncReaderControls() {
+export function syncTranslatePlaybackControls() {
   const lang = getReaderLang();
-  const dialectWrap = document.getElementById('tts-dialect-wrap');
-  const piperWrap = document.getElementById('tts-piper-voice-wrap');
-  const voiceNote = document.getElementById('tts-voice-note');
+  const dialectWrap = document.getElementById('translate-dialect-wrap');
+  const piperWrap = document.getElementById('translate-piper-voice-wrap');
+  const voiceNote = document.getElementById('translate-voice-note');
 
   if (dialectWrap) dialectWrap.hidden = lang !== 'en';
   if (piperWrap) piperWrap.hidden = lang !== 'en';
@@ -101,13 +115,13 @@ function syncReaderControls() {
   }
 }
 
-function renderWordDisplay(text) {
-  const display = document.getElementById('tts-display');
+export function renderTranslateOutput(text = currentSymbols) {
+  const display = getOutputDisplay();
   if (!display) return;
 
   const words = tokenizeFonoraPhrase(text);
   if (!words.length) {
-    display.innerHTML = '<span class="tts-empty">Words appear here as you type. Press Play to hear them spoken.</span>';
+    display.innerHTML = EMPTY_OUTPUT_HTML;
     return;
   }
 
@@ -116,24 +130,29 @@ function renderWordDisplay(text) {
     .join(' ');
 }
 
+/** @deprecated Use setTranslateSymbols / renderTranslateOutput */
+export function renderTranslatePlaybackDisplay(text) {
+  setTranslateSymbols(text);
+}
+
 function highlightWord(index, { active = false, done = false } = {}) {
-  const el = document.getElementById('tts-display')?.querySelector(`.tts-word[data-index="${index}"]`);
+  const el = getOutputDisplay()?.querySelector(`.tts-word[data-index="${index}"]`);
   if (!el) return;
   el.classList.toggle('tts-word--active', active);
   el.classList.toggle('tts-word--done', done);
 }
 
 function clearWordHighlight() {
-  document.getElementById('tts-display')?.querySelectorAll('.tts-word').forEach((el) => {
+  getOutputDisplay()?.querySelectorAll('.tts-word').forEach((el) => {
     el.classList.remove('tts-word--active', 'tts-word--done');
   });
 }
 
 function setPlaybackUi(active) {
   playing = active;
-  const playBtn = document.getElementById('tts-play');
-  const stopBtn = document.getElementById('tts-stop');
-  const input = document.getElementById('tts-input');
+  const playBtn = document.getElementById('translate-play');
+  const stopBtn = document.getElementById('translate-stop');
+  const input = document.getElementById('translate-input');
   if (playBtn) playBtn.disabled = active;
   if (stopBtn) stopBtn.disabled = !active;
   if (input) input.disabled = active;
@@ -142,30 +161,30 @@ function setPlaybackUi(active) {
 function showLoading(message) {
   if (!playing) return;
 
-  const loading = document.getElementById('tts-loading');
-  const msg = document.getElementById('tts-loading-message');
-  const playBtn = document.getElementById('tts-play');
-  const display = document.getElementById('tts-display');
+  const loading = document.getElementById('translate-loading');
+  const msg = document.getElementById('translate-loading-message');
+  const playBtn = document.getElementById('translate-play');
+  const display = getOutputDisplay();
 
   if (loading) loading.hidden = false;
   if (msg) msg.textContent = message;
   if (playBtn) playBtn.textContent = 'Loading…';
   if (display) display.classList.add('tts-display--loading');
-  showStatus('');
+  showPlaybackStatus('');
 }
 
 function hideLoading() {
-  const loading = document.getElementById('tts-loading');
-  const playBtn = document.getElementById('tts-play');
-  const display = document.getElementById('tts-display');
+  const loading = document.getElementById('translate-loading');
+  const playBtn = document.getElementById('translate-play');
+  const display = getOutputDisplay();
 
   if (loading) loading.hidden = true;
   if (playBtn) playBtn.textContent = '▶ Play';
   if (display) display.classList.remove('tts-display--loading');
 }
 
-function showStatus(message, { isError = false, isSuccess = false } = {}) {
-  const status = document.getElementById('tts-status');
+function showPlaybackStatus(message, { isError = false, isSuccess = false } = {}) {
+  const status = document.getElementById('translate-playback-status');
   if (!status) return;
   if (!message) {
     status.hidden = true;
@@ -180,20 +199,14 @@ function showStatus(message, { isError = false, isSuccess = false } = {}) {
   if (isSuccess) status.classList.add('tts-status--success');
 }
 
-async function handlePlay() {
+export async function playTranslateOutput() {
   if (playing || !rulesRef) return;
 
-  const input = document.getElementById('tts-input');
-  const text = input?.value.trim() || '';
+  const text = currentSymbols;
   const words = tokenizeFonoraPhrase(text);
 
   if (!words.length) {
-    showStatus('Enter Fonora text to play.', { isError: true });
-    return;
-  }
-
-  if (looksLikePhonemeKeyText(text, rulesRef)) {
-    showStatus('This looks like phoneme keys (dh a s a n…). Paste Fonora symbols from the Translator “Fonora spelling” field, or use Read in Reader.', { isError: true });
+    showPlaybackStatus('Type some text above to translate first.', { isError: true });
     return;
   }
 
@@ -203,7 +216,7 @@ async function handlePlay() {
 
   cancelRequested = false;
   setPlaybackUi(true);
-  renderWordDisplay(text);
+  renderTranslateOutput(text);
   clearWordHighlight();
 
   const needsLoad = playback.piperVoice && !isPiperAudioReady(playback.piperVoice);
@@ -231,16 +244,16 @@ async function handlePlay() {
 
     hideLoading();
     if (result.cancelled) {
-      showStatus('Stopped.');
+      showPlaybackStatus('Stopped.');
       clearWordHighlight();
     } else if (result.skipped > 0) {
-      showStatus(`Finished, ${result.spoken} spoken, ${result.skipped} skipped.`, { isError: true });
+      showPlaybackStatus(`Finished, ${result.spoken} spoken, ${result.skipped} skipped.`, { isError: true });
     } else {
-      showStatus(`Finished, ${result.spoken} word${result.spoken === 1 ? '' : 's'}.`, { isSuccess: true });
+      showPlaybackStatus(`Finished, ${result.spoken} word${result.spoken === 1 ? '' : 's'}.`, { isSuccess: true });
     }
   } catch (err) {
     hideLoading();
-    showStatus(err.message || String(err), { isError: true });
+    showPlaybackStatus(err.message || String(err), { isError: true });
     clearWordHighlight();
   } finally {
     setPlaybackUi(false);
@@ -261,77 +274,37 @@ function warmReaderResources() {
   if (piperVoice) initPiperAudio(piperVoice).catch(() => {});
 }
 
-function bindReaderUiOnce() {
-  if (readerUiBound) return;
-  readerUiBound = true;
+function bindPlaybackUiOnce() {
+  if (playbackUiBound) return;
+  playbackUiBound = true;
 
-  document.getElementById('tts-lang')?.addEventListener('change', () => {
+  document.getElementById('translate-lang')?.addEventListener('change', () => {
     saveLanguagePreference(getReaderLang(), getReaderEnglishDialect());
-    syncReaderControls();
+    syncTranslatePlaybackControls();
     warmReaderResources();
   });
 
-  document.getElementById('tts-dialect')?.addEventListener('change', () => {
+  document.getElementById('translate-dialect')?.addEventListener('change', () => {
     saveEnglishDialectPreference(getReaderEnglishDialect());
   });
 
-  document.getElementById('tts-piper-voice')?.addEventListener('change', warmReaderResources);
+  document.getElementById('translate-piper-voice')?.addEventListener('change', warmReaderResources);
 
-  const input = document.getElementById('tts-input');
-  input?.addEventListener('input', () => {
-    if (!playing) renderWordDisplay(input.value);
-  });
-
-  document.getElementById('tts-play')?.addEventListener('click', handlePlay);
-  document.getElementById('tts-stop')?.addEventListener('click', handleStop);
-
-  document.getElementById('tts-normalize')?.addEventListener('click', () => {
-    if (!input || playing) return;
-    input.value = normalizeSymbolInput(input.value, rulesRef);
-    renderWordDisplay(input.value);
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-  });
-
-  document.getElementById('tts-backspace')?.addEventListener('click', () => {
-    if (!input || playing) return;
-    deleteSymbolBeforeCursor(input);
-    renderWordDisplay(input.value);
-  });
+  document.getElementById('translate-play')?.addEventListener('click', playTranslateOutput);
+  document.getElementById('translate-stop')?.addEventListener('click', handleStop);
 }
 
-export function loadReaderFromTranslation(symbols, wordSources, lang) {
-  const input = document.getElementById('tts-input');
-  if (input) {
-    input.value = symbols || '';
-    renderWordDisplay(input.value);
-  }
-  if (wordSources) {
-    setReaderWordSources(wordSources);
-  }
-  if (lang) {
-    const langEl = document.getElementById('tts-lang');
-    if (langEl) langEl.value = lang;
-    syncReaderControls();
-    warmReaderResources();
-  }
-  hideLoading();
-  showStatus('');
-}
-
-export function setupFonoraReader(rules) {
+export function setupTranslatePlayback(rules) {
   rulesRef = rules;
   populateLanguageSelect();
   populateDialectSelect();
   populatePiperVoiceSelect();
-  syncReaderControls();
+  syncTranslatePlaybackControls();
   hideLoading();
   warmReaderResources();
-  bindReaderUiOnce();
-
-  const input = document.getElementById('tts-input');
-  if (input && !input.value.trim()) {
-    input.value = '';
-  }
-
-  renderWordDisplay(input?.value || '');
+  bindPlaybackUiOnce();
+  renderTranslateOutput('');
 }
+
+/** @deprecated Use setupTranslatePlayback */
+export const setupFonoraReader = setupTranslatePlayback;

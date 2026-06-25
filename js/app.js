@@ -22,14 +22,12 @@ import { registerIpaVowelMap, setActiveIpaVowelMap, registerConsonantMapFromRule
 import { loadAlphabetOverrides } from './alphabet-overrides.js';
 import { setupAlphabetLab } from './alphabet-lab.js';
 import { normalizeSymbolInput, decodeToPhonemeKeys } from './decode.js';
-import { encodeSounds } from './encode.js';
 import { translateIpaPhrase } from './ipa-pipeline.js';
 import { initEspeak, getEspeakInitError } from './ipa.js';
-import { loadLanguagePreference, loadEnglishDialectPreference, saveLanguagePreference, saveEnglishDialectPreference, ENGLISH_DIALECT_OPTIONS } from './language-preferences.js';
 import { escapeHtml, insertAtCursor, deleteSymbolBeforeCursor } from './utils.js';
 import { setupEncoderTesting } from './encoder-testing.js';
 import { setupPronunciationValidation } from './pronunciation-validation-ui.js';
-import { setupFonoraReader, loadReaderFromTranslation } from './fonora-tts-ui.js';
+import { setupTranslatePlayback, setTranslateSymbols } from './fonora-tts-ui.js';
 import { setupBreakdown, prefillBreakdownFromWordSources } from './breakdown-ui.js';
 import { setupSamples, setupHomeSample, ensureSamplesLoaded } from './samples.js';
 import { setupOpenProblems } from './open-problems-ui.js';
@@ -361,54 +359,35 @@ function formatIpaResult(result) {
   return html;
 }
 
-function setTranslateDetails(metaEl, toggleEl, html) {
+function setTranslateDetails(metaEl, detailsBody, toggleEl, html) {
   metaEl.innerHTML = html || '<em class="translate-meta-empty">Type to see encoding details.</em>';
-  metaEl.hidden = !toggleEl.checked;
+  detailsBody.hidden = !toggleEl.checked;
 }
 
-function bindTranslateDetailsToggle(toggleEl, metaEl) {
+function bindTranslateDetailsToggle(toggleEl, detailsBody) {
   toggleEl.addEventListener('change', () => {
-    metaEl.hidden = !toggleEl.checked;
+    detailsBody.hidden = !toggleEl.checked;
   });
 }
 
 function setupTranslator() {
-  const savedPrefs = { lang: loadLanguagePreference(), englishDialect: loadEnglishDialectPreference() };
   let applyGeneration = 0;
-  let outputDirty = false;
-  let lastTranslateWords = null;
 
   const inputEl = document.getElementById('translate-input');
-  const outputEl = document.getElementById('translate-output');
   const pronEl = document.getElementById('translate-pronunciation');
   const metaEl = document.getElementById('translate-meta');
   const detailsToggle = document.getElementById('translate-show-details');
+  const detailsBody = document.getElementById('translate-details-body');
   const decodeEl = document.getElementById('translate-decode');
   const statusEl = document.getElementById('translate-status');
   const langEl = document.getElementById('translate-lang');
-  const dialectWrap = document.getElementById('translate-dialect-wrap');
   const dialectEl = document.getElementById('translate-dialect');
-
-  langEl.value = savedPrefs.lang;
-  if (dialectEl) {
-    dialectEl.innerHTML = ENGLISH_DIALECT_OPTIONS.map(
-      (opt) => `<option value="${escapeHtml(opt.code)}">${escapeHtml(opt.label)}</option>`,
-    ).join('');
-    dialectEl.value = savedPrefs.englishDialect;
-  }
-
-  function syncDialectVisibility() {
-    if (!dialectWrap) return;
-    dialectWrap.hidden = langEl.value !== 'en';
-  }
 
   function englishPipelineOptions() {
     if (langEl.value !== 'en') return {};
     const dialect = dialectEl?.value;
     return dialect ? { englishDialect: dialect } : {};
   }
-
-  syncDialectVisibility();
 
   function setStatus(message, isError = false) {
     if (!statusEl) return;
@@ -422,30 +401,22 @@ function setupTranslator() {
     statusEl.className = isError ? 'translate-status translate-status--error' : 'translate-status';
   }
 
-  function isSingleWord(text) {
-    return text.trim().split(/\s+/).filter(Boolean).length === 1;
-  }
-
-  function refreshDecodePreview() {
-    const keys = decodeToPhonemeKeys(outputEl.value, rules).phonemeKeys;
+  function refreshDecodePreview(symbols) {
+    const keys = decodeToPhonemeKeys(symbols || '', rules).phonemeKeys;
     decodeEl.textContent = `Recovered phoneme keys: ${keys || '(empty)'}`;
   }
 
-  renderSymbolButtons(document.getElementById('translate-keyboard'), outputEl);
-  attachKeyboardShortcuts(outputEl);
-  bindTranslateDetailsToggle(detailsToggle, metaEl);
+  bindTranslateDetailsToggle(detailsToggle, detailsBody);
 
   async function applyTranslate() {
     const text = inputEl.value.trim();
     const generation = ++applyGeneration;
 
     if (!text) {
-      setTranslateDetails(metaEl, detailsToggle, '');
+      setTranslateDetails(metaEl, detailsBody, detailsToggle, '');
       setStatus('');
-      if (!outputDirty) {
-        outputEl.value = '';
-        pronEl.value = '';
-      }
+      setTranslateSymbols('');
+      pronEl.value = '';
       decodeEl.textContent = '';
       return;
     }
@@ -454,83 +425,30 @@ function setupTranslator() {
     const pipelineOptions = englishPipelineOptions();
 
     try {
-      setStatus('Loading IPA…');
       const result = await translateIpaPhrase(text, rules, lang, pipelineOptions);
 
       if (generation !== applyGeneration) return;
 
       const detailResult = result.words?.length === 1 ? result.words[0] : result;
-      setTranslateDetails(metaEl, detailsToggle, formatIpaResult(detailResult));
+      setTranslateDetails(metaEl, detailsBody, detailsToggle, formatIpaResult(detailResult));
       setStatus('');
 
-      if (!outputDirty) {
-        outputEl.value = result.symbols;
-        pronEl.value = result.normalizedPhonemes || '';
-      }
-
-      lastTranslateWords = result.words || null;
-      setReaderWordSources(lastTranslateWords);
-
-      refreshDecodePreview();
+      setTranslateSymbols(result.symbols);
+      pronEl.value = result.normalizedPhonemes || '';
+      setReaderWordSources(result.words || null);
+      refreshDecodePreview(result.symbols);
     } catch (err) {
       if (generation !== applyGeneration) return;
       setStatus(err.message || 'IPA pipeline failed.', true);
-      setTranslateDetails(metaEl, detailsToggle, `<div class="warning-item">${escapeHtml(err.message || 'IPA pipeline failed.')}</div>`);
+      setTranslateDetails(metaEl, detailsBody, detailsToggle, `<div class="warning-item">${escapeHtml(err.message || 'IPA pipeline failed.')}</div>`);
     }
   }
 
-  inputEl.addEventListener('input', () => {
-    outputDirty = false;
-    applyTranslate();
-  });
+  inputEl.addEventListener('input', applyTranslate);
 
-  langEl.addEventListener('change', () => {
-    saveLanguagePreference(langEl.value);
-    syncDialectVisibility();
-    outputDirty = false;
-    applyTranslate();
-  });
+  langEl.addEventListener('change', applyTranslate);
 
-  dialectEl?.addEventListener('change', () => {
-    saveEnglishDialectPreference(dialectEl.value);
-    outputDirty = false;
-    applyTranslate();
-  });
-
-  outputEl.addEventListener('input', () => {
-    outputDirty = true;
-    if (isSingleWord(inputEl.value)) {
-      pronEl.value = decodeToPhonemeKeys(outputEl.value, rules).phonemeKeys;
-    }
-    refreshDecodePreview();
-  });
-
-  pronEl.addEventListener('input', () => {
-    if (!isSingleWord(inputEl.value)) return;
-    outputEl.value = encodeSounds(pronEl.value, rules).symbols;
-    outputDirty = true;
-    refreshDecodePreview();
-  });
-
-  document.getElementById('translate-normalize').addEventListener('click', () => {
-    outputEl.value = normalizeSymbolInput(outputEl.value, rules);
-    outputEl.dispatchEvent(new Event('input'));
-  });
-
-  document.getElementById('translate-backspace').addEventListener('click', () => {
-    deleteSymbolBeforeCursor(outputEl);
-    outputDirty = true;
-  });
-
-  document.getElementById('translate-read-in-reader')?.addEventListener('click', () => {
-    const symbols = outputEl.value.trim();
-    if (!symbols) {
-      setStatus('Translate some text first.', true);
-      return;
-    }
-    loadReaderFromTranslation(symbols, lastTranslateWords, langEl.value);
-    showTab('reader');
-  });
+  dialectEl?.addEventListener('change', applyTranslate);
 }
 
 function setupReverseLookup() {
@@ -700,6 +618,7 @@ function getTabFromHash() {
   const id = window.location.hash.replace(/^#/, '');
   if (id === 'about') return 'platform';
   if (id === 'home') return 'home';
+  if (id === 'reader') return 'translator';
   if (id) {
     const panel = document.querySelector(`[data-tab-panel="${id}"]`);
     if (panel) return id;
@@ -899,17 +818,12 @@ function applyRulesBundle(loaded) {
   setupTestMode();
   setupEncoderTesting(rules);
   setupPronunciationValidation(rules);
-  setupFonoraReader(rules);
+  setupTranslatePlayback(rules);
   setupBreakdown(rules);
   setupSamples(rules);
   setupHomeSample(rules);
   setupOpenProblems();
   setupDocsViewer();
-  const ttsInput = document.getElementById('tts-input');
-  if (ttsInput) {
-    renderSymbolButtons(document.getElementById('tts-keyboard'), ttsInput);
-    attachKeyboardShortcuts(ttsInput);
-  }
   setupTranslator();
   setupAlphabetLab({
     getRules: () => rules,

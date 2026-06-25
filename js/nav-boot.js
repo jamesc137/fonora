@@ -5,7 +5,6 @@
   const SCRIPT_TABS = new Set([
     'home',
     'translator',
-    'reader',
     'grid',
     'alphabet',
     'breakdown',
@@ -65,6 +64,12 @@
   if (hash === 'home' || (hash && SCRIPT_TABS.has(hash))) {
     html.setAttribute('data-fonora-nav', 'script');
     html.setAttribute('data-fonora-tab', hash || 'home');
+    return;
+  }
+
+  if (hash === 'reader') {
+    html.setAttribute('data-fonora-nav', 'script');
+    html.setAttribute('data-fonora-tab', 'translator');
     return;
   }
 

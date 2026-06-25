@@ -1,8 +1,10 @@
+import './load-env.js';
 import { createServer } from 'node:http';
 import { existsSync } from 'node:fs';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { handleAuthRoutes, logAuthStatus } from './tools/fonoran-auth.js';
 import { handleFonoranApi } from './tools/fonoran-api.js';
 import { maybeAutoImportOnStartup } from './tools/fonoran-store.js';
 
@@ -125,6 +127,14 @@ createServer(async (req, res) => {
       return;
     }
 
+    if (url.pathname.startsWith('/auth/')) {
+      const handled = await handleAuthRoutes(req, res, url, method);
+      if (handled) return;
+      res.writeHead(404, { 'Content-Type': 'application/json', ...SECURITY_HEADERS });
+      res.end(JSON.stringify({ error: 'Not found' }));
+      return;
+    }
+
     if (url.pathname.startsWith('/api/fonoran/')) {
       const handled = await handleFonoranApi(req, res, url.pathname, method);
       if (handled) return;
@@ -162,6 +172,7 @@ createServer(async (req, res) => {
   }
 }).listen(port, host, async () => {
   console.log(`Fonora listening on http://${host}:${port}`);
+  logAuthStatus();
   try {
     await maybeAutoImportOnStartup();
   } catch (err) {

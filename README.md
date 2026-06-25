@@ -109,7 +109,7 @@ npm run fonoran:export                # export PostgreSQL bucket → JSON backup
 
 ### Contributing
 
-Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). Full documentation index: [docs/README.md](docs/README.md).
+Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). Fonoran vocabulary proposals use a Google Form (see [docs/fonoran-auth-and-release.md](docs/fonoran-auth-and-release.md)). Full documentation index: [docs/README.md](docs/README.md).
 
 ## License
 

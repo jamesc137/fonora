@@ -69,11 +69,21 @@ let state = {
   mountId: 'app-header-root',
 };
 
+/** @type {{ required: boolean, authenticated: boolean, email: string | null, loginUrl: string } | null} */
+let fonoranAuthState = null;
+
 function escapeAttr(s) {
   return String(s)
     .replace(/&/g, '&amp;')
     .replace(/"/g, '&quot;')
     .replace(/</g, '&lt;');
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
 
 function scriptBase(context) {
@@ -82,6 +92,14 @@ function scriptBase(context) {
 
 function docHref(context, path) {
   return `${scriptBase(context)}/?path=${encodeURIComponent(path)}#docs`;
+}
+
+function renderFonoranAuthTools() {
+  if (!fonoranAuthState?.required || !fonoranAuthState.authenticated) return '';
+  const email = escapeAttr(fonoranAuthState.email ?? 'Signed in');
+  return `
+        <span class="fonoran-auth-user sans" title="${email}">${escapeHtml(fonoranAuthState.email ?? 'Signed in')}</span>
+        <button type="button" class="icon-btn" id="fonoran-sign-out">Sign out</button>`;
 }
 
 function renderRow1(context) {
@@ -167,6 +185,7 @@ function renderFonoranRow2(activeTab) {
     <div class="app-header__row app-header__row--tools app-header__row--fonoran">
       <nav class="fonoran-tabs" aria-label="Fonoran tools">${tabs}</nav>
       <div class="app-header__tools">
+        ${renderFonoranAuthTools()}
         <button type="button" class="icon-btn" id="undo-btn" data-fonoran-action="undo" disabled>↶ Undo</button>
         <button type="button" class="icon-btn" id="health-btn" data-fonoran-action="health">Health</button>
         <button type="button" class="icon-btn" id="advanced-btn" data-fonoran-action="advanced">⚙ Advanced</button>
@@ -274,6 +293,13 @@ function setupFonoranHeaderListeners() {
       }
     });
   });
+
+  const signOut = document.getElementById('fonoran-sign-out');
+  if (signOut) {
+    signOut.addEventListener('click', () => {
+      root.dispatchEvent(new CustomEvent('universal-nav:sign-out', { bubbles: true }));
+    });
+  }
 }
 
 function bindListeners() {
@@ -331,6 +357,22 @@ export function setActiveTab(tabOrPage) {
 export function setFonoranUndoDisabled(disabled) {
   const btn = document.getElementById('undo-btn');
   if (btn) btn.disabled = disabled;
+}
+
+/**
+ * @param {{ required: boolean, authenticated: boolean, email?: string | null, loginUrl?: string }} auth
+ */
+export function setFonoranAuth(auth) {
+  fonoranAuthState = {
+    required: Boolean(auth.required),
+    authenticated: Boolean(auth.authenticated),
+    email: auth.email ?? null,
+    loginUrl: auth.loginUrl ?? '/auth/google?returnTo=/fonoran/',
+  };
+  if (state.context === 'fonoran') {
+    render();
+    bindListeners();
+  }
 }
 
 export { closeNavDropdown, MORE_TAB_IDS };

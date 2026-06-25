@@ -2,7 +2,137 @@
     import { romanToFonoraScript, pieceToFonoraSymbols } from '../tools/fonoran-fonora-bridge.js';
     import { loadLanguageRules } from '../js/load-language-rules.js';
     import { speakFonoraPhrase, cancelSpeech } from '../js/fonora-tts.js';
-    import { initUniversalNav, setActiveTab, setFonoranUndoDisabled } from '../js/universal-nav.js';
+    import { initUniversalNav, setActiveTab, setFonoranUndoDisabled, setFonoranAuth } from '../js/universal-nav.js';
+
+    const AUTH = {
+      required: false,
+      authenticated: true,
+      email: null,
+      loginUrl: '/auth/google?returnTo=/fonoran/',
+    };
+    const WRITE_PAGES = new Set(['roots', 'create', 'review', 'advanced']);
+
+    function canWrite() {
+      return !AUTH.required || AUTH.authenticated;
+    }
+
+    function writeLocked() {
+      return AUTH.required && !AUTH.authenticated;
+    }
+
+    function writeDisabled(...reasons) {
+      return writeLocked() || reasons.some(Boolean);
+    }
+
+    function writeDisabledAttr(...reasons) {
+      return writeDisabled(...reasons) ? ' disabled' : '';
+    }
+
+    function setWriteButton(el, ...reasons) {
+      if (!el) return;
+      const off = reasons.some(Boolean);
+      el.dataset.writeOff = off ? '1' : '0';
+      el.disabled = writeDisabled(off);
+    }
+
+    function syncWordComposerControls() {
+      const picks = STATE.wordComposer;
+      const spelling = picks.length ? resolveComposerSpelling(picks) : '';
+      const match = renderSpellingMatch('wc-match', spelling);
+      setWriteButton($('wc-save'), picks.length < 2 || spellingBlocksSave(match));
+    }
+
+    function applyWriteAccessUI() {
+      updateAuthGate();
+      setFonoranUndoDisabled(!STATE.lab?.can_undo || !canWrite());
+      const locked = writeLocked();
+      document.body.classList.toggle('fonoran-readonly', locked);
+
+      document.querySelectorAll('[data-write]').forEach((el) => {
+        if (el.tagName === 'SPAN') return;
+        el.disabled = locked || el.dataset.writeOff === '1';
+      });
+
+      document.querySelectorAll('[data-write-input]').forEach((el) => {
+        if (locked) {
+          el.readOnly = true;
+          if (el.type === 'checkbox' || el.tagName === 'SELECT') el.disabled = true;
+        } else {
+          el.readOnly = false;
+          if (el.type === 'checkbox' || el.tagName === 'SELECT') el.disabled = false;
+        }
+      });
+    }
+
+    function authReturnPath() {
+      return `/fonoran/${window.location.hash || ''}`;
+    }
+
+    async function refreshAuth() {
+      try {
+        const returnTo = authReturnPath();
+        const res = await fetch(`/auth/session?returnTo=${encodeURIComponent(returnTo)}`, { credentials: 'include' });
+        const data = await res.json();
+        AUTH.required = Boolean(data.authRequired);
+        AUTH.authenticated = Boolean(data.authenticated);
+        AUTH.email = data.email ?? null;
+        AUTH.loginUrl = data.loginUrl ?? '/auth/google?returnTo=/fonoran/';
+      } catch {
+        AUTH.required = false;
+        AUTH.authenticated = true;
+      }
+      setFonoranAuth({
+        required: AUTH.required,
+        authenticated: AUTH.authenticated,
+        email: AUTH.email,
+        loginUrl: AUTH.loginUrl,
+      });
+      applyWriteAccessUI();
+      if (STATE.lab && WRITE_PAGES.has(STATE.page)) renderActivePage();
+    }
+
+    async function signOut() {
+      await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
+      await refreshAuth();
+      toast('Signed out');
+      switchPage('home');
+    }
+
+    function handleAuthUrlErrors() {
+      const params = new URLSearchParams(window.location.search);
+      const err = params.get('auth_error');
+      if (!err) return;
+      params.delete('auth_error');
+      params.delete('email');
+      const next = params.toString();
+      const clean = `${window.location.pathname}${window.location.hash}${next ? `?${next}` : ''}`;
+      history.replaceState(null, '', clean);
+      const messages = {
+        access_denied: 'Sign-in cancelled.',
+        domain: 'That Google account is not allowed. Use an @fonora.org address.',
+        email_unverified: 'Google email is not verified.',
+        invalid_state: 'Sign-in expired — try again.',
+      };
+      toast(messages[err] ?? `Sign-in failed (${err}).`);
+    }
+
+    function updateAuthGate() {
+      let gate = $('auth-gate');
+      if (!gate) {
+        gate = document.createElement('div');
+        gate.id = 'auth-gate';
+        document.querySelector('main')?.prepend(gate);
+      }
+      if (!canWrite() && WRITE_PAGES.has(STATE.page)) {
+        gate.hidden = false;
+        gate.className = 'auth-gate sans';
+        gate.innerHTML = `<p>Sign in with your <strong>@fonora.org</strong> Google account to edit Fonoran vocabulary.</p>
+          <a href="${escapeHtml(AUTH.loginUrl)}" class="btn btn-primary auth-gate__sign-in">Sign in with Google</a>`;
+      } else {
+        gate.hidden = true;
+        gate.innerHTML = '';
+      }
+    }
 
     const LANDER_SHOWCASE_WORD_ID = 'cmp-kaso';
     let landerShowcaseToken = 0;
@@ -29,8 +159,16 @@
     const $ = (id) => document.getElementById(id);
 
     async function api(path, opts = {}) {
-      const res = await fetch(path, { headers: { 'Content-Type': 'application/json' }, ...opts });
+      const res = await fetch(path, {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        ...opts,
+      });
       const data = await res.json().catch(() => ({}));
+      if (res.status === 401) {
+        await refreshAuth();
+        throw new Error('Sign in required');
+      }
       if (!res.ok) throw new Error(data.error || res.statusText);
       return data;
     }
@@ -159,12 +297,12 @@
     }
     function rootPickerWithBadge(sounds) {
       return sounds.length ? sounds.map(s => `
-        <button type="button" class="root-cell" data-add-root="${escapeHtml(s.spelling)}">${typeBadge('root')}${rootCellBodyHtml(s)}</button>`).join('')
+        <button type="button" class="root-cell" data-add-root="${escapeHtml(s.spelling)}" data-write>${typeBadge('root')}${rootCellBodyHtml(s)}</button>`).join('')
         : '<p class="empty" style="grid-column:1/-1">No match.</p>';
     }
     function wordPickerMarkup(words) {
       return words.length ? words.map(c => `
-        <button type="button" class="root-cell" data-add-word="${escapeHtml(c.id)}">${wordCellBodyHtml(c)}</button>`).join('')
+        <button type="button" class="root-cell" data-add-word="${escapeHtml(c.id)}" data-write>${wordCellBodyHtml(c)}</button>`).join('')
         : '<p class="empty" style="grid-column:1/-1">No approved words match.</p>';
     }
 
@@ -174,13 +312,14 @@
         await ensureLexicon();
         STATE.lab = await api('/api/fonoran/lab');
         $('load-error').hidden = true;
-        setFonoranUndoDisabled(!STATE.lab.can_undo);
+        setFonoranUndoDisabled(!STATE.lab.can_undo || !canWrite());
         if (!opts.skipRender) renderActivePage();
         wireMeaningPicker('wc', 'wc-meaning');
       } catch { $('load-error').hidden = false; }
     }
 
     function renderActivePage() {
+      if (STATE.page !== 'home' && !STATE.lab) return;
       if (STATE.page === 'home') {
         wireLander();
         renderLanderShowcase();
@@ -192,6 +331,7 @@
       else if (STATE.page === 'dictionary') renderDictionary();
       else if (STATE.page === 'health') renderHealth();
       else if (STATE.page === 'advanced') renderAdvanced();
+      applyWriteAccessUI();
     }
 
     function wireLander() {
@@ -227,8 +367,8 @@
       return `<div class="lex-pick sans">
         <label class="lex-label" for="${prefix}-lex-cat">Browse English words</label>
         <div class="lex-row">
-          <select id="${prefix}-lex-cat" aria-label="Category"><option value="">All categories</option></select>
-          <select id="${prefix}-lex-word" aria-label="English word"><option value="">Pick a word…</option></select>
+          <select id="${prefix}-lex-cat" aria-label="Category" data-write-input><option value="">All categories</option></select>
+          <select id="${prefix}-lex-word" aria-label="English word" data-write-input><option value="">Pick a word…</option></select>
         </div>
       </div>`;
     }
@@ -310,7 +450,7 @@
       const mono = value || '-';
       const hint = value ? pieceHint(value) : '';
       const glyph = value && STATE.rules ? pieceToFonoraSymbols(value, STATE.rules) : '';
-      return `<button type="button" class="syl-chip ${value ? '' : 'none'}${picked ? ' picked' : ''}" data-piece="${kind}" data-val="${escapeHtml(value)}">
+      return `<button type="button" class="syl-chip ${value ? '' : 'none'}${picked ? ' picked' : ''}" data-piece="${kind}" data-val="${escapeHtml(value)}" data-write>
         ${glyph ? `<span class="syl-glyph symbol-text">${escapeHtml(glyph)}</span>` : ''}
         <span class="mono">${escapeHtml(mono)}</span>${hint ? `<span class="hint">${escapeHtml(hint)}</span>` : ''}</button>`;
     }
@@ -391,7 +531,7 @@
 
       const saveBtn = saveBtnId ? $(saveBtnId) : null;
       const hearBtn = hearBtnId ? $(hearBtnId) : null;
-      if (saveBtn) saveBtn.disabled = !valid || exists;
+      if (saveBtn) setWriteButton(saveBtn, !valid || exists);
       if (hearBtn) hearBtn.disabled = !valid;
 
       $(builderId)?.querySelectorAll('.syl-chip[data-piece]').forEach(chip => {
@@ -446,7 +586,7 @@
           ? `<div class="syl-invalid">Root <strong>${escapeHtml(sp)}</strong> already exists.</div>`
           : '';
       }
-      if (saveBtn) saveBtn.disabled = !valid || exists;
+      if (saveBtn) setWriteButton(saveBtn, !valid || exists);
       if (hearBtn) hearBtn.disabled = !valid;
 
       $('root-syl-builder')?.querySelectorAll('.syl-chip[data-piece]').forEach(chip => {
@@ -547,7 +687,7 @@
 
     function rootPickerMarkup(sounds) {
       return sounds.length ? sounds.map(s => `
-        <button type="button" class="root-cell" data-add="${escapeHtml(s.spelling)}">${rootCellBodyHtml(s)}</button>`).join('')
+        <button type="button" class="root-cell" data-add="${escapeHtml(s.spelling)}" data-write>${rootCellBodyHtml(s)}</button>`).join('')
         : '<p class="empty" style="grid-column:1/-1">No match.</p>';
     }
 
@@ -610,6 +750,7 @@
 
     function renderRoots() {
       const el = $('roots-body');
+      if (!STATE.lab || !el) return;
       if (!STATE.exploreSel) {
         const sounds = sortRoots(STATE.lab.sounds);
         const filtered = filterRoots(sounds, STATE.rootsFilter);
@@ -626,7 +767,7 @@
               <div class="root-create-right">
                 <div class="split-h">Preview</div>
                 <div class="root-preview-card is-empty" id="new-root-preview-card">
-                  <input type="text" id="new-root-spelling" class="root-preview-roman" placeholder="-" autocomplete="off" spellcheck="false" aria-label="Roman spelling">
+                  <input type="text" id="new-root-spelling" class="root-preview-roman" placeholder="-" autocomplete="off" spellcheck="false" aria-label="Roman spelling" data-write-input>
                   <div class="root-preview-glyphs fonora-script symbol-text" id="new-root-glyphs" aria-hidden="true">&nbsp;</div>
                   <div class="pron-block root-preview-pron">
                     <div class="pron-line">Say: <strong id="new-root-say">-</strong></div>
@@ -640,9 +781,9 @@
             </div>
             <label class="fld" for="new-root-meaning">Meaning <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
             ${meaningPickerHtml('new-root')}
-            <input type="text" id="new-root-meaning" placeholder="Type or pick from English list…">
+            <input type="text" id="new-root-meaning" placeholder="Type or pick from English list…" data-write-input>
             <div class="actions" style="margin-top:0.7rem">
-              <button type="button" class="btn btn-primary" id="new-root-save" disabled>Add root</button>
+              <button type="button" class="btn btn-primary" id="new-root-save" disabled data-write>Add root</button>
             </div>
           </div>
           <h3 class="section-h">All roots <span id="roots-count" style="color:var(--muted);font-weight:400">(${rootsCountLabel(filtered, sounds, unnamed)})</span></h3>
@@ -702,9 +843,9 @@
           <button type="button" class="hear-min" id="exp-hear" aria-label="Listen to this root">▶ Listen</button>
           ${STATE.rootEditing ? renderRootEdit(s) : (s.meaning ? `
             <div class="feel-actions" style="margin-top:0.85rem">
-              <button type="button" class="fa-approve" id="root-approve" ${s.meaning ? '' : 'disabled'}>✓ Approve</button>
-              <button type="button" class="fa-edit" id="root-edit">✎ Edit</button>
-              <button type="button" class="fa-reject" id="root-reject">✕ Reject</button>
+              <button type="button" class="fa-approve" id="root-approve"${writeDisabledAttr(!s.meaning)} data-write>✓ Approve</button>
+              <button type="button" class="fa-edit" id="root-edit" data-write>✎ Edit</button>
+              <button type="button" class="fa-reject" id="root-reject" data-write>✕ Reject</button>
             </div>
             <div class="tip"><strong>Tip:</strong> ${ROOT_TIP}</div>` : renderRootNamePanel(s))}
         </div>
@@ -724,10 +865,10 @@
           <button type="button" class="btn" id="rb-explore" style="margin:0 0 0.5rem" disabled>Explore preview</button>
           <label class="fld" for="rb-meaning">Compound word meaning</label>
           ${meaningPickerHtml('rb')}
-          <input type="text" id="rb-meaning" placeholder="What does this new word mean?">
+          <input type="text" id="rb-meaning" placeholder="What does this new word mean?" data-write-input>
           <div class="actions" style="margin-top:0.7rem">
-            <button type="button" class="btn btn-primary" id="rb-save" disabled>Save word</button>
-            <button type="button" class="btn" id="rb-reset">Reset</button>
+            <button type="button" class="btn btn-primary" id="rb-save" disabled data-write>Save word</button>
+            <button type="button" class="btn" id="rb-reset" data-write>Reset</button>
           </div>
           <input type="search" id="rb-filter" placeholder="Search roots and words by spelling or meaning…" style="margin-top:0.85rem">
           <h4 class="picker-h">Primitive roots</h4>
@@ -792,10 +933,10 @@
           <p class="sans" style="font-size:0.86rem;color:var(--muted);margin:0 0 0.65rem">Name this root here. <strong>${escapeHtml(s.spelling)}</strong> is one sound, not a compound like ${escapeHtml(s.spelling + s.spelling)}.</p>
           <label class="fld" for="root-name-meaning">Root meaning</label>
           ${meaningPickerHtml('root-name')}
-          <input type="text" id="root-name-meaning" placeholder="e.g. self, bond, motion…" autocomplete="off">
+          <input type="text" id="root-name-meaning" placeholder="e.g. self, bond, motion…" autocomplete="off" data-write-input>
           <div class="edit-actions" style="margin-top:0.65rem">
-            <button type="button" class="btn btn-primary" id="root-name-save">Save meaning</button>
-            <button type="button" class="btn fa-reject" id="root-name-reject" style="border-color:#f0c0c0;color:var(--reject)">Reject root</button>
+            <button type="button" class="btn btn-primary" id="root-name-save" data-write>Save meaning</button>
+            <button type="button" class="btn fa-reject" id="root-name-reject" style="border-color:#f0c0c0;color:var(--reject)" data-write>Reject root</button>
           </div>
         </div>`;
     }
@@ -828,13 +969,13 @@
       return `
         <div class="edit-panel" style="text-align:left;margin-top:1rem">
           <label class="fld" for="root-ed-spelling">Roman spelling</label>
-          <input type="text" id="root-ed-spelling" value="${escapeHtml(s.spelling)}" autocomplete="off">
+          <input type="text" id="root-ed-spelling" value="${escapeHtml(s.spelling)}" autocomplete="off" data-write-input>
           <div id="root-ed-pron"></div>
           <div id="root-ed-hint"></div>
           ${renderSyllableBuilderCollapsible('root-ed', STATE.rootEditPickerOpen)}
           <label class="fld" for="root-ed-meaning">Meaning</label>
           ${meaningPickerHtml('root-ed')}
-          <input type="text" id="root-ed-meaning" value="${escapeHtml(s.meaning ?? '')}" placeholder="e.g. flow, edge, agent…">
+          <input type="text" id="root-ed-meaning" value="${escapeHtml(s.meaning ?? '')}" placeholder="e.g. flow, edge, agent…" data-write-input>
           <div id="root-ed-dupe"></div>
           <div class="deps-summary">
             <span class="words">${s.used_in_count} word${s.used_in_count === 1 ? '' : 's'}</span> use this root${s.used_in_count ? `: ${s.used_in.slice(0, 8).map(c => escapeHtml(c.meaning || c.spelling)).join(', ')}${s.used_in_count > 8 ? '…' : ''}` : '.'}
@@ -842,7 +983,7 @@
           </div>
           <div id="root-ed-impact"></div>
           <div class="edit-actions">
-            <button type="button" class="btn btn-primary" id="root-ed-save">Save &amp; approve</button>
+            <button type="button" class="btn btn-primary" id="root-ed-save" data-write>Save &amp; approve</button>
             <button type="button" class="btn" id="root-ed-cancel">Cancel</button>
           </div>
         </div>`;
@@ -951,7 +1092,7 @@
         if (i === 0) {
           return `<span class="tok" style="opacity:0.85;cursor:default">${typeBadge(c.type)} <span class="mono">${escapeHtml(sp)}</span> = ${escapeHtml(label)}</span>`;
         }
-        return `<span class="tok" data-idx="${i}">${typeBadge(c.type)} <span class="mono">${escapeHtml(sp)}</span> = ${escapeHtml(label)} ×</span>`;
+        return `<span class="tok" data-idx="${i}" data-write>${typeBadge(c.type)} <span class="mono">${escapeHtml(sp)}</span> = ${escapeHtml(label)} ×</span>`;
       }).join('');
       $('rb-pick').querySelectorAll('[data-idx]').forEach(t => t.addEventListener('click', () => {
         STATE.rootBuild.splice(Number(t.dataset.idx), 1);
@@ -972,7 +1113,7 @@
         exploreBtn.onclick = () => openExplorerPreview(picks, spelling);
       }
       const match = renderSpellingMatch('rb-match', spelling);
-      $('rb-save').disabled = picks.length < 2 || spellingBlocksSave(match);
+      setWriteButton($('rb-save'), picks.length < 2 || spellingBlocksSave(match));
       const omitIds = picks.filter(c => c.type === 'word').map(c => c.ref);
       $('rb-roots').innerHTML = rootPickerWithBadge(pickableRoots(STATE.rootBuildFilter, { omit: [root.spelling] }));
       $('rb-words').innerHTML = wordPickerMarkup(pickableWords(STATE.rootBuildFilter, { omitIds }));
@@ -993,7 +1134,7 @@
       if (!STATE.lab) return;
       const picks = STATE.wordComposer;
       $('wc-pick').innerHTML = picks.length
-        ? picks.map((c, i) => `<span class="tok" data-idx="${i}">${typeBadge(c.type)} <span class="mono">${escapeHtml(c.spelling || c.ref)}</span> = ${escapeHtml(compDisplayLabel(c))} ×</span>`).join('')
+        ? picks.map((c, i) => `<span class="tok" data-idx="${i}" data-write>${typeBadge(c.type)} <span class="mono">${escapeHtml(c.spelling || c.ref)}</span> = ${escapeHtml(compDisplayLabel(c))} ×</span>`).join('')
         : '<span class="sans" style="color:var(--muted);font-size:0.84rem">Tap roots or approved words below…</span>';
       $('wc-pick').querySelectorAll('.tok').forEach(t => t.addEventListener('click', () => { STATE.wordComposer.splice(Number(t.dataset.idx), 1); renderWordComposer(); }));
       const spelling = picks.length ? resolveComposerSpelling(picks) : '';
@@ -1012,7 +1153,7 @@
         exploreBtn.disabled = picks.length < 2;
         exploreBtn.onclick = () => openExplorerPreview(picks, spelling);
       }
-      $('wc-save').disabled = picks.length < 2 || spellingBlocksSave(match);
+      syncWordComposerControls();
       const omitIds = picks.filter(c => c.type === 'word').map(c => c.ref);
       $('wc-roots').innerHTML = rootPickerWithBadge(pickableRoots(STATE.wordComposerFilter));
       $('wc-words').innerHTML = wordPickerMarkup(pickableWords(STATE.wordComposerFilter, { omitIds }));
@@ -1389,6 +1530,7 @@
     }
 
     function renderWords() {
+      if (!STATE.lab) return;
       const list = userWords();
       const total = list.length;
       const reviewEl = $('word-review');
@@ -1424,9 +1566,9 @@
           ${STATE.editing ? renderWordEdit(c) : `
             <p class="feel">${c.meaning ? 'Does this word feel right?' : 'This word needs a meaning.'}</p>
             <div class="feel-actions">
-              <button type="button" class="fa-approve" id="approve" ${c.meaning ? '' : 'disabled'}>✓ Approve</button>
-              <button type="button" class="fa-edit" id="edit">✎ Edit</button>
-              <button type="button" class="fa-reject" id="reject">✕ Reject</button>
+              <button type="button" class="fa-approve" id="approve"${writeDisabledAttr(!c.meaning)} data-write>✓ Approve</button>
+              <button type="button" class="fa-edit" id="edit" data-write>✎ Edit</button>
+              <button type="button" class="fa-reject" id="reject" data-write>✕ Reject</button>
             </div>`}
           ${cardNav(STATE.wordCursor, total, 'word')}
         </div>`;
@@ -1443,7 +1585,7 @@
           <button type="button" class="hear-min" id="ed-hear" style="margin:0.5rem 0 0" aria-label="Listen to this recipe">▶ Listen</button>
           <label class="fld" for="ed-meaning">Meaning: keep it, or rename the word</label>
           ${meaningPickerHtml('ed')}
-          <input type="text" id="ed-meaning" value="${escapeHtml(c.meaning ?? '')}" placeholder="${escapeHtml(c.suggested_meaning || 'e.g. river, friend…')}">
+          <input type="text" id="ed-meaning" value="${escapeHtml(c.meaning ?? '')}" placeholder="${escapeHtml(c.suggested_meaning || 'e.g. river, friend…')}" data-write-input>
           <div id="ed-dupe"></div>
           <label class="fld">Recipe: which sounds build it (tap to remove)</label>
           <div class="pick" id="ed-recipe-pick"></div>
@@ -1451,7 +1593,7 @@
           <input type="search" id="ed-recipe-filter" placeholder="Find a sound by meaning… e.g. bond, motion">
           <div class="sound-grid" id="ed-recipe-sounds"></div>
           <div class="edit-actions">
-            <button type="button" class="btn btn-primary" id="ed-save">Save &amp; approve</button>
+            <button type="button" class="btn btn-primary" id="ed-save" data-write>Save &amp; approve</button>
             <button type="button" class="btn" id="ed-cancel">Cancel</button>
           </div>
         </div>`;
@@ -1501,7 +1643,7 @@
       const comps = STATE.recipe;
       const spelling = resolveComposerSpelling(comps);
       $('ed-recipe-pick').innerHTML = comps.length
-        ? comps.map((comp, i) => `<span class="tok" data-idx="${i}">${typeBadge(comp.type)} <span class="mono">${escapeHtml(comp.spelling || comp.ref)}</span> = ${escapeHtml(compDisplayLabel(comp))} ×</span>`).join('')
+        ? comps.map((comp, i) => `<span class="tok" data-idx="${i}" data-write>${typeBadge(comp.type)} <span class="mono">${escapeHtml(comp.spelling || comp.ref)}</span> = ${escapeHtml(compDisplayLabel(comp))} ×</span>`).join('')
         : '<span class="sans" style="color:var(--muted);font-size:0.84rem">Add at least 2 components…</span>';
       const gloss = comps.map(compDisplayLabel).map(escapeHtml).join(' + ');
       $('ed-recipe-preview').innerHTML = `
@@ -1697,6 +1839,7 @@
       return list.sort((a, b) => a.word.localeCompare(b.word));
     }
     function renderDictionary() {
+      if (!STATE.lab) return;
       const s = STATE.lab.stats;
       $('dict-stats').innerHTML = `
         <div><strong>${s.sounds}</strong> sounds</div>
@@ -1800,9 +1943,11 @@
     header?.addEventListener('universal-nav:page', (event) => {
       switchPage(event.detail.page);
     });
+    header?.addEventListener('universal-nav:sign-out', () => { signOut(); });
     header?.addEventListener('universal-nav:action', async (event) => {
       const { action } = event.detail;
       if (action === 'undo') {
+        if (!canWrite()) { toast('Sign in required'); return; }
         const res = await api('/api/fonoran/lab/undo', { method: 'POST', body: '{}' });
         toast(res.reverted ? `Undid: ${res.label}` : 'Nothing to undo');
         STATE.editing = false;
@@ -1910,15 +2055,23 @@
 
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
-    const initialHash = window.location.hash.replace(/^#/, '');
-    const initialPage = initialHash && ALL_PAGES.has(initialHash) ? initialHash : 'home';
-    initUniversalNav({ context: 'fonoran', activeTab: initialPage });
-    switchPage(initialPage);
-    window.addEventListener('hashchange', () => {
-      const hashPage = window.location.hash.replace(/^#/, '');
-      const page = hashPage && ALL_PAGES.has(hashPage) ? hashPage : 'home';
-      if (page !== STATE.page) switchPage(page);
-    });
+    async function boot() {
+      await refreshAuth();
+      handleAuthUrlErrors();
+      const initialHash = window.location.hash.replace(/^#/, '');
+      const initialPage = initialHash && ALL_PAGES.has(initialHash) ? initialHash : 'home';
+      STATE.page = initialPage;
+      initUniversalNav({ context: 'fonoran', activeTab: initialPage });
+      document.querySelectorAll('.page').forEach((p) => p.classList.remove('active'));
+      $(`page-${initialPage}`)?.classList.add('active');
+      updateAuthGate();
+      window.addEventListener('hashchange', () => {
+        const hashPage = window.location.hash.replace(/^#/, '');
+        const page = hashPage && ALL_PAGES.has(hashPage) ? hashPage : 'home';
+        if (page !== STATE.page) switchPage(page);
+      });
+      wireLander();
+      await load();
+    }
 
-    wireLander();
-    load();
+    boot();

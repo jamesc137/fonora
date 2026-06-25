@@ -71,6 +71,7 @@ CLI: `npm run fonoran:gen3`, `fonoran:gen3:1`, `fonoran:canonical:init`, `fonora
 | Platform overview | [platform-overview.md](platform-overview.md) | Docs |
 | Run locally, tests | [../README.md](../README.md) | — |
 | Deploy & PostgreSQL | [deploy.md](deploy.md) | — |
+| Fonoran auth & release plan | [fonoran-auth-and-release.md](fonoran-auth-and-release.md) | — |
 | Open problems / research | [open-problems.md](open-problems.md) | `#open-problems` |
 | Contributing | [../CONTRIBUTING.md](../CONTRIBUTING.md) | Docs |
 | Language-system audit (June 2026) | [FONORA_CLEANUP_AUDIT.md](FONORA_CLEANUP_AUDIT.md) | Docs |

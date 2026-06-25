@@ -1649,10 +1649,9 @@
       return `
         <button type="button" class="dict-item${selected ? ' is-selected' : ''}" data-kind="${entry.kind}" data-id="${escapeHtml(entry.id)}">
           <span class="dict-item__content">
+            <span class="mn${unnamed ? ' unnamed' : ''}">${escapeHtml(meaning)}</span>
             ${glyphs ? `<span class="dict-item__glyphs root-glyphs symbol-text" aria-hidden="true">${escapeHtml(glyphs)}</span>` : ''}
             <span class="sp">${escapeHtml(entry.word)}</span>
-            <span class="mn${unnamed ? ' unnamed' : ''}">${escapeHtml(meaning)}</span>
-            ${entry.hint ? `<span class="dict-item__hint">${escapeHtml(entry.hint)}</span>` : ''}
           </span>
           <span class="dict-item__badges">${typeBadge(type)} ${badge(entry.state)}</span>
         </button>`;

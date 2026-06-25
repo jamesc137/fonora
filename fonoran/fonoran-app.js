@@ -1863,8 +1863,7 @@
         </div>`;
       openSheet();
       await renderExplorerMermaidIn(body, data.mermaid, data.graph_nodes, (navKind, ref) => {
-        const keepScroll = Boolean(onNavigate);
-        closeSheet({ restoreScroll: !keepScroll });
+        closeSheet();
         if (onNavigate) onNavigate(navKind, ref);
         else openExplorer(navKind, ref);
       });
@@ -1883,24 +1882,12 @@
       } catch (e) { toast(e.message); }
     }
 
-    let sheetScrollY = 0;
-
     function openSheet() {
-      if ($('sheet').classList.contains('open')) return;
-      sheetScrollY = window.scrollY;
       $('sheet').classList.add('open');
-      document.documentElement.classList.add('sheet-open');
-      document.body.classList.add('sheet-open');
-      document.body.style.top = `-${sheetScrollY}px`;
     }
 
-    function closeSheet({ restoreScroll = true } = {}) {
-      if (!$('sheet').classList.contains('open')) return;
+    function closeSheet() {
       $('sheet').classList.remove('open');
-      document.documentElement.classList.remove('sheet-open');
-      document.body.classList.remove('sheet-open');
-      document.body.style.top = '';
-      if (restoreScroll) window.scrollTo(0, sheetScrollY);
     }
 
     function openChain(kind, id) {

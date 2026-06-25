@@ -140,7 +140,6 @@ html[data-fonora-tab] .tab-panel {
 html[data-fonora-tab='platform'] #tab-platform,
 html[data-fonora-tab='home'] #tab-home,
 html[data-fonora-tab='translator'] #tab-translator,
-html[data-fonora-tab='reader'] #tab-reader,
 html[data-fonora-tab='grid'] #tab-grid,
 html[data-fonora-tab='alphabet'] #tab-alphabet,
 html[data-fonora-tab='breakdown'] #tab-breakdown,
@@ -157,7 +156,6 @@ html[data-fonora-tab='docs'] #tab-docs {
 
 html[data-fonora-tab='home'] [data-tab='home'].tab-btn,
 html[data-fonora-tab='translator'] [data-tab='translator'].tab-btn,
-html[data-fonora-tab='reader'] [data-tab='reader'].tab-btn,
 html[data-fonora-tab='grid'] [data-tab='grid'].tab-btn,
 html[data-fonora-tab='alphabet'] [data-tab='alphabet'].tab-btn,
 html[data-fonora-tab='breakdown'] [data-tab='breakdown'].tab-btn,
@@ -1821,23 +1819,53 @@ body.app-body--fonoran .btn-primary:hover {
   margin: 0 0 0.35rem;
 }
 
-.translate-main label,
-#tab-translator > label {
+#tab-translator > label,
+.translate-main label {
   display: block;
   font-size: 0.85rem;
   color: #444;
   margin: 0.75rem 0 0.35rem;
 }
 
-#tab-reader > .section-desc + .translate-controls ~ label:first-of-type,
 #tab-translator > .section-desc + .translate-controls ~ label:first-of-type,
 #tab-translator > label:first-of-type {
   margin-top: 0;
 }
 
+.translate-playback-actions {
+  margin-top: 0.5rem;
+  align-items: center;
+}
+
+.translate-playback-status {
+  margin: 0;
+}
+
+#tab-translator .translate-output {
+  margin-top: 0;
+}
+
+#tab-translator .tts-loading {
+  margin-top: 0.75rem;
+}
+
 .translate-output {
-  min-height: 3.5rem;
-  font-size: 1.5rem;
+  min-height: 6rem;
+}
+
+.translate-details-body label {
+  display: block;
+  font-size: 0.85rem;
+  color: #444;
+  margin: 0.75rem 0 0.35rem;
+}
+
+.translate-details-body label:first-child {
+  margin-top: 0;
+}
+
+.translate-details-body[hidden] {
+  display: none;
 }
 
 .translate-details-section {

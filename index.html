@@ -56,8 +56,7 @@
       <nav class="main-nav" aria-label="Script tools">
         <div class="main-nav-primary">
           <button type="button" class="tab-btn" data-tab="home">Home</button>
-          <button type="button" class="tab-btn" data-tab="translator">Translator</button>
-          <button type="button" class="tab-btn" data-tab="reader">Reader</button>
+          <button type="button" class="tab-btn" data-tab="translator">Transliterate</button>
           <button type="button" class="tab-btn" data-tab="grid">Sound Grid</button>
           <button type="button" class="tab-btn" data-tab="alphabet">Alphabet</button>
         </div>
@@ -112,7 +111,7 @@
             <p>A phonetic writing system built from nine core symbols that represent where and how speech sounds are produced.</p>
             <div class="home-layer-card__actions">
               <button type="button" class="btn btn--primary" data-tab="home">Explore Script</button>
-              <button type="button" class="btn" data-tab="translator">Translator</button>
+              <button type="button" class="btn" data-tab="translator">Transliterate</button>
             </div>
           </article>
           <article class="home-layer-card">
@@ -249,56 +248,59 @@
       </section>
     </section>
 
-    <!-- Translator -->
+    <!-- Transliterate -->
     <section class="panel tab-panel" id="tab-translator" data-tab-panel="translator" hidden>
-      <h2>Translator</h2>
+      <h2>Transliterate</h2>
 
-      <p class="section-desc">Type a word or phrase to get a Fonora spelling via the IPA pipeline. Each word is translated separately. Edit the result with the symbol keyboard.</p>
+      <p class="section-desc">Type text to transliterate into Fonora, then press Play to hear it with a matching neural or eSpeak voice.</p>
 
       <div class="translate-controls">
         <div class="translate-control">
           <label for="translate-lang">Language</label>
-          <select id="translate-lang" class="text-input text-input--full">
-            <option value="en">English</option>
-            <option value="es">Spanish</option>
-            <option value="fr">French</option>
-            <option value="de">German</option>
-            <option value="ja">Japanese</option>
-            <option value="ar">Arabic</option>
-            <option value="zh">Mandarin</option>
-          </select>
+          <select id="translate-lang" class="text-input text-input--full"></select>
         </div>
         <div class="translate-control" id="translate-dialect-wrap">
           <label for="translate-dialect">English dialect</label>
           <select id="translate-dialect" class="text-input text-input--full"></select>
         </div>
+        <div class="translate-control" id="translate-piper-voice-wrap">
+          <label for="translate-piper-voice">Neural voice</label>
+          <select id="translate-piper-voice" class="text-input text-input--full"></select>
+        </div>
       </div>
+      <p id="translate-voice-note" class="section-desc" hidden></p>
 
       <label for="translate-input">Text</label>
       <textarea id="translate-input" class="text-input text-input--full" rows="4" placeholder="e.g. knife, hola, the big dog" autocomplete="off"></textarea>
 
       <div id="translate-status" class="translate-status" hidden></div>
 
-      <label for="translate-output">Fonora spelling</label>
-      <textarea id="translate-output" class="symbol-text symbol-input translate-output text-input--full" rows="4" placeholder="Fonora symbols appear here…"></textarea>
-      <div id="translate-keyboard" class="symbol-buttons symbol-buttons--compact"></div>
-      <div class="button-row">
-        <button type="button" id="translate-normalize" class="btn">Normalize spacing</button>
-        <button type="button" id="translate-backspace" class="btn">Backspace</button>
-        <button type="button" id="translate-read-in-reader" class="btn btn--primary">Read in Reader</button>
+      <label id="translate-output-label" for="translate-output">Fonora spelling</label>
+      <div id="translate-output" class="tts-display symbol-text translate-output" role="status" aria-live="polite" aria-labelledby="translate-output-label"></div>
+      <div class="button-row translate-playback-actions">
+        <button type="button" id="translate-play" class="btn btn--primary">▶ Play</button>
+        <button type="button" id="translate-stop" class="btn" disabled>■ Stop</button>
+        <div id="translate-playback-status" class="tts-status translate-playback-status" hidden role="status" aria-live="polite"></div>
       </div>
 
-      <label for="translate-pronunciation">Normalized Fonora phonemes</label>
-      <input type="text" id="translate-pronunciation" class="text-input text-input--full" placeholder="IPA-derived phonemes, editable for single words">
-
-      <div id="translate-decode" class="translate-decode-preview"></div>
+      <div id="translate-loading" class="tts-loading" hidden role="status" aria-live="polite">
+        <span class="tts-loading-spinner" aria-hidden="true"></span>
+        <span id="translate-loading-message" class="tts-loading-message">Loading…</span>
+      </div>
 
       <div class="translate-details-section">
         <label class="translate-details-toggle">
-          <input type="checkbox" id="translate-show-details" checked>
+          <input type="checkbox" id="translate-show-details">
           Show encoding details
         </label>
-        <div id="translate-meta" class="translate-meta-panel"></div>
+        <div id="translate-details-body" class="translate-details-body" hidden>
+          <label for="translate-pronunciation">Normalized Fonora phonemes</label>
+          <input type="text" id="translate-pronunciation" class="text-input text-input--full" readonly tabindex="-1" placeholder="IPA-derived phonemes appear here">
+
+          <div id="translate-decode" class="translate-decode-preview"></div>
+
+          <div id="translate-meta" class="translate-meta-panel"></div>
+        </div>
       </div>
     </section>
 
@@ -631,56 +633,6 @@
           </table>
         </div>
       </div>
-    </section>
-
-    <!-- Reader -->
-    <section class="panel tab-panel" id="tab-reader" data-tab-panel="reader" hidden>
-      <h2>Fonora Reader</h2>
-      <p class="section-desc">Play Fonora symbols aloud. Choose the source language so playback uses the matching neural or eSpeak voice for recovered IPA.</p>
-
-      <div class="translate-controls">
-        <div class="translate-control">
-          <label for="tts-lang">Language</label>
-          <select id="tts-lang" class="text-input text-input--full">
-            <option value="en">English</option>
-            <option value="es">Spanish</option>
-            <option value="fr">French</option>
-            <option value="de">German</option>
-            <option value="ja">Japanese</option>
-            <option value="ar">Arabic</option>
-            <option value="zh">Mandarin</option>
-          </select>
-        </div>
-        <div class="translate-control" id="tts-dialect-wrap">
-          <label for="tts-dialect">English dialect</label>
-          <select id="tts-dialect" class="text-input text-input--full"></select>
-        </div>
-        <div class="translate-control" id="tts-piper-voice-wrap">
-          <label for="tts-piper-voice">Neural voice</label>
-          <select id="tts-piper-voice" class="text-input text-input--full"></select>
-        </div>
-      </div>
-      <p id="tts-voice-note" class="section-desc" hidden></p>
-
-      <label for="tts-input">Fonora text</label>
-      <textarea id="tts-input" class="symbol-text symbol-input text-input--full" rows="4" placeholder="Type or insert Fonora symbols…" autocomplete="off"></textarea>
-
-      <div class="button-row">
-        <button type="button" id="tts-play" class="btn btn--primary">▶ Play</button>
-        <button type="button" id="tts-stop" class="btn" disabled>■ Stop</button>
-        <button type="button" id="tts-normalize" class="btn">Normalize spacing</button>
-        <button type="button" id="tts-backspace" class="btn">Backspace</button>
-      </div>
-
-      <div id="tts-keyboard" class="symbol-buttons symbol-buttons--compact"></div>
-
-      <div id="tts-loading" class="tts-loading" hidden role="status" aria-live="polite">
-        <span class="tts-loading-spinner" aria-hidden="true"></span>
-        <span id="tts-loading-message" class="tts-loading-message">Loading…</span>
-      </div>
-
-      <div id="tts-display" class="tts-display symbol-text" aria-live="polite"></div>
-      <div id="tts-status" class="tts-status" hidden></div>
     </section>
 
     <!-- Breakdown -->

@@ -7,8 +7,7 @@ import { docViewerHref, isDocsRoute } from './doc-urls.js';
 
 const SCRIPT_TABS = [
   { id: 'home', label: 'Home', primary: true },
-  { id: 'translator', label: 'Translator', primary: true },
-  { id: 'reader', label: 'Reader', primary: true },
+  { id: 'translator', label: 'Transliterate', primary: true },
   { id: 'grid', label: 'Sound Grid', primary: true },
   { id: 'alphabet', label: 'Alphabet', primary: true },
 ];
@@ -39,8 +38,7 @@ const FONORAN_TABS = [
 
 const SCRIPT_TITLES = {
   home: 'Home',
-  translator: 'Translator',
-  reader: 'Reader',
+  translator: 'Transliterate',
   grid: 'Sound Grid',
   alphabet: 'Alphabet',
   breakdown: 'Breakdown',

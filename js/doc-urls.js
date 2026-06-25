@@ -44,6 +44,7 @@ export const DOC_CATALOG = [
   { path: 'docs/IPA_VOWEL_NORMALIZATION_AUDIT.md', label: 'Vowel normalization audit', layer: 'script' },
   { path: 'docs/FONORA_VOWEL_DECISION_REPORT.md', label: 'Vowel decision report (v2)', layer: 'script' },
 
+  { path: 'docs/fonoran-grammar.md', label: 'Fonoran grammar', layer: 'language' },
   { path: 'docs/fonoran.md', label: 'Fonoran language', layer: 'language' },
   { path: 'docs/fonoran-gen3.md', label: 'DDA semantics (Gen 3)', layer: 'language' },
   { path: 'docs/fonoran-gen3-1.md', label: 'DDA phonetic layer (Gen 3.1)', layer: 'language' },
@@ -174,7 +175,7 @@ export function parseDocFromLocation(loc = window.location) {
     return { path: DEFAULT_DOC_PATH, anchor: '' };
   }
 
-  // Legacy /docs/* paths — still parsed so old links can redirect client-side.
+  // Legacy /docs/* paths: still parsed so old links can redirect client-side.
   if (pathname === '/docs') {
     return { path: DEFAULT_DOC_PATH, anchor: loc.hash.replace(/^#/, '') };
   }

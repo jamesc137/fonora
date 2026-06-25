@@ -23,7 +23,7 @@ const DOMAIN_LABELS = {
 
 /** Additional ideal root words by semantic category. */
 const EXPANSION = [
-  // index — agency, identity, locus
+  // index: agency, identity, locus
   { word: 'act', gloss: 'to do; perform', category: 'index' },
   { word: 'actor', gloss: 'one who acts', category: 'index' },
   { word: 'deed', gloss: 'an action done', category: 'index' },
@@ -39,7 +39,7 @@ const EXPANSION = [
   { word: 'choice', gloss: 'selection among options', category: 'index' },
   { word: 'cause', gloss: 'what brings about', category: 'index' },
   { word: 'effect', gloss: 'what follows from cause', category: 'index' },
-  // interface — bounds, edges, surfaces
+  // interface: bounds, edges, surfaces
   { word: 'bound', gloss: 'limit; edge', category: 'interface' },
   { word: 'limit', gloss: 'outer bound', category: 'interface' },
   { word: 'face', gloss: 'outer surface', category: 'interface' },
@@ -53,7 +53,7 @@ const EXPANSION = [
   { word: 'lip', gloss: 'edge of opening', category: 'interface' },
   { word: 'mouth', gloss: 'opening; speech organ', category: 'interface' },
   { word: 'envelope', gloss: 'wrapping boundary', category: 'interface' },
-  // emanation — signal, mark, emission
+  // emanation: signal, mark, emission
   { word: 'mark', gloss: 'visible sign', category: 'emanation' },
   { word: 'sign', gloss: 'indicator; symbol', category: 'emanation' },
   { word: 'signal', gloss: 'emitted indicator', category: 'emanation' },
@@ -66,7 +66,7 @@ const EXPANSION = [
   { word: 'flash', gloss: 'brief emission', category: 'emanation' },
   { word: 'echo', gloss: 'returned sound', category: 'emanation' },
   { word: 'trace', gloss: 'leftover mark', category: 'emanation' },
-  // junction — bond, link, weave
+  // junction: bond, link, weave
   { word: 'bond', gloss: 'connection; tie', category: 'junction' },
   { word: 'link', gloss: 'joined connection', category: 'junction' },
   { word: 'tie', gloss: 'fastened bond', category: 'junction' },
@@ -79,7 +79,7 @@ const EXPANSION = [
   { word: 'path', gloss: 'route of passage', category: 'junction' },
   { word: 'road', gloss: 'travel way', category: 'junction' },
   { word: 'cross', gloss: 'intersection point', category: 'junction' },
-  // cavity — container, void, hold
+  // cavity: container, void, hold
   { word: 'hold', gloss: 'contain within', category: 'cavity' },
   { word: 'void', gloss: 'empty interior', category: 'cavity' },
   { word: 'hollow', gloss: 'empty inside', category: 'cavity' },
@@ -91,7 +91,7 @@ const EXPANSION = [
   { word: 'bowl', gloss: 'concave container', category: 'cavity' },
   { word: 'pocket', gloss: 'small held space', category: 'cavity' },
   { word: 'womb', gloss: 'generative cavity', category: 'cavity' },
-  // stream — flow, breath, pulse
+  // stream: flow, breath, pulse
   { word: 'flow', gloss: 'continuous change', category: 'stream' },
   { word: 'stream', gloss: 'moving current', category: 'stream' },
   { word: 'river', gloss: 'large flowing water', category: 'stream' },

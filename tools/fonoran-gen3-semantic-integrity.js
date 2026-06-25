@@ -60,7 +60,7 @@ export function coordinateFidelity(item, config, primitive) {
 
   if (c.D !== canon.D || c.M !== canon.M || c.A !== canon.A) {
     score = 0;
-    notes.push('semantic DDA changed — critical');
+    notes.push('semantic DDA changed: critical');
     return { score, notes, canon };
   }
 
@@ -89,7 +89,7 @@ export function coordinateFidelity(item, config, primitive) {
   }
   if (item.fallback) {
     score -= 25;
-    notes.push('fallback candidate — integrity uncertain');
+    notes.push('fallback candidate: integrity uncertain');
   }
 
   score = Math.max(0, Math.min(100, score));
@@ -123,13 +123,13 @@ export function explainRepair(item, gen3Item, config, primitive) {
 
   let why = 'Direct grid mapping.';
   if (item.phonetic_only_repair) {
-    why = 'Phonetic vowel spread only — place and manner preserved; semantic aspect unchanged.';
+    why = 'Phonetic vowel spread only: place and manner preserved; semantic aspect unchanged.';
   } else if (severity === 'low' && c.coda) {
     why = 'CVC extension for rhyme distinctiveness; DDA semantics unchanged.';
   } else if (severity === 'medium') {
     why = 'Single-axis grid repair (place or manner) for distinctiveness or null-onset avoidance.';
   } else if (severity === 'high') {
-    why = 'Multi-axis grid repair — coordinate-to-sound mapping less transparent; semantics in notation only.';
+    why = 'Multi-axis grid repair: coordinate-to-sound mapping less transparent; semantics in notation only.';
   }
 
   return { severity, changes, why, canon };
@@ -138,18 +138,18 @@ export function explainRepair(item, gen3Item, config, primitive) {
 export function semanticDriftWarning(item, fidelity, severity) {
   const warnings = [];
   if (fidelity.score < 70) {
-    warnings.push('Low coordinate fidelity — sound may not evoke grid position');
+    warnings.push('Low coordinate fidelity: sound may not evoke grid position');
   }
   if (severity === 'high' && CORE_PRIMITIVE_IDS.has(item.id)) {
     warnings.push('High repair on core derivation primitive');
   }
   if (item.coordinates.coda && fidelity.score < 80) {
-    warnings.push('CVC + grid shift — compound segmentation may obscure morpheme boundaries');
+    warnings.push('CVC + grid shift: compound segmentation may obscure morpheme boundaries');
   }
   const pd = item.repair_detail?.pd ?? 0;
   const md = item.repair_detail?.md ?? 0;
   if (pd >= 2 || md >= 2) {
-    warnings.push('Deep grid rotation — learner must rely on notation not surface form');
+    warnings.push('Deep grid rotation: learner must rely on notation not surface form');
   }
   return warnings;
 }
@@ -186,7 +186,7 @@ export function compoundTransparency(derivation, inventory, gen3Derivation, conf
   }
   if (derivation.compound && derivation.compound.length > 12) {
     score -= 15;
-    warnings.push('Long compound — semantic elegance reduced');
+    warnings.push('Long compound: semantic elegance reduced');
   }
 
   const partScores = parts.map(p => {
@@ -275,12 +275,12 @@ export function runSemanticIntegrityAudit(gen31, gen3, config) {
 export function generateSemanticIntegrityMarkdown(audit) {
   const s = audit.summary;
   const lines = [];
-  lines.push('# Fonoran Gen 3.1 — Semantic Integrity Audit');
+  lines.push('# Fonoran Gen 3.1: Semantic Integrity Audit');
   lines.push('');
   lines.push(`> Generated: ${audit.generated_at}`);
   lines.push('> Verifies DDA semantic coordinates survive Gen 3.1 phonetic distinctiveness repairs.');
   lines.push('> Regenerate: `npm run fonoran:gen3:semantic` → `reports/`');
-  lines.push('> Roots **not regenerated** — audit of current `fonoran-gen3-1-roots.json`.');
+  lines.push('> Roots **not regenerated**: audit of current `fonoran-gen3-1-roots.json`.');
   lines.push('');
   lines.push('## Executive summary');
   lines.push('');
@@ -289,15 +289,15 @@ export function generateSemanticIntegrityMarkdown(audit) {
   lines.push(`| Average coordinate fidelity (all) | **${s.average_fidelity}/100** | ≥85 |`);
   lines.push(`| Core primitive fidelity | **${s.core_average_fidelity}/100** | ≥85 |`);
   lines.push(`| High-severity repair on core (unjustified) | **${s.unjustified_high_core_count}** | 0 |`);
-  lines.push(`| High-severity repair on core (total) | ${s.high_repair_core_count} | — |`);
-  lines.push(`| Semantic drift warnings | ${s.drift_warning_count} | — |`);
+  lines.push(`| High-severity repair on core (total) | ${s.high_repair_core_count} | n/a |`);
+  lines.push(`| Semantic drift warnings | ${s.drift_warning_count} | n/a |`);
   lines.push(`| Example compounds semantically transparent | **${s.compounds_elegant}/${s.compounds_total}** | all |`);
   lines.push('');
   lines.push(s.passes_core_fidelity_target && s.passes_no_high_core && s.compounds_elegant === s.compounds_total
-    ? '**Overall: PASS** — semantic integrity preserved within targets.'
+    ? '**Overall: PASS**: semantic integrity preserved within targets.'
     : s.passes_core_fidelity_target && s.passes_no_high_core
-      ? '**Overall: PASS (core)** — core primitives and compounds meet targets; non-core grid repairs documented below.'
-      : '**Overall: REVIEW** — see flagged items below.');
+      ? '**Overall: PASS (core)**: core primitives and compounds meet targets; non-core grid repairs documented below.'
+      : '**Overall: REVIEW**: see flagged items below.');
   lines.push('');
   lines.push('## Method');
   lines.push('');
@@ -305,7 +305,7 @@ export function generateSemanticIntegrityMarkdown(audit) {
   lines.push('');
   lines.push('**Phonetic layer (Gen 3.1):** place, manner, vowel, optional CVC coda.');
   lines.push('');
-  lines.push('Fidelity scoring penalizes grid place/manner rotation and phonetic spread/CVC — not semantic relabeling.');
+  lines.push('Fidelity scoring penalizes grid place/manner rotation and phonetic spread/CVC: not semantic relabeling.');
   lines.push('');
   lines.push('Repair severity: **none** (direct) · **low** (vowel spread or coda only) · **medium** (single grid axis) · **high** (multi-axis or fallback).');
   lines.push('');
@@ -322,9 +322,9 @@ export function generateSemanticIntegrityMarkdown(audit) {
   lines.push('| ID | Gen3 | Gen3.1 | Fidelity | Repair | Drift |');
   lines.push('| --- | --- | --- | ---: | --- | --- |');
   for (const p of audit.primitives) {
-    const drift = p.semantic_drift.length ? p.semantic_drift.join('; ') : '—';
+    const drift = p.semantic_drift.length ? p.semantic_drift.join('; ') : ': ';
     const core = p.is_core ? '★' : '';
-    lines.push(`| ${p.id}${core} | ${p.gen3_root ?? '—'} | ${p.root} | ${p.fidelity_score} | ${p.repair_severity} | ${drift} |`);
+    lines.push(`| ${p.id}${core} | ${p.gen3_root ?? ': '} | ${p.root} | ${p.fidelity_score} | ${p.repair_severity} | ${drift} |`);
   }
   lines.push('');
   lines.push('★ = core derivation primitive');
@@ -363,14 +363,14 @@ export function generateSemanticIntegrityMarkdown(audit) {
     lines.push('| Part | Root | Coordinates |');
     lines.push('| --- | --- | --- |');
     for (const part of c.parts) {
-      lines.push(`| ${part.id} | ${part.root} | ${part.notation ?? '—'} |`);
+      lines.push(`| ${part.id} | ${part.root} | ${part.notation ?? ': '} |`);
     }
     lines.push('');
   }
   lines.push('## High-repair core primitives');
   lines.push('');
   if (!audit.high_repair_core.length) {
-    lines.push('None — success criterion met.');
+    lines.push('None: success criterion met.');
   } else {
     for (const p of audit.high_repair_core) {
       const j = audit.core_justifications?.[p.id];

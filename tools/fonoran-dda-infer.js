@@ -1,5 +1,5 @@
 /**
- * Batch DDA inference — invisible semantic infrastructure.
+ * Batch DDA inference: invisible semantic infrastructure.
  */
 
 import { readFile } from 'node:fs/promises';

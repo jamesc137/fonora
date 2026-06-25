@@ -22,7 +22,7 @@ const src = ONNX_SRC_CANDIDATES.find((dir) => existsSync(join(dir, ONNX_FILES[0]
 
 if (!src) {
   console.error(
-    'onnxruntime-web dist not found. Run npm install — onnxruntime-web must match piper-tts-web (1.20.x).',
+    'onnxruntime-web dist not found. Run npm install: onnxruntime-web must match piper-tts-web (1.20.x).',
   );
   process.exit(1);
 }

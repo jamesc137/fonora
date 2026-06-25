@@ -1,5 +1,5 @@
 /**
- * Node test runner — not imported by the browser app.
+ * Node test runner: not imported by the browser app.
  */
 import { readFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -159,11 +159,11 @@ const vendorOnnxResult = test('vendor/onnx WASM bundle matches Piper runtime', (
   const vendorRoot = join(dirname(fileURLToPath(import.meta.url)), '..', 'vendor', 'onnx');
   assert(
     existsSync(join(vendorRoot, 'ort-wasm-simd-threaded.wasm')),
-    'vendor/onnx/ort-wasm-simd-threaded.wasm missing — run npm install',
+    'vendor/onnx/ort-wasm-simd-threaded.wasm missing: run npm install',
   );
   assert(
     existsSync(join(vendorRoot, 'ort-wasm-simd-threaded.mjs')),
-    'vendor/onnx/ort-wasm-simd-threaded.mjs missing — run npm install',
+    'vendor/onnx/ort-wasm-simd-threaded.mjs missing: run npm install',
   );
 });
 

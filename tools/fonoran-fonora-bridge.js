@@ -27,7 +27,7 @@ export function syllableToFonoraSymbols(spelling, rules) {
   return { symbols: encoded.symbols, phonemeString, warnings: encoded.warnings };
 }
 
-/** Sound or compound (parts array) → Fonora script phrase (syllables coinjoined — one word, no spaces). */
+/** Sound or compound (parts array) → Fonora script phrase (syllables coinjoined: one word, no spaces). */
 export function romanToFonoraScript(input, rules) {
   if (!rules) return { phrase: '', syllables: [], warnings: ['Rules not loaded'] };
   const parts = Array.isArray(input) ? input : [input];

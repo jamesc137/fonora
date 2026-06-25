@@ -35,6 +35,7 @@ See [platform-overview.md](platform-overview.md) for storage details and [deploy
 | --- | --- | --- | --- |
 | **Home** | Lander | Public | Overview, live showcase, health summary |
 | **Dictionary** | Dictionary + Language Explorer | **Public (read-only)** | Browse vocabulary; click any item for derivation trees and family graphs |
+| **Grammar** | Grammar specification | **Public (read-only)** | Living language constitution with readable examples, planned particles, and translator architecture |
 | **Root Creator** (Roots) | Root Creator | Sign-in required | Create primitive syllables |
 | **Word Creator** | Word Creator | Sign-in required | Stack **roots** + **approved words** → preview → name → save |
 | **Review** | Review Tools | Sign-in required | Approve, reject, or edit pending items |
@@ -42,6 +43,8 @@ See [platform-overview.md](platform-overview.md) for storage details and [deploy
 | **Advanced** | DDA / lab tools | Sign-in required | Run DDA, reset lab, destructive ops |
 
 **Language Explorer** (from Dictionary) shows: Built from · Derivation tree · Used in · Related words · Mermaid family graph. Explorer uses read-only API routes, no sign-in needed.
+
+**Grammar** (`/fonoran/#grammar`) is the evolving specification for Fonoran syntax and the future translator. Source: [fonoran-grammar.md](fonoran-grammar.md).
 
 **Advanced:** Run DDA, compound parser, health metrics, optional debug DDA fields, lab reset. Parser (`GET /parse`) is read-only; DDA and resets require sign-in.
 

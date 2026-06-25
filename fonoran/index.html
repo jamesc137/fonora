@@ -33,6 +33,7 @@
           <button type="button" class="tab-btn" data-fonoran-page="create">Word Creator</button>
           <button type="button" class="tab-btn" data-fonoran-page="matcher">Word Matcher</button>
           <button type="button" class="tab-btn" data-fonoran-page="dictionary">Dictionary</button>
+          <button type="button" class="tab-btn" data-fonoran-page="grammar">Grammar</button>
         </div>
         <div class="nav-dropdown" id="fonoran-nav-more">
           <button type="button" class="nav-dropdown-trigger tab-btn" id="fonoran-nav-more-trigger" aria-expanded="false" aria-haspopup="true" aria-controls="fonoran-nav-more-menu">
@@ -133,6 +134,10 @@
                 <strong>Dictionary</strong>
                 <span>Browse and explore derivations</span>
               </button>
+              <button type="button" class="fonoran-tool-card" data-goto-page="grammar">
+                <strong>Grammar</strong>
+                <span>Read the language specification</span>
+              </button>
               <button type="button" class="fonoran-tool-card" data-goto-page="review">
                 <strong>Review</strong>
                 <span>Approve or revise vocabulary</span>
@@ -141,6 +146,8 @@
           </section>
 
           <footer class="lander-footer">
+            <a href="#grammar">Read the grammar specification</a>
+            <span aria-hidden="true">·</span>
             <a href="../docs/fonoran.md">Read the Fonoran guide</a>
             <span aria-hidden="true">·</span>
             <a href="../#docs">Platform overview</a>
@@ -276,6 +283,32 @@
             <div class="fonoran-split-empty">
               <p>Select a word or root on the left to preview it, then open the Word Tree or DDA from the card.</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-grammar" class="page">
+        <div class="grammar-page content-page">
+          <div class="grammar-sticky-shell">
+            <header class="grammar-toolbar">
+              <div class="grammar-toolbar__text">
+                <p class="grammar-toolbar__tag">Living specification</p>
+                <h1 class="grammar-toolbar__title">Grammar</h1>
+                <p class="grammar-toolbar__lead sans">The constitution of Fonoran. Semantic, compositional, and designed for the future translator.</p>
+              </div>
+              <a class="btn grammar-toolbar__source" href="../docs/fonoran-grammar.md" target="_blank" rel="noopener noreferrer">Source markdown</a>
+            </header>
+          </div>
+          <div class="grammar-layout">
+            <aside class="grammar-sidebar" aria-label="Grammar sections">
+              <h3 class="grammar-sidebar__title">On this page</h3>
+              <nav id="grammar-toc" class="grammar-toc" aria-label="Grammar table of contents">
+                <p class="grammar-toc__loading sans">Loading…</p>
+              </nav>
+            </aside>
+            <article id="grammar-body" class="grammar-content markdown-body" aria-live="polite">
+              <p class="grammar-content__loading sans">Loading specification…</p>
+            </article>
           </div>
         </div>
       </section>

@@ -1,6 +1,6 @@
 /**
  * Google OAuth session auth for Fonoran write access.
- * Zero extra dependencies — uses Node crypto + fetch.
+ * Zero extra dependencies: uses Node crypto + fetch.
  */
 
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
@@ -369,11 +369,11 @@ export function logAuthStatus() {
     const domain = allowedDomain();
     const allowlist = allowedEmails();
     console.log(
-      `Fonoran auth: enabled — ${allowlist ? `allowlist (${allowlist.size} emails)` : `@${domain} only`}`,
+      `Fonoran auth: enabled: ${allowlist ? `allowlist (${allowlist.size} emails)` : `@${domain} only`}`,
     );
     return;
   }
   console.warn(
-    'Fonoran auth: not configured — write API is open. Set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and SESSION_SECRET to enable.',
+    'Fonoran auth: not configured: write API is open. Set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and SESSION_SECRET to enable.',
   );
 }

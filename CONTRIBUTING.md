@@ -67,6 +67,17 @@ npm test
 
 Symbol changes should stay consistent with the v3 vowel grammar (`⚬X` simple, `⚬XᵔY` diphthong).
 
+## Writing style
+
+When writing or editing Fonoran documentation (especially [docs/fonoran-grammar.md](docs/fonoran-grammar.md)):
+
+- Do not use em dashes or double hyphens as punctuation. Use periods, commas, colons, or separate sentences instead.
+- Favor short Fonoran examples over long theoretical explanations.
+- Introduce a rule, then immediately show one or more example sentences.
+- Mark undefined concepts in red using `[concept]` syntax in grammar docs. Never silently omit unknown vocabulary or substitute English without marking it as unresolved.
+
+The grammar page should feel like a language learners can start reading immediately, not a linguistics textbook.
+
 ## Pull requests
 
 - Keep PRs focused, one logical change per PR when possible

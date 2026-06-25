@@ -1,5 +1,5 @@
 /**
- * Fonoran lab storage — PostgreSQL when configured, JSON file fallback.
+ * Fonoran lab storage: PostgreSQL when configured, JSON file fallback.
  * Local JSON is never deleted; it remains the portable backup format.
  */
 

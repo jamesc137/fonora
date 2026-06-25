@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Gen 3 human-readability audit report (frozen reference inventory).
- * Writes reports/fonoran-gen3-human-readability-audit.md — not committed (see .gitignore).
+ * Writes reports/fonoran-gen3-human-readability-audit.md: not committed (see .gitignore).
  */
 
 import { readFile, writeFile, mkdir } from 'node:fs/promises';

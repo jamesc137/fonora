@@ -124,7 +124,7 @@ createServer(async (req, res) => {
       const onnxWasm = findOnnxWasmPath();
       if (!onnxWasm) {
         res.writeHead(503, { 'Content-Type': 'text/plain; charset=utf-8', ...SECURITY_HEADERS });
-        res.end('onnx wasm missing — run npm install');
+        res.end('onnx wasm missing: run npm install');
         return;
       }
       res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8', ...SECURITY_HEADERS });

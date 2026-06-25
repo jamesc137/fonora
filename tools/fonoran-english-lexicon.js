@@ -1,6 +1,6 @@
 /**
  * English reference lexicon for manual Fonoran naming.
- * Not assigned to phonetic bases — browse-only vocabulary.
+ * Not assigned to phonetic bases: browse-only vocabulary.
  */
 
 import { readFile, writeFile } from 'node:fs/promises';

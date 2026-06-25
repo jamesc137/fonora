@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Vowel readability measurement — no mapping changes, report only.
+ * Vowel readability measurement: no mapping changes, report only.
  * Run: node scripts/vowel-readability-report.js
  *      npm run test:vowels
  */

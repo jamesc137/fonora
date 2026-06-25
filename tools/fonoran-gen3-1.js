@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Fonoran Gen 3.1 — distinctiveness-aware root generator.
+ * Fonoran Gen 3.1: distinctiveness-aware root generator.
  * Semantic DDA coordinates unchanged; phonetic vowel spread + grid repair.
  */
 

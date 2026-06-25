@@ -25,6 +25,7 @@
     'matcher',
     'review',
     'dictionary',
+    'grammar',
     'health',
     'advanced',
   ]);

@@ -255,8 +255,20 @@
     const reviewed = (st) => st === 'approved' || st === 'revised' || st === 'rejected';
     function soundMeaning(sp) { const s = STATE.lab.sounds.find(x => x.spelling === sp); return s?.meaning || s?.legacy_label || sp; }
 
+    function composerComponentParts(c) {
+      if (c.type === 'word') {
+        const w = STATE.lab?.compounds?.find(x => x.id === c.ref);
+        if (w?.parts?.length) return w.parts;
+      }
+      return [c.spelling || (c.type === 'root' ? c.ref : c.ref.replace(/^cmp-/, ''))];
+    }
     function composerFlatSpellings(composer) {
-      return (composer ?? []).map(c => c.spelling || (c.type === 'root' ? c.ref : c.ref.replace(/^cmp-/, '')));
+      return (composer ?? []).flatMap(composerComponentParts);
+    }
+    function composerCanListen(composer) {
+      const picks = composer ?? [];
+      if (!composerFlatSpellings(picks).length) return false;
+      return picks.length >= 2 || (picks.length === 1 && picks[0].type === 'word');
     }
     function composerToApi(composer) {
       return (composer ?? []).map(c => ({ type: c.type, ref: c.ref }));
@@ -1101,10 +1113,10 @@
       const spelling = picks.length ? resolveComposerSpelling(picks) : '';
       $('rb-spell').textContent = spelling || '-';
       const flat = composerFlatSpellings(picks);
-      $('rb-pron').innerHTML = picks.length >= 2 ? pronBlock(flat) : '';
+      $('rb-pron').innerHTML = composerCanListen(picks) ? pronBlock(flat) : '';
       const hearBtn = $('rb-hear');
       if (hearBtn) {
-        hearBtn.disabled = picks.length < 2;
+        hearBtn.disabled = !composerCanListen(picks);
         hearBtn.onclick = () => speakNeural(flat);
       }
       const exploreBtn = $('rb-explore');
@@ -1139,15 +1151,16 @@
       $('wc-pick').querySelectorAll('.tok').forEach(t => t.addEventListener('click', () => { STATE.wordComposer.splice(Number(t.dataset.idx), 1); renderWordComposer(); }));
       const spelling = picks.length ? resolveComposerSpelling(picks) : '';
       $('wc-spell').textContent = spelling || '-';
-      $('wc-pron').innerHTML = picks.length >= 2 ? pronBlock(composerFlatSpellings(picks)) : '';
+      const flat = composerFlatSpellings(picks);
+      $('wc-pron').innerHTML = composerCanListen(picks) ? pronBlock(flat) : '';
       if (picks.length >= 2 && ! $('wc-meaning').value.trim()) {
         const sug = picks.map(compDisplayLabel).join(' + ');
         $('wc-meaning').placeholder = sug;
       }
       const match = renderSpellingMatch('wc-match', spelling);
       const hearBtn = $('wc-hear');
-      hearBtn.disabled = picks.length < 2;
-      hearBtn.onclick = () => speakNeural(composerFlatSpellings(picks));
+      hearBtn.disabled = !composerCanListen(picks);
+      hearBtn.onclick = () => speakNeural(flat);
       const exploreBtn = $('wc-explore');
       if (exploreBtn) {
         exploreBtn.disabled = picks.length < 2;

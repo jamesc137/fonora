@@ -49,7 +49,7 @@ Public (no login)
 Admin (@fonora.org Google session)
   POST /api/fonoran/*          — create roots, compounds, review, DDA, undo
   PATCH /api/fonoran/*         — edit sounds, compounds, review state
-  /fonoran/ builder tabs       — Root Creator, Compound Creator, Review, Advanced
+  /fonoran/ builder tabs       — Root Creator, Word Creator, Review, Advanced
 ```
 
 ### Implementation sketch

@@ -29,9 +29,9 @@ const MORE_MENU = [
 const FONORAN_TABS = [
   { id: 'home', label: 'Home' },
   { id: 'roots', label: 'Root Creator' },
-  { id: 'create', label: 'Compound Creator' },
-  { id: 'review', label: 'Review' },
+  { id: 'create', label: 'Word Creator' },
   { id: 'dictionary', label: 'Dictionary' },
+  { id: 'review', label: 'Review' },
 ];
 
 const SCRIPT_TITLES = {
@@ -54,7 +54,7 @@ const SCRIPT_TITLES = {
 const FONORAN_TITLES = {
   home: 'About Fonoran',
   roots: 'Root Creator',
-  create: 'Compound Creator',
+  create: 'Word Creator',
   review: 'Review',
   dictionary: 'Dictionary',
   health: 'Health',

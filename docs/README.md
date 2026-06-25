@@ -37,7 +37,7 @@ The Fonora phonetic writing system — symbols, encoding rules, transliteration,
 | --- | --- | --- |
 | Fonoran language overview | [fonoran.md](fonoran.md) | `/fonoran/` |
 | Root words | [fonoran.md](fonoran.md#language-model) | `/fonoran/` (Roots) |
-| Compounds | [fonoran.md](fonoran.md#language-model) | `/fonoran/` (Create Words) |
+| Compounds | [fonoran.md](fonoran.md#language-model) | `/fonoran/` (Word Creator) |
 | Dictionary | [fonoran.md](fonoran.md#ui-tabs) | `/fonoran/#dictionary` |
 | DDA semantics (Gen 3) | [fonoran-gen3.md](fonoran-gen3.md) | Docs |
 | DDA phonetic layer (Gen 3.1) | [fonoran-gen3-1.md](fonoran-gen3-1.md) | Docs |
@@ -54,7 +54,7 @@ Suite for creating, reviewing, testing, and exploring Fonoran.
 | Tool | Document | App |
 | --- | --- | --- |
 | Root Creator | [fonoran.md](fonoran.md#ui-tabs) | `/fonoran/` (Roots) |
-| Compound Creator | [fonoran.md](fonoran.md#ui-tabs) | `/fonoran/` (Create Words) |
+| Word Creator | [fonoran.md](fonoran.md#ui-tabs) | `/fonoran/` |
 | Review Tools | [fonoran.md](fonoran.md#ui-tabs) | `/fonoran/` (Review) |
 | Language Explorer | [fonoran.md](fonoran.md#ui-tabs) | `/fonoran/` (Dictionary, Roots) |
 | Semantic Analysis (Health, Run DDA) | [fonoran.md](fonoran.md#ui-tabs) | `/fonoran/` (Health, Advanced) |

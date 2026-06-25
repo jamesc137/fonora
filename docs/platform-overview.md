@@ -26,7 +26,7 @@ flowchart TB
     end
     subgraph builder [Language Builder Tools]
       RC[Root Creator]
-      CC[Compound Creator]
+      WC[Word Creator]
       RT[Review Tools]
       SM[Story Mode]
       LE[Language Explorer]
@@ -81,7 +81,7 @@ The **Language Builder Tools** are the interactive suite at [`/fonoran/`](../fon
 
 1. Open [`/fonoran/`](../fonoran/) after `npm start`
 2. **Root Creator** — create primitive syllables (CV / CVC)
-3. **Compound Creator** — stack roots and approved words
+3. **Word Creator** — stack roots and approved words
 4. **Review** — approve, reject, or revise pending items
 5. **Language Explorer** — derivation trees and family graphs (from Dictionary or Roots)
 6. **Semantic Analysis** — Health overlay and **Run DDA** in Advanced
@@ -94,7 +94,7 @@ The **Language Builder Tools** are the interactive suite at [`/fonoran/`](../fon
 | --- | --- | --- |
 | **Script** | Sound Grid, Alphabet, Translator, Reader, Breakdown, Samples, Quiz, Keyboard, Reverse Lookup, Pronunciation Testing/Validation | [language-rules.md](language-rules.md), [IPA-PIPELINE-REPORT.md](IPA-PIPELINE-REPORT.md), [multilingual-support.md](multilingual-support.md) |
 | **Language** | Dictionary (`/fonoran/`), DDA reference data | [fonoran.md](fonoran.md), [fonoran-gen3.md](fonoran-gen3.md), [fonoran-gen3-1.md](fonoran-gen3-1.md) |
-| **Builder** | Root Creator, Compound Creator, Review, Language Explorer, Health, Advanced | [fonoran.md](fonoran.md), [fonoran-generator-archive.md](fonoran-generator-archive.md) |
+| **Builder** | Root Creator, Word Creator, Review, Language Explorer, Health, Advanced | [fonoran.md](fonoran.md), [fonoran-generator-archive.md](fonoran-generator-archive.md) |
 | **Platform** | Home, Open Problems, Docs viewer | [open-problems.md](open-problems.md), [deploy.md](deploy.md) |
 
 **Story Mode** (passage reading with vocabulary feedback) was an earlier experiment — removed during cleanup. See [fonoran-generator-archive.md](fonoran-generator-archive.md) for recovery notes. A nav slot is reserved for a future restoration.

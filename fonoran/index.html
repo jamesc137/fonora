@@ -83,16 +83,16 @@
                 <span>Create primitive syllables</span>
               </button>
               <button type="button" class="fonoran-tool-card" data-goto-page="create">
-                <strong>Compound Creator</strong>
+                <strong>Word Creator</strong>
                 <span>Stack roots into words</span>
-              </button>
-              <button type="button" class="fonoran-tool-card" data-goto-page="review">
-                <strong>Review</strong>
-                <span>Approve or revise vocabulary</span>
               </button>
               <button type="button" class="fonoran-tool-card" data-goto-page="dictionary">
                 <strong>Dictionary</strong>
                 <span>Browse and explore derivations</span>
+              </button>
+              <button type="button" class="fonoran-tool-card" data-goto-page="review">
+                <strong>Review</strong>
+                <span>Approve or revise vocabulary</span>
               </button>
             </div>
           </section>
@@ -110,14 +110,20 @@
           <div class="fonoran-split-chrome">
             <p class="fonoran-split-chrome__intro sans">Stack primitive roots or approved words. Each piece adds meaning. Preview, name it, save for review.</p>
             <input type="search" id="wc-filter" class="search-bar" placeholder="Search roots and words by spelling or meaning…" autocomplete="off">
-            <label class="sans wc-toggle"><input type="checkbox" id="wc-show-unapproved" data-write-input> Show unapproved word candidates</label>
+            <div class="toolbar" id="wc-filters">
+              <button type="button" class="chip active" data-wc-filter="roots">Root words</button>
+              <button type="button" class="chip active" data-wc-filter="words">Words</button>
+              <button type="button" class="chip" data-wc-filter="unapproved">Unapproved</button>
+              <button type="button" class="chip" data-wc-filter="unnamed">Unnamed</button>
+            </div>
           </div>
         </div>
         <div class="fonoran-split-grid">
           <aside class="fonoran-split-picker" aria-label="Roots and words">
-            <h4 class="picker-h">Primitive roots</h4>
+            <p class="empty sans" id="wc-picker-empty" hidden style="margin:0.5rem 0">Turn on <strong>Root words</strong> or <strong>Words</strong> above to browse the picker.</p>
+            <h4 class="picker-h" id="wc-roots-h">Root words</h4>
             <div class="sound-grid" id="wc-roots"></div>
-            <h4 class="picker-h">Approved words</h4>
+            <h4 class="picker-h" id="wc-words-h">Words</h4>
             <div class="sound-grid" id="wc-words"></div>
           </aside>
           <div class="fonoran-split-workspace" id="word-create">
@@ -170,7 +176,7 @@
       <section id="page-dictionary" class="page fonoran-split-page">
         <div class="fonoran-split-shell" data-split-shell>
           <div class="fonoran-split-chrome">
-            <p class="fonoran-split-chrome__intro sans">Public read-only — browse the vocabulary and explore derivation trees.</p>
+            <p class="fonoran-split-chrome__intro sans">Browse the vocabulary and explore derivation trees.</p>
             <input type="search" id="dict-search" class="search-bar" placeholder="Search Fonoran or English…" autocomplete="off">
             <div class="toolbar" id="dict-filters">
               <button type="button" class="chip active" data-filter="all">All</button>
@@ -180,7 +186,6 @@
               <button type="button" class="chip" data-filter="approved">Approved</button>
               <button type="button" class="chip" data-filter="rejected">Rejected</button>
             </div>
-            <div class="stats" id="dict-stats"></div>
           </div>
         </div>
         <div class="fonoran-split-grid">
@@ -196,12 +201,10 @@
       </section>
 
       <section id="page-health" class="page">
-        <button type="button" class="back-link" id="health-back">← Back</button>
         <div id="health-body"></div>
       </section>
 
       <section id="page-advanced" class="page">
-        <button type="button" class="back-link" id="adv-back">← Back to building</button>
         <div class="box">
           <h2>Advanced</h2>
           <p>Tools for maintaining your language. Normal creation never requires any of this.</p>

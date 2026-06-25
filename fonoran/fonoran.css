@@ -84,7 +84,7 @@
     .all-done .big { font-size:2.5rem; }
     .all-done h2 { font-family:-apple-system,sans-serif; }
 
-    /* root picker cells (compound creator) */
+    /* root picker cells (word creator) */
     .root-cell { display:flex; flex-direction:column; gap:0.2rem; text-align:left; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:0.75rem 0.85rem; cursor:pointer; font:inherit; transition:border-color 0.15s; }
     .root-cell:hover { border-color:var(--accent); }
     .root-cell .sp { font-family:ui-monospace,monospace; font-size:1.2rem; font-weight:700; color:var(--word); }
@@ -174,24 +174,23 @@
     .tl-item .tl-when { color:var(--muted); font-size:0.78rem; margin-left:auto; white-space:nowrap; }
     .tl-icon { width:1.2rem; text-align:center; }
 
-    /* split-page layout (dictionary, compound creator) — page scroll only, sticky chrome + picker */
+    /* split-page layout (dictionary, word creator) — page scroll only, sticky chrome + picker */
     .fonoran-split-page { margin-top:calc(-1 * var(--layout-main-pt, 1.75rem)); }
     .fonoran-split-shell {
       position:sticky;
-      top:0;
+      top:var(--fonoran-header-offset, 7rem);
       z-index:19;
-      margin-top:calc(-1 * var(--fonoran-header-offset, 7rem));
-      padding-top:var(--fonoran-header-offset, 7rem);
       background:var(--layout-page-bg, var(--bg));
-      margin-bottom:0.65rem;
+      margin-bottom:0;
       border-bottom:1px solid var(--border);
       box-shadow:0 6px 16px -4px rgba(0,0,0,.08);
       isolation:isolate;
     }
+    /* Full-bleed backdrop: extend above the shell to seal the header–chrome gap while stuck. */
     .fonoran-split-shell::before {
       content:'';
       position:absolute;
-      top:0;
+      top:calc(-1 * var(--fonoran-header-offset, 7rem));
       bottom:0;
       left:50%;
       z-index:0;
@@ -204,7 +203,7 @@
       position:relative;
       z-index:1;
       padding:0 0 0.85rem;
-      background:transparent;
+      background:var(--layout-page-bg, var(--bg));
       margin:0;
     }
     .fonoran-split-chrome__intro { margin:0 0 0.65rem; font-size:0.86rem; color:var(--muted); line-height:1.4; }
@@ -212,7 +211,15 @@
     .fonoran-split-chrome .toolbar { margin:0 0 0.65rem; }
     .fonoran-split-chrome .stats { margin:0; gap:1.25rem; }
     .fonoran-split-chrome .wc-toggle { margin:0; }
-    .fonoran-split-grid { display:grid; grid-template-columns:minmax(260px,340px) minmax(0,1fr); gap:1rem; align-items:start; }
+    .fonoran-split-grid {
+      display:grid;
+      grid-template-columns:minmax(260px,340px) minmax(0,1fr);
+      gap:1rem;
+      align-items:start;
+      position:relative;
+      z-index:0;
+      margin-top:2rem;
+    }
     .fonoran-split-picker {
       position:sticky;
       top:var(--fonoran-split-chrome-offset, 9rem);
@@ -224,6 +231,7 @@
       padding:0.75rem;
     }
     .fonoran-split-picker .picker-h:first-child { margin-top:0; }
+    .fonoran-split-picker [hidden] { display:none !important; }
     .fonoran-split-picker .sound-grid { max-height:none; overflow:visible; }
     .fonoran-split-picker__body { margin:0 -0.15rem; padding:0 0.15rem 0.1rem; }
     .fonoran-split-picker__body .word-item { margin-bottom:0.35rem; padding:0.65rem 0.85rem; }
@@ -244,7 +252,7 @@
     .composer-hero__actions { display:flex; flex-wrap:wrap; gap:0.5rem; justify-content:center; align-items:center; margin:0.65rem 0 0; }
     .composer-hero__actions .hear-min { margin:0; }
     .composer-form { text-align:left; border-top:1px solid var(--border); padding-top:1rem; margin-top:0.25rem; }
-    /* compound creator: keep the preview panel in view while the picker list scrolls */
+    /* word creator: keep the preview panel in view while the picker list scrolls */
     #page-create .fonoran-split-picker { position:static; }
     #page-create .fonoran-split-workspace {
       position:sticky;

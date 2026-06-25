@@ -48,7 +48,7 @@ The **Language Builder Tools** at [`/fonoran/`](fonoran/) are the suite used to 
 | Builder tool | Purpose |
 | --- | --- |
 | [Root Creator](fonoran/) | Create primitive syllables (CV / CVC) |
-| [Compound Creator](fonoran/) | Stack roots and approved words |
+| [Word Creator](fonoran/) | Stack roots and approved words |
 | [Review](fonoran/) | Approve, reject, or revise pending items |
 | [Language Explorer](fonoran/) | Derivation trees and family graphs |
 | [Semantic Analysis](fonoran/) | Health scores + Run DDA (Advanced) |

@@ -570,11 +570,12 @@ export function runTests(options) {
 
   t('doc viewer builds GitHub and in-app URLs', () => {
     assert(githubDocUrl('docs/foo.md').includes('github.com/jamesc137/fonora/blob/main/docs/foo.md'));
-    assert(docViewerHref('docs/foo.md') === '/docs/foo');
-    assert(docViewerHref('docs/foo.md#section') === '/docs/foo#section');
-    assert(docViewerHref('docs/platform-overview.md') === '/docs');
+    assert(docViewerHref('docs/foo.md') === '/?path=docs%2Ffoo.md');
+    assert(docViewerHref('docs/foo.md#section') === '/?path=docs%2Ffoo.md#section');
+    assert(docViewerHref('docs/platform-overview.md') === '/#docs');
+    assert(parseDocFromLocation({ pathname: '/', hash: '#docs', search: '' })?.path === 'docs/platform-overview.md');
+    assert(parseDocFromLocation({ pathname: '/', hash: '', search: '?path=docs%2Flanguage-rules.md' })?.path === 'docs/language-rules.md');
     assert(parseDocFromLocation({ pathname: '/docs', hash: '', search: '' })?.path === 'docs/platform-overview.md');
-    assert(parseDocFromLocation({ pathname: '/docs/language-rules', hash: '', search: '' })?.path === 'docs/language-rules.md');
   });
 
   t('markdown renderer handles headings and tables', () => {

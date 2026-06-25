@@ -33,7 +33,12 @@ const FONORAN_TABS = [
   { id: 'create', label: 'Word Creator' },
   { id: 'matcher', label: 'Word Matcher' },
   { id: 'dictionary', label: 'Dictionary' },
+];
+
+const FONORAN_MORE_MENU = [
   { id: 'review', label: 'Review' },
+  { id: 'health', label: 'Health' },
+  { id: 'advanced', label: 'Advanced' },
 ];
 
 const SCRIPT_TITLES = {
@@ -64,7 +69,7 @@ const FONORAN_TITLES = {
 };
 
 const MORE_TAB_IDS = new Set(MORE_MENU.filter((i) => i.id).map((i) => i.id));
-const FONORAN_MORE_IDS = new Set(['health', 'advanced']);
+const FONORAN_MORE_IDS = new Set(FONORAN_MORE_MENU.map((i) => i.id));
 
 const PLATFORM_TABS = [
   { id: 'platform', label: 'About' },
@@ -223,15 +228,12 @@ function renderFonoranRow2(activeTab) {
   ).join('');
 
   const moreActive = FONORAN_MORE_IDS.has(activeTab);
-  const moreItems = ['health', 'advanced']
-    .map((id) => {
-      const active = id === activeTab;
-      const label = id === 'health' ? 'Health' : 'Advanced';
-      return `<button type="button" class="tab-btn nav-dropdown-item${active ? ' tab-btn--active' : ''}" data-fonoran-page="${id}" role="menuitem"${
-        active ? ' aria-current="page"' : ''
-      }>${label}</button>`;
-    })
-    .join('');
+  const moreItems = FONORAN_MORE_MENU.map((item) => {
+    const active = item.id === activeTab;
+    return `<button type="button" class="tab-btn nav-dropdown-item${active ? ' tab-btn--active' : ''}" data-fonoran-page="${item.id}" role="menuitem"${
+      active ? ' aria-current="page"' : ''
+    }>${item.label}</button>`;
+  }).join('');
 
   return `
     <div class="app-header__row app-header__row--tools" data-nav-row="language-tools">

@@ -143,7 +143,7 @@
       requestAnimationFrame(syncSplitStickyOffsets);
     }
 
-    const LANDER_SHOWCASE_WORD_ID = 'cmp-kaso';
+    const LANDER_SHOWCASE_WORD_ID = 'cmp-shakafa';
     let landerShowcaseToken = 0;
     let landerHealthToken = 0;
 
@@ -1227,9 +1227,9 @@
       return api('/api/fonoran/lab/graph/preview', {
         method: 'POST',
         body: JSON.stringify({
-          spelling: 'kaso',
-          meaning: 'love',
-          components: [{ type: 'root', ref: 'ka' }, { type: 'root', ref: 'so' }],
+          spelling: 'shakafa',
+          meaning: 'war',
+          components: [{ type: 'word', ref: 'cmp-shaka' }, { type: 'root', ref: 'fa' }],
         }),
       });
     }
@@ -1240,13 +1240,13 @@
         openExplorer('word', word.id);
         return;
       }
-      openExplorer('word', 'preview-kaso', {
+      openExplorer('word', 'preview-shakafa', {
         preview: true,
-        spelling: 'kaso',
-        meaning: 'love',
+        spelling: 'shakafa',
+        meaning: 'war',
         components: [
-          { type: 'root', ref: 'ka', spelling: 'ka' },
-          { type: 'root', ref: 'so', spelling: 'so' },
+          { type: 'word', ref: 'cmp-shaka', spelling: 'shaka' },
+          { type: 'root', ref: 'fa', spelling: 'fa' },
         ],
       });
     }
@@ -1267,7 +1267,7 @@
         await renderExplorerMermaidIn(el, data.mermaid, data.graph_nodes);
       } catch {
         if (token !== landerShowcaseToken) return;
-        el.innerHTML = '<p class="sans fonoran-showcase__error">Could not load the example word. Start the dev server with <code>npm start</code>.</p>';
+        el.innerHTML = '<p class="fonoran-showcase__error">Could not load the example word. Start the dev server with <code>npm start</code>.</p>';
       }
     }
 
@@ -1361,7 +1361,7 @@
         $('lander-health-open')?.addEventListener('click', () => switchPage('health'));
       } catch {
         if (token !== landerHealthToken) return;
-        el.innerHTML = '<p class="sans lander-health__error">Could not load health metrics. Start the dev server with <code>npm start</code>.</p>';
+        el.innerHTML = '<p class="lander-health__error">Could not load health metrics. Start the dev server with <code>npm start</code>.</p>';
       }
     }
 
@@ -2167,16 +2167,16 @@
 
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
+    const initialPage = document.documentElement.getAttribute('data-fonora-page') || 'home';
+    initUniversalNav({ context: 'language', activeTab: initialPage });
+    document.querySelectorAll('.page').forEach((p) => p.classList.remove('active'));
+    $(`page-${initialPage}`)?.classList.add('active');
+
     async function boot() {
-      await refreshAuth();
-      handleAuthUrlErrors();
-      const initialHash = window.location.hash.replace(/^#/, '');
-      const initialPage = initialHash && ALL_PAGES.has(initialHash) ? initialHash : 'home';
       STATE.page = initialPage;
       if (initialPage === 'review') STATE.reviewFocusPending = true;
-      initUniversalNav({ context: 'fonoran', activeTab: initialPage });
-      document.querySelectorAll('.page').forEach((p) => p.classList.remove('active'));
-      $(`page-${initialPage}`)?.classList.add('active');
+      await refreshAuth();
+      handleAuthUrlErrors();
       updateAuthGate();
       window.addEventListener('hashchange', () => {
         const hashPage = window.location.hash.replace(/^#/, '');

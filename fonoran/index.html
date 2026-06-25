@@ -5,24 +5,64 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fonoran: Experimental Language</title>
   <meta name="description" content="Fonoran is an open-source experiment in language creation built on the Fonora phonetic writing system: primitive concepts, compound words, semantic relationships, and language-building tools.">
+  <script src="../js/nav-boot.js"></script>
   <link rel="stylesheet" href="../app.css">
   <link rel="stylesheet" href="fonoran.css">
+  <link rel="prefetch" href="../">
+  <link rel="prefetch" href="../#home">
 </head>
 <body class="app-body--fonoran">
-  <header id="app-header-root" class="app-header app-header--fonoran"></header>
+  <header id="app-header-root" class="app-header" data-nav-shell="static">
+    <div class="app-header__tabstrip">
+      <div class="app-header__row app-header__row--platform">
+        <div class="app-header__start">
+          <nav class="platform-tabs" role="tablist" aria-label="Fonora sections">
+            <a href="../#about" class="platform-tab" data-nav-tab="platform">Fonora</a>
+            <a href="../#home" class="platform-tab" data-nav-tab="script">Script</a>
+            <a href="./" class="platform-tab" data-nav-tab="language">Language</a>
+          </nav>
+        </div>
+        <nav class="app-header__global" aria-label="Account" data-nav-auth></nav>
+      </div>
+    </div>
+    <div class="app-header__row app-header__row--tools" data-nav-row="language-tools">
+      <nav class="main-nav" aria-label="Fonoran tools">
+        <div class="main-nav-primary">
+          <button type="button" class="tab-btn" data-fonoran-page="home">Home</button>
+          <button type="button" class="tab-btn" data-fonoran-page="roots">Root Creator</button>
+          <button type="button" class="tab-btn" data-fonoran-page="create">Word Creator</button>
+          <button type="button" class="tab-btn" data-fonoran-page="matcher">Word Matcher</button>
+          <button type="button" class="tab-btn" data-fonoran-page="dictionary">Dictionary</button>
+          <button type="button" class="tab-btn" data-fonoran-page="review">Review</button>
+        </div>
+        <div class="nav-dropdown" id="fonoran-nav-more">
+          <button type="button" class="nav-dropdown-trigger tab-btn" id="fonoran-nav-more-trigger" aria-expanded="false" aria-haspopup="true" aria-controls="fonoran-nav-more-menu">
+            More
+            <span class="nav-dropdown-chevron" aria-hidden="true">▾</span>
+          </button>
+          <div class="nav-dropdown-menu" id="fonoran-nav-more-menu" role="menu" hidden>
+            <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="health" role="menuitem">Health</button>
+            <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="advanced" role="menuitem">Advanced</button>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
   <div class="app">
     <main>
       <div id="load-error" class="error" hidden>
         Could not load language data. Run <code>npm start</code>, then open <code>/fonoran/</code>.
       </div>
 
-      <section id="page-home" class="page active">
+      <section id="page-home" class="page">
         <div class="fonoran-lander content-page">
-          <section class="fonoran-lander__intro content-section content-section--intro">
-            <h1>Fonoran</h1>
-            <p class="fonoran-lander__subtitle">An experimental language and language-building toolkit.</p>
+          <section class="content-section content-section--intro">
+            <header class="home-intro-header">
+              <h1>Fonoran</h1>
+              <p class="home-subtitle">An experimental language and language-building toolkit.</p>
+            </header>
 
-            <div class="fonoran-lander__prose sans">
+            <div class="home-prose">
               <p>Fonoran is an open-source experiment in language creation built on top of the Fonora phonetic writing system.</p>
               <p>Rather than focusing on a single constructed language, the project explores how languages can be intentionally designed, analyzed, and evolved using modern tooling. It includes systems for creating primitive concepts, building compound words, exploring semantic relationships, reviewing vocabulary, and tracing the evolution of every word.</p>
               <p>Fonoran serves as the reference language and a living proof of concept used to develop and validate the language building platform.</p>
@@ -31,11 +71,11 @@
 
           <section class="fonoran-lander__showcase content-section" aria-labelledby="showcase-heading">
             <h2 id="showcase-heading">See the tooling in action</h2>
-            <p class="sans fonoran-lander__showcase-lead">Every word is traced from roots through derivation trees, semantic coordinates (DDA), and interactive family graphs with pronunciation in the Fonora script.</p>
+            <p class="section-lead">Every word is traced from roots through derivation trees, semantic coordinates (DDA), and interactive family graphs with pronunciation in the Fonora script.</p>
             <div id="lander-showcase" class="fonoran-showcase" aria-live="polite">
-              <p class="sans fonoran-showcase__loading">Loading example word…</p>
+              <p class="fonoran-showcase__loading">Loading example word…</p>
             </div>
-            <div class="fonoran-showcase__toolbar sans">
+            <div class="fonoran-showcase__toolbar">
               <button type="button" class="btn btn-primary" id="lander-showcase-explore">Open full explorer</button>
               <button type="button" class="btn" id="lander-showcase-dictionary" data-goto-page="dictionary">Browse dictionary</button>
             </div>
@@ -43,18 +83,18 @@
 
           <section class="fonoran-lander__health content-section" aria-labelledby="health-heading">
             <h2 id="health-heading">Language health</h2>
-            <p class="sans fonoran-lander__health-lead">A live readability audit of vocabulary by four dimensions that measure internal consistency, morphological transparency, and learner ergonomics. Designed for conlang pedagogy, not English familiarity.</p>
+            <p class="section-lead">A live readability audit of vocabulary by four dimensions that measure internal consistency, morphological transparency, and learner ergonomics. Designed for conlang pedagogy, not English familiarity.</p>
             <div id="lander-health" class="lander-health" aria-live="polite">
-              <p class="sans lander-health__loading">Loading health metrics…</p>
+              <p class="lander-health__loading">Loading health metrics…</p>
             </div>
           </section>
 
           <section class="fonoran-lander__compare content-section" aria-labelledby="compare-heading">
             <h2 id="compare-heading">Fonora vs. Fonoran</h2>
-            <p class="sans fonoran-lander__compare-lead">Think of it as:</p>
+            <p class="section-lead">Think of it as:</p>
             <div class="fonoran-compare-grid content-card-grid content-card-grid--2">
               <article class="fonoran-compare-card content-card fonoran-compare-card--script">
-                <p class="fonoran-compare-card__tag">Fonora</p>
+                <p class="home-layer-card__tag">Fonora</p>
                 <h3>The writing system</h3>
                 <p>Fonora is the phonetic writing system. It defines how speech is represented using a small set of phonetic symbols.</p>
                 <ul>
@@ -63,7 +103,7 @@
                 <a class="btn fonoran-compare-card__btn" href="../#grid">Explore the script</a>
               </article>
               <article class="fonoran-compare-card content-card fonoran-compare-card--language">
-                <p class="fonoran-compare-card__tag">Fonoran</p>
+                <p class="home-layer-card__tag">Fonoran</p>
                 <h3>The language</h3>
                 <p>Fonoran is the reference language built with that writing system and the accompanying language-builder toolkit.</p>
                 <ul>
@@ -71,12 +111,12 @@
                 </ul>
               </article>
             </div>
-            <p class="sans fonoran-lander__compare-foot">The long-term goal is not simply to build one language, but to explore better tools for creating, understanding, and documenting languages using a shared phonetic foundation.</p>
+            <p class="section-foot">The long-term goal is not simply to build one language, but to explore better tools for creating, understanding, and documenting languages using a shared phonetic foundation.</p>
           </section>
 
           <section class="fonoran-lander__tools content-section" aria-labelledby="tools-heading">
             <h2 id="tools-heading">Language Builder Tools</h2>
-            <p class="sans fonoran-lander__tools-lead">Create, review, and explore your Fonoran vocabulary. Your words live in a local lab bucket; they are never overwritten by reference data.</p>
+            <p class="section-lead">Create, review, and explore your Fonoran vocabulary. Your words live in a local lab bucket; they are never overwritten by reference data.</p>
             <div class="fonoran-tool-cards content-card-grid content-card-grid--2">
               <button type="button" class="fonoran-tool-card" data-goto-page="roots">
                 <strong>Root Creator</strong>
@@ -101,7 +141,7 @@
             </div>
           </section>
 
-          <footer class="fonoran-lander__footer sans">
+          <footer class="lander-footer">
             <a href="../docs/fonoran.md">Read the Fonoran guide</a>
             <span aria-hidden="true">·</span>
             <a href="../?path=docs%2Fplatform-overview.md#docs">Platform overview</a>
@@ -281,12 +321,12 @@
 
   <footer class="site-footer">
     <div class="site-footer-inner">
-      <p class="site-footer-copy sans">
+      <p class="site-footer-copy">
         © 2026 <a href="https://jamescalhoun.co" target="_blank" rel="noopener noreferrer">James Calhoun</a>.
         Released under the <a href="https://github.com/jamesc137/fonora/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>.
       </p>
-      <p class="site-footer-links sans">
-        <a href="../#home">Fonora Script</a>
+      <p class="site-footer-links">
+        <a href="../#home">Script</a>
         <span class="site-footer-sep" aria-hidden="true">·</span>
         <a href="https://fonora.org/fonoran/">fonora.org</a>
         <span class="site-footer-sep" aria-hidden="true">·</span>

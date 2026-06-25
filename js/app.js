@@ -35,7 +35,7 @@ import { setupSamples, setupHomeSample, ensureSamplesLoaded } from './samples.js
 import { setupOpenProblems } from './open-problems-ui.js';
 import { setupDocsViewer, onDocsTabActivated, loadDocViewer } from './docs-viewer-ui.js';
 import { openDocViewer } from './doc-urls.js';
-import { initUniversalNav, setActiveTab, closeNavDropdown, MORE_TAB_IDS } from './universal-nav.js';
+import { initUniversalNav, setActiveTab, setNavContext, closeNavDropdown, MORE_TAB_IDS } from './universal-nav.js';
 import { setReaderWordSources } from './fonora-tts.js';
 
 let rules = null;
@@ -697,26 +697,72 @@ function updateQuizStats() {
 
 function getTabFromHash() {
   const id = window.location.hash.replace(/^#/, '');
-  if (id && id !== 'home') {
+  if (id === 'about') return 'platform';
+  if (id === 'home') return 'home';
+  if (id) {
     const panel = document.querySelector(`[data-tab-panel="${id}"]`);
     if (panel) return id;
   }
   if (new URLSearchParams(window.location.search).has('path')) {
     return 'docs';
   }
-  return 'home';
+  return 'platform';
+}
+
+function isPlatformTab(tabId) {
+  return tabId === 'platform' || tabId === 'open-problems' || tabId === 'docs';
 }
 
 function setHashForTab(tabId) {
-  const hash = tabId === 'home' ? '' : `#${tabId}`;
-  if (window.location.hash !== hash) {
-    history.replaceState(null, '', `${window.location.pathname}${window.location.search}${hash}`);
+  const base = window.location.pathname;
+  if (tabId === 'platform') {
+    const next = `${base}#about`;
+    if (`${window.location.pathname}${window.location.search}${window.location.hash}` !== next) {
+      history.replaceState(null, '', next);
+    }
+    return;
   }
+  const hash = tabId === 'home' ? '#home' : `#${tabId}`;
+  if (tabId === 'docs') {
+    const path = new URLSearchParams(window.location.search).get('path') || 'docs/platform-overview.md';
+    const next = `${base}?path=${encodeURIComponent(path)}#docs`;
+    if (`${window.location.pathname}${window.location.search}${window.location.hash}` !== next) {
+      history.replaceState(null, '', next);
+    }
+    return;
+  }
+  if (`${window.location.pathname}${window.location.search}${window.location.hash}` !== `${base}${hash}`) {
+    history.replaceState(null, '', `${base}${hash}`);
+  }
+}
+
+function syncAppHeaderOffset() {
+  const header = document.getElementById('app-header-root');
+  if (!header) return;
+  const bottom = Math.ceil(header.getBoundingClientRect().bottom);
+  document.documentElement.style.setProperty('--app-header-offset', `${bottom}px`);
+}
+
+let appHeaderOffsetObserver = null;
+
+function ensureAppHeaderOffsetObserver() {
+  const header = document.getElementById('app-header-root');
+  if (!header) return;
+  syncAppHeaderOffset();
+  if (appHeaderOffsetObserver) return;
+  appHeaderOffsetObserver = new ResizeObserver(() => syncAppHeaderOffset());
+  appHeaderOffsetObserver.observe(header);
+  window.addEventListener('resize', syncAppHeaderOffset);
 }
 
 function showTab(tabId) {
   const previousTab = document.querySelector('.tab-panel--active')?.dataset.tabPanel;
+  const platform = isPlatformTab(tabId);
 
+  document.documentElement.setAttribute('data-fonora-nav', platform ? 'platform' : 'script');
+  document.documentElement.setAttribute('data-fonora-tab', tabId);
+
+  setNavContext(platform ? 'platform' : 'script');
   setActiveTab(tabId);
 
   document.querySelectorAll('.tab-panel').forEach((panel) => {
@@ -745,15 +791,15 @@ function showTab(tabId) {
   if (tabId === 'docs') {
     onDocsTabActivated();
   }
+
+  requestAnimationFrame(syncAppHeaderOffset);
 }
 
 window.showTab = showTab;
 window.openDocViewer = openDocViewer;
 
 function setupTabs() {
-  initUniversalNav({ context: 'script', activeTab: getTabFromHash() });
-
-  document.querySelectorAll('main [data-tab], .home-page [data-tab]').forEach((el) => {
+  document.querySelectorAll('main [data-tab], .home-page [data-tab], .platform-home [data-tab]').forEach((el) => {
     el.addEventListener('click', (event) => {
       if (el.tagName === 'A') event.preventDefault();
       const docPath = el.getAttribute('data-doc-path');
@@ -767,6 +813,15 @@ function setupTabs() {
 
   const header = document.getElementById('app-header-root');
   header?.addEventListener('universal-nav:tab', (event) => {
+    const { tab } = event.detail;
+    if (tab === 'docs') {
+      openDocViewer('docs/platform-overview.md');
+      loadDocViewer('docs/platform-overview.md').catch(() => {});
+    }
+    showTab(tab);
+  });
+
+  header?.addEventListener('universal-nav:platform-tab', (event) => {
     const { tab } = event.detail;
     if (tab === 'docs') {
       openDocViewer('docs/platform-overview.md');
@@ -880,4 +935,19 @@ function applyRulesBundle(loaded) {
   }
 }
 
+function bootstrapShell() {
+  const initialTab = getTabFromHash();
+  initUniversalNav({
+    context: isPlatformTab(initialTab) ? 'platform' : 'script',
+    activeTab: initialTab,
+  });
+  document.querySelectorAll('.tab-panel').forEach((panel) => {
+    const active = panel.dataset.tabPanel === initialTab;
+    panel.hidden = !active;
+    panel.classList.toggle('tab-panel--active', active);
+  });
+  ensureAppHeaderOffsetObserver();
+}
+
+bootstrapShell();
 initApp();

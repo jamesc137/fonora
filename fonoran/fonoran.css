@@ -10,7 +10,7 @@
       --bg:var(--layout-page-bg);
     }
     body.app-body--fonoran {
-      font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+      font-family: var(--font-serif);
       font-size:17px;
       line-height:1.5;
       color:var(--text);
@@ -102,8 +102,6 @@
     .edit-actions { display:flex; gap:0.5rem; margin-top:1rem; }
     .btn { font-family:-apple-system,sans-serif; font-size:0.9rem; padding:0.55rem 1rem; border-radius:8px; border:1px solid var(--border); background:var(--surface); cursor:pointer; transition:border-color 0.15s, background 0.15s, color 0.15s; }
     .btn:hover { background:var(--accent-soft); border-color:var(--accent); color:var(--accent); }
-    .btn-primary { background:var(--accent); color:#fff; border-color:var(--accent); font-weight:500; }
-    .btn-primary:hover { background:#245a42; border-color:#245a42; color:#fff; }
     .btn:disabled { opacity:0.45; cursor:default; }
     .dupe { background:#fef3f2; border:1px solid #f3c0bb; border-radius:8px; padding:0.6rem 0.8rem; margin-top:0.5rem; font-family:-apple-system,sans-serif; font-size:0.84rem; color:#8a2a1f; }
     .impact { background:var(--review-bg); border:1px solid #f0c98a; border-radius:8px; padding:0.75rem 0.9rem; margin-top:0.85rem; font-family:-apple-system,sans-serif; font-size:0.86rem; }
@@ -287,9 +285,10 @@
     #page-matcher .fonoran-split-chrome {
       padding-top:0.65rem;
     }
-    /* word matcher */
+    /* word matcher — flex column layout (must override app.css first-paint .page rules) */
+    html[data-fonora-page='matcher'] #page-matcher.fonoran-match-page,
     #page-matcher.fonoran-match-page.active {
-      display:flex;
+      display:flex !important;
       flex-direction:column;
       height:calc(100svh - var(--fonoran-header-offset, 4.5rem) - var(--layout-main-pt, 1.75rem) - var(--layout-main-pb, 2.5rem));
       max-height:calc(100svh - var(--fonoran-header-offset, 4.5rem) - var(--layout-main-pt, 1.75rem) - var(--layout-main-pb, 2.5rem));
@@ -419,6 +418,7 @@
     }
     .matcher-restore:hover { background:var(--accent-soft); border-color:var(--accent); }
     @media (max-width:768px){
+      html[data-fonora-page='matcher'] #page-matcher.fonoran-match-page,
       #page-matcher.fonoran-match-page.active {
         height:auto;
         max-height:none;
@@ -527,7 +527,7 @@
 
     /* advanced */
     .box { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.25rem; margin-bottom:1.25rem; font-family:-apple-system,sans-serif; font-size:0.92rem; }
-    .box h2 { margin:0 0 0.5rem; font-size:1.05rem; font-family:"Iowan Old Style",Georgia,serif; }
+    .box h2 { margin:0 0 0.5rem; font-size:1.05rem; font-family:inherit; }
     .box h3 { font-size:0.95rem; margin:0.75rem 0 0.35rem; }
     .adv-links { display:flex; flex-direction:column; gap:0.4rem; }
     .adv-links a { color:var(--accent); font-size:0.9rem; }
@@ -596,14 +596,7 @@
     }
     .sheet.open { visibility:visible; pointer-events:auto; opacity:1; transform:translate(-50%,-50%) scale(1); }
 
-    /* --- Fonoran lander (layout via .content-page / .content-section in app.css) --- */
-    .fonoran-lander__intro h1 { margin:0 0 0.35rem; font-size:2rem; font-weight:600; letter-spacing:-0.02em; color:var(--word); }
-    .fonoran-lander__subtitle { margin:0 0 1.25rem; font-size:1.05rem; color:var(--muted); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
-    .fonoran-lander__prose { color:#333; line-height:1.55; max-width:var(--layout-prose-max); }
-    .fonoran-lander__prose p { margin:0; }
-    .fonoran-lander__prose p + p { margin-top:0.85rem; }
-    .fonoran-lander h2 { margin:0 0 0.85rem; font-size:1.2rem; font-weight:600; }
-    .fonoran-lander__showcase-lead { margin:0 0 1rem; color:var(--muted); font-size:0.92rem; line-height:1.45; max-width:var(--layout-prose-max); }
+    /* --- Fonoran lander (shared intro/section typography in app.css) --- */
     .fonoran-showcase { padding:1.25rem 1.35rem; background:var(--surface); border:1px solid var(--border); border-radius:var(--layout-card-radius); }
     .fonoran-showcase .explorer-section:first-of-type { margin-top:0; }
     .showcase-hero { position:relative; text-align:center; margin-bottom:0.75rem; }
@@ -661,7 +654,6 @@
     .showcase-used-chip .mono { font-size:0.82rem; font-weight:600; color:var(--word); }
     .showcase-used-chip span:last-child { color:var(--muted); }
     .showcase-used-more { font-family:-apple-system,sans-serif; font-size:0.78rem; color:var(--muted); padding:0.25rem 0.35rem; }
-    .fonoran-lander__health-lead { margin:0 0 1rem; color:var(--muted); font-size:0.92rem; line-height:1.45; max-width:var(--layout-prose-max); }
     .lander-health__loading,
     .lander-health__error { margin:0; font-size:0.9rem; color:var(--muted); text-align:center; padding:1rem; }
     .lander-health__summary { display:grid; gap:1rem; margin-bottom:1.25rem; }
@@ -692,22 +684,15 @@
     .lander-health__metric-note { margin:0.35rem 0 0; font-family:-apple-system,sans-serif; font-size:0.74rem; color:var(--muted); line-height:1.35; text-align:left; }
     .lander-health__footnote { margin:0; font-family:-apple-system,sans-serif; font-size:0.8rem; color:var(--muted); line-height:1.45; max-width:var(--layout-prose-max); }
     .lander-health__actions { display:flex; justify-content:center; margin-top:1rem; }
-    .fonoran-lander__compare-lead { margin:0 0 1rem; color:var(--muted); font-size:0.92rem; line-height:1.45; }
-    .fonoran-lander__compare-foot { margin:1rem 0 0; color:#333; font-size:0.92rem; line-height:1.55; max-width:var(--layout-prose-max); }
     .fonoran-compare-card { display:flex; flex-direction:column; gap:0.5rem; }
     .fonoran-compare-card--script { border-top:3px solid #2563eb; }
     .fonoran-compare-card--language { border-top:3px solid var(--accent); }
-    .fonoran-compare-card__tag { margin:0; font-size:0.65rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--muted); font-family:-apple-system,sans-serif; }
     .fonoran-compare-card h3 { margin:0; font-size:1.05rem; }
     .fonoran-compare-card p { margin:0; font-size:0.92rem; color:#444; line-height:1.45; font-family:-apple-system,sans-serif; }
     .fonoran-compare-card ul { margin:0.25rem 0 0.75rem; padding-left:1.15rem; font-family:-apple-system,sans-serif; font-size:0.88rem; color:#555; line-height:1.45; }
     .fonoran-compare-card__btn { align-self:flex-start; margin-top:auto; display:inline-block; color:var(--word); text-decoration:none; font-weight:500; transition:border-color 0.15s, background 0.15s, color 0.15s; }
     .fonoran-compare-card__btn:hover { background:var(--accent-soft); border-color:var(--accent); color:var(--accent); }
-    .fonoran-lander__tools-lead { margin:0 0 1rem; color:var(--muted); font-size:0.92rem; line-height:1.45; max-width:var(--layout-prose-max); }
-    .fonoran-tool-card { text-align:left; padding:var(--layout-card-padding); border:1px solid var(--border); border-radius:var(--layout-card-radius); background:var(--surface); cursor:pointer; font-family:-apple-system,sans-serif; transition:border-color 0.15s, background 0.15s; }
+    .fonoran-tool-card { text-align:left; padding:var(--layout-card-padding); border:1px solid var(--border); border-radius:var(--layout-card-radius); background:var(--surface); cursor:pointer; font:inherit; transition:border-color 0.15s, background 0.15s; }
     .fonoran-tool-card:hover { border-color:#95d5b2; background:var(--accent-soft); }
     .fonoran-tool-card strong { display:block; font-size:0.92rem; color:var(--word); margin-bottom:0.2rem; }
     .fonoran-tool-card span { display:block; font-size:0.8rem; color:var(--muted); line-height:1.35; }
-    .fonoran-lander__footer { font-size:0.88rem; color:var(--muted); display:flex; flex-wrap:wrap; gap:0.35rem 0.5rem; align-items:center; padding-top:0.5rem; }
-    .fonoran-lander__footer a { color:var(--accent); }
-    .fonoran-lander__footer a:hover { text-decoration:underline; }

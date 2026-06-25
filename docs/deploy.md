@@ -62,8 +62,48 @@ Use for uptime monitors.
 | --- | --- | --- |
 | `PORT` | `8000` | HTTP port (set by Heroku) |
 | `HOST` | `0.0.0.0` | Bind address |
+| `DATABASE_URL` | — | PostgreSQL connection string for Fonoran lab data |
+| `FONORAN_STORAGE` | `postgres` if `DATABASE_URL` set, else `json` | Force `json` or `postgres` storage |
+| `FONORAN_SKIP_JSON_MIRROR` | — | Set to `1` to skip writing JSON mirror when using PostgreSQL |
+| `PGSSLMODE` | — | Set to `disable` for local PostgreSQL without SSL |
+| `GOOGLE_CLIENT_ID` | — | Google OAuth client ID (Fonoran write auth) |
+| `GOOGLE_CLIENT_SECRET` | — | Google OAuth client secret |
+| `SESSION_SECRET` | — | Random secret for signing session cookies (32+ chars) |
+| `ALLOWED_DOMAIN` | `fonora.org` | Only `@domain` Google accounts may edit Fonoran |
+| `ADMIN_EMAILS` | — | Optional comma-separated allowlist instead of domain |
+| `AUTH_CALLBACK_URL` | derived from request | OAuth redirect URI override |
+| `FONORAN_AUTH` | — | Set to `off` to disable auth locally |
 
-No secrets are required for the public site.
+No secrets are required for the **public script app** alone. When all three OAuth vars are set (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `SESSION_SECRET`), Fonoran **write** routes require a signed-in `@fonora.org` Google account. Copy [`.env.example`](../.env.example) for local testing.
+
+## PostgreSQL (Fonoran lab data)
+
+Live Fonoran vocabulary (roots, compounds, review state) can be stored in **PostgreSQL** instead of `data/fonoran-sound-bucket.json`.
+
+### Heroku Postgres
+
+```bash
+heroku addons:create heroku-postgresql:essential-0
+heroku config:get DATABASE_URL
+```
+
+On first boot with an empty database, the server **imports** local `data/fonoran-sound-bucket.json` if present — your JSON file is **not deleted**.
+
+### Manual import / export
+
+```bash
+# Import local JSON → PostgreSQL (requires DATABASE_URL)
+npm run fonoran:import
+
+# Export PostgreSQL → JSON backup
+npm run fonoran:export
+```
+
+### Local development
+
+Without `DATABASE_URL`, storage falls back to JSON at `data/fonoran-sound-bucket.json` (gitignored). Reference generator JSON (Gen 3 configs, canonical registry) remains file-based.
+
+See [platform-overview.md](platform-overview.md) for the data architecture overview.
 
 ## Static hosting alternatives
 
@@ -78,11 +118,22 @@ Because WASM assets are large (~90 MB in `vendor/` after install), a Node static
 
 ## Production checklist
 
+### Fonora (script app)
+
 - [ ] `npm install && npm test` pass
 - [ ] `npm start` — Translator, Reader, and Sound Grid work
 - [ ] `https://fonora.org` serves with valid TLS
 - [ ] Canonical URL and Open Graph tags point to `https://fonora.org/` (see `index.html`)
 - [ ] Custom domain redirects `www` → apex or vice versa (your preference)
+
+### Fonoran (language builder)
+
+- [ ] Google Workspace + OAuth credentials configured ([fonoran-auth-and-release.md](fonoran-auth-and-release.md))
+- [ ] `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `SESSION_SECRET`, `ALLOWED_DOMAIN` set on Heroku
+- [ ] Write API requires `@fonora.org` session; unsigned users can browse dictionary only
+- [ ] `DATABASE_URL` set; live bucket imported or seeded once
+- [ ] Contributor Google Form linked from `/fonoran/` lander
+- [ ] Backup: `npm run fonoran:export` after significant changes
 
 ## CI
 

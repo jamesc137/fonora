@@ -7,12 +7,28 @@ Thank you for helping improve Fonora. This project is an experimental open-sourc
 
 ## Ways to contribute
 
+### Fonora (the script)
+
+Open to everyone via GitHub:
+
 - **Language rules** — propose changes to [`docs/language-rules.md`](docs/language-rules.md) (symbols, grid cells, vowel mappings) with reasoning and test cases
 - **IPA pipeline** — improve normalization, encoding, or validation in `js/`
 - **Documentation** — clarify concepts, add examples, fix outdated docs in `docs/`
 - **Open problems** — review [docs/open-problems.md](docs/open-problems.md) or More → **Open Problems** in the app; file issues for gaps you can reproduce
 - **Bug reports** — open a GitHub issue with reproduction steps
 - **Tests** — extend `js/tests-core.js` when fixing encoding or grammar behavior
+
+Use the issue templates under [`.github/ISSUE_TEMPLATE/`](.github/ISSUE_TEMPLATE/) for native-speaker feedback, mapping proposals, and similar script-layer reports.
+
+### Fonoran (the language)
+
+Fonoran vocabulary is curated — not open PRs against the live dictionary. To propose roots, compounds, or meanings:
+
+1. Fill out the **Fonoran contributor form** (Google Form — link on [fonora.org/fonoran/](https://fonora.org/fonoran/) once published; see [docs/fonoran-auth-and-release.md](docs/fonoran-auth-and-release.md))
+2. Include your name, contact email, university, `.edu` email, and why you want to contribute
+3. Approved proposals are entered by the project maintainer in the language builder
+
+You can always **browse** the public dictionary and read the docs ([fonoran.md](docs/fonoran.md), [fonoran-gen3.md](docs/fonoran-gen3.md)) without applying.
 
 ## Development setup
 

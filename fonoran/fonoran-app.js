@@ -141,13 +141,17 @@
     const STATE = {
       lab: null, page: 'home', rules: null,
       wordCursor: 0,
+      reviewFocusPending: false,
       rootsFilter: '',
       editing: false, editMeaning: '', clearAffected: false,
       justSaved: null,
       recipe: null, recipeFilter: '',
       dictFilter: 'all', dictQuery: '', dictSelection: null,
       wordComposer: [], wordComposerFilter: '',
+      wordComposerShowRoots: true,
+      wordComposerShowWords: true,
       showUnapprovedWords: false,
+      showUnnamed: false,
       showDebugDda: false,
       rootDraft: { onset: '', vowel: '', coda: '' },
       lexicon: null,
@@ -281,20 +285,26 @@
     function typeBadge(type) {
       return `<span class="badge badge-${type === 'root' ? 'base' : 'compound'}">${type === 'root' ? 'ROOT' : 'WORD'}</span>`;
     }
-    function pickableRoots(query, { omit = [] } = {}) {
+    function hasMeaning(item) {
+      return Boolean(item?.meaning?.trim());
+    }
+    function pickableRoots(query, { omit = [], showUnnamed = false } = {}) {
       const q = (query ?? '').trim().toLowerCase();
       const skip = new Set(omit);
       return STATE.lab.sounds.filter(s => s.state !== 'rejected' && !skip.has(s.spelling))
+        .filter(s => showUnnamed || hasMeaning(s))
         .filter(s => !q || `${s.spelling} ${s.meaning ?? ''} ${s.legacy_label ?? ''}`.toLowerCase().includes(q))
         .sort((a, b) => (a.meaning || a.spelling).localeCompare(b.meaning || b.spelling));
     }
-    function pickableWords(query, { omitIds = [] } = {}) {
+    function pickableWords(query, { omitIds = [], showUnnamed = false } = {}) {
       const q = (query ?? '').trim().toLowerCase();
       const skip = new Set(omitIds);
       const allowed = STATE.showUnapprovedWords
         ? ['approved', 'revised', 'needs_review', 'draft']
         : ['approved', 'revised'];
       return STATE.lab.compounds.filter(c => allowed.includes(c.state) && !skip.has(c.id))
+        .filter(c => !c.generator_hint)
+        .filter(c => showUnnamed || hasMeaning(c))
         .filter(c => !q || `${c.spelling} ${c.meaning ?? ''}`.toLowerCase().includes(q))
         .sort((a, b) => (a.meaning || a.spelling).localeCompare(b.meaning || b.spelling));
     }
@@ -313,7 +323,7 @@
     function wordPickerMarkup(words) {
       return words.length ? words.map(c => `
         <button type="button" class="root-cell" data-add-word="${escapeHtml(c.id)}" data-write>${wordCellBodyHtml(c)}</button>`).join('')
-        : '<p class="empty" style="grid-column:1/-1">No approved words match.</p>';
+        : '<p class="empty" style="grid-column:1/-1">No words match.</p>';
     }
 
     async function load(opts = {}) {
@@ -688,19 +698,43 @@
         exploreBtn.onclick = () => openExplorerPreview(picks, spelling);
       }
       syncWordComposerControls();
+      $('wc-filters')?.querySelectorAll('[data-wc-filter]').forEach(chip => {
+        const key = chip.dataset.wcFilter;
+        const on = key === 'roots' ? STATE.wordComposerShowRoots
+          : key === 'words' ? STATE.wordComposerShowWords
+            : key === 'unapproved' ? STATE.showUnapprovedWords
+              : STATE.showUnnamed;
+        chip.classList.toggle('active', on);
+      });
+      const showRoots = STATE.wordComposerShowRoots;
+      const showWords = STATE.wordComposerShowWords;
+      $('wc-roots-h')?.toggleAttribute('hidden', !showRoots);
+      $('wc-roots')?.toggleAttribute('hidden', !showRoots);
+      $('wc-words-h')?.toggleAttribute('hidden', !showWords);
+      $('wc-words')?.toggleAttribute('hidden', !showWords);
+      $('wc-picker-empty')?.toggleAttribute('hidden', showRoots || showWords);
+      const pickerOpts = { showUnnamed: STATE.showUnnamed };
       const omitIds = picks.filter(c => c.type === 'word').map(c => c.ref);
-      $('wc-roots').innerHTML = rootPickerWithBadge(pickableRoots(STATE.wordComposerFilter));
-      $('wc-words').innerHTML = wordPickerMarkup(pickableWords(STATE.wordComposerFilter, { omitIds }));
-      $('wc-roots').querySelectorAll('[data-add-root]').forEach(b => b.addEventListener('click', () => {
-        STATE.wordComposer.push({ type: 'root', ref: b.dataset.addRoot, spelling: b.dataset.addRoot });
-        renderWordComposer();
-      }));
-      $('wc-words').querySelectorAll('[data-add-word]').forEach(b => b.addEventListener('click', () => {
-        const w = STATE.lab.compounds.find(c => c.id === b.dataset.addWord);
-        if (!w) return;
-        STATE.wordComposer.push({ type: 'word', ref: w.id, spelling: w.spelling, meaning: w.meaning });
-        renderWordComposer();
-      }));
+      if (showRoots) {
+        $('wc-roots').innerHTML = rootPickerWithBadge(pickableRoots(STATE.wordComposerFilter, pickerOpts));
+        $('wc-roots').querySelectorAll('[data-add-root]').forEach(b => b.addEventListener('click', () => {
+          STATE.wordComposer.push({ type: 'root', ref: b.dataset.addRoot, spelling: b.dataset.addRoot });
+          renderWordComposer();
+        }));
+      } else {
+        $('wc-roots').innerHTML = '';
+      }
+      if (showWords) {
+        $('wc-words').innerHTML = wordPickerMarkup(pickableWords(STATE.wordComposerFilter, { omitIds, ...pickerOpts }));
+        $('wc-words').querySelectorAll('[data-add-word]').forEach(b => b.addEventListener('click', () => {
+          const w = STATE.lab.compounds.find(c => c.id === b.dataset.addWord);
+          if (!w) return;
+          STATE.wordComposer.push({ type: 'word', ref: w.id, spelling: w.spelling, meaning: w.meaning });
+          renderWordComposer();
+        }));
+      } else {
+        $('wc-words').innerHTML = '';
+      }
       requestAnimationFrame(syncSplitStickyOffsets);
     }
 
@@ -1069,6 +1103,8 @@
     }
 
 
+    function firstOpenIndex(list) { return list.findIndex(i => isOpen(i.state)); }
+
     function renderWords() {
       if (!STATE.lab) return;
       const list = userWords();
@@ -1079,11 +1115,19 @@
           <div class="all-done">
             <p class="big">🌱</p>
             <h2>Nothing to review yet</h2>
-            <p class="sans" style="color:var(--muted);max-width:28rem;margin:0.5rem auto 1.25rem">Words you save on <strong>Create Words</strong> show up here one at a time.</p>
+            <p class="sans" style="color:var(--muted);max-width:28rem;margin:0.5rem auto 1.25rem">Words you save on <strong>Word Creator</strong> show up here one at a time.</p>
             <button type="button" class="btn btn-primary" id="review-go-create">Create a word</button>
           </div>`;
         $('review-go-create')?.addEventListener('click', () => switchPage('create'));
         return;
+      }
+      if (STATE.reviewFocusPending) {
+        STATE.reviewFocusPending = false;
+        const openIdx = firstOpenIndex(list);
+        if (openIdx >= 0) {
+          STATE.wordCursor = openIdx;
+          STATE.justSaved = null;
+        }
       }
       const open = list.filter(i => isOpen(i.state)).length;
       if (STATE.wordCursor >= total) STATE.wordCursor = total - 1;
@@ -1244,7 +1288,6 @@
         toast(`Rejected ${item.spelling}`); await advanceWord();
       });
     }
-    function firstOpenIndex(list) { return list.findIndex(i => isOpen(i.state)); }
     async function advanceWord() {
       const before = STATE.wordCursor;
       await load({ skipRender: true });
@@ -1454,13 +1497,21 @@
 
     function syncSplitStickyOffsets() {
       const header = document.getElementById('app-header-root');
+      let headerBottom = 0;
       if (header) {
-        const { bottom } = header.getBoundingClientRect();
-        document.documentElement.style.setProperty('--fonoran-header-offset', `${Math.ceil(bottom)}px`);
+        headerBottom = Math.ceil(header.getBoundingClientRect().bottom);
+        document.documentElement.style.setProperty('--fonoran-header-offset', `${headerBottom}px`);
       }
       const shell = document.querySelector('.fonoran-split-page.active [data-split-shell]');
       if (shell) {
-        document.documentElement.style.setProperty('--fonoran-split-chrome-offset', `${shell.offsetHeight}px`);
+        const grid = shell.nextElementSibling;
+        const gridGap = grid?.classList.contains('fonoran-split-grid')
+          ? parseFloat(getComputedStyle(grid).marginTop) || 0
+          : 0;
+        document.documentElement.style.setProperty(
+          '--fonoran-split-chrome-offset',
+          `${headerBottom + shell.offsetHeight + gridGap}px`,
+        );
       }
     }
 
@@ -1483,12 +1534,6 @@
     function renderDictionary() {
       if (!STATE.lab) return;
       ensureSplitStickyObserver();
-      const s = STATE.lab.stats;
-      $('dict-stats').innerHTML = `
-        <div><strong>${s.sounds}</strong> sounds</div>
-        <div><strong>${s.compounds}</strong> compounds</div>
-        <div><strong>${s.sound_states.approved + s.sound_states.revised + s.compound_states.approved + s.compound_states.revised}</strong> approved</div>
-        <div><strong>${s.sound_states.needs_review + s.compound_states.needs_review}</strong> need review</div>`;
       renderDictionaryList();
       syncDictSelection();
       requestAnimationFrame(syncSplitStickyOffsets);
@@ -1573,7 +1618,9 @@
       if (MAIN_PAGES.has(STATE.page)) STATE.toolReturnPage = STATE.page;
     }
     function switchPage(name) {
+      const enteringReview = name === 'review' && STATE.page !== 'review';
       STATE.page = name; STATE.editing = false;
+      if (enteringReview) STATE.reviewFocusPending = true;
       setActiveTab(name);
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       $(`page-${name}`).classList.add('active');
@@ -1611,15 +1658,21 @@
         switchPage('advanced');
       }
     });
-    $('adv-back').addEventListener('click', () => switchPage(STATE.toolReturnPage || 'roots'));
     $('dict-search').addEventListener('input', e => { STATE.dictQuery = e.target.value; renderDictionary(); });
     $('roots-filter')?.addEventListener('input', e => { STATE.rootsFilter = e.target.value; updateRootsSoundFilter(); });
     $('dict-filters').addEventListener('click', e => { const b = e.target.closest('[data-filter]'); if (!b) return; STATE.dictFilter = b.dataset.filter; $('dict-filters').querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c === b)); renderDictionary(); });
-    $('health-back').addEventListener('click', () => switchPage(STATE.toolReturnPage || 'roots'));
     $('adv-dictionary').addEventListener('click', () => { rememberMainPage(); switchPage('dictionary'); });
     $('adv-health').addEventListener('click', () => { rememberMainPage(); switchPage('health'); });
     $('wc-filter').addEventListener('input', e => { STATE.wordComposerFilter = e.target.value; renderWordComposer(); });
-    $('wc-show-unapproved')?.addEventListener('change', e => { STATE.showUnapprovedWords = e.target.checked; renderWordComposer(); });
+    $('wc-filters')?.addEventListener('click', e => {
+      const chip = e.target.closest('[data-wc-filter]');
+      if (!chip) return;
+      if (chip.dataset.wcFilter === 'roots') STATE.wordComposerShowRoots = !STATE.wordComposerShowRoots;
+      else if (chip.dataset.wcFilter === 'words') STATE.wordComposerShowWords = !STATE.wordComposerShowWords;
+      else if (chip.dataset.wcFilter === 'unapproved') STATE.showUnapprovedWords = !STATE.showUnapprovedWords;
+      else if (chip.dataset.wcFilter === 'unnamed') STATE.showUnnamed = !STATE.showUnnamed;
+      renderWordComposer();
+    });
     $('wc-clear').addEventListener('click', () => { STATE.wordComposer = []; $('wc-meaning').value = ''; renderWordComposer(); });
     $('wc-save').addEventListener('click', async () => {
       const meaning = $('wc-meaning').value.trim();
@@ -1713,6 +1766,7 @@
       const initialHash = window.location.hash.replace(/^#/, '');
       const initialPage = initialHash && ALL_PAGES.has(initialHash) ? initialHash : 'home';
       STATE.page = initialPage;
+      if (initialPage === 'review') STATE.reviewFocusPending = true;
       initUniversalNav({ context: 'fonoran', activeTab: initialPage });
       document.querySelectorAll('.page').forEach((p) => p.classList.remove('active'));
       $(`page-${initialPage}`)?.classList.add('active');

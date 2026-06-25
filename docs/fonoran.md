@@ -36,7 +36,7 @@ See [platform-overview.md](platform-overview.md) for storage details and [deploy
 | **Home** | Lander | Public | Overview, live showcase, health summary |
 | **Dictionary** | Dictionary + Language Explorer | **Public (read-only)** | Browse vocabulary; click any item for derivation trees and family graphs |
 | **Root Creator** (Roots) | Root Creator | Sign-in required | Create primitive syllables |
-| **Compound Creator** (Create Words) | Compound Creator | Sign-in required | Stack **roots** + **approved words** → preview → name → save |
+| **Word Creator** | Word Creator | Sign-in required | Stack **roots** + **approved words** → preview → name → save |
 | **Review** | Review Tools | Sign-in required | Approve, reject, or edit pending items |
 | **Health** | Semantic Analysis | Public (read-only) | Readability scores and warnings |
 | **Advanced** | DDA / lab tools | Sign-in required | Run DDA, reset lab, destructive ops |

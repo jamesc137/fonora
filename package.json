@@ -25,12 +25,24 @@
     "audit:collisions": "node scripts/collision-audit.js",
     "test:pronunciation-validation": "node scripts/pronunciation-validation-report.js",
     "audit:ipa-vowels": "node scripts/ipa-vowel-normalization-audit.js",
-    "report:ipa-diagnostics": "node scripts/ipa-normalization-diagnostics.js"
+    "report:ipa-diagnostics": "node scripts/ipa-normalization-diagnostics.js",
+    "fonoran:gen3": "node tools/fonoran-gen3.js",
+    "fonoran:gen3:1": "node tools/fonoran-gen3-1.js",
+    "fonoran:gen3:compare": "node tools/fonoran-gen3-1-compare.js",
+    "fonoran:gen3:audit": "node tools/fonoran-gen3-audit.js",
+    "fonoran:gen3:semantic": "node tools/fonoran-gen3-semantic-audit.js",
+    "fonoran:canonical:init": "node tools/fonoran-canonical-stabilize.js",
+    "fonoran:canonical:constitution": "node tools/fonoran-canonical-stabilize.js",
+    "fonoran:stress-test": "node tools/fonoran-stress-test.js",
+    "fonoran:explore": "node -e \"console.log('Open http://localhost:' + (process.env.PORT||8000) + '/fonoran/')\"",
+    "fonoran:import": "node scripts/fonoran-import-json.js",
+    "fonoran:export": "node scripts/fonoran-export-json.js"
   },
   "dependencies": {
     "@echogarden/espeak-ng-emscripten": "^0.3.5",
     "espeak-ng": "^1.0.2",
     "onnxruntime-web": "1.20.1",
+    "pg": "^8.22.0",
     "piper-tts-web": "^1.1.2"
   }
 }

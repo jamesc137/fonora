@@ -32,57 +32,15 @@
     docs/language-rules.md could not be loaded. Start a local HTTP server and reload.
   </div>
 
-  <header class="site-header">
-    <div class="site-header-inner">
-      <a href="#home" class="site-brand" data-tab="home" aria-label="Fonora — go to home">
-        <span class="site-name">Fonora</span>
-        <span class="tagline">Universal Phonetic Script</span>
-      </a>
-
-      <nav class="main-nav" aria-label="Main navigation">
-        <div class="main-nav-primary">
-          <button type="button" class="tab-btn tab-btn--active" data-tab="home" aria-current="page">Home</button>
-          <button type="button" class="tab-btn" data-tab="translator">Translator</button>
-          <button type="button" class="tab-btn" data-tab="reader">Reader</button>
-          <button type="button" class="tab-btn" data-tab="grid">Sound Grid</button>
-          <button type="button" class="tab-btn" data-tab="alphabet">Alphabet</button>
-        </div>
-
-        <div class="nav-dropdown" id="nav-more">
-          <button
-            type="button"
-            class="nav-dropdown-trigger tab-btn"
-            id="nav-more-trigger"
-            aria-expanded="false"
-            aria-haspopup="true"
-            aria-controls="nav-more-menu"
-          >
-            More
-            <span class="nav-dropdown-chevron" aria-hidden="true">▾</span>
-          </button>
-          <div class="nav-dropdown-menu" id="nav-more-menu" role="menu" hidden>
-          <button type="button" class="tab-btn nav-dropdown-item" data-tab="breakdown" role="menuitem">Breakdown</button>
-            <button type="button" class="tab-btn nav-dropdown-item" data-tab="samples" role="menuitem">Samples</button>
-            <button type="button" class="tab-btn nav-dropdown-item" data-tab="quiz" role="menuitem">Quiz</button>
-            <button type="button" class="tab-btn nav-dropdown-item" data-tab="keyboard" role="menuitem">Keyboard</button>
-            <button type="button" class="tab-btn nav-dropdown-item" data-tab="reverse" role="menuitem">Reverse Lookup</button>
-            <button type="button" class="tab-btn nav-dropdown-item" data-tab="encoder-testing" role="menuitem">Pronunciation Testing</button>
-            <button type="button" class="tab-btn nav-dropdown-item" data-tab="pronunciation-validation" role="menuitem">Pronunciation Validation</button>
-            <button type="button" class="tab-btn nav-dropdown-item" data-tab="open-problems" role="menuitem">Open Problems</button>
-            <button type="button" class="tab-btn nav-dropdown-item" data-tab="docs" role="menuitem">Docs</button>
-          </div>
-        </div>
-      </nav>
-    </div>
-  </header>
+  <header id="app-header-root" class="app-header app-header--script"></header>
 
   <main class="main-content" id="main-content">
     <!-- Home -->
-    <section class="home-page tab-panel tab-panel--active" id="tab-home" data-tab-panel="home" aria-labelledby="home-title">
-      <section class="home-section home-section--intro" aria-labelledby="home-title">
+    <section class="home-page content-page tab-panel tab-panel--active" id="tab-home" data-tab-panel="home" aria-labelledby="home-title">
+      <section class="home-section home-section--intro content-section content-section--intro" aria-labelledby="home-title">
         <header class="home-intro-header">
           <h1 id="home-title">Fonora</h1>
-          <p class="home-subtitle">A universal script built from speech itself</p>
+          <p class="home-subtitle">An experimental script built from speech itself.</p>
         </header>
 
         <div class="home-prose">
@@ -98,7 +56,7 @@
         </div>
       </section>
 
-      <section class="home-section home-section--sample" aria-labelledby="sample-heading">
+      <section class="home-section home-section--sample content-section" aria-labelledby="sample-heading">
         <h2 id="sample-heading">See Fonora in Action</h2>
 
         <article class="home-sample-preview">
@@ -126,7 +84,7 @@
         </article>
       </section>
 
-      <section class="home-section" aria-labelledby="how-heading">
+      <section class="home-section content-section" aria-labelledby="how-heading">
         <h2 id="how-heading">How It Works</h2>
         <p>Fonora is built from only <b>nine</b> core symbols.</p>
         <ul>
@@ -151,7 +109,7 @@
         </div>
       </section>
 
-      <section class="home-section" aria-labelledby="why-heading">
+      <section class="home-section content-section" aria-labelledby="why-heading">
         <h2 id="why-heading">Why Fonora?</h2>
         <div class="home-principles">
           <article class="home-principle">
@@ -181,7 +139,7 @@
         </div>
       </section>
 
-      <section class="home-section" aria-labelledby="goals-heading">
+      <section class="home-section content-section" aria-labelledby="goals-heading">
         <h2 id="goals-heading">Project Goals</h2>
         <ul class="home-list home-list--goals">
           <li>Create a highly learnable writing system</li>
@@ -193,7 +151,7 @@
         </ul>
       </section>
 
-      <section class="home-section home-section--status" aria-labelledby="status-heading">
+      <section class="home-section home-section--status content-section" aria-labelledby="status-heading">
         <h2 id="status-heading">Experimental Research Project</h2>
         <p>Fonora is an active research project.</p>
         <p>The symbol inventory, phonetic mappings, encoding rules, and tooling continue to evolve through experimentation and real-world testing.</p>
@@ -781,6 +739,8 @@
         Released under the <a href="https://github.com/jamesc137/fonora/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>.
       </p>
       <p class="site-footer-links">
+        <a href="fonoran/">Language Builder</a>
+        <span class="site-footer-sep" aria-hidden="true">·</span>
         <a href="https://fonora.org">fonora.org</a>
         <span class="site-footer-sep" aria-hidden="true">·</span>
         <a href="https://github.com/jamesc137/fonora" target="_blank" rel="noopener noreferrer">GitHub</a>

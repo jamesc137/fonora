@@ -5,23 +5,42 @@ export const GITHUB_BLOB_BASE = 'https://github.com/jamesc137/fonora/blob/main/'
 const ALLOWED_EXACT = new Set(['CONTRIBUTING.md', 'README.md']);
 const ALLOWED_PREFIX = 'docs/';
 
-/** Curated doc list for the viewer sidebar. */
+/** Display order for grouped docs sidebar. */
+export const DOC_LAYER_ORDER = [
+  { id: 'platform', label: 'Platform' },
+  { id: 'script', label: 'Script Layer' },
+  { id: 'language', label: 'Language Layer' },
+  { id: 'ops', label: 'Operations' },
+];
+
+/**
+ * Curated doc list for the viewer sidebar.
+ * @type {Array<{ path: string, label: string, layer: string }>}
+ */
 export const DOC_CATALOG = [
-  { path: 'docs/README.md', label: 'Documentation index' },
-  { path: 'docs/language-rules.md', label: 'Language rules' },
-  { path: 'docs/open-problems.md', label: 'Open problems' },
-  { path: 'docs/multilingual-support.md', label: 'Multilingual support' },
-  { path: 'docs/ipa-normalize.md', label: 'IPA normalization' },
-  { path: 'docs/pronunciation-validation.md', label: 'Pronunciation validation' },
-  { path: 'docs/espeak-integration.md', label: 'eSpeak integration' },
-  { path: 'docs/IPA-PIPELINE-REPORT.md', label: 'IPA pipeline report' },
-  { path: 'docs/FONORA_COLLISION_AUDIT.md', label: 'Collision audit' },
-  { path: 'docs/IPA_VOWEL_NORMALIZATION_AUDIT.md', label: 'Vowel normalization audit' },
-  { path: 'docs/FONORA_VOWEL_DECISION_REPORT.md', label: 'Vowel decision report (v2)' },
-  { path: 'docs/FONORA_CLEANUP_AUDIT.md', label: 'Cleanup audit' },
-  { path: 'docs/deploy.md', label: 'Deploy' },
-  { path: 'CONTRIBUTING.md', label: 'Contributing' },
-  { path: 'README.md', label: 'Project README' },
+  { path: 'docs/platform-overview.md', label: 'Platform overview', layer: 'platform' },
+  { path: 'docs/README.md', label: 'Documentation index', layer: 'platform' },
+  { path: 'README.md', label: 'Project README', layer: 'platform' },
+
+  { path: 'docs/language-rules.md', label: 'Encoding rules', layer: 'script' },
+  { path: 'docs/IPA-PIPELINE-REPORT.md', label: 'IPA pipeline report', layer: 'script' },
+  { path: 'docs/ipa-normalize.md', label: 'IPA normalization', layer: 'script' },
+  { path: 'docs/multilingual-support.md', label: 'Multilingual support', layer: 'script' },
+  { path: 'docs/espeak-integration.md', label: 'eSpeak integration', layer: 'script' },
+  { path: 'docs/pronunciation-validation.md', label: 'Pronunciation validation', layer: 'script' },
+  { path: 'docs/FONORA_COLLISION_AUDIT.md', label: 'Collision audit', layer: 'script' },
+  { path: 'docs/IPA_VOWEL_NORMALIZATION_AUDIT.md', label: 'Vowel normalization audit', layer: 'script' },
+  { path: 'docs/FONORA_VOWEL_DECISION_REPORT.md', label: 'Vowel decision report (v2)', layer: 'script' },
+
+  { path: 'docs/fonoran.md', label: 'Fonoran language', layer: 'language' },
+  { path: 'docs/fonoran-gen3.md', label: 'DDA semantics (Gen 3)', layer: 'language' },
+  { path: 'docs/fonoran-gen3-1.md', label: 'DDA phonetic layer (Gen 3.1)', layer: 'language' },
+  { path: 'docs/fonoran-generator-archive.md', label: 'Generator archive', layer: 'language' },
+
+  { path: 'docs/open-problems.md', label: 'Open problems', layer: 'ops' },
+  { path: 'docs/deploy.md', label: 'Deploy', layer: 'ops' },
+  { path: 'docs/FONORA_CLEANUP_AUDIT.md', label: 'Cleanup audit', layer: 'ops' },
+  { path: 'CONTRIBUTING.md', label: 'Contributing', layer: 'ops' },
 ];
 
 /**

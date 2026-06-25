@@ -27,6 +27,7 @@ import {
 import { buildPhonemeKeyLexicon } from './fonora-speak-lexicon.js';
 import { ipaToEspeakSynthesisInput, segmentIpa } from './ipa-espeak-format.js';
 import { ipaToPiperPhonemeIds, canMapIpaToPiper, getPiperVoiceForLang, getSamplePlaybackPlan, PIPER_VOICE_BY_LANG } from './piper-audio.js';
+import { buildMermaidGraph } from '../tools/fonoran-graph.js';
 
 function assert(cond, msg) {
   if (!cond) throw new Error(msg);
@@ -77,6 +78,27 @@ const derivedResult = test('derived sounds use composition not stale symbols', (
   assert(th.symbols === composeDerivedSymbol('reverse_front_tongue_friction', rules.places, rules.modifiers));
   assert(z.composition === 'reverse_friction_voice');
   assert(z.symbols === composeDerivedSymbol('reverse_friction_voice', rules.places, rules.modifiers));
+});
+
+const graphResult = test('buildMermaidGraph links components to focus word', () => {
+  const bucket = {
+    sounds: [
+      { spelling: 'ka', meaning: 'person', state: 'approved' },
+      { spelling: 'so', meaning: 'bond', state: 'approved' },
+    ],
+    compounds: [{
+      id: 'cmp-kaso',
+      spelling: 'kaso',
+      meaning: 'love',
+      state: 'approved',
+      components: [{ type: 'root', ref: 'ka' }, { type: 'root', ref: 'so' }],
+    }],
+  };
+  const graph = buildMermaidGraph(bucket, { kind: 'word', ref: 'cmp-kaso' });
+  assert(graph.source.includes('word_cmp_kaso'));
+  assert(graph.source.includes('root_ka --> word_cmp_kaso'));
+  assert(graph.source.includes('root_so --> word_cmp_kaso'));
+  assert(graph.nodes.some(n => n.id === 'word_cmp_kaso'));
 });
 
 const ipaFormatResult = test('ipaToEspeakSynthesisInput segments stress and underscores', () => {
@@ -283,6 +305,7 @@ const allFailed = [
   ...(parserResult.ok ? [] : [parserResult]),
   ...(composeResult.ok ? [] : [composeResult]),
   ...(derivedResult.ok ? [] : [derivedResult]),
+  ...(graphResult.ok ? [] : [graphResult]),
   ...(piperGResult.ok ? [] : [piperGResult]),
   ...(piperLengthResult.ok ? [] : [piperLengthResult]),
   ...(sampleVoiceResult.ok ? [] : [sampleVoiceResult]),
@@ -300,6 +323,7 @@ const allPassed =
   + (parserResult.ok ? 1 : 0)
   + (composeResult.ok ? 1 : 0)
   + (derivedResult.ok ? 1 : 0)
+  + (graphResult.ok ? 1 : 0)
   + (ipaFormatResult.ok ? 1 : 0)
   + (piperGResult.ok ? 1 : 0)
   + (piperLengthResult.ok ? 1 : 0)
@@ -310,7 +334,7 @@ const allPassed =
   + (flapResult.ok ? 1 : 0)
   + (perroResult.ok ? 1 : 0)
   + (voiceResult.ok ? 1 : 0);
-const allTotal = total + corpusResults.length + 13;
+const allTotal = total + corpusResults.length + 14;
 
 for (const f of allFailed) console.error('FAIL:', f.name, '-', f.error);
 console.log(`${allPassed}/${allTotal} tests passed`);

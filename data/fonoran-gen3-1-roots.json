@@ -1,0 +1,1550 @@
+{
+  "version": "0.3.1-gen3",
+  "generated_at": "2026-06-22T21:56:09.408Z",
+  "philosophy": "Speech production is a journey from inner source (throat) through articulation to outer interface (lips). Meaning inherits this topology.",
+  "coordinate_system": "DDA",
+  "phonetic_layer": "Semantic aspect (A) is fixed in coordinates. Phonetic vowel is chosen from Fonora-native pools to spread rhyme classes — not an English borrowing layer.",
+  "primitive_count": 36,
+  "unique_roots": 36,
+  "vowel_ending_distribution": {
+    "i": 3,
+    "e": 2,
+    "o": 3,
+    "u": 3,
+    "a": 3,
+    "ee": 2,
+    "ae": 2,
+    "oh": 2,
+    "p": 4,
+    "t": 4,
+    "h": 4,
+    "k": 4
+  },
+  "pool_vowel_cv_distribution": {
+    "i": 3,
+    "e": 2,
+    "o": 3,
+    "u": 3,
+    "a": 3,
+    "ee": 2,
+    "ae": 2,
+    "oh": 2
+  },
+  "rhyme_distribution": {
+    "i": 3,
+    "e": 2,
+    "o": 3,
+    "u": 3,
+    "a": 3,
+    "ee": 2,
+    "ae": 2,
+    "oh": 2,
+    "op": 1,
+    "ot": 1,
+    "ch": 1,
+    "ik": 1,
+    "aep": 1,
+    "ok": 1,
+    "it": 1,
+    "eh": 1,
+    "up": 1,
+    "ut": 1,
+    "aek": 1,
+    "eeh": 1,
+    "ap": 1,
+    "uk": 1,
+    "at": 1,
+    "ohh": 1
+  },
+  "max_pool_vowel_cv": 3,
+  "max_rhyme_count": 3,
+  "grid_repair_rate": 31,
+  "audit_scores": {
+    "learnability": 100,
+    "pronounceability": 96,
+    "memorability": 85,
+    "parseability": 100,
+    "compoundLength": 8,
+    "algorithmicFeel": 31,
+    "warningCount": 5,
+    "highSeverityCount": 0
+  },
+  "inventory": [
+    {
+      "root": "pi",
+      "id": "bound",
+      "gloss": "limit; edge; what marks termination",
+      "coordinates": {
+        "id": "bound",
+        "gloss": "limit; edge; what marks termination",
+        "D": "interface",
+        "M": "packet",
+        "A": "focal",
+        "place": "1",
+        "manner": "plain",
+        "vowel": "i",
+        "vowel_canonical": "ee",
+        "phonetic_spread": true,
+        "syllable_template": "CV",
+        "coda": null,
+        "fonora_onset": "p",
+        "notation": "⟨interface, packet, focal⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 1,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 1,
+        "total": 1
+      },
+      "distinctiveness_score": 1000,
+      "distinctiveness_penalty": 0,
+      "phonetic_only_repair": true,
+      "coda_extension": false,
+      "fallback": false
+    },
+    {
+      "root": "se",
+      "id": "mark",
+      "gloss": "intentional sign; deliberate index",
+      "coordinates": {
+        "id": "mark",
+        "gloss": "intentional sign; deliberate index",
+        "D": "index",
+        "M": "flux",
+        "A": "focal",
+        "place": "2",
+        "manner": "friction",
+        "vowel": "e",
+        "vowel_canonical": "ee",
+        "phonetic_spread": true,
+        "syllable_template": "CV",
+        "coda": null,
+        "fonora_onset": "s",
+        "notation": "⟨index, flux, focal⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 2,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 2,
+        "total": 2
+      },
+      "distinctiveness_score": 1000,
+      "distinctiveness_penalty": 0,
+      "phonetic_only_repair": true,
+      "coda_extension": false,
+      "fallback": false
+    },
+    {
+      "root": "lo",
+      "id": "probe",
+      "gloss": "directed extension from a point",
+      "coordinates": {
+        "id": "probe",
+        "gloss": "directed extension from a point",
+        "D": "index",
+        "M": "passage",
+        "A": "focal",
+        "place": "2",
+        "manner": "glide",
+        "vowel": "o",
+        "vowel_canonical": "ee",
+        "phonetic_spread": true,
+        "syllable_template": "CV",
+        "coda": null,
+        "fonora_onset": "l",
+        "notation": "⟨index, passage, focal⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 3,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 3,
+        "total": 3
+      },
+      "distinctiveness_score": 1000,
+      "distinctiveness_penalty": 0,
+      "phonetic_only_repair": true,
+      "coda_extension": false,
+      "fallback": false
+    },
+    {
+      "root": "ku",
+      "id": "signal",
+      "gloss": "discrete emission; packet projected outward",
+      "coordinates": {
+        "id": "signal",
+        "gloss": "discrete emission; packet projected outward",
+        "D": "emanation",
+        "M": "packet",
+        "A": "focal",
+        "place": "4",
+        "manner": "plain",
+        "vowel": "u",
+        "vowel_canonical": "ee",
+        "phonetic_spread": true,
+        "syllable_template": "CV",
+        "coda": null,
+        "fonora_onset": "k",
+        "notation": "⟨emanation, packet, focal⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 4,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 4,
+        "total": 4
+      },
+      "distinctiveness_score": 1000,
+      "distinctiveness_penalty": 0,
+      "phonetic_only_repair": true,
+      "coda_extension": false,
+      "fallback": false
+    },
+    {
+      "root": "da",
+      "id": "agent",
+      "gloss": "activated locus; point that acts",
+      "coordinates": {
+        "id": "agent",
+        "gloss": "activated locus; point that acts",
+        "D": "index",
+        "M": "live",
+        "A": "animated",
+        "place": "2",
+        "manner": "voice",
+        "vowel": "a",
+        "vowel_canonical": "e",
+        "phonetic_spread": true,
+        "syllable_template": "CV",
+        "coda": null,
+        "fonora_onset": "d",
+        "notation": "⟨index, live, animated⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 4,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 4,
+        "total": 4
+      },
+      "distinctiveness_score": 1000,
+      "distinctiveness_penalty": 0,
+      "phonetic_only_repair": true,
+      "coda_extension": false,
+      "fallback": false
+    },
+    {
+      "root": "tee",
+      "id": "identity",
+      "gloss": "discrete self-same; repeatable unit",
+      "coordinates": {
+        "id": "identity",
+        "gloss": "discrete self-same; repeatable unit",
+        "D": "index",
+        "M": "packet",
+        "A": "struct",
+        "place": "2",
+        "manner": "plain",
+        "vowel": "ee",
+        "vowel_canonical": "i",
+        "phonetic_spread": true,
+        "syllable_template": "CV",
+        "coda": null,
+        "fonora_onset": "t",
+        "notation": "⟨index, packet, struct⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 3,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 3,
+        "total": 3
+      },
+      "distinctiveness_score": 1000,
+      "distinctiveness_penalty": 0,
+      "phonetic_only_repair": true,
+      "coda_extension": false,
+      "fallback": false
+    },
+    {
+      "root": "rae",
+      "id": "bond",
+      "gloss": "structural connection; what holds together",
+      "coordinates": {
+        "id": "bond",
+        "gloss": "structural connection; what holds together",
+        "D": "junction",
+        "M": "passage",
+        "A": "struct",
+        "place": "3",
+        "manner": "glide",
+        "vowel": "ae",
+        "vowel_canonical": "i",
+        "phonetic_spread": true,
+        "syllable_template": "CV",
+        "coda": null,
+        "fonora_onset": "r",
+        "notation": "⟨junction, passage, struct⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 2,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 2,
+        "total": 2
+      },
+      "distinctiveness_score": 1000,
+      "distinctiveness_penalty": 0,
+      "phonetic_only_repair": true,
+      "coda_extension": false,
+      "fallback": false
+    },
+    {
+      "root": "ñoh",
+      "id": "container",
+      "gloss": "held interior; volume that receives",
+      "coordinates": {
+        "id": "container",
+        "gloss": "held interior; volume that receives",
+        "D": "junction",
+        "M": "hollow",
+        "A": "resonant",
+        "place": "3",
+        "manner": "nasal",
+        "vowel": "oh",
+        "vowel_canonical": "oh",
+        "phonetic_spread": false,
+        "syllable_template": "CV",
+        "coda": null,
+        "fonora_onset": "ñ",
+        "notation": "⟨junction, hollow, resonant⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 0,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 0,
+        "total": 0
+      },
+      "distinctiveness_score": 1000,
+      "distinctiveness_penalty": 0,
+      "phonetic_only_repair": false,
+      "coda_extension": false,
+      "fallback": false
+    },
+    {
+      "root": "kop",
+      "id": "field",
+      "gloss": "extended presence; spread without discrete edges",
+      "coordinates": {
+        "id": "field",
+        "gloss": "extended presence; spread without discrete edges",
+        "D": "emanation",
+        "M": "packet",
+        "A": "field",
+        "place": "4",
+        "manner": "plain",
+        "vowel": "o",
+        "vowel_canonical": "o",
+        "phonetic_spread": false,
+        "syllable_template": "CVC",
+        "coda": "p",
+        "fonora_onset": "k",
+        "notation": "⟨emanation, packet, field⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 0,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 0,
+        "total": 0
+      },
+      "distinctiveness_score": 1000,
+      "distinctiveness_penalty": 0,
+      "phonetic_only_repair": false,
+      "coda_extension": true,
+      "fallback": false
+    },
+    {
+      "root": "xot",
+      "id": "wave",
+      "gloss": "propagating flux; disturbance that travels",
+      "coordinates": {
+        "id": "wave",
+        "gloss": "propagating flux; disturbance that travels",
+        "D": "emanation",
+        "M": "flux",
+        "A": "field",
+        "place": "4",
+        "manner": "friction",
+        "vowel": "o",
+        "vowel_canonical": "o",
+        "phonetic_spread": false,
+        "syllable_template": "CVC",
+        "coda": "t",
+        "fonora_onset": "x",
+        "notation": "⟨emanation, flux, field⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 0,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 0,
+        "total": 0
+      },
+      "distinctiveness_score": 1000,
+      "distinctiveness_penalty": 0,
+      "phonetic_only_repair": false,
+      "coda_extension": true,
+      "fallback": false
+    },
+    {
+      "root": "xaech",
+      "id": "flow",
+      "gloss": "unbounded change; continuous passage of state",
+      "coordinates": {
+        "id": "flow",
+        "gloss": "unbounded change; continuous passage of state",
+        "D": "emanation",
+        "M": "flux",
+        "A": "turbulent",
+        "place": "4",
+        "manner": "friction",
+        "vowel": "ae",
+        "vowel_canonical": "ae",
+        "phonetic_spread": false,
+        "syllable_template": "CVC",
+        "coda": "ch",
+        "fonora_onset": "x",
+        "notation": "⟨emanation, flux, turbulent⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 0,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 0,
+        "total": 0
+      },
+      "distinctiveness_score": 1000,
+      "distinctiveness_penalty": 0,
+      "phonetic_only_repair": false,
+      "coda_extension": true,
+      "fallback": false
+    },
+    {
+      "root": "lik",
+      "id": "path",
+      "gloss": "directed passage through space",
+      "coordinates": {
+        "id": "path",
+        "gloss": "directed passage through space",
+        "D": "index",
+        "M": "passage",
+        "A": "struct",
+        "place": "2",
+        "manner": "glide",
+        "vowel": "i",
+        "vowel_canonical": "i",
+        "phonetic_spread": false,
+        "syllable_template": "CVC",
+        "coda": "k",
+        "fonora_onset": "l",
+        "notation": "⟨index, passage, struct⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 0,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 0,
+        "total": 0
+      },
+      "distinctiveness_score": 1000,
+      "distinctiveness_penalty": 0,
+      "phonetic_only_repair": false,
+      "coda_extension": true,
+      "fallback": false
+    },
+    {
+      "root": "shaep",
+      "id": "change",
+      "gloss": "state transformation at junction",
+      "coordinates": {
+        "id": "change",
+        "gloss": "state transformation at junction",
+        "D": "junction",
+        "M": "flux",
+        "A": "turbulent",
+        "place": "3",
+        "manner": "friction",
+        "vowel": "ae",
+        "vowel_canonical": "ae",
+        "phonetic_spread": false,
+        "syllable_template": "CVC",
+        "coda": "p",
+        "fonora_onset": "sh",
+        "notation": "⟨junction, flux, turbulent⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 0,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 0,
+        "total": 0
+      },
+      "distinctiveness_score": 920,
+      "distinctiveness_penalty": 80,
+      "phonetic_only_repair": false,
+      "coda_extension": true,
+      "fallback": false
+    },
+    {
+      "root": "ñok",
+      "id": "group",
+      "gloss": "collective cavity; many in one volume",
+      "coordinates": {
+        "id": "group",
+        "gloss": "collective cavity; many in one volume",
+        "D": "junction",
+        "M": "hollow",
+        "A": "resonant",
+        "place": "3",
+        "manner": "nasal",
+        "vowel": "o",
+        "vowel_canonical": "oh",
+        "phonetic_spread": true,
+        "syllable_template": "CVC",
+        "coda": "k",
+        "fonora_onset": "ñ",
+        "notation": "⟨junction, hollow, resonant⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 1,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 1,
+        "total": 1
+      },
+      "distinctiveness_score": 920,
+      "distinctiveness_penalty": 80,
+      "phonetic_only_repair": false,
+      "coda_extension": true,
+      "fallback": false
+    },
+    {
+      "root": "chit",
+      "id": "static",
+      "gloss": "without change; stable junction",
+      "coordinates": {
+        "id": "static",
+        "gloss": "without change; stable junction",
+        "D": "junction",
+        "M": "packet",
+        "A": "struct",
+        "place": "3",
+        "manner": "plain",
+        "vowel": "i",
+        "vowel_canonical": "i",
+        "phonetic_spread": false,
+        "syllable_template": "CVC",
+        "coda": "t",
+        "fonora_onset": "ch",
+        "notation": "⟨junction, packet, struct⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 0,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 0,
+        "total": 0
+      },
+      "distinctiveness_score": 920,
+      "distinctiveness_penalty": 80,
+      "phonetic_only_repair": false,
+      "coda_extension": true,
+      "fallback": false
+    },
+    {
+      "root": "leh",
+      "id": "motion",
+      "gloss": "undergoing passage; index in transit",
+      "coordinates": {
+        "id": "motion",
+        "gloss": "undergoing passage; index in transit",
+        "D": "index",
+        "M": "passage",
+        "A": "animated",
+        "place": "2",
+        "manner": "glide",
+        "vowel": "e",
+        "vowel_canonical": "e",
+        "phonetic_spread": false,
+        "syllable_template": "CVC",
+        "coda": "h",
+        "fonora_onset": "l",
+        "notation": "⟨index, passage, animated⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 0,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 0,
+        "total": 0
+      },
+      "distinctiveness_score": 920,
+      "distinctiveness_penalty": 80,
+      "phonetic_only_repair": false,
+      "coda_extension": true,
+      "fallback": false
+    },
+    {
+      "root": "gha",
+      "id": "unknown",
+      "gloss": "opaque origin; source not indexed",
+      "coordinates": {
+        "id": "unknown",
+        "gloss": "opaque origin; source not indexed",
+        "D": "origin",
+        "M": "hollow",
+        "A": "source",
+        "place": "5",
+        "manner": "voice",
+        "vowel": "a",
+        "vowel_canonical": "a",
+        "phonetic_spread": false,
+        "syllable_template": "CV",
+        "coda": null,
+        "fonora_onset": "gh",
+        "notation": "⟨origin, hollow, source⟩"
+      },
+      "repair_steps": 3,
+      "grid_repair_steps": 3,
+      "phonetic_vowel_steps": 0,
+      "repair_detail": {
+        "pd": 0,
+        "md": 3,
+        "vd": 0,
+        "total": 3
+      },
+      "distinctiveness_score": 920,
+      "distinctiveness_penalty": 80,
+      "phonetic_only_repair": false,
+      "coda_extension": false,
+      "fallback": false
+    },
+    {
+      "root": "che",
+      "id": "threshold",
+      "gloss": "liminal crossing; doorway state",
+      "coordinates": {
+        "id": "threshold",
+        "gloss": "liminal crossing; doorway state",
+        "D": "interface",
+        "M": "passage",
+        "A": "focal",
+        "place": "3",
+        "manner": "plain",
+        "vowel": "e",
+        "vowel_canonical": "ee",
+        "phonetic_spread": true,
+        "syllable_template": "CV",
+        "coda": null,
+        "fonora_onset": "ch",
+        "notation": "⟨interface, passage, focal⟩"
+      },
+      "repair_steps": 3,
+      "grid_repair_steps": 3,
+      "phonetic_vowel_steps": 2,
+      "repair_detail": {
+        "pd": 2,
+        "md": 1,
+        "vd": 2,
+        "total": 5
+      },
+      "distinctiveness_score": 920,
+      "distinctiveness_penalty": 80,
+      "phonetic_only_repair": false,
+      "coda_extension": false,
+      "fallback": false
+    },
+    {
+      "root": "shi",
+      "id": "here",
+      "gloss": "indexical locus; this-point",
+      "coordinates": {
+        "id": "here",
+        "gloss": "indexical locus; this-point",
+        "D": "index",
+        "M": "packet",
+        "A": "focal",
+        "place": "3",
+        "manner": "friction",
+        "vowel": "i",
+        "vowel_canonical": "ee",
+        "phonetic_spread": true,
+        "syllable_template": "CV",
+        "coda": null,
+        "fonora_onset": "sh",
+        "notation": "⟨index, packet, focal⟩"
+      },
+      "repair_steps": 3,
+      "grid_repair_steps": 3,
+      "phonetic_vowel_steps": 1,
+      "repair_detail": {
+        "pd": 1,
+        "md": 2,
+        "vd": 1,
+        "total": 4
+      },
+      "distinctiveness_score": 920,
+      "distinctiveness_penalty": 80,
+      "phonetic_only_repair": false,
+      "coda_extension": false,
+      "fallback": false
+    },
+    {
+      "root": "tup",
+      "id": "known",
+      "gloss": "indexed certainty; designated and stable",
+      "coordinates": {
+        "id": "known",
+        "gloss": "indexed certainty; designated and stable",
+        "D": "index",
+        "M": "packet",
+        "A": "focal",
+        "place": "2",
+        "manner": "plain",
+        "vowel": "u",
+        "vowel_canonical": "ee",
+        "phonetic_spread": true,
+        "syllable_template": "CVC",
+        "coda": "p",
+        "fonora_onset": "t",
+        "notation": "⟨index, packet, focal⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 4,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 4,
+        "total": 4
+      },
+      "distinctiveness_score": 840,
+      "distinctiveness_penalty": 160,
+      "phonetic_only_repair": false,
+      "coda_extension": true,
+      "fallback": false
+    },
+    {
+      "root": "put",
+      "id": "surface",
+      "gloss": "contact plane; outer face",
+      "coordinates": {
+        "id": "surface",
+        "gloss": "contact plane; outer face",
+        "D": "interface",
+        "M": "packet",
+        "A": "contact",
+        "place": "1",
+        "manner": "plain",
+        "vowel": "u",
+        "vowel_canonical": "u",
+        "phonetic_spread": false,
+        "syllable_template": "CVC",
+        "coda": "t",
+        "fonora_onset": "p",
+        "notation": "⟨interface, packet, contact⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 0,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 0,
+        "total": 0
+      },
+      "distinctiveness_score": 840,
+      "distinctiveness_penalty": 160,
+      "phonetic_only_repair": false,
+      "coda_extension": true,
+      "fallback": false
+    },
+    {
+      "root": "ngu",
+      "id": "envelope",
+      "gloss": "wrapping containment at boundary",
+      "coordinates": {
+        "id": "envelope",
+        "gloss": "wrapping containment at boundary",
+        "D": "interface",
+        "M": "hollow",
+        "A": "contact",
+        "place": "4",
+        "manner": "nasal",
+        "vowel": "u",
+        "vowel_canonical": "u",
+        "phonetic_spread": false,
+        "syllable_template": "CV",
+        "coda": null,
+        "fonora_onset": "ng",
+        "notation": "⟨interface, hollow, contact⟩"
+      },
+      "repair_steps": 3,
+      "grid_repair_steps": 3,
+      "phonetic_vowel_steps": 0,
+      "repair_detail": {
+        "pd": 3,
+        "md": 0,
+        "vd": 0,
+        "total": 3
+      },
+      "distinctiveness_score": 920,
+      "distinctiveness_penalty": 80,
+      "phonetic_only_repair": false,
+      "coda_extension": false,
+      "fallback": false
+    },
+    {
+      "root": "chaek",
+      "id": "form",
+      "gloss": "articulated shape; composed figure",
+      "coordinates": {
+        "id": "form",
+        "gloss": "articulated shape; composed figure",
+        "D": "junction",
+        "M": "packet",
+        "A": "struct",
+        "place": "3",
+        "manner": "plain",
+        "vowel": "ae",
+        "vowel_canonical": "i",
+        "phonetic_spread": true,
+        "syllable_template": "CVC",
+        "coda": "k",
+        "fonora_onset": "ch",
+        "notation": "⟨junction, packet, struct⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 2,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 2,
+        "total": 2
+      },
+      "distinctiveness_score": 840,
+      "distinctiveness_penalty": 160,
+      "phonetic_only_repair": false,
+      "coda_extension": true,
+      "fallback": false
+    },
+    {
+      "root": "kho",
+      "id": "weave",
+      "gloss": "interlaced change; pattern in motion",
+      "coordinates": {
+        "id": "weave",
+        "gloss": "interlaced change; pattern in motion",
+        "D": "junction",
+        "M": "flux",
+        "A": "struct",
+        "place": "5",
+        "manner": "friction",
+        "vowel": "o",
+        "vowel_canonical": "i",
+        "phonetic_spread": true,
+        "syllable_template": "CV",
+        "coda": null,
+        "fonora_onset": "kh",
+        "notation": "⟨junction, flux, struct⟩"
+      },
+      "repair_steps": 2,
+      "grid_repair_steps": 2,
+      "phonetic_vowel_steps": 2,
+      "repair_detail": {
+        "pd": 2,
+        "md": 0,
+        "vd": 2,
+        "total": 4
+      },
+      "distinctiveness_score": 920,
+      "distinctiveness_penalty": 80,
+      "phonetic_only_repair": false,
+      "coda_extension": false,
+      "fallback": false
+    },
+    {
+      "root": "ñeeh",
+      "id": "lattice",
+      "gloss": "organized cavity; structured interior",
+      "coordinates": {
+        "id": "lattice",
+        "gloss": "organized cavity; structured interior",
+        "D": "junction",
+        "M": "hollow",
+        "A": "struct",
+        "place": "3",
+        "manner": "nasal",
+        "vowel": "ee",
+        "vowel_canonical": "i",
+        "phonetic_spread": true,
+        "syllable_template": "CVC",
+        "coda": "h",
+        "fonora_onset": "ñ",
+        "notation": "⟨junction, hollow, struct⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 3,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 3,
+        "total": 3
+      },
+      "distinctiveness_score": 840,
+      "distinctiveness_penalty": 160,
+      "phonetic_only_repair": false,
+      "coda_extension": true,
+      "fallback": false
+    },
+    {
+      "root": "goh",
+      "id": "pulse",
+      "gloss": "rhythmic activation; repeating live emanation",
+      "coordinates": {
+        "id": "pulse",
+        "gloss": "rhythmic activation; repeating live emanation",
+        "D": "emanation",
+        "M": "live",
+        "A": "field",
+        "place": "4",
+        "manner": "voice",
+        "vowel": "oh",
+        "vowel_canonical": "o",
+        "phonetic_spread": true,
+        "syllable_template": "CV",
+        "coda": null,
+        "fonora_onset": "g",
+        "notation": "⟨emanation, live, field⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 3,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 3,
+        "total": 3
+      },
+      "distinctiveness_score": 850,
+      "distinctiveness_penalty": 150,
+      "phonetic_only_repair": true,
+      "coda_extension": false,
+      "fallback": false
+    },
+    {
+      "root": "yae",
+      "id": "reach",
+      "gloss": "extension toward; directed spread",
+      "coordinates": {
+        "id": "reach",
+        "gloss": "extension toward; directed spread",
+        "D": "emanation",
+        "M": "passage",
+        "A": "field",
+        "place": "4",
+        "manner": "glide",
+        "vowel": "ae",
+        "vowel_canonical": "o",
+        "phonetic_spread": true,
+        "syllable_template": "CV",
+        "coda": null,
+        "fonora_onset": "y",
+        "notation": "⟨emanation, passage, field⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 2,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 2,
+        "total": 2
+      },
+      "distinctiveness_score": 850,
+      "distinctiveness_penalty": 150,
+      "phonetic_only_repair": true,
+      "coda_extension": false,
+      "fallback": false
+    },
+    {
+      "root": "hee",
+      "id": "source",
+      "gloss": "generative point; where form begins",
+      "coordinates": {
+        "id": "source",
+        "gloss": "generative point; where form begins",
+        "D": "origin",
+        "M": "packet",
+        "A": "source",
+        "place": "5",
+        "manner": "plain",
+        "vowel": "ee",
+        "vowel_canonical": "a",
+        "phonetic_spread": true,
+        "syllable_template": "CV",
+        "coda": null,
+        "fonora_onset": "h",
+        "notation": "⟨origin, packet, source⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 2,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 2,
+        "total": 2
+      },
+      "distinctiveness_score": 850,
+      "distinctiveness_penalty": 150,
+      "phonetic_only_repair": true,
+      "coda_extension": false,
+      "fallback": false
+    },
+    {
+      "root": "khap",
+      "id": "breath",
+      "gloss": "continuous origin; pre-articulate stream",
+      "coordinates": {
+        "id": "breath",
+        "gloss": "continuous origin; pre-articulate stream",
+        "D": "origin",
+        "M": "flux",
+        "A": "source",
+        "place": "5",
+        "manner": "friction",
+        "vowel": "a",
+        "vowel_canonical": "a",
+        "phonetic_spread": false,
+        "syllable_template": "CVC",
+        "coda": "p",
+        "fonora_onset": "kh",
+        "notation": "⟨origin, flux, source⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 0,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 0,
+        "total": 0
+      },
+      "distinctiveness_score": 760,
+      "distinctiveness_penalty": 240,
+      "phonetic_only_repair": false,
+      "coda_extension": true,
+      "fallback": false
+    },
+    {
+      "root": "ghuk",
+      "id": "will",
+      "gloss": "originary activation; intent before action",
+      "coordinates": {
+        "id": "will",
+        "gloss": "originary activation; intent before action",
+        "D": "origin",
+        "M": "live",
+        "A": "source",
+        "place": "5",
+        "manner": "voice",
+        "vowel": "u",
+        "vowel_canonical": "a",
+        "phonetic_spread": true,
+        "syllable_template": "CVC",
+        "coda": "k",
+        "fonora_onset": "gh",
+        "notation": "⟨origin, live, source⟩"
+      },
+      "repair_steps": 0,
+      "grid_repair_steps": 0,
+      "phonetic_vowel_steps": 2,
+      "repair_detail": {
+        "pd": 0,
+        "md": 0,
+        "vd": 2,
+        "total": 2
+      },
+      "distinctiveness_score": 760,
+      "distinctiveness_penalty": 240,
+      "phonetic_only_repair": false,
+      "coda_extension": true,
+      "fallback": false
+    },
+    {
+      "root": "mat",
+      "id": "void",
+      "gloss": "inner absence; hollow at the source",
+      "coordinates": {
+        "id": "void",
+        "gloss": "inner absence; hollow at the source",
+        "D": "origin",
+        "M": "hollow",
+        "A": "source",
+        "place": "1",
+        "manner": "nasal",
+        "vowel": "a",
+        "vowel_canonical": "a",
+        "phonetic_spread": false,
+        "syllable_template": "CVC",
+        "coda": "t",
+        "fonora_onset": "m",
+        "notation": "⟨origin, hollow, source⟩"
+      },
+      "repair_steps": 1,
+      "grid_repair_steps": 1,
+      "phonetic_vowel_steps": 0,
+      "repair_detail": {
+        "pd": 1,
+        "md": 0,
+        "vd": 0,
+        "total": 1
+      },
+      "distinctiveness_score": 760,
+      "distinctiveness_penalty": 240,
+      "phonetic_only_repair": false,
+      "coda_extension": true,
+      "fallback": false
+    },
+    {
+      "root": "hohh",
+      "id": "cycle",
+      "gloss": "return path; departure that comes back",
+      "coordinates": {
+        "id": "cycle",
+        "gloss": "return path; departure that comes back",
+        "D": "origin",
+        "M": "passage",
+        "A": "resonant",
+        "place": "5",
+        "manner": "plain",
+        "vowel": "oh",
+        "vowel_canonical": "oh",
+        "phonetic_spread": false,
+        "syllable_template": "CVC",
+        "coda": "h",
+        "fonora_onset": "h",
+        "notation": "⟨origin, passage, resonant⟩"
+      },
+      "repair_steps": 1,
+      "grid_repair_steps": 1,
+      "phonetic_vowel_steps": 0,
+      "repair_detail": {
+        "pd": 0,
+        "md": 1,
+        "vd": 0,
+        "total": 1
+      },
+      "distinctiveness_score": 760,
+      "distinctiveness_penalty": 240,
+      "phonetic_only_repair": false,
+      "coda_extension": true,
+      "fallback": false
+    },
+    {
+      "root": "bu",
+      "id": "material",
+      "gloss": "stuff-at-boundary; substance at interface",
+      "coordinates": {
+        "id": "material",
+        "gloss": "stuff-at-boundary; substance at interface",
+        "D": "interface",
+        "M": "packet",
+        "A": "contact",
+        "place": "1",
+        "manner": "voice",
+        "vowel": "u",
+        "vowel_canonical": "u",
+        "phonetic_spread": false,
+        "syllable_template": "CV",
+        "coda": null,
+        "fonora_onset": "b",
+        "notation": "⟨interface, packet, contact⟩"
+      },
+      "repair_steps": 1,
+      "grid_repair_steps": 1,
+      "phonetic_vowel_steps": 0,
+      "repair_detail": {
+        "pd": 0,
+        "md": 1,
+        "vd": 0,
+        "total": 1
+      },
+      "distinctiveness_score": 770,
+      "distinctiveness_penalty": 230,
+      "phonetic_only_repair": false,
+      "coda_extension": false,
+      "fallback": false
+    },
+    {
+      "root": "mo",
+      "id": "collective",
+      "gloss": "many-as-one field; distributed plurality",
+      "coordinates": {
+        "id": "collective",
+        "gloss": "many-as-one field; distributed plurality",
+        "D": "emanation",
+        "M": "hollow",
+        "A": "field",
+        "place": "1",
+        "manner": "nasal",
+        "vowel": "o",
+        "vowel_canonical": "o",
+        "phonetic_spread": false,
+        "syllable_template": "CV",
+        "coda": null,
+        "fonora_onset": "m",
+        "notation": "⟨emanation, hollow, field⟩"
+      },
+      "repair_steps": 2,
+      "grid_repair_steps": 2,
+      "phonetic_vowel_steps": 0,
+      "repair_detail": {
+        "pd": 2,
+        "md": 0,
+        "vd": 0,
+        "total": 2
+      },
+      "distinctiveness_score": 770,
+      "distinctiveness_penalty": 230,
+      "phonetic_only_repair": false,
+      "coda_extension": false,
+      "fallback": false
+    },
+    {
+      "root": "ja",
+      "id": "near",
+      "gloss": "proximal index; within reach of pointer",
+      "coordinates": {
+        "id": "near",
+        "gloss": "proximal index; within reach of pointer",
+        "D": "index",
+        "M": "packet",
+        "A": "contact",
+        "place": "3",
+        "manner": "voice",
+        "vowel": "a",
+        "vowel_canonical": "u",
+        "phonetic_spread": true,
+        "syllable_template": "CV",
+        "coda": null,
+        "fonora_onset": "j",
+        "notation": "⟨index, packet, contact⟩"
+      },
+      "repair_steps": 2,
+      "grid_repair_steps": 2,
+      "phonetic_vowel_steps": 2,
+      "repair_detail": {
+        "pd": 1,
+        "md": 1,
+        "vd": 2,
+        "total": 4
+      },
+      "distinctiveness_score": 770,
+      "distinctiveness_penalty": 230,
+      "phonetic_only_repair": false,
+      "coda_extension": false,
+      "fallback": false
+    },
+    {
+      "root": "xi",
+      "id": "far",
+      "gloss": "distal field; beyond indexical grasp",
+      "coordinates": {
+        "id": "far",
+        "gloss": "distal field; beyond indexical grasp",
+        "D": "emanation",
+        "M": "packet",
+        "A": "field",
+        "place": "4",
+        "manner": "friction",
+        "vowel": "i",
+        "vowel_canonical": "o",
+        "phonetic_spread": true,
+        "syllable_template": "CV",
+        "coda": null,
+        "fonora_onset": "x",
+        "notation": "⟨emanation, packet, field⟩"
+      },
+      "repair_steps": 2,
+      "grid_repair_steps": 2,
+      "phonetic_vowel_steps": 3,
+      "repair_detail": {
+        "pd": 0,
+        "md": 2,
+        "vd": 3,
+        "total": 5
+      },
+      "distinctiveness_score": 770,
+      "distinctiveness_penalty": 230,
+      "phonetic_only_repair": false,
+      "coda_extension": false,
+      "fallback": false
+    }
+  ],
+  "derivations": [
+    {
+      "concept": "river",
+      "not_primitive": true,
+      "composition": [
+        "flow",
+        "path"
+      ],
+      "gloss": "continuous change along directed passage",
+      "coordinate_gloss": "⟨emanation,flux,turbulent⟩ + ⟨index,passage,struct⟩",
+      "parts": [
+        {
+          "id": "flow",
+          "root": "xaech",
+          "notation": "⟨emanation, flux, turbulent⟩"
+        },
+        {
+          "id": "path",
+          "root": "lik",
+          "notation": "⟨index, passage, struct⟩"
+        }
+      ],
+      "compound": "xaechlik"
+    },
+    {
+      "concept": "planet",
+      "not_primitive": true,
+      "composition": [
+        "bound",
+        "field",
+        "motion"
+      ],
+      "gloss": "edge + extended presence + index in transit",
+      "coordinate_gloss": "⟨interface,packet,focal⟩ + ⟨emanation,packet,field⟩ + ⟨index,passage,animated⟩",
+      "parts": [
+        {
+          "id": "bound",
+          "root": "pi",
+          "notation": "⟨interface, packet, focal⟩"
+        },
+        {
+          "id": "field",
+          "root": "kop",
+          "notation": "⟨emanation, packet, field⟩"
+        },
+        {
+          "id": "motion",
+          "root": "leh",
+          "notation": "⟨index, passage, animated⟩"
+        }
+      ],
+      "compound": "pikopleh"
+    },
+    {
+      "concept": "speaker",
+      "not_primitive": true,
+      "composition": [
+        "signal",
+        "agent"
+      ],
+      "gloss": "discrete emission + activated locus",
+      "coordinate_gloss": "⟨emanation,packet,focal⟩ + ⟨index,live,animated⟩",
+      "parts": [
+        {
+          "id": "signal",
+          "root": "ku",
+          "notation": "⟨emanation, packet, focal⟩"
+        },
+        {
+          "id": "agent",
+          "root": "da",
+          "notation": "⟨index, live, animated⟩"
+        }
+      ],
+      "compound": "kuda"
+    },
+    {
+      "concept": "language",
+      "not_primitive": true,
+      "composition": [
+        "signal",
+        "bond",
+        "group"
+      ],
+      "gloss": "emission + structural connection + collective cavity",
+      "coordinate_gloss": "signal + bond + group",
+      "parts": [
+        {
+          "id": "signal",
+          "root": "ku",
+          "notation": "⟨emanation, packet, focal⟩"
+        },
+        {
+          "id": "bond",
+          "root": "rae",
+          "notation": "⟨junction, passage, struct⟩"
+        },
+        {
+          "id": "group",
+          "root": "ñok",
+          "notation": "⟨junction, hollow, resonant⟩"
+        }
+      ],
+      "compound": "kuraeñok"
+    },
+    {
+      "concept": "memory",
+      "not_primitive": true,
+      "composition": [
+        "mark",
+        "container",
+        "static"
+      ],
+      "gloss": "sign + held interior + stability",
+      "coordinate_gloss": "mark + container + static",
+      "parts": [
+        {
+          "id": "mark",
+          "root": "se",
+          "notation": "⟨index, flux, focal⟩"
+        },
+        {
+          "id": "container",
+          "root": "ñoh",
+          "notation": "⟨junction, hollow, resonant⟩"
+        },
+        {
+          "id": "static",
+          "root": "chit",
+          "notation": "⟨junction, packet, struct⟩"
+        }
+      ],
+      "compound": "señohchit"
+    },
+    {
+      "concept": "storm",
+      "not_primitive": true,
+      "composition": [
+        "wave",
+        "change",
+        "field"
+      ],
+      "gloss": "propagating flux + state transformation + extended presence",
+      "coordinate_gloss": "wave + change + field",
+      "parts": [
+        {
+          "id": "wave",
+          "root": "xot",
+          "notation": "⟨emanation, flux, field⟩"
+        },
+        {
+          "id": "change",
+          "root": "shaep",
+          "notation": "⟨junction, flux, turbulent⟩"
+        },
+        {
+          "id": "field",
+          "root": "kop",
+          "notation": "⟨emanation, packet, field⟩"
+        }
+      ],
+      "compound": "xotshaepkop"
+    },
+    {
+      "concept": "community",
+      "not_primitive": true,
+      "composition": [
+        "group",
+        "bond",
+        "identity"
+      ],
+      "gloss": "collective cavity + connection + discrete self-same",
+      "coordinate_gloss": "group + bond + identity",
+      "parts": [
+        {
+          "id": "group",
+          "root": "ñok",
+          "notation": "⟨junction, hollow, resonant⟩"
+        },
+        {
+          "id": "bond",
+          "root": "rae",
+          "notation": "⟨junction, passage, struct⟩"
+        },
+        {
+          "id": "identity",
+          "root": "tee",
+          "notation": "⟨index, packet, struct⟩"
+        }
+      ],
+      "compound": "ñokraetee"
+    },
+    {
+      "concept": "question",
+      "not_primitive": true,
+      "composition": [
+        "probe",
+        "unknown"
+      ],
+      "gloss": "directed extension + opaque origin",
+      "coordinate_gloss": "probe + unknown",
+      "parts": [
+        {
+          "id": "probe",
+          "root": "lo",
+          "notation": "⟨index, passage, focal⟩"
+        },
+        {
+          "id": "unknown",
+          "root": "gha",
+          "notation": "⟨origin, hollow, source⟩"
+        }
+      ],
+      "compound": "logha"
+    }
+  ]
+}

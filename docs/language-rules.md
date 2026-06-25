@@ -1,5 +1,7 @@
 # Language Rules
 
+These are the authoritative **encoding rules** for the Fonora phonetic script (Script Layer). The experimental **Fonoran** language is written using this script — see [platform-overview.md](platform-overview.md) and [fonoran.md](fonoran.md) for the language and builder tools.
+
 ## Configuration
 
 | key | value |

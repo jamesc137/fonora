@@ -267,7 +267,10 @@
     .fonoran-lander__subtitle { margin:0 0 1.25rem; font-size:1.05rem; color:var(--muted); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
     .fonoran-lander__prose { color:#333; line-height:1.55; max-width:var(--layout-prose-max); }
     .fonoran-lander__prose p { margin:0; }
+    .fonoran-lander__prose p + p { margin-top:0.85rem; }
     .fonoran-lander h2 { margin:0 0 0.85rem; font-size:1.2rem; font-weight:600; }
+    .fonoran-lander__compare-lead { margin:0 0 1rem; color:var(--muted); font-size:0.92rem; line-height:1.45; }
+    .fonoran-lander__compare-foot { margin:1rem 0 0; color:#333; font-size:0.92rem; line-height:1.55; max-width:var(--layout-prose-max); }
     .fonoran-compare-card { display:flex; flex-direction:column; gap:0.5rem; }
     .fonoran-compare-card--script { border-top:3px solid #2563eb; }
     .fonoran-compare-card--language { border-top:3px solid var(--accent); }
@@ -275,7 +278,8 @@
     .fonoran-compare-card h3 { margin:0; font-size:1.05rem; }
     .fonoran-compare-card p { margin:0; font-size:0.92rem; color:#444; line-height:1.45; font-family:-apple-system,sans-serif; }
     .fonoran-compare-card ul { margin:0.25rem 0 0.75rem; padding-left:1.15rem; font-family:-apple-system,sans-serif; font-size:0.88rem; color:#555; line-height:1.45; }
-    .fonoran-compare-card .btn { align-self:flex-start; margin-top:auto; text-decoration:none; display:inline-block; }
+    .fonoran-compare-card__btn { align-self:flex-start; margin-top:auto; display:inline-block; color:var(--word); text-decoration:none; font-weight:500; transition:border-color 0.15s, background 0.15s, color 0.15s; }
+    .fonoran-compare-card__btn:hover { background:var(--accent-soft); border-color:var(--accent); color:var(--accent); }
     .fonoran-lander__tools-lead { margin:0 0 1rem; color:var(--muted); font-size:0.92rem; line-height:1.45; max-width:var(--layout-prose-max); }
     .fonoran-tool-card { text-align:left; padding:var(--layout-card-padding); border:1px solid var(--border); border-radius:var(--layout-card-radius); background:var(--surface); cursor:pointer; font-family:-apple-system,sans-serif; transition:border-color 0.15s, background 0.15s; }
     .fonoran-tool-card:hover { border-color:#95d5b2; background:var(--accent-soft); }

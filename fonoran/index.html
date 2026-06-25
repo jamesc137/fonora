@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fonoran — Experimental Language</title>
-  <meta name="description" content="Fonoran is an experimental constructed language written in the Fonora phonetic script — build roots, compose words, and grow a vocabulary.">
+  <meta name="description" content="Fonoran is an open-source experiment in language creation built on the Fonora phonetic writing system — primitive concepts, compound words, semantic relationships, and language-building tools.">
   <link rel="stylesheet" href="../app.css">
   <link rel="stylesheet" href="fonoran.css">
 </head>
@@ -18,44 +18,40 @@
 
       <section id="page-home" class="page active">
         <div class="fonoran-lander content-page">
-          <header class="fonoran-lander__intro content-section content-section--intro">
+          <section class="fonoran-lander__intro content-section content-section--intro">
             <h1>Fonoran</h1>
-            <p class="fonoran-lander__subtitle">An experimental language built with Fonora</p>
-          </header>
+            <p class="fonoran-lander__subtitle">An experimental language and language-building toolkit.</p>
 
-          <div class="fonoran-lander__prose sans">
-            <p>
-              <strong>Fonoran</strong> is a constructed language you grow word by word — primitive roots, compound words, meanings, and derivation trees.
-              It is <em>written in</em> the Fonora phonetic script, but it is its own vocabulary and grammar experiment, not the script itself.
-            </p>
-          </div>
+            <div class="fonoran-lander__prose sans">
+              <p>Fonoran is an open-source experiment in language creation built on top of the Fonora phonetic writing system.</p>
+              <p>Rather than focusing on a single constructed language, the project explores how languages can be intentionally designed, analyzed, and evolved using modern tooling. It includes systems for creating primitive concepts, building compound words, exploring semantic relationships, reviewing vocabulary, and tracing the evolution of every word.</p>
+              <p>Fonoran serves as the reference language and a living proof of concept used to develop and validate the language building platform.</p>
+            </div>
+          </section>
 
           <section class="fonoran-lander__compare content-section" aria-labelledby="compare-heading">
-            <h2 id="compare-heading">Fonora vs Fonoran</h2>
+            <h2 id="compare-heading">Fonora vs. Fonoran</h2>
+            <p class="sans fonoran-lander__compare-lead">Think of it as:</p>
             <div class="fonoran-compare-grid content-card-grid content-card-grid--2">
               <article class="fonoran-compare-card content-card fonoran-compare-card--script">
-                <p class="fonoran-compare-card__tag">Fonora Script</p>
+                <p class="fonoran-compare-card__tag">Fonora</p>
                 <h3>The writing system</h3>
-                <p>A universal phonetic script — nine core symbols plus vowel grammar. Transliterates pronunciation from any language via IPA.</p>
+                <p>Fonora is the phonetic writing system. It defines how speech is represented using a small set of phonetic symbols.</p>
                 <ul>
-                  <li>Sound Grid, Alphabet, encoding rules</li>
-                  <li>Translator, Reader, transliteration tools</li>
-                  <li>Not a spoken language — a way to <em>write</em> sounds</li>
+                  <li>A universal phonetic script.</li>
                 </ul>
-                <a class="btn" href="../#grid">Explore the script</a>
+                <a class="btn fonoran-compare-card__btn" href="../#grid">Explore the script</a>
               </article>
               <article class="fonoran-compare-card content-card fonoran-compare-card--language">
-                <p class="fonoran-compare-card__tag">Fonoran Language</p>
+                <p class="fonoran-compare-card__tag">Fonoran</p>
                 <h3>The language</h3>
-                <p>An experimental conlang with its own roots, compounds, review workflow, and semantic coordinates (DDA).</p>
+                <p>Fonoran is the reference language built with that writing system and the accompanying language-builder toolkit.</p>
                 <ul>
-                  <li>Root Creator — primitive syllables (CV / CVC)</li>
-                  <li>Compound Creator — stack roots into words</li>
-                  <li>Dictionary, Language Explorer, semantic analysis</li>
+                  <li>A living language experiment and proof of concept for language creation.</li>
                 </ul>
-                <button type="button" class="btn btn-primary" data-goto-page="roots">Start building</button>
               </article>
             </div>
+            <p class="sans fonoran-lander__compare-foot">The long-term goal is not simply to build one language, but to explore better tools for creating, understanding, and documenting languages using a shared phonetic foundation.</p>
           </section>
 
           <section class="fonoran-lander__tools content-section" aria-labelledby="tools-heading">

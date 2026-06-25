@@ -767,7 +767,17 @@
 
     async function renderExplorerMermaidIn(rootEl, mermaidSource, graphNodes, onNavigate) {
       if (!window.mermaid || !mermaidSource || !rootEl) return;
-      window.mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' });
+      window.mermaid.initialize({
+        startOnLoad: false,
+        theme: 'base',
+        themeVariables: {
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          lineColor: '#a89f95',
+          clusterBkg: '#faf8f5',
+          clusterBorder: '#e8e2da',
+        },
+        securityLevel: 'loose',
+      });
       await window.mermaid.run({ nodes: rootEl.querySelectorAll('.mermaid') });
       const wrap = rootEl.querySelector('.mermaid-wrap');
       bindMermaidGraphClicks(wrap?.querySelector('svg'), graphNodes, onNavigate);
@@ -912,7 +922,7 @@
       return { html, speakParts };
     }
 
-    function buildExplorerHtml(data, explorerKind, { preview = false, compact = false } = {}) {
+    function buildExplorerHtml(data, explorerKind, { preview = false, compact = false, includeGraph = true, modalActions = false } = {}) {
       const f = data.focus;
       const builtFrom = buildBuiltFromList(f.components);
 
@@ -923,6 +933,16 @@
       const speakParts = explorerKind === 'root'
         ? [f.spelling]
         : (f.components?.length ? composerFlatSpellings(f.components) : [f.spelling]);
+
+      const graphSection = includeGraph && data.mermaid
+        ? `<div class="explorer-section"><h4>Family graph</h4><p class="sans graph-hint">Tap a node to explore that root or word.</p><div class="mermaid-wrap"><pre class="mermaid">${escapeHtml(data.mermaid)}</pre></div></div>`
+        : '';
+      const actionButtons = modalActions
+        ? `<div class="explorer-actions">
+            <button type="button" class="btn" data-open-graph ${data.mermaid ? '' : 'disabled'}>Family graph</button>
+            <button type="button" class="btn" data-open-dda>Semantic coordinates (DDA)</button>
+          </div>`
+        : '';
 
       let html = `
         <div class="explorer-hero">
@@ -939,7 +959,8 @@
         </div>
         <div class="explorer-section"><h4>Built from</h4><ul class="explorer-list">${builtFrom}</ul></div>
         <div class="explorer-section"><h4>Derivation tree</h4><div class="explorer-tree">${escapeHtml(treeText)}</div></div>
-        ${data.mermaid ? `<div class="explorer-section"><h4>Family graph</h4><p class="sans graph-hint">Tap a node to explore that root or word.</p><div class="mermaid-wrap"><pre class="mermaid">${escapeHtml(data.mermaid)}</pre></div></div>` : ''}`;
+        ${graphSection}
+        ${actionButtons}`;
 
       if (!compact) {
         const usedIn = data.used_in?.length
@@ -1376,14 +1397,52 @@
       return api(`/api/fonoran/lab/graph/${kind}/${encodeURIComponent(id)}`);
     }
 
-    async function mountExplorer(containerEl, kind, id, preview = null, { onNavigate } = {}) {
+    async function mountExplorer(containerEl, kind, id, preview = null, { onNavigate, includeGraph = true, modalActions = false } = {}) {
       const data = await fetchExplorerData(kind, id, preview);
       const explorerKind = preview?.preview ? 'word' : kind;
-      const { html, speakParts } = buildExplorerHtml(data, explorerKind, { preview: !!preview?.preview });
+      const { html, speakParts } = buildExplorerHtml(data, explorerKind, {
+        preview: !!preview?.preview,
+        includeGraph,
+        modalActions,
+      });
       containerEl.innerHTML = html;
       containerEl.querySelector('.explorer-hear-btn')?.addEventListener('click', () => speakNeural(speakParts));
-      await renderExplorerMermaidIn(containerEl, data.mermaid, data.graph_nodes, onNavigate);
+      if (includeGraph) {
+        await renderExplorerMermaidIn(containerEl, data.mermaid, data.graph_nodes, onNavigate);
+      }
+      if (modalActions) {
+        containerEl.querySelector('[data-open-graph]')?.addEventListener('click', () => {
+          openFamilyGraphSheet(data, onNavigate);
+        });
+        containerEl.querySelector('[data-open-dda]')?.addEventListener('click', () => {
+          openDdaSheet(data, explorerKind, id);
+        });
+      }
       return data;
+    }
+
+    async function openFamilyGraphSheet(data, onNavigate) {
+      const f = data.focus;
+      if (!data.mermaid) return;
+      const body = $('sheet-body');
+      body.innerHTML = `
+        <div class="explorer-section showcase-graph">
+          <h4>Family graph · <span class="mono">${escapeHtml(f.spelling)}</span></h4>
+          <p class="sans graph-hint">Tap a node to explore that root or word.</p>
+          <div class="mermaid-wrap"><pre class="mermaid">${escapeHtml(data.mermaid)}</pre></div>
+        </div>`;
+      $('sheet').classList.add('open');
+      await renderExplorerMermaidIn(body, data.mermaid, data.graph_nodes, (navKind, ref) => {
+        closeSheet();
+        if (onNavigate) onNavigate(navKind, ref);
+        else openExplorer(navKind, ref);
+      });
+    }
+
+    function openDdaSheet(data, explorerKind, ref) {
+      const dda = labItemDda(explorerKind, ref);
+      $('sheet-body').innerHTML = buildDdaPanelHtml(dda, data.focus.components);
+      $('sheet').classList.add('open');
     }
 
     async function openExplorer(kind, id, preview = null) {
@@ -1433,7 +1492,7 @@
     }
 
     function dictDetailEmptyHtml() {
-      return `<div class="fonoran-split-empty"><p>Select a word or root on the left to explore its derivation tree, family graph, and related words.</p></div>`;
+      return `<div class="fonoran-split-empty"><p>Select a word or root on the left to preview pronunciation, derivation, and related words. Open the family graph or DDA coordinates from there.</p></div>`;
     }
 
     function showDictDetailEmpty() {
@@ -1449,6 +1508,8 @@
       panel.innerHTML = '<p class="fonoran-split-loading">Loading…</p>';
       try {
         await mountExplorer(panel, dictExplorerKind(entryKind), id, null, {
+          includeGraph: false,
+          modalActions: true,
           onNavigate: (navKind, ref) => {
             const kind = navKind === 'root' ? 'sound' : 'compound';
             STATE.dictSelection = { kind, id: ref };
@@ -1482,15 +1543,37 @@
       }
     }
 
+    function dictItemGlyphs(entry) {
+      if (!STATE.rules) return '';
+      if (entry.kind === 'sound') return romanToFonoraScript([entry.word], STATE.rules).phrase;
+      const compound = STATE.lab.compounds.find(c => c.id === entry.id);
+      const parts = compound?.parts ?? [entry.word];
+      return romanToFonoraScript(parts, STATE.rules).phrase;
+    }
+
+    function dictItemHtml(entry) {
+      const glyphs = dictItemGlyphs(entry);
+      const meaning = entry.english === '(unnamed)' ? 'unnamed' : entry.english;
+      const unnamed = meaning === 'unnamed';
+      const sel = STATE.dictSelection;
+      const selected = sel && sel.kind === entry.kind && sel.id === entry.id;
+      const type = entry.kind === 'sound' ? 'root' : 'word';
+      return `
+        <button type="button" class="dict-item${selected ? ' is-selected' : ''}" data-kind="${entry.kind}" data-id="${escapeHtml(entry.id)}">
+          <span class="dict-item__content">
+            ${glyphs ? `<span class="dict-item__glyphs root-glyphs symbol-text" aria-hidden="true">${escapeHtml(glyphs)}</span>` : ''}
+            <span class="sp">${escapeHtml(entry.word)}</span>
+            <span class="mn${unnamed ? ' unnamed' : ''}">${escapeHtml(meaning)}</span>
+            ${entry.hint ? `<span class="dict-item__hint">${escapeHtml(entry.hint)}</span>` : ''}
+          </span>
+          <span class="dict-item__badges">${typeBadge(type)} ${badge(entry.state)}</span>
+        </button>`;
+    }
+
     function renderDictionaryList() {
       const list = dictEntries();
-      $('dict-list').innerHTML = list.length ? list.map(e => `
-        <button type="button" class="word-item" data-kind="${e.kind}" data-id="${escapeHtml(e.id)}">
-          <div class="row"><span class="fonoran">${escapeHtml(e.word)}</span><span>${badge(e.type)} ${badge(e.state)}</span></div>
-          <div class="row" style="margin-top:0.15rem"><span class="english">${escapeHtml(e.english)}</span></div>
-          <div class="hint">${escapeHtml(e.hint)}</div>
-        </button>`).join('') : '<p class="empty">Nothing matches.</p>';
-      $('dict-list').querySelectorAll('.word-item').forEach(b => b.addEventListener('click', () => {
+      $('dict-list').innerHTML = list.length ? list.map(dictItemHtml).join('') : '<p class="empty">Nothing matches.</p>';
+      $('dict-list').querySelectorAll('.dict-item').forEach(b => b.addEventListener('click', () => {
         selectDictionaryEntry(b.dataset.kind, b.dataset.id);
       }));
     }

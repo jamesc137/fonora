@@ -105,8 +105,9 @@ export function buildMermaidGraph(bucket, { kind, ref, usedIn = [], related = []
   }
 
   const lines = ['graph TD'];
-  for (const { id, label } of nodes.values()) {
-    lines.push(`  ${id}["${label}"]`);
+  for (const { id, label, kind: nodeKind } of nodes.values()) {
+    const cls = id === focusId ? 'focusNode' : (nodeKind === 'root' ? 'rootNode' : 'wordNode');
+    lines.push(`  ${id}["${label}"]:::${cls}`);
   }
   for (const e of edges) {
     if (e.style === 'dotted') {
@@ -116,6 +117,11 @@ export function buildMermaidGraph(bucket, { kind, ref, usedIn = [], related = []
     }
   }
   if (lines.length === 1) lines.push('  empty["No derivation yet"]');
+  lines.push(
+    '  classDef rootNode fill:#e8f4f8,stroke:#1864ab,color:#1864ab,stroke-width:1.5px,rx:10,ry:10',
+    '  classDef wordNode fill:#f3f0ff,stroke:#5f3dc4,color:#5f3dc4,stroke-width:1.5px,rx:10,ry:10',
+    '  classDef focusNode fill:#d8f3dc,stroke:#2d6a4f,color:#1b4332,stroke-width:2px,rx:10,ry:10',
+  );
 
   return {
     source: lines.join('\n'),

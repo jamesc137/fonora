@@ -174,7 +174,7 @@
     .tl-item .tl-when { color:var(--muted); font-size:0.78rem; margin-left:auto; white-space:nowrap; }
     .tl-icon { width:1.2rem; text-align:center; }
 
-    /* split-page layout (dictionary, word creator) — page scroll only, sticky chrome + picker */
+    /* split-page layout — page scroll only, sticky chrome + right workspace (or left picker by default) */
     .fonoran-split-page { margin-top:calc(-1 * var(--layout-main-pt, 1.75rem)); }
     .fonoran-split-shell {
       position:sticky;
@@ -234,7 +234,6 @@
     .fonoran-split-picker [hidden] { display:none !important; }
     .fonoran-split-picker .sound-grid { max-height:none; overflow:visible; }
     .fonoran-split-picker__body { margin:0 -0.15rem; padding:0 0.15rem 0.1rem; }
-    .fonoran-split-picker__body .word-item { margin-bottom:0.35rem; padding:0.65rem 0.85rem; }
     .fonoran-split-workspace {
       position:relative;
       background:var(--surface);
@@ -263,6 +262,14 @@
     /* root creator: sticky preview panel while sound picker scrolls */
     #page-roots .fonoran-split-picker { position:static; }
     #page-roots .fonoran-split-workspace {
+      position:sticky;
+      top:var(--fonoran-split-chrome-offset, 9rem);
+      z-index:10;
+      align-self:start;
+    }
+    /* dictionary: sticky preview panel while word list scrolls */
+    #page-dictionary .fonoran-split-picker { position:static; }
+    #page-dictionary .fonoran-split-workspace {
       position:sticky;
       top:var(--fonoran-split-chrome-offset, 9rem);
       z-index:10;
@@ -323,12 +330,51 @@
     .health-undo-btn { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; font-size:0.82rem; color:#4b5563; background:none; border:none; padding:0.3rem 0.5rem; border-radius:4px; cursor:pointer; white-space:nowrap; flex-shrink:0; }
     .health-undo-btn:hover:not(:disabled) { background:#f3f4f6; color:#111; }
     .health-undo-btn:disabled { opacity:0.4; cursor:default; }
-    .word-item { display:block; width:100%; text-align:left; font:inherit; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:0.8rem 1rem; margin-bottom:0.5rem; cursor:pointer; }
-    .word-item:hover { border-color:var(--accent); }
-    .word-item .row { display:flex; justify-content:space-between; align-items:baseline; gap:0.75rem; }
-    .word-item .fonoran { font-family:ui-monospace,Menlo,monospace; font-size:1.15rem; font-weight:600; color:var(--word); }
-    .word-item .english { font-family:-apple-system,sans-serif; font-size:0.92rem; }
-    .word-item .hint { margin-top:0.2rem; font-size:0.8rem; color:var(--muted); font-family:-apple-system,sans-serif; }
+    .dict-item {
+      display:flex;
+      align-items:stretch;
+      justify-content:space-between;
+      gap:0.65rem;
+      width:100%;
+      text-align:left;
+      font:inherit;
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:0.65rem 0.85rem;
+      margin-bottom:0.35rem;
+      cursor:pointer;
+      transition:border-color 0.15s, background 0.15s;
+    }
+    .dict-item:hover { border-color:var(--accent); }
+    .dict-item.is-selected { border-color:var(--accent); background:var(--accent-soft); }
+    .dict-item__content {
+      flex:1;
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:0.1rem;
+    }
+    .dict-item__glyphs {
+      font-size:1.35rem;
+      line-height:1.2;
+      color:var(--text);
+      margin:0 0 0.05rem;
+      max-width:100%;
+      white-space:normal;
+      word-break:break-word;
+    }
+    .dict-item__content .sp { font-size:1.05rem; }
+    .dict-item__content .mn { font-family:-apple-system,sans-serif; font-size:0.85rem; }
+    .dict-item__badges { flex-shrink:0; align-self:flex-end; margin-top:auto; display:flex; flex-wrap:wrap; gap:0.2rem; justify-content:flex-end; }
+    .dict-item__hint {
+      font-family:-apple-system,sans-serif;
+      font-size:0.75rem;
+      color:var(--muted);
+      max-width:100%;
+      white-space:normal;
+    }
 
     /* advanced */
     .box { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.25rem; margin-bottom:1.25rem; font-family:-apple-system,sans-serif; font-size:0.92rem; }
@@ -342,8 +388,6 @@
 
     .toast { position:fixed; left:50%; bottom:1.25rem; transform:translateX(-50%); background:var(--word); color:#fff; font-family:-apple-system,sans-serif; font-size:0.88rem; padding:0.6rem 1.1rem; border-radius:99px; z-index:80; opacity:0; transition:opacity 0.2s; pointer-events:none; }
     .toast.show { opacity:1; }
-    .sheet { position:fixed; inset:auto 0 0 0; max-height:80vh; background:var(--surface); border-top:1px solid var(--border); padding:1.1rem 1.25rem 1.75rem; z-index:60; transform:translateY(100%); transition:transform 0.2s,visibility 0.2s; overflow-y:auto; visibility:hidden; pointer-events:none; }
-    .sheet.open { transform:translateY(0); visibility:visible; pointer-events:auto; box-shadow:0 -8px 30px rgba(0,0,0,.12); }
     .sheet .close { float:right; border:none; background:none; font-size:1.4rem; cursor:pointer; color:var(--muted); line-height:1; }
     .chain { text-align:center; }
     .chain .c-word { font-family:ui-monospace,Menlo,monospace; font-size:1.8rem; font-weight:700; color:var(--word); }
@@ -371,16 +415,37 @@
     .explorer-hero__word .review-meaning { margin:0; }
     .explorer-hero__word .explorer-hear-btn { margin:0.1rem 0 0; }
     .explorer-hero__note { font-size:0.82rem; color:var(--muted); margin:0.5rem auto 0; max-width:28rem; line-height:1.45; }
+    .explorer-actions { display:flex; flex-wrap:wrap; gap:0.5rem; margin:0.85rem 0 0.25rem; }
     .explorer-tree { font-family:ui-monospace,Menlo,monospace; font-size:0.82rem; white-space:pre-wrap; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:0.65rem 0.75rem; }
     .explorer-list { list-style:none; padding:0; margin:0; }
     .explorer-list li { font-family:-apple-system,sans-serif; font-size:0.88rem; padding:0.35rem 0; border-bottom:1px solid var(--border); }
     .mermaid-wrap { overflow:auto; margin:0.5rem 0; }
     .graph-hint { font-size:0.78rem; color:var(--muted); margin:0 0 0.35rem; }
+    .mermaid-wrap .nodeLabel { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; font-size:0.78rem; }
     .mermaid-wrap .graph-node-clickable { cursor:pointer; }
     .mermaid-wrap .graph-node-clickable:hover rect,
-    .mermaid-wrap .graph-node-clickable:hover polygon { filter:brightness(0.95); stroke:var(--accent, #5b7cff); stroke-width:2px; }
-    .sheet.explorer-sheet.open { max-height:90vh; }
-    @media (min-width:560px){ .sheet { top:auto; right:auto; bottom:0; left:50%; transform:translate(-50%,100%); width:min(720px,calc(100vw - 2rem)); border:1px solid var(--border); border-radius:var(--radius); border-top:1px solid var(--border); } .sheet.open { bottom:1.25rem; transform:translate(-50%,0); } }
+    .mermaid-wrap .graph-node-clickable:hover polygon { filter:brightness(0.97); stroke:var(--accent); stroke-width:2px; }
+    .sheet {
+      position:fixed;
+      top:50%;
+      left:50%;
+      width:min(720px,calc(100vw - 2rem));
+      max-height:min(90vh,820px);
+      margin:0;
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:1.1rem 1.25rem 1.75rem;
+      z-index:60;
+      overflow-y:auto;
+      visibility:hidden;
+      pointer-events:none;
+      opacity:0;
+      transform:translate(-50%,-48%) scale(0.98);
+      transition:transform 0.2s ease, opacity 0.2s ease, visibility 0.2s;
+      box-shadow:0 16px 48px rgba(0,0,0,.14);
+    }
+    .sheet.open { visibility:visible; pointer-events:auto; opacity:1; transform:translate(-50%,-50%) scale(1); }
 
     /* --- Fonoran lander (layout via .content-page / .content-section in app.css) --- */
     .fonoran-lander__intro h1 { margin:0 0 0.35rem; font-size:2rem; font-weight:600; letter-spacing:-0.02em; color:var(--word); }

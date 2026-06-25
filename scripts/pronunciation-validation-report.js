@@ -1,5 +1,5 @@
 /**
- * Batch pronunciation validation report — uses eSpeak for real-word IPA.
+ * Batch pronunciation validation report: uses eSpeak for real-word IPA.
  * Output: reports/pronunciation-validation-report.md
  */
 import { writeFileSync, mkdirSync } from 'node:fs';
@@ -54,12 +54,12 @@ async function main() {
 
   for (const r of results) {
     if (r.error) {
-      lines.push(`| ${r.word} | — | — | — | ✗ | ${r.error} |`);
+      lines.push(`| ${r.word} | n/a |: | n/a | ✗ | ${r.error} |`);
       continue;
     }
     const warn = r.collisionWarnings?.length
       ? r.collisionWarnings.map((w) => w.label).join('; ')
-      : '—';
+      : ': ';
     lines.push(
       `| ${r.word} | ${(r.sourceIpa || '').replace(/\|/g, '\\|')} | ${(r.recoveredIpa || '').replace(/\|/g, '\\|')} | ${r.phonemeKeysMatch ? '✓' : '✗'} | ${r.ipaMatch ? '✓' : '✗'} | ${warn} |`,
     );

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Fonoran Gen 3 — grid-native root generator.
+ * Fonoran Gen 3: grid-native root generator.
  * Roots emerge from DDA coordinates only. No human-language collision repair.
  */
 

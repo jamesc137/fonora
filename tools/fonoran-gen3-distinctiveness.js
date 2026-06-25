@@ -1,5 +1,5 @@
 /**
- * Fonoran Gen 3.1 — phonetic distinctiveness utilities.
+ * Fonoran Gen 3.1: phonetic distinctiveness utilities.
  * Semantic DDA unchanged; scores phonetic root forms only.
  */
 

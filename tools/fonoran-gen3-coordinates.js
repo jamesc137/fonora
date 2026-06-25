@@ -60,7 +60,7 @@ export function generateRoot(primitive, config, manner, place, vowel, coda = '')
 
 /**
  * Enumerate coordinate-faithful candidates only (canonical place + manner).
- * No post-generation grid repair — vowel spread and CVC extension only.
+ * No post-generation grid repair: vowel spread and CVC extension only.
  * When canonical place+manner yields null onset (throat hollow/glide), also yields
  * same-place manner alternatives as phonotactic options (not place rotation).
  */

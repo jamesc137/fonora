@@ -4,6 +4,7 @@
     import { speakFonoraPhrase, cancelSpeech } from '../js/fonora-tts.js';
     import { initUniversalNav, setActiveTab, setFonoranUndoDisabled, setFonoranAuth } from '../js/universal-nav.js';
     import { bindModalDismiss, setModalBackdropOpen } from '../js/modal-dismiss.js';
+    import { extractMarkdownHeadings, normalizeGrammarSource, renderMarkdown } from '../js/markdown-render.js';
 
     const AUTH = {
       required: false,
@@ -373,6 +374,7 @@
       else if (STATE.page === 'review') renderWords();
       else if (STATE.page === 'roots') renderRoots();
       else if (STATE.page === 'dictionary') renderDictionary();
+      else if (STATE.page === 'grammar') renderGrammar();
       else if (STATE.page === 'health') renderHealth();
       else if (STATE.page === 'advanced') renderAdvanced();
       applyWriteAccessUI();
@@ -2070,6 +2072,10 @@
           `${headerBottom + shell.offsetHeight + gridGap}px`,
         );
       }
+      const grammarChrome = document.querySelector('#page-grammar.active .grammar-sticky-shell');
+      if (grammarChrome) {
+        document.documentElement.style.setProperty('--grammar-chrome-offset', `${grammarChrome.offsetHeight}px`);
+      }
     }
 
     let splitStickyObserver = null;
@@ -2086,6 +2092,11 @@
           splitStickyObserver.observe(shell);
         }
       });
+      const grammarChrome = document.querySelector('#page-grammar .grammar-sticky-shell');
+      if (grammarChrome && !grammarChrome.dataset.stickyObserved) {
+        grammarChrome.dataset.stickyObserved = '1';
+        splitStickyObserver.observe(grammarChrome);
+      }
     }
 
     function renderDictionary() {
@@ -2094,6 +2105,74 @@
       renderDictionaryList();
       syncDictSelection();
       requestAnimationFrame(syncSplitStickyOffsets);
+    }
+
+    /* ---------- GRAMMAR SPEC ---------- */
+    const GRAMMAR_DOC_PATH = '../docs/fonoran-grammar.md';
+    let grammarLoadToken = 0;
+
+    async function renderGrammarMermaidIn(rootEl) {
+      if (!window.mermaid || !rootEl) return;
+      window.mermaid.initialize({
+        startOnLoad: false,
+        theme: 'base',
+        themeVariables: {
+          fontFamily: 'ui-monospace, Menlo, monospace',
+          lineColor: '#a89f95',
+          clusterBkg: '#faf8f5',
+          clusterBorder: '#e8e2da',
+        },
+        securityLevel: 'loose',
+      });
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      await window.mermaid.run({ nodes: rootEl.querySelectorAll('.mermaid') });
+    }
+
+    async function renderGrammar() {
+      ensureSplitStickyObserver();
+      syncSplitStickyOffsets();
+      const body = $('grammar-body');
+      const toc = $('grammar-toc');
+      if (!body) return;
+      const token = ++grammarLoadToken;
+      body.innerHTML = '<p class="grammar-content__loading sans">Loading specification…</p>';
+      if (toc) toc.innerHTML = '<p class="grammar-toc__loading sans">Loading…</p>';
+      try {
+        const res = await fetch(GRAMMAR_DOC_PATH, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`Could not load grammar specification (HTTP ${res.status})`);
+        const markdown = normalizeGrammarSource(await res.text());
+        if (token !== grammarLoadToken) return;
+        const headings = extractMarkdownHeadings(markdown, { minLevel: 2, maxLevel: 3 });
+        if (toc) {
+          toc.innerHTML = headings.length
+            ? `<ul class="grammar-toc__list">${headings
+                .map(
+                  (h) =>
+                    `<li class="grammar-toc__item grammar-toc__item--h${h.level}"><a href="#${escapeHtml(h.id)}" class="grammar-toc__link">${escapeHtml(h.title)}</a></li>`,
+                )
+                .join('')}</ul>`
+            : '<p class="grammar-toc__loading sans">No sections</p>';
+        }
+        body.innerHTML = renderMarkdown(markdown, { docPath: 'docs/fonoran-grammar.md', grammar: true });
+        await renderGrammarMermaidIn(body);
+        if (token !== grammarLoadToken) return;
+        syncSplitStickyOffsets();
+        toc?.querySelectorAll('.grammar-toc__link').forEach((link) => {
+          link.addEventListener('click', (event) => {
+            const href = link.getAttribute('href');
+            if (!href?.startsWith('#')) return;
+            const target = document.getElementById(href.slice(1));
+            if (!target) return;
+            event.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            history.replaceState(null, '', `${window.location.pathname}#grammar`);
+          });
+        });
+      } catch (e) {
+        if (token !== grammarLoadToken) return;
+        body.innerHTML = `<p class="empty">${escapeHtml(e.message)}</p>`;
+        if (toc) toc.innerHTML = '';
+      }
     }
 
     /* ---------- HEALTH + TIMELINE ---------- */
@@ -2165,7 +2244,7 @@
 
     /* ---------- nav ---------- */
     const MAIN_PAGES = new Set(['roots', 'create', 'matcher', 'review', 'dictionary']);
-    const ALL_PAGES = new Set(['home', 'roots', 'create', 'matcher', 'review', 'dictionary', 'health', 'advanced']);
+    const ALL_PAGES = new Set(['home', 'roots', 'create', 'matcher', 'review', 'dictionary', 'grammar', 'health', 'advanced']);
     function scrollPageTop() {
       window.scrollTo(0, 0);
       document.documentElement.scrollTop = 0;
@@ -2194,7 +2273,7 @@
       scrollPageTop();
       requestAnimationFrame(() => {
         scrollPageTop();
-        if (name === 'dictionary' || name === 'create' || name === 'roots') {
+        if (name === 'dictionary' || name === 'create' || name === 'roots' || name === 'grammar') {
           syncSplitStickyOffsets();
           requestAnimationFrame(syncSplitStickyOffsets);
         }

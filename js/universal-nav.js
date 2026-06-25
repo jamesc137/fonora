@@ -33,6 +33,7 @@ const FONORAN_TABS = [
   { id: 'create', label: 'Word Creator' },
   { id: 'matcher', label: 'Word Matcher' },
   { id: 'dictionary', label: 'Dictionary' },
+  { id: 'grammar', label: 'Grammar' },
 ];
 
 const FONORAN_MORE_MENU = [
@@ -64,6 +65,7 @@ const FONORAN_TITLES = {
   matcher: 'Word Matcher',
   review: 'Review',
   dictionary: 'Dictionary',
+  grammar: 'Grammar',
   health: 'Health',
   advanced: 'Advanced',
 };

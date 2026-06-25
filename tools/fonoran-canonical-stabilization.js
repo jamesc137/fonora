@@ -124,7 +124,7 @@ export function primitiveRegistryEntry(primitive, gen31Item, auditEntry, config,
       status: 'pending_review',
       canonical_root: null,
       candidates,
-      review_note: 'Fidelity < 80 — select coordinate-faithful candidate (A–D). No grid repair.',
+      review_note: 'Fidelity < 80: select coordinate-faithful candidate (A–D). No grid repair.',
     };
   }
 
@@ -238,7 +238,7 @@ export function composeFromCanonical(composition, registry) {
 
 export function generateCanonicalRootsMarkdown(registry) {
   const lines = [];
-  lines.push('# Fonoran Canonical Roots — Lexical Constitution');
+  lines.push('# Fonoran Canonical Roots: Lexical Constitution');
   lines.push('');
   lines.push(`> Version: ${registry.version}`);
   lines.push(`> Status: **${registry.status}**`);
@@ -246,11 +246,11 @@ export function generateCanonicalRootsMarkdown(registry) {
   lines.push('');
   lines.push('## Constitutional rules');
   lines.push('');
-  lines.push('1. **Semantic authority** — Meaning lives in DDA coordinates `⟨Depth, Mode, Aspect⟩`, not in English glosses.');
-  lines.push('2. **Canonical roots** — Each primitive has one approved roman root. Once approved, it is **immutable**.');
-  lines.push('3. **Compounding** — Compounds concatenate canonical roots in order general → specific.');
-  lines.push('4. **Expansion** — New vocabulary may be coined from primitives; **accepted primitives may not be rewritten** by generators.');
-  lines.push('5. **Phonetic layer** — Vowel spread and CVC extensions are allowed at selection time; post-hoc grid repair is not.');
+  lines.push('1. **Semantic authority**: Meaning lives in DDA coordinates `⟨Depth, Mode, Aspect⟩`, not in English glosses.');
+  lines.push('2. **Canonical roots**: Each primitive has one approved roman root. Once approved, it is **immutable**.');
+  lines.push('3. **Compounding**: Compounds concatenate canonical roots in order general → specific.');
+  lines.push('4. **Expansion**: New vocabulary may be coined from primitives; **accepted primitives may not be rewritten** by generators.');
+  lines.push('5. **Phonetic layer**: Vowel spread and CVC extensions are allowed at selection time; post-hoc grid repair is not.');
   lines.push('');
   lines.push('## Summary');
   lines.push('');
@@ -270,7 +270,7 @@ export function generateCanonicalRootsMarkdown(registry) {
   lines.push('| ID | Canonical root | Coordinates | Gloss | Status |');
   lines.push('| --- | --- | --- | --- | --- |');
   for (const p of registry.primitives) {
-    const root = p.canonical_root ?? '—';
+    const root = p.canonical_root ?? ': ';
     const st = p.status === 'approved' ? '✓ approved' : '⏳ pending';
     lines.push(`| ${p.id} | \`${root}\` | ${p.coordinates.notation} | ${p.gloss} | ${st} |`);
   }
@@ -279,13 +279,13 @@ export function generateCanonicalRootsMarkdown(registry) {
   lines.push('');
   const pending = registry.primitives.filter(p => p.status === 'pending_review');
   if (!pending.length) {
-    lines.push('None — all primitives canonical.');
+    lines.push('None: all primitives canonical.');
   } else {
     for (const p of pending) {
       lines.push(`### ${p.id}`);
       lines.push('');
       lines.push(`- **Coordinates:** ${p.coordinates.notation}`);
-      lines.push(`- **Gen 3.1 (repaired):** \`${p.gen31_root}\` — fidelity ${p.fidelity_score}`);
+      lines.push(`- **Gen 3.1 (repaired):** \`${p.gen31_root}\`: fidelity ${p.fidelity_score}`);
       lines.push(`- **Issue:** phonetic repair drift, not semantic weakness`);
       lines.push('');
       lines.push('| Label | Root | Fidelity | Distinctiveness | Form |');
@@ -437,10 +437,10 @@ export function generateStressTestMarkdown(report) {
   lines.push('| --- | --- | ---: | ---: | ---: | --- | --- |');
   for (const r of report.results) {
     if (!r.compound) {
-      lines.push(`| ${r.concept} | — | — | — | — | — | ${r.error} |`);
+      lines.push(`| ${r.concept} | n/a |: | n/a |: | n/a | ${r.error} |`);
       continue;
     }
-    lines.push(`| ${r.concept} | \`${r.compound}\` | ${r.length} | ${r.readability} | ${r.elegance} | ${r.ambiguous ? 'yes' : '—'} | ${r.composition} |`);
+    lines.push(`| ${r.concept} | \`${r.compound}\` | ${r.length} | ${r.readability} | ${r.elegance} | ${r.ambiguous ? 'yes' : ': '} | ${r.composition} |`);
   }
   lines.push('');
   return lines.join('\n');

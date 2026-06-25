@@ -1,5 +1,5 @@
 /**
- * Fonoran language API — file-backed lab store.
+ * Fonoran language API: file-backed lab store.
  */
 
 import {

@@ -1,6 +1,6 @@
 /**
  * Turn Fonoran roman spellings into plain-English pronunciation hints.
- * Based on docs/language-rules.md — teaching aids, not IPA.
+ * Based on docs/language-rules.md: teaching aids, not IPA.
  */
 
 const ONSETS = [
@@ -100,7 +100,7 @@ export function compoundSayAs(parts) {
   return parts.map(p => sayAsBold(p)).filter(Boolean).join(' + ');
 }
 
-/** Phonetic keys without English reference words — e.g. bu → B-OO, hee → H-EE. */
+/** Phonetic keys without English reference words: e.g. bu → B-OO, hee → H-EE. */
 const PHONETIC_VOWEL = {
   a: 'AH', e: 'EH', i: 'IH', o: 'OH', u: 'OO',
   ee: 'EE', ae: 'AE', oh: 'OH', eye: 'EYE', ow: 'OW', oy: 'OY', ay: 'AY',
@@ -125,7 +125,7 @@ export function compoundPhoneticKey(parts) {
   return parts.map(p => phoneticKeyBold(p)).filter(Boolean).join('·');
 }
 
-/** English teaching aids below the phonetic line — e.g. bu → "b · book". */
+/** English teaching aids below the phonetic line: e.g. bu → "b · book". */
 export function englishGuide(spelling) {
   const syl = parseSyllable(spelling);
   if (!syl) return '';
@@ -151,7 +151,7 @@ export function compoundVowelGuide(parts) {
   return parts.map(vowelSayAsBold).filter(Boolean).join(' + ');
 }
 
-/** Syllable as one utterance for speech synthesis — not the English hint words. */
+/** Syllable as one utterance for speech synthesis: not the English hint words. */
 export function toSpeakable(spelling) {
   const syl = parseSyllable(spelling);
   if (!syl) return spelling;

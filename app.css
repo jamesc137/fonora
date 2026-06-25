@@ -4,7 +4,7 @@
   box-sizing: border-box;
 }
 
-/* Shared layout tokens — Fonora platform, Script, and Language */
+/* Shared layout tokens: Fonora platform, Script, and Language */
 :root {
   --layout-max-width: 960px;
   --layout-gutter: 1rem;
@@ -176,6 +176,7 @@ html[data-fonora-tab='roots'] [data-fonoran-page='roots'].tab-btn,
 html[data-fonora-tab='create'] [data-fonoran-page='create'].tab-btn,
 html[data-fonora-tab='matcher'] [data-fonoran-page='matcher'].tab-btn,
 html[data-fonora-tab='dictionary'] [data-fonoran-page='dictionary'].tab-btn,
+html[data-fonora-tab='grammar'] [data-fonoran-page='grammar'].tab-btn,
 html[data-fonora-tab='review'] [data-fonoran-page='review'].tab-btn,
 html[data-fonora-tab='health'] [data-fonoran-page='health'].tab-btn,
 html[data-fonora-tab='advanced'] [data-fonoran-page='advanced'].tab-btn,
@@ -193,6 +194,7 @@ html[data-fonora-page='roots'] #page-roots,
 html[data-fonora-page='create'] #page-create,
 html[data-fonora-page='review'] #page-review,
 html[data-fonora-page='dictionary'] #page-dictionary,
+html[data-fonora-page='grammar'] #page-grammar,
 html[data-fonora-page='health'] #page-health,
 html[data-fonora-page='advanced'] #page-advanced {
   display: block !important;
@@ -773,7 +775,7 @@ code {
   display: none;
 }
 
-/* Shared lander + home typography — full content width within layout max */
+/* Shared lander + home typography: full content width within layout max */
 
 .home-intro-header {
   margin-bottom: 1.25rem;

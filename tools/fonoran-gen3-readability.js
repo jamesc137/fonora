@@ -219,7 +219,7 @@ export function analyzeAmbiguity(inventory, derivations = []) {
         warnings.push({
           type: 'prefix_overlap',
           severity: 'high',
-          message: `"${shorter.root}" (${shorter.id}) prefixes "${longer.root}" (${longer.id}) — segmentation risk`,
+          message: `"${shorter.root}" (${shorter.id}) prefixes "${longer.root}" (${longer.id}): segmentation risk`,
         });
       }
     }
@@ -305,12 +305,12 @@ export function auditScores(inventory, derivations, warnings) {
 
 export function generateAuditMarkdown({ inventory, derivations, warnings, scores, generatedAt }) {
   const lines = [];
-  lines.push('# Fonoran Gen 3 — Human Readability Audit');
+  lines.push('# Fonoran Gen 3: Human Readability Audit');
   lines.push('');
   lines.push(`> Generated: ${generatedAt}`);
   lines.push('> Live lab health: `/fonoran/` → Health');
   lines.push('> Regenerate (frozen Gen 3 JSON): `npm run fonoran:gen3:audit` → `reports/`');
-  lines.push('> **Goal:** learnability through Fonoran internal logic — not English familiarity.');
+  lines.push('> **Goal:** learnability through Fonoran internal logic: not English familiarity.');
   lines.push('');
   lines.push('## Executive summary');
   lines.push('');
@@ -331,9 +331,9 @@ export function generateAuditMarkdown({ inventory, derivations, warnings, scores
   lines.push('');
   lines.push('- **Strength:** Every primitive is a named coordinate with grid explainability.');
   lines.push('- **Strength:** Lip-to-throat depth axis is a single consistent metaphor.');
-  lines.push('- **Risk:** Focal `ee` roots rhyme — discrimination relies on onset consonants only.');
+  lines.push('- **Risk:** Focal `ee` roots rhyme: discrimination relies on onset consonants only.');
   lines.push('- **Risk:** Repair-shifted roots weaken strict coordinate→form teaching.');
-  lines.push('- **Risk:** Familiar labels (planet, river) are reviewer aids — not translation pairs.');
+  lines.push('- **Risk:** Familiar labels (planet, river) are reviewer aids: not translation pairs.');
   lines.push('');
   lines.push('## Pronounceability');
   lines.push('');
@@ -351,7 +351,7 @@ export function generateAuditMarkdown({ inventory, derivations, warnings, scores
   lines.push('');
   for (const d of derivations) {
     const n = segmentCompound(d.compound, inventory).length;
-    lines.push(`- **${d.compound}** (${d.concept}): ${n === 1 ? 'unique parse' : `${n} parses`} — ${d.composition.join(' + ')}`);
+    lines.push(`- **${d.compound}** (${d.concept}): ${n === 1 ? 'unique parse' : `${n} parses`}: ${d.composition.join(' + ')}`);
   }
   lines.push('');
   lines.push('## Compound length');

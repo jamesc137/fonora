@@ -1,6 +1,6 @@
 /**
  * Load `.env` from project root when present (local dev).
- * Skipped on Heroku — config vars are already in process.env.
+ * Skipped on Heroku: config vars are already in process.env.
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';

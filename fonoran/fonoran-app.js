@@ -11,6 +11,7 @@
       loginUrl: '/auth/google?returnTo=/fonoran/',
     };
     const WRITE_PAGES = new Set(['roots', 'create', 'review', 'advanced']);
+    const SPLIT_WRITE_PAGES = new Set(['roots', 'create']);
 
     function canWrite() {
       return !AUTH.required || AUTH.authenticated;
@@ -117,21 +118,28 @@
     }
 
     function updateAuthGate() {
+      const main = document.querySelector('main');
+      const show = !canWrite() && WRITE_PAGES.has(STATE.page);
       let gate = $('auth-gate');
+
+      if (!show) {
+        gate?.remove();
+        requestAnimationFrame(syncSplitStickyOffsets);
+        return;
+      }
+
       if (!gate) {
         gate = document.createElement('div');
         gate.id = 'auth-gate';
-        document.querySelector('main')?.prepend(gate);
       }
-      if (!canWrite() && WRITE_PAGES.has(STATE.page)) {
-        gate.hidden = false;
-        gate.className = 'auth-gate sans';
-        gate.innerHTML = `<p>Sign in with your <strong>@fonora.org</strong> Google account to edit Fonoran vocabulary.</p>
-          <a href="${escapeHtml(AUTH.loginUrl)}" class="btn btn-primary auth-gate__sign-in">Sign in with Google</a>`;
-      } else {
-        gate.hidden = true;
-        gate.innerHTML = '';
-      }
+      gate.className = 'auth-gate sans';
+      gate.innerHTML = `<p>Sign in with your <strong>@fonora.org</strong> Google account to edit Fonoran vocabulary.</p>
+        <a href="${escapeHtml(AUTH.loginUrl)}" class="btn btn-primary auth-gate__sign-in">Sign in with Google</a>`;
+      const host = SPLIT_WRITE_PAGES.has(STATE.page)
+        ? $(`page-${STATE.page}`)?.querySelector('.fonoran-split-chrome')
+        : main;
+      if (host && gate.parentElement !== host) host.prepend(gate);
+      requestAnimationFrame(syncSplitStickyOffsets);
     }
 
     const LANDER_SHOWCASE_WORD_ID = 'cmp-kaso';
@@ -1715,6 +1723,7 @@
           history.replaceState(null, '', nextHash);
         }
       }
+      updateAuthGate();
       renderActivePage();
       scrollPageTop();
       requestAnimationFrame(() => {

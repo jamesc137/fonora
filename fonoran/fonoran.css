@@ -358,24 +358,18 @@
       gap:0.1rem;
     }
     .dict-item__glyphs {
-      font-size:1.35rem;
+      font-size:1.5rem;
       line-height:1.2;
       color:var(--text);
-      margin:0 0 0.05rem;
+      margin:0;
       max-width:100%;
       white-space:normal;
       word-break:break-word;
     }
-    .dict-item__content .sp { font-size:1.05rem; }
-    .dict-item__content .mn { font-family:-apple-system,sans-serif; font-size:0.85rem; }
+    .dict-item__content .mn { font-family:-apple-system,sans-serif; font-size:1.05rem; font-weight:700; color:var(--text); }
+    .dict-item__content .mn.unnamed { font-weight:600; color:var(--draft); font-style:italic; }
+    .dict-item__content .sp { font-size:0.88rem; color:var(--muted); font-family:ui-monospace,monospace; }
     .dict-item__badges { flex-shrink:0; align-self:flex-end; margin-top:auto; display:flex; flex-wrap:wrap; gap:0.2rem; justify-content:flex-end; }
-    .dict-item__hint {
-      font-family:-apple-system,sans-serif;
-      font-size:0.75rem;
-      color:var(--muted);
-      max-width:100%;
-      white-space:normal;
-    }
 
     /* advanced */
     .box { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.25rem; margin-bottom:1.25rem; font-family:-apple-system,sans-serif; font-size:0.92rem; }

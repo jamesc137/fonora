@@ -105,35 +105,48 @@
         </div>
       </section>
 
-      <section id="page-create" class="page">
-        <div class="composer" id="word-create">
-          <h3>Create a new word</h3>
-          <p class="sans" style="font-size:0.84rem;color:var(--muted);margin:0">Stack primitive roots or approved words. Each piece adds meaning. Preview, name it, save for review.</p>
-          <div class="pick" id="wc-pick"></div>
-          <p class="composer-spell" id="wc-spell">-</p>
-          <div id="wc-pron"></div>
-          <div id="wc-match"></div>
-          <button type="button" class="hear-min" id="wc-hear" style="margin:0.5rem 0" disabled aria-label="Listen to this word">▶ Listen</button>
-          <button type="button" class="btn" id="wc-explore" style="margin:0 0 0.5rem" disabled>Explore preview</button>
-          <label class="fld" for="wc-meaning">Meaning</label>
-          <div class="lex-pick sans">
-            <label class="lex-label" for="wc-lex-cat">Browse English words</label>
-            <div class="lex-row">
-              <select id="wc-lex-cat" aria-label="Category"><option value="">All categories</option></select>
-              <select id="wc-lex-word" aria-label="English word"><option value="">Pick a word…</option></select>
+      <section id="page-create" class="page fonoran-split-page">
+        <div class="fonoran-split-shell" data-split-shell>
+          <div class="fonoran-split-chrome">
+            <p class="fonoran-split-chrome__intro sans">Stack primitive roots or approved words. Each piece adds meaning. Preview, name it, save for review.</p>
+            <input type="search" id="wc-filter" class="search-bar" placeholder="Search roots and words by spelling or meaning…" autocomplete="off">
+            <label class="sans wc-toggle"><input type="checkbox" id="wc-show-unapproved" data-write-input> Show unapproved word candidates</label>
+          </div>
+        </div>
+        <div class="fonoran-split-grid">
+          <aside class="fonoran-split-picker" aria-label="Roots and words">
+            <h4 class="picker-h">Primitive roots</h4>
+            <div class="sound-grid" id="wc-roots"></div>
+            <h4 class="picker-h">Approved words</h4>
+            <div class="sound-grid" id="wc-words"></div>
+          </aside>
+          <div class="fonoran-split-workspace" id="word-create">
+            <div class="composer-hero">
+              <div class="pick" id="wc-pick"></div>
+              <p class="composer-spell" id="wc-spell">-</p>
+              <div id="wc-pron"></div>
+              <div id="wc-match"></div>
+              <div class="composer-hero__actions">
+                <button type="button" class="hear-min" id="wc-hear" disabled aria-label="Listen to this word">▶ Listen</button>
+                <button type="button" class="btn" id="wc-explore" disabled>Explore preview</button>
+              </div>
+            </div>
+            <div class="composer-form">
+              <label class="fld" for="wc-meaning">Meaning</label>
+              <div class="lex-pick sans">
+                <label class="lex-label" for="wc-lex-cat">Browse English words</label>
+                <div class="lex-row">
+                  <select id="wc-lex-cat" aria-label="Category"><option value="">All categories</option></select>
+                  <select id="wc-lex-word" aria-label="English word"><option value="">Pick a word…</option></select>
+                </div>
+              </div>
+              <input type="text" id="wc-meaning" placeholder="Type or pick from English list…" data-write-input>
+              <div class="actions" style="margin-top:0.7rem">
+                <button type="button" class="btn btn-primary" id="wc-save" disabled data-write>Save word</button>
+                <button type="button" class="btn" id="wc-clear" data-write>Clear</button>
+              </div>
             </div>
           </div>
-          <input type="text" id="wc-meaning" placeholder="Type or pick from English list…" data-write-input>
-          <div class="actions" style="margin-top:0.7rem">
-            <button type="button" class="btn btn-primary" id="wc-save" disabled data-write>Save word</button>
-            <button type="button" class="btn" id="wc-clear" data-write>Clear</button>
-          </div>
-          <label class="sans wc-toggle"><input type="checkbox" id="wc-show-unapproved" data-write-input> Show unapproved word candidates</label>
-          <input type="search" id="wc-filter" placeholder="Search roots and words by spelling or meaning…" style="margin-top:0.85rem">
-          <h4 class="picker-h">Primitive roots</h4>
-          <div class="sound-grid" id="wc-roots"></div>
-          <h4 class="picker-h">Approved words</h4>
-          <div class="sound-grid" id="wc-words"></div>
         </div>
       </section>
 
@@ -141,19 +154,32 @@
 
       <section id="page-roots" class="page"><div id="roots-body"></div></section>
 
-      <section id="page-dictionary" class="page">
-        <p class="page-intro">Public read-only — browse the vocabulary and open derivation trees.</p>
-        <input type="search" id="dict-search" class="search-bar" placeholder="Search Fonoran or English…" autocomplete="off">
-        <div class="toolbar" id="dict-filters">
-          <button type="button" class="chip active" data-filter="all">All</button>
-          <button type="button" class="chip" data-filter="base">Roots</button>
-          <button type="button" class="chip" data-filter="compound">Words</button>
-          <button type="button" class="chip" data-filter="needs_review">Needs review</button>
-          <button type="button" class="chip" data-filter="approved">Approved</button>
-          <button type="button" class="chip" data-filter="rejected">Rejected</button>
+      <section id="page-dictionary" class="page fonoran-split-page">
+        <div class="fonoran-split-shell" data-split-shell>
+          <div class="fonoran-split-chrome">
+            <p class="fonoran-split-chrome__intro sans">Public read-only — browse the vocabulary and explore derivation trees.</p>
+            <input type="search" id="dict-search" class="search-bar" placeholder="Search Fonoran or English…" autocomplete="off">
+            <div class="toolbar" id="dict-filters">
+              <button type="button" class="chip active" data-filter="all">All</button>
+              <button type="button" class="chip" data-filter="base">Roots</button>
+              <button type="button" class="chip" data-filter="compound">Words</button>
+              <button type="button" class="chip" data-filter="needs_review">Needs review</button>
+              <button type="button" class="chip" data-filter="approved">Approved</button>
+              <button type="button" class="chip" data-filter="rejected">Rejected</button>
+            </div>
+            <div class="stats" id="dict-stats"></div>
+          </div>
         </div>
-        <div class="stats" id="dict-stats"></div>
-        <div id="dict-list"></div>
+        <div class="fonoran-split-grid">
+          <aside class="fonoran-split-picker" aria-label="Dictionary entries">
+            <div class="fonoran-split-picker__body" id="dict-list"></div>
+          </aside>
+          <div class="fonoran-split-workspace" id="dict-detail" aria-live="polite">
+            <div class="fonoran-split-empty">
+              <p>Select a word or root on the left to explore its derivation tree, family graph, and related words.</p>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section id="page-health" class="page">

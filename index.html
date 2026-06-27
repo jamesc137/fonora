@@ -57,8 +57,8 @@
         <div class="main-nav-primary">
           <button type="button" class="tab-btn" data-tab="home">Home</button>
           <button type="button" class="tab-btn" data-tab="translator">Transliterate</button>
-          <button type="button" class="tab-btn" data-tab="grid">Sound Grid</button>
           <button type="button" class="tab-btn" data-tab="alphabet">Alphabet</button>
+          <button type="button" class="tab-btn" data-tab="grid">Sound Grid</button>
         </div>
         <div class="nav-dropdown" id="nav-more">
           <button type="button" class="nav-dropdown-trigger tab-btn" id="nav-more-trigger" aria-expanded="false" aria-haspopup="true" aria-controls="nav-more-menu">
@@ -72,12 +72,10 @@
             <button type="button" class="tab-btn nav-dropdown-item" data-tab="keyboard" role="menuitem">Keyboard</button>
             <button type="button" class="tab-btn nav-dropdown-item" data-tab="reverse" role="menuitem">Reverse Lookup</button>
             <p class="nav-dropdown-label" role="presentation">Script QA</p>
+            <button type="button" class="tab-btn nav-dropdown-item" data-tab="symbols" role="menuitem">Symbols</button>
             <button type="button" class="tab-btn nav-dropdown-item" data-tab="quiz" role="menuitem">Quiz</button>
             <button type="button" class="tab-btn nav-dropdown-item" data-tab="encoder-testing" role="menuitem">Pronunciation Testing</button>
             <button type="button" class="tab-btn nav-dropdown-item" data-tab="pronunciation-validation" role="menuitem">Pronunciation Validation</button>
-            <p class="nav-dropdown-label" role="presentation">Platform</p>
-            <button type="button" class="tab-btn nav-dropdown-item" data-tab="open-problems" role="menuitem">Open Problems</button>
-            <button type="button" class="tab-btn nav-dropdown-item" data-tab="docs" role="menuitem">Docs</button>
           </div>
         </div>
       </nav>
@@ -558,29 +556,11 @@
       </div>
     </section>
 
-    <!-- Alphabet Lab -->
+    <!-- Alphabet -->
     <section class="panel tab-panel" id="tab-alphabet" data-tab-panel="alphabet" hidden>
       <h2>Alphabet</h2>
       <p class="section-desc">
-        Experiment with primary symbols (5 places, vowel indicator <span class="symbol-text">⚬</span>, 4 manner modifiers).
-        Apply to update the whole app for this browser session, or edit <code>docs/language-rules.md</code> and reload.
-      </p>
-
-      <div id="alphabet-status" class="alphabet-status" hidden></div>
-
-      <div class="alphabet-actions button-row">
-        <button type="button" id="alphabet-apply" class="btn btn--primary">Apply to app</button>
-        <button type="button" id="alphabet-reset-draft" class="btn">Reset draft</button>
-        <button type="button" id="alphabet-clear" class="btn">Clear overrides (use markdown)</button>
-      </div>
-
-      <h3 class="examples-heading">Primary symbols</h3>
-      <div id="alphabet-primary-grid" class="alphabet-primary-grid"></div>
-
-      <h3 class="examples-heading">Phoneme inventory</h3>
-      <p class="section-desc">
-        Language-agnostic sound → symbol reference, recomposed from primary symbols above.
-        Keyboard typing shortcuts are on the <strong>Keyboard</strong> tab.
+        Language-agnostic sound to symbol mapping. Composed from the nine primary symbols and vowel indicator <span class="symbol-text">⚬</span>.
       </p>
 
       <div class="alphabet-inventory-group">
@@ -633,6 +613,26 @@
           </table>
         </div>
       </div>
+    </section>
+
+    <!-- Symbol editor -->
+    <section class="panel tab-panel" id="tab-symbols" data-tab-panel="symbols" hidden>
+      <h2>Symbols</h2>
+      <p class="section-desc">
+        Experiment with primary symbols (5 places, vowel indicator <span class="symbol-text">⚬</span>, 4 manner modifiers).
+        Apply to update the whole app for this browser session, or edit <code>docs/language-rules.md</code> and reload.
+      </p>
+
+      <div id="symbols-status" class="alphabet-status" hidden></div>
+
+      <div class="alphabet-actions button-row">
+        <button type="button" id="symbols-apply" class="btn btn--primary">Apply to app</button>
+        <button type="button" id="symbols-reset-draft" class="btn">Reset draft</button>
+        <button type="button" id="symbols-clear" class="btn">Clear overrides (use markdown)</button>
+      </div>
+
+      <h3 class="examples-heading">Primary symbols</h3>
+      <div id="symbols-primary-grid" class="alphabet-primary-grid"></div>
     </section>
 
     <!-- Breakdown -->

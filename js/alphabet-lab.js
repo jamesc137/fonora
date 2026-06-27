@@ -32,14 +32,15 @@ function renderInventoryRows(rows) {
  * @param {(overrides: Record<string, string>) => void} opts.onApplyOverrides
  */
 export function setupAlphabetLab({ getRules, getMarkdownPrimarySymbols, onApplyOverrides }) {
-  const panel = document.getElementById('tab-alphabet');
-  if (!panel) return;
+  const alphabetPanel = document.getElementById('tab-alphabet');
+  const symbolsPanel = document.getElementById('tab-symbols');
+  if (!alphabetPanel || !symbolsPanel) return;
 
-  const gridEl = document.getElementById('alphabet-primary-grid');
+  const gridEl = document.getElementById('symbols-primary-grid');
   const consonantsBody = document.getElementById('alphabet-inventory-consonants');
   const derivedBody = document.getElementById('alphabet-inventory-derived');
   const vowelsBody = document.getElementById('alphabet-inventory-vowels');
-  const statusEl = document.getElementById('alphabet-status');
+  const statusEl = document.getElementById('symbols-status');
 
   /** @type {Record<string, string>} */
   let draftOverrides = { ...loadAlphabetOverrides() };
@@ -135,7 +136,7 @@ export function setupAlphabetLab({ getRules, getMarkdownPrimarySymbols, onApplyO
     if (vowelsBody) vowelsBody.innerHTML = renderInventoryRows(vowels);
   }
 
-  document.getElementById('alphabet-apply')?.addEventListener('click', () => {
+  document.getElementById('symbols-apply')?.addEventListener('click', () => {
     const clean = {};
     for (const [id, sym] of Object.entries(draftOverrides)) {
       const base = markdownBase(id);
@@ -154,14 +155,14 @@ export function setupAlphabetLab({ getRules, getMarkdownPrimarySymbols, onApplyO
     renderPhonemeInventory();
   });
 
-  document.getElementById('alphabet-reset-draft')?.addEventListener('click', () => {
+  document.getElementById('symbols-reset-draft')?.addEventListener('click', () => {
     draftOverrides = { ...loadAlphabetOverrides() };
     renderPrimaryEditor();
     renderPhonemeInventory();
     setStatus('Draft reset to last saved overrides.', 'info');
   });
 
-  document.getElementById('alphabet-clear')?.addEventListener('click', () => {
+  document.getElementById('symbols-clear')?.addEventListener('click', () => {
     clearAlphabetOverrides();
     draftOverrides = {};
     onApplyOverrides({});

@@ -8,8 +8,8 @@ import { docViewerHref, isDocsRoute } from './doc-urls.js';
 const SCRIPT_TABS = [
   { id: 'home', label: 'Home', primary: true },
   { id: 'translator', label: 'Transliterate', primary: true },
-  { id: 'grid', label: 'Sound Grid', primary: true },
   { id: 'alphabet', label: 'Alphabet', primary: true },
+  { id: 'grid', label: 'Sound Grid', primary: true },
 ];
 
 const MORE_MENU = [
@@ -19,12 +19,10 @@ const MORE_MENU = [
   { id: 'keyboard', label: 'Keyboard' },
   { id: 'reverse', label: 'Reverse Lookup' },
   { type: 'label', text: 'Script QA' },
+  { id: 'symbols', label: 'Symbols' },
   { id: 'quiz', label: 'Quiz' },
   { id: 'encoder-testing', label: 'Pronunciation Testing' },
   { id: 'pronunciation-validation', label: 'Pronunciation Validation' },
-  { type: 'label', text: 'Platform' },
-  { id: 'open-problems', label: 'Open Problems' },
-  { id: 'docs', label: 'Docs' },
 ];
 
 const FONORAN_TABS = [
@@ -57,6 +55,7 @@ const SCRIPT_TITLES = {
   samples: 'Samples',
   keyboard: 'Keyboard',
   reverse: 'Reverse Lookup',
+  symbols: 'Symbols',
   quiz: 'Quiz',
   'encoder-testing': 'Pronunciation Testing',
   'pronunciation-validation': 'Pronunciation Validation',

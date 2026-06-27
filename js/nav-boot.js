@@ -14,6 +14,7 @@
     'quiz',
     'encoder-testing',
     'pronunciation-validation',
+    'symbols',
     'open-problems',
     'docs',
   ]);

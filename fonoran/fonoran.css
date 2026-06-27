@@ -1173,7 +1173,17 @@
     .showcase-dda__blend-note { font-family:var(--font-mono); font-size:0.72rem; color:#6b5b95; }
     .showcase-dda__blend-meaning { color:var(--muted); font-size:0.78rem; text-align:right; }
     .showcase-dda__meta { margin:0.65rem 0 0; font-family:var(--font-serif); font-size:0.76rem; color:#6b5b95; line-height:1.4; }
-    .showcase-dda__pill { display:inline-block; font-size:0.68rem; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; background:#ede7f6; color:#5e35b1; border-radius:4px; padding:0.1rem 0.35rem; margin-right:0.25rem; }
+    .showcase-dda__footer { display:flex; flex-wrap:wrap; gap:0.3rem; align-items:center; margin-top:0.65rem; }
+    .showcase-dda__pill { display:inline-block; font-family:var(--font-serif); font-size:0.66rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; background:var(--revised-bg); color:var(--revised); border-radius:4px; padding:0.12rem 0.4rem; }
+    .showcase-dda__pill--confirmed { background:var(--ok-bg); color:var(--ok); }
+    .showcase-dda__pill--stale { background:var(--draft-bg); color:var(--draft); }
+    .showcase-dda__pill--low { background:var(--draft-bg); color:var(--draft); }
+    .showcase-dda__method { font-family:var(--font-serif); font-size:0.72rem; color:var(--muted); font-style:italic; }
+    .showcase-dda__conf { font-family:var(--font-mono); font-size:0.68rem; color:var(--muted); padding:0.1rem 0.3rem; background:rgba(255,255,255,0.55); border:1px solid var(--border); border-radius:4px; }
+    .showcase-dda__conf--low { color:var(--draft); border-color:#e8cfa0; background:var(--draft-bg); }
+    .dda-chart { margin-top:0.85rem; }
+    .dda-chart__wrap { border-radius:6px; overflow:hidden; background:rgba(255,255,255,0.55); border:1px solid var(--border); padding:0.5rem; min-height:80px; }
+    .dda-chart__wrap svg { max-width:100%; height:auto; display:block; margin:0 auto; }
     .showcase-used-chips { display:flex; flex-wrap:wrap; gap:0.4rem; align-items:center; }
     .showcase-used-chip { display:flex; flex-direction:column; align-items:flex-start; gap:0.05rem; font-family:var(--font-serif); font-size:0.76rem; text-align:left; padding:0.4rem 0.6rem; background:var(--surface); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:border-color 0.15s, background 0.15s; }
     .showcase-used-chip:hover { border-color:var(--accent); background:var(--accent-soft); }

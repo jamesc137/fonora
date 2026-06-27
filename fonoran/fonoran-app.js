@@ -1529,6 +1529,52 @@
       return `⟨ ${dda.D ?? '?'} · ${dda.M ?? '?'} · ${dda.A ?? '?'} ⟩`;
     }
 
+    function ddaMethodLabel(dda) {
+      if (!dda) return null;
+      const sources = dda.sources ?? [];
+      if (sources.includes('compound_blend')) return 'blended from parts';
+      if (sources.includes('meaning')) return 'matched by meaning';
+      if (sources.includes('meaning_partial')) return 'partial meaning match';
+      if (sources.includes('phonetic')) return 'inferred from sound';
+      if (dda.status === 'confirmed') return 'confirmed';
+      return null;
+    }
+
+    function buildDdaMermaidSource(spelling, meaning, dda, components) {
+      if (!dda?.D && !dda?.M && !dda?.A) return null;
+      const esc = s => (s ?? '').replace(/"/g, '#quot;').replace(/[[\]{}|]/g, '').slice(0, 36);
+      const wordLabel = meaning ? `${esc(spelling)} · ${esc(meaning)}` : esc(spelling || '?');
+      const lines = ['graph TD'];
+      const parts = (components ?? []).map((c, i) => {
+        const sp = c.type === 'root'
+          ? c.ref
+          : (STATE.lab.compounds.find(x => x.id === c.ref)?.spelling ?? c.ref);
+        const m = c.type === 'root'
+          ? soundMeaning(c.ref)
+          : (STATE.lab.compounds.find(x => x.id === c.ref)?.meaning ?? '');
+        const label = m ? `${esc(sp)} · ${esc(m)}` : esc(sp);
+        lines.push(`  P${i}["${label}"]`);
+        return `P${i}`;
+      });
+      if (parts.length > 1) {
+        lines.push(`  ${parts.join(' & ')} --> Word["${wordLabel}"]`);
+      } else if (parts.length === 1) {
+        lines.push(`  ${parts[0]} --> Word["${wordLabel}"]`);
+      } else {
+        lines.push(`  Word["${wordLabel}"]`);
+      }
+      lines.push(`  Word --> D["Depth: ${esc(dda.D ?? '?')}"]`);
+      lines.push(`  Word --> M["Mode: ${esc(dda.M ?? '?')}"]`);
+      lines.push(`  Word --> A["Aspect: ${esc(dda.A ?? '?')}"]`);
+      lines.push('  classDef coord fill:#ede7f6,stroke:#c5b8f0,color:#4527a0');
+      if (parts.length) {
+        lines.push('  classDef part fill:#e8f5e9,stroke:#a5d6a7,color:#1b5e20');
+        lines.push(`  class ${parts.join(',')} part`);
+      }
+      lines.push('  class D,M,A coord');
+      return lines.join('\n');
+    }
+
     function componentMeta(c) {
       const w = c.type === 'word' ? STATE.lab.compounds.find(x => x.id === c.ref) : null;
       return {
@@ -1656,20 +1702,20 @@
       </div>`;
     }
 
-    function buildDdaPanelHtml(wordDda, components) {
+    function buildDdaPanelHtml(wordDda, components, focus = null) {
       if (!wordDda?.D && !wordDda?.M && !wordDda?.A) {
         return `<div class="showcase-dda showcase-dda--empty">
-          <h4>Semantic coordinates (DDA)</h4>
-          <p class="sans showcase-dda__empty">Coordinates are inferred automatically as you build: depth, mode, and aspect for every root and compound.</p>
+          <h4>Semantic coordinates</h4>
+          <p class="sans showcase-dda__empty">Every word carries three semantic coordinates — depth, mode, and aspect — assigned automatically when you build. Run DDA in Advanced to generate them.</p>
         </div>`;
       }
       const axes = [
-        { key: 'Depth', val: wordDda.D },
-        { key: 'Mode', val: wordDda.M },
-        { key: 'Aspect', val: wordDda.A },
+        { key: 'Depth', val: wordDda.D, hint: 'how abstract or concrete' },
+        { key: 'Mode', val: wordDda.M, hint: 'how the concept moves or acts' },
+        { key: 'Aspect', val: wordDda.A, hint: 'how it relates to its context' },
       ];
       const axisHtml = axes.map(a => `
-        <div class="showcase-dda__axis">
+        <div class="showcase-dda__axis" title="${escapeHtml(a.hint)}">
           <span class="showcase-dda__axis-key">${a.key}</span>
           <span class="showcase-dda__axis-val">${escapeHtml(a.val ?? '?')}</span>
         </div>`).join('');
@@ -1685,19 +1731,40 @@
           <span class="showcase-dda__blend-meaning">${escapeHtml(m)}</span>
         </div>`;
       }).filter(Boolean).join('');
-      const conf = wordDda.confidence != null ? `${Math.round(wordDda.confidence * 100)}% confidence` : '';
-      const composition = wordDda.coordinates?.composition?.length
-        ? `blend: ${wordDda.coordinates.composition.join(' → ')}`
+      const conf = wordDda.confidence != null ? wordDda.confidence : null;
+      const confPct = conf != null ? Math.round(conf * 100) : null;
+      const isLowConf = conf != null && conf < 0.6;
+      const method = ddaMethodLabel(wordDda);
+      const statusPillClass = wordDda.status === 'confirmed'
+        ? 'showcase-dda__pill showcase-dda__pill--confirmed'
+        : wordDda.status === 'stale'
+          ? 'showcase-dda__pill showcase-dda__pill--stale'
+          : (isLowConf ? 'showcase-dda__pill showcase-dda__pill--low' : 'showcase-dda__pill');
+      const methodBadge = method
+        ? `<span class="showcase-dda__method">${escapeHtml(method)}</span>`
         : '';
-      const status = wordDda.status
-        ? `<span class="showcase-dda__pill">${escapeHtml(wordDda.status)}</span>`
+      const statusPill = wordDda.status
+        ? `<span class="${statusPillClass}">${escapeHtml(wordDda.status)}</span>`
+        : '';
+      const confBadge = confPct != null
+        ? `<span class="showcase-dda__conf${isLowConf ? ' showcase-dda__conf--low' : ''}">${confPct}%</span>`
+        : '';
+      const mermaidSrc = focus?.spelling
+        ? buildDdaMermaidSource(focus.spelling, focus.meaning, wordDda, components)
+        : null;
+      const chartHtml = mermaidSrc
+        ? `<div class="dda-chart">
+            <p class="showcase-dda__blend-label">Semantic relationship</p>
+            <div class="mermaid-wrap dda-chart__wrap"><div class="mermaid">${escapeHtml(mermaidSrc)}</div></div>
+          </div>`
         : '';
       return `<div class="showcase-dda">
-        <h4>Semantic coordinates (DDA)</h4>
+        <h4>Semantic coordinates</h4>
         <p class="showcase-dda__notation">${escapeHtml(ddaNotation(wordDda))}</p>
         <div class="showcase-dda__axes">${axisHtml}</div>
-        ${blendRows ? `<div class="showcase-dda__blend"><p class="showcase-dda__blend-label">Blended from roots</p>${blendRows}</div>` : ''}
-        <p class="showcase-dda__meta">${status}${conf ? `${status ? ' ' : ''}${escapeHtml(conf)}` : ''}${composition ? ` · ${escapeHtml(composition)}` : ''}</p>
+        ${blendRows ? `<div class="showcase-dda__blend"><p class="showcase-dda__blend-label">Blended from</p>${blendRows}</div>` : ''}
+        <div class="showcase-dda__footer">${methodBadge}${statusPill}${confBadge}</div>
+        ${chartHtml}
       </div>`;
     }
 
@@ -1732,8 +1799,8 @@
 
     function buildExplorerActionsHtml({ graph = false, dda = true, hasMermaid = false, compact = false } = {}) {
       if (!graph && !dda) return '';
-      const ddaLabel = compact ? 'DDA' : 'Semantic coordinates (DDA)';
-      const ddaTitle = compact ? 'Semantic coordinates (DDA)' : '';
+      const ddaLabel = compact ? 'Coordinates' : 'Semantic coordinates';
+      const ddaTitle = compact ? 'Semantic coordinates' : '';
       return `<div class="explorer-actions">
         ${graph ? `<button type="button" class="btn" data-open-graph ${hasMermaid ? '' : 'disabled'}>Word Tree</button>` : ''}
         ${dda ? `<button type="button" class="btn" data-open-dda${ddaTitle ? ` title="${ddaTitle}"` : ''}>${ddaLabel}</button>` : ''}
@@ -1863,16 +1930,8 @@
       },
     ];
 
-    function buildLanderHealthHtml(h) {
-      const core = ['learnability', 'pronounceability', 'memorability', 'parseability'];
-      const overall = Math.round(core.reduce((a, k) => a + h.scores[k], 0) / core.length);
+    function buildHealthMethodHtml(h) {
       const color = healthScoreColor;
-      const scoreCards = h.dimensions.map(d => `
-        <div class="score lander-health__score">
-          <div class="top"><span class="name">${escapeHtml(d.label)}</span><span class="val" style="color:${color(d.score)}">${d.score}<span style="font-size:0.7rem;color:var(--muted)">/100</span></span></div>
-          <div class="bar"><span style="width:${d.score}%;background:${color(d.score)}"></span></div>
-          <p class="explain">${escapeHtml(d.explain)}</p>
-        </div>`).join('');
       const methodCards = HEALTH_METHOD.map(m => {
         const live = h.scores[m.key];
         return `<article class="lander-health__method-card">
@@ -1886,6 +1945,28 @@
       }).join('');
       const metrics = buildHealthMetricsHtml(h.metrics);
       const metricMethods = buildHealthMetricMethodHtml(h.metrics, h.scores, color);
+      return `
+        <div class="lander-health__method">
+          <p class="lander-health__method-lead">Each dimension is recomputed from your live lab bucket whenever you open Health. Scores are heuristic design guides. They measure structural ergonomics, not linguistic "correctness."</p>
+          <div class="lander-health__method-grid">${methodCards}</div>
+          <div class="lander-health__metrics">${metrics}</div>
+          <h4 class="lander-health__method-subhead">Secondary metrics</h4>
+          <div class="lander-health__method-grid lander-health__method-grid--secondary">${metricMethods}</div>
+          <p class="lander-health__footnote">Warnings include look-alike sounds, prefix overlap, rhyming clusters, segmentation ambiguity, and pronunciation difficulty. Semantic coordinates (DDA) are analysed separately and surface through the explorer and health detail view.</p>
+        </div>`;
+    }
+
+    function buildLanderHealthHtml(h) {
+      const core = ['learnability', 'pronounceability', 'memorability', 'parseability'];
+      const overall = Math.round(core.reduce((a, k) => a + h.scores[k], 0) / core.length);
+      const color = healthScoreColor;
+      const scoreCards = h.dimensions.map(d => `
+        <div class="score lander-health__score">
+          <div class="top"><span class="name">${escapeHtml(d.label)}</span><span class="val" style="color:${color(d.score)}">${d.score}<span style="font-size:0.7rem;color:var(--muted)">/100</span></span></div>
+          <div class="bar"><span style="width:${d.score}%;background:${color(d.score)}"></span></div>
+          <p class="explain">${escapeHtml(d.explain)}</p>
+        </div>`).join('');
+      const metrics = buildHealthMetricsHtml(h.metrics);
       const warnNote = h.warning_summary.total
         ? `${h.warning_summary.total} ambiguity warning${h.warning_summary.total === 1 ? '' : 's'} flagged (${h.warning_summary.high} serious)`
         : 'No ambiguity warnings in the current vocabulary';
@@ -1899,15 +1980,6 @@
             <div class="lander-health__metrics lander-health__metrics--summary">${metrics}</div>
           </div>
           <div class="lander-health__scores">${scoreCards}</div>
-        </div>
-        <div class="lander-health__method">
-          <h3>How scores are calculated</h3>
-          <p class="lander-health__method-lead">Each dimension is recomputed from your live lab bucket whenever you open Health. Scores are heuristic design guides. They measure structural ergonomics, not linguistic "correctness."</p>
-          <div class="lander-health__method-grid">${methodCards}</div>
-          <div class="lander-health__metrics">${metrics}</div>
-          <h4 class="lander-health__method-subhead">Secondary metrics</h4>
-          <div class="lander-health__method-grid lander-health__method-grid--secondary">${metricMethods}</div>
-          <p class="lander-health__footnote">Warnings include look-alike sounds, prefix overlap, rhyming clusters, segmentation ambiguity, and pronunciation difficulty. Semantic coordinates (DDA) are analysed separately and surface through the explorer and health detail view.</p>
         </div>
         <div class="lander-health__actions">
           <button type="button" class="btn btn-primary" id="lander-health-open">View full health report</button>
@@ -2627,10 +2699,27 @@
       return data;
     }
 
-    function openDdaSheet(data, explorerKind, ref) {
+    async function openDdaSheet(data, explorerKind, ref) {
       const dda = labItemDda(explorerKind, ref);
+      const body = $('sheet-body');
+      body.innerHTML = buildDdaPanelHtml(dda, data.focus.components, data.focus);
       openSheet();
-      $('sheet-body').innerHTML = buildDdaPanelHtml(dda, data.focus.components);
+      const mermaidEl = body.querySelector('.mermaid');
+      if (mermaidEl && window.mermaid) {
+        window.mermaid.initialize({
+          startOnLoad: false,
+          theme: 'base',
+          themeVariables: { fontFamily: 'ui-monospace, Menlo, monospace', lineColor: '#a89f95' },
+          securityLevel: 'loose',
+        });
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        try {
+          await window.mermaid.run({ nodes: [mermaidEl] });
+        } catch (err) {
+          console.warn('DDA chart render failed:', err);
+          body.querySelector('.dda-chart')?.remove();
+        }
+      }
     }
 
     async function openExplorer(kind, id, preview = null) {
@@ -3925,6 +4014,8 @@
       try {
         const h = await api('/api/fonoran/lab/health');
         const d = h.dda ?? {};
+        const methodEl = $('adv-health-method');
+        if (methodEl) methodEl.innerHTML = buildHealthMethodHtml(h);
         $('adv-dda-status').textContent = `DDA: ${d.pending ?? 0} pending · ${d.stale ?? 0} stale · ${d.inferred ?? 0} inferred · ${d.confirmed ?? 0} confirmed`;
         if (STATE.showDebugDda && STATE.lab) {
           const debug = {
@@ -3936,7 +4027,11 @@
         } else if ($('adv-debug-panel')) {
           $('adv-debug-panel').hidden = true;
         }
-      } catch { $('adv-dda-status').textContent = ''; }
+      } catch {
+        $('adv-dda-status').textContent = '';
+        const methodEl = $('adv-health-method');
+        if (methodEl) methodEl.innerHTML = '<p class="lander-health__error">Could not load health metrics.</p>';
+      }
     }
 
     $('adv-run-dda').addEventListener('click', async () => {

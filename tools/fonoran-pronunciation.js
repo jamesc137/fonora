@@ -233,3 +233,28 @@ export function enumerateAllSyllables() {
   }
   return out;
 }
+
+const IPA_ONSET = {
+  p: 'p', b: 'b', t: 't', d: 'd', k: 'k', g: 'g', h: 'h',
+  f: 'f', s: 's', v: 'v', z: 'z', m: 'm', n: 'n', w: 'w', l: 'l', r: 'r', y: 'j',
+  ch: 'tʃ', sh: 'ʃ', j: 'dʒ', x: 'x', kh: 'χ', gh: 'ɣ',
+  th: 'θ', dh: 'ð', ng: 'ŋ', ñ: 'ɲ',
+};
+
+const IPA_VOWEL = {
+  a: 'ʌ', e: 'ɛ', i: 'ɪ', o: 'ɑ', u: 'ʊ',
+  ee: 'i', ae: 'æ', oh: 'oʊ', eye: 'aɪ', ow: 'aʊ', oy: 'ɔɪ', ay: 'eɪ',
+};
+
+const IPA_CODA = { ...IPA_ONSET, ch: 'tʃ', sh: 'ʃ' };
+
+/** Teaching IPA from Fonoran roman spelling (approximate, per language-rules). */
+export function romanToIpa(spelling) {
+  const syl = parseSyllable(spelling);
+  if (!syl || syl.unparsed) return `/${spelling}/`;
+  const parts = [];
+  if (syl.onset) parts.push(IPA_ONSET[syl.onset] ?? syl.onset);
+  if (syl.vowel) parts.push(IPA_VOWEL[syl.vowel] ?? syl.vowel);
+  if (syl.coda) parts.push(IPA_CODA[syl.coda] ?? syl.coda);
+  return `/${parts.join('')}/`;
+}

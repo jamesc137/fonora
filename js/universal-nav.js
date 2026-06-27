@@ -29,15 +29,20 @@ const MORE_MENU = [
 
 const FONORAN_TABS = [
   { id: 'home', label: 'Home' },
-  { id: 'roots', label: 'Root Creator' },
-  { id: 'create', label: 'Word Creator' },
-  { id: 'matcher', label: 'Word Matcher' },
+  { id: 'translator', label: 'Translator' },
   { id: 'dictionary', label: 'Dictionary' },
   { id: 'grammar', label: 'Grammar' },
 ];
 
 const FONORAN_MORE_MENU = [
+  { type: 'label', text: 'Vocabulary' },
+  { id: 'roots', label: 'Root Creator' },
+  { id: 'create', label: 'Word Creator' },
+  { id: 'matcher', label: 'Word Matcher' },
+  { id: 'concepts', label: 'Concept Editor' },
+  { type: 'label', text: 'Review' },
   { id: 'review', label: 'Review' },
+  { type: 'label', text: 'Tools' },
   { id: 'health', label: 'Health' },
   { id: 'advanced', label: 'Advanced' },
 ];
@@ -60,10 +65,13 @@ const SCRIPT_TITLES = {
 
 const FONORAN_TITLES = {
   home: 'About Fonoran',
+  'root-review': 'Root Review',
+  concepts: 'Concept Editor',
+  translator: 'Translator',
   roots: 'Root Creator',
   create: 'Word Creator',
   matcher: 'Word Matcher',
-  review: 'Review',
+  review: 'Word Review',
   dictionary: 'Dictionary',
   grammar: 'Grammar',
   health: 'Health',
@@ -71,7 +79,7 @@ const FONORAN_TITLES = {
 };
 
 const MORE_TAB_IDS = new Set(MORE_MENU.filter((i) => i.id).map((i) => i.id));
-const FONORAN_MORE_IDS = new Set(FONORAN_MORE_MENU.map((i) => i.id));
+const FONORAN_MORE_IDS = new Set(FONORAN_MORE_MENU.filter((i) => i.id).map((i) => i.id));
 
 const PLATFORM_TABS = [
   { id: 'platform', label: 'About' },
@@ -231,6 +239,9 @@ function renderFonoranRow2(activeTab) {
 
   const moreActive = FONORAN_MORE_IDS.has(activeTab);
   const moreItems = FONORAN_MORE_MENU.map((item) => {
+    if (item.type === 'label') {
+      return `<p class="nav-dropdown-label" role="presentation">${item.text}</p>`;
+    }
     const active = item.id === activeTab;
     return `<button type="button" class="tab-btn nav-dropdown-item${active ? ' tab-btn--active' : ''}" data-fonoran-page="${item.id}" role="menuitem"${
       active ? ' aria-current="page"' : ''

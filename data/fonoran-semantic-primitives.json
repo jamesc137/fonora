@@ -1,0 +1,683 @@
+{
+  "version": "1.2-semantic-foundation",
+  "status": "proposal",
+  "description": "Phase 1: ~100 dimensions of fundamental human experience. No phonetic forms. Not a word list — a carved semantic space.",
+  "philosophy_source": "docs/fonoran-grammar.md",
+  "defining_test": "A primitive concept represents a fundamental human experience that cannot be naturally expressed using simpler Fonoran concepts.",
+  "primitive_count": 99,
+  "primitives": [
+    {
+      "id": "person",
+      "gloss": "a sentient being; someone",
+      "domain": "being"
+    },
+    {
+      "id": "self",
+      "gloss": "oneself; me or mine",
+      "domain": "being"
+    },
+    {
+      "id": "collective",
+      "gloss": "many treated as one",
+      "domain": "being"
+    },
+    {
+      "id": "body",
+      "gloss": "the physical form of a being",
+      "domain": "being"
+    },
+    {
+      "id": "life",
+      "gloss": "the state of being alive",
+      "domain": "being"
+    },
+    {
+      "id": "death",
+      "gloss": "the end of life",
+      "domain": "being"
+    },
+    {
+      "id": "birth",
+      "gloss": "the beginning of an individual life",
+      "domain": "being"
+    },
+    {
+      "id": "breath",
+      "gloss": "the air stream of living",
+      "domain": "being"
+    },
+    {
+      "id": "move",
+      "gloss": "change position in space; all locomotion inherits from this",
+      "domain": "action"
+    },
+    {
+      "id": "give",
+      "gloss": "transfer something to another",
+      "domain": "action"
+    },
+    {
+      "id": "take",
+      "gloss": "receive something from another",
+      "domain": "action"
+    },
+    {
+      "id": "hold",
+      "gloss": "retain in grasp or keeping",
+      "domain": "action"
+    },
+    {
+      "id": "use",
+      "gloss": "employ a thing for a purpose",
+      "domain": "action"
+    },
+    {
+      "id": "help",
+      "gloss": "act so another can do or have",
+      "domain": "action"
+    },
+    {
+      "id": "make",
+      "gloss": "bring something into being",
+      "domain": "action"
+    },
+    {
+      "id": "do",
+      "gloss": "perform an action; act",
+      "domain": "action"
+    },
+    {
+      "id": "speak",
+      "gloss": "talk; use the voice with words",
+      "domain": "action"
+    },
+    {
+      "id": "see",
+      "gloss": "perceive with the eyes",
+      "domain": "action"
+    },
+    {
+      "id": "hear",
+      "gloss": "perceive with the ears",
+      "domain": "action"
+    },
+    {
+      "id": "touch",
+      "gloss": "feel by contact with skin",
+      "domain": "action"
+    },
+    {
+      "id": "smell",
+      "gloss": "perceive with the nose",
+      "domain": "action"
+    },
+    {
+      "id": "taste",
+      "gloss": "perceive with the mouth",
+      "domain": "action"
+    },
+    {
+      "id": "know",
+      "gloss": "understand; hold as true",
+      "domain": "action"
+    },
+    {
+      "id": "think",
+      "gloss": "use the mind",
+      "domain": "action"
+    },
+    {
+      "id": "feel",
+      "gloss": "experience inner sensation",
+      "domain": "action"
+    },
+    {
+      "id": "want",
+      "gloss": "desire; wish for",
+      "domain": "action"
+    },
+    {
+      "id": "eat",
+      "gloss": "consume food",
+      "domain": "action"
+    },
+    {
+      "id": "sleep",
+      "gloss": "rest in unconsciousness",
+      "domain": "action"
+    },
+    {
+      "id": "thing",
+      "gloss": "any entity; the primary noun dimension — book, meal, vehicle, lamp inherit from thing + X",
+      "domain": "ontology"
+    },
+    {
+      "id": "substance",
+      "gloss": "physical stuff; matter",
+      "domain": "ontology"
+    },
+    {
+      "id": "form",
+      "gloss": "shape or look of something",
+      "domain": "ontology"
+    },
+    {
+      "id": "change",
+      "gloss": "become different; grow, age, damage, improve inherit from this",
+      "domain": "ontology"
+    },
+    {
+      "id": "empty",
+      "gloss": "contains nothing; nothing inside",
+      "domain": "ontology"
+    },
+    {
+      "id": "water",
+      "gloss": "liquid water to drink or touch",
+      "domain": "element"
+    },
+    {
+      "id": "fire",
+      "gloss": "flame; hot bright burning",
+      "domain": "element"
+    },
+    {
+      "id": "earth",
+      "gloss": "ground; dirt underfoot",
+      "domain": "element"
+    },
+    {
+      "id": "air",
+      "gloss": "what we breathe; invisible atmosphere",
+      "domain": "element"
+    },
+    {
+      "id": "light",
+      "gloss": "brightness you can see by",
+      "domain": "element"
+    },
+    {
+      "id": "dark",
+      "gloss": "absence of light",
+      "domain": "element"
+    },
+    {
+      "id": "hot",
+      "gloss": "high temperature; burns",
+      "domain": "element"
+    },
+    {
+      "id": "cold",
+      "gloss": "low temperature; shiver",
+      "domain": "element"
+    },
+    {
+      "id": "stone",
+      "gloss": "hard rock",
+      "domain": "element"
+    },
+    {
+      "id": "plant",
+      "gloss": "living vegetation",
+      "domain": "element"
+    },
+    {
+      "id": "animal",
+      "gloss": "living creature that is not a person",
+      "domain": "element"
+    },
+    {
+      "id": "inside",
+      "gloss": "within an interior",
+      "domain": "space"
+    },
+    {
+      "id": "outside",
+      "gloss": "beyond a boundary; exterior",
+      "domain": "space"
+    },
+    {
+      "id": "here",
+      "gloss": "at this place",
+      "domain": "space"
+    },
+    {
+      "id": "there",
+      "gloss": "at that place",
+      "domain": "space"
+    },
+    {
+      "id": "near",
+      "gloss": "close in space",
+      "domain": "space"
+    },
+    {
+      "id": "far",
+      "gloss": "distant in space",
+      "domain": "space"
+    },
+    {
+      "id": "up",
+      "gloss": "higher position",
+      "domain": "space"
+    },
+    {
+      "id": "down",
+      "gloss": "lower position",
+      "domain": "space"
+    },
+    {
+      "id": "path",
+      "gloss": "a way leading through space",
+      "domain": "space"
+    },
+    {
+      "id": "place",
+      "gloss": "a location; somewhere",
+      "domain": "space"
+    },
+    {
+      "id": "surface",
+      "gloss": "outer face; what you touch on the outside",
+      "domain": "space"
+    },
+    {
+      "id": "bound",
+      "gloss": "edge; where something stops",
+      "domain": "space"
+    },
+    {
+      "id": "center",
+      "gloss": "middle point",
+      "domain": "space"
+    },
+    {
+      "id": "before",
+      "gloss": "earlier in time; yesterday inherits from this",
+      "domain": "time"
+    },
+    {
+      "id": "after",
+      "gloss": "later in time; tomorrow inherits from this",
+      "domain": "time"
+    },
+    {
+      "id": "now",
+      "gloss": "this moment",
+      "domain": "time"
+    },
+    {
+      "id": "time",
+      "gloss": "duration; while things happen",
+      "domain": "time"
+    },
+    {
+      "id": "one",
+      "gloss": "a single unit",
+      "domain": "quantity"
+    },
+    {
+      "id": "many",
+      "gloss": "large quantity; plurality",
+      "domain": "quantity"
+    },
+    {
+      "id": "all",
+      "gloss": "every one without exception",
+      "domain": "quantity"
+    },
+    {
+      "id": "some",
+      "gloss": "an indefinite portion",
+      "domain": "quantity"
+    },
+    {
+      "id": "more",
+      "gloss": "greater amount",
+      "domain": "quantity"
+    },
+    {
+      "id": "less",
+      "gloss": "smaller amount",
+      "domain": "quantity"
+    },
+    {
+      "id": "fast",
+      "gloss": "quick; high speed",
+      "domain": "quantity"
+    },
+    {
+      "id": "love",
+      "gloss": "deep affection; care",
+      "domain": "emotion"
+    },
+    {
+      "id": "fear",
+      "gloss": "apprehension of harm",
+      "domain": "emotion"
+    },
+    {
+      "id": "joy",
+      "gloss": "happiness; delight",
+      "domain": "emotion"
+    },
+    {
+      "id": "pain",
+      "gloss": "hurt; suffering",
+      "domain": "emotion"
+    },
+    {
+      "id": "sad",
+      "gloss": "sorrow; unhappiness",
+      "domain": "emotion"
+    },
+    {
+      "id": "good",
+      "gloss": "desirable; works well",
+      "domain": "evaluation"
+    },
+    {
+      "id": "bad",
+      "gloss": "undesirable; harmful",
+      "domain": "evaluation"
+    },
+    {
+      "id": "true",
+      "gloss": "corresponds to reality",
+      "domain": "evaluation"
+    },
+    {
+      "id": "false",
+      "gloss": "does not correspond to reality",
+      "domain": "evaluation"
+    },
+    {
+      "id": "equal",
+      "gloss": "same amount; fair match; balance and exchange inherit from this",
+      "domain": "evaluation"
+    },
+    {
+      "id": "bond",
+      "gloss": "connection that holds together",
+      "domain": "relationships"
+    },
+    {
+      "id": "conflict",
+      "gloss": "opposition; clash; fight",
+      "domain": "relationships"
+    },
+    {
+      "id": "same",
+      "gloss": "not different; matching",
+      "domain": "relationships"
+    },
+    {
+      "id": "different",
+      "gloss": "not the same",
+      "domain": "relationships"
+    },
+    {
+      "id": "part",
+      "gloss": "a piece of a larger whole",
+      "domain": "relationships"
+    },
+    {
+      "id": "whole",
+      "gloss": "all parts together",
+      "domain": "relationships"
+    },
+    {
+      "id": "mark",
+      "gloss": "a visible sign, drawing, or trace",
+      "domain": "process"
+    },
+    {
+      "id": "source",
+      "gloss": "where something begins",
+      "domain": "process"
+    },
+    {
+      "id": "container",
+      "gloss": "something that holds other things",
+      "domain": "process"
+    },
+    {
+      "id": "flow",
+      "gloss": "continuous passage without stopping",
+      "domain": "process"
+    },
+    {
+      "id": "pulse",
+      "gloss": "rhythmic recurrence",
+      "domain": "process"
+    },
+    {
+      "id": "still",
+      "gloss": "without motion; staying",
+      "domain": "process"
+    },
+    {
+      "id": "will",
+      "gloss": "intent; directed purpose",
+      "domain": "process"
+    },
+    {
+      "id": "strong",
+      "gloss": "great force; hard to break; power and leadership inherit from this",
+      "domain": "process"
+    },
+    {
+      "id": "reach",
+      "gloss": "extension through space",
+      "domain": "process"
+    },
+    {
+      "id": "wave",
+      "gloss": "disturbance that travels outward",
+      "domain": "process"
+    },
+    {
+      "id": "food",
+      "gloss": "what is eaten to sustain life",
+      "domain": "life"
+    },
+    {
+      "id": "hand",
+      "gloss": "the grasping part of the body",
+      "domain": "body"
+    },
+    {
+      "id": "eye",
+      "gloss": "the seeing part of the body",
+      "domain": "body"
+    },
+    {
+      "id": "skin",
+      "gloss": "the outer covering of the body",
+      "domain": "body"
+    },
+    {
+      "id": "bone",
+      "gloss": "the rigid inner frame of the body",
+      "domain": "body"
+    }
+  ],
+  "demoted_from_primitives": [
+    {
+      "id": "walk",
+      "reason": "One kind of move; culturally specific locomotion",
+      "compound": [
+        "move",
+        "path"
+      ]
+    },
+    {
+      "id": "run",
+      "reason": "Move modality",
+      "compound": [
+        "move",
+        "fast"
+      ]
+    },
+    {
+      "id": "swim",
+      "reason": "Move modality",
+      "compound": [
+        "move",
+        "water"
+      ]
+    },
+    {
+      "id": "fly",
+      "reason": "Move modality",
+      "compound": [
+        "move",
+        "air"
+      ]
+    },
+    {
+      "id": "useful",
+      "reason": "Derived evaluation",
+      "compound": [
+        "good",
+        "use"
+      ]
+    },
+    {
+      "id": "cause",
+      "reason": "Causal linking belongs in grammar (because)",
+      "compound": null,
+      "grammar": "logic_because"
+    },
+    {
+      "id": "effect",
+      "reason": "Result linking belongs in grammar (therefore)",
+      "compound": null,
+      "grammar": "logic_therefore"
+    },
+    {
+      "id": "void",
+      "reason": "Empty is more fundamental",
+      "compound": [
+        "empty"
+      ]
+    },
+    {
+      "id": "nothing",
+      "reason": "Absence of thing",
+      "compound": [
+        "empty"
+      ],
+      "alt": [
+        "logic_not",
+        "thing"
+      ]
+    },
+    {
+      "id": "identity",
+      "reason": "Persistence of self over time",
+      "compound": [
+        "self",
+        "memory"
+      ]
+    },
+    {
+      "id": "value",
+      "reason": "Abstract economic framing",
+      "compound": [
+        "good",
+        "want",
+        "equal"
+      ]
+    },
+    {
+      "id": "signal",
+      "reason": "Programmer framing",
+      "compound": null
+    },
+    {
+      "id": "pattern",
+      "reason": "Regularity from simpler dimensions",
+      "compound": [
+        "same",
+        "many",
+        "time"
+      ]
+    },
+    {
+      "id": "power",
+      "reason": "Emerges from strength in context",
+      "compound": [
+        "strong",
+        "do"
+      ]
+    },
+    {
+      "id": "remember",
+      "reason": "Temporal knowing",
+      "compound": [
+        "know",
+        "before"
+      ]
+    },
+    {
+      "id": "forget",
+      "reason": "Knowing emptied",
+      "compound": [
+        "know",
+        "empty"
+      ]
+    }
+  ],
+  "productive_dimensions": {
+    "thing": [
+      "book",
+      "meal",
+      "vehicle",
+      "lamp",
+      "document",
+      "tool"
+    ],
+    "change": [
+      "grow",
+      "age",
+      "damage",
+      "improve",
+      "transform"
+    ],
+    "move": [
+      "run",
+      "swim",
+      "fly",
+      "crawl",
+      "vehicle"
+    ],
+    "equal": [
+      "balance",
+      "fairness",
+      "exchange",
+      "symmetry",
+      "money"
+    ],
+    "strong": [
+      "force",
+      "leader",
+      "government",
+      "weapon",
+      "healthy"
+    ],
+    "bond": [
+      "family",
+      "friend",
+      "law",
+      "religion"
+    ],
+    "conflict": [
+      "war",
+      "fight",
+      "debate",
+      "problem",
+      "enemy"
+    ]
+  }
+}

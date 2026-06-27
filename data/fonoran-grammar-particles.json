@@ -1,0 +1,51 @@
+{
+  "version": "1.2-grammar-inventory",
+  "status": "proposal",
+  "description": "Phase 2 grammar particle inventory. Separate from lexical roots. Phonetic forms reserved but not finalized.",
+  "philosophy_source": "docs/fonoran-grammar.md",
+  "note": "Particles mark relationships in the sentence skeleton (Subject · Time · Event · Object · Modifiers). They never fuse into lexical spellings. Present tense has no particle: it is the default when the Time slot is empty.",
+  "existing_placeholders": {
+    "mi": { "role": "pronoun", "gloss": "I", "status": "Under Development" },
+    "ta": { "role": "tense", "gloss": "past", "status": "Under Development" },
+    "na": { "role": "tense", "gloss": "future", "status": "Under Development" }
+  },
+  "particles": [
+    { "id": "pronoun_i", "role": "pronoun", "gloss": "I; the speaker", "group": "pronoun", "placeholder": "mi" },
+    { "id": "pronoun_you", "role": "pronoun", "gloss": "you; the addressee", "group": "pronoun" },
+    { "id": "pronoun_we", "role": "pronoun", "gloss": "we; speaker and others", "group": "pronoun" },
+    { "id": "pronoun_they", "role": "pronoun", "gloss": "they; others not including speaker", "group": "pronoun" },
+    { "id": "pronoun_he", "role": "pronoun", "gloss": "he; male third person", "group": "pronoun" },
+    { "id": "pronoun_she", "role": "pronoun", "gloss": "she; female third person", "group": "pronoun" },
+    { "id": "pronoun_it", "role": "pronoun", "gloss": "it; non-person entity", "group": "pronoun" },
+
+    { "id": "tense_past", "role": "tense", "gloss": "past time", "group": "tense", "placeholder": "ta" },
+    { "id": "tense_present", "role": "tense", "gloss": "present time (inferred; no surface particle)", "group": "tense", "placeholder": null, "note": "Omitted on surface. Default when Time slot is empty." },
+    { "id": "tense_future", "role": "tense", "gloss": "future time", "group": "tense", "placeholder": "na" },
+
+    { "id": "logic_not", "role": "negation", "gloss": "not; negation", "group": "logical" },
+    { "id": "logic_and", "role": "conjunction", "gloss": "and; conjunction", "group": "logical" },
+    { "id": "logic_or", "role": "disjunction", "gloss": "or; alternative", "group": "logical" },
+    { "id": "logic_if", "role": "conditional", "gloss": "if; condition", "group": "logical" },
+    { "id": "logic_because", "role": "causal", "gloss": "because; gives reason (replaces lexical cause)", "group": "logical" },
+    { "id": "logic_therefore", "role": "result", "gloss": "therefore; follows from reason (replaces lexical effect)", "group": "logical" },
+    { "id": "logic_yes", "role": "affirmation", "gloss": "yes; affirmative", "group": "logical" },
+    { "id": "logic_no", "role": "denial", "gloss": "no; negative answer", "group": "logical" },
+
+    { "id": "rel_with", "role": "accompaniment", "gloss": "with; together with", "group": "relationship" },
+    { "id": "rel_without", "role": "absence", "gloss": "without; lacking", "group": "relationship" },
+    { "id": "rel_toward", "role": "direction", "gloss": "toward; in the direction of", "group": "relationship" },
+    { "id": "rel_from", "role": "origin", "gloss": "from; originating at", "group": "relationship" },
+    { "id": "rel_in", "role": "containment", "gloss": "in; inside relation", "group": "relationship" },
+    { "id": "rel_at", "role": "location", "gloss": "at; located on or at", "group": "relationship" },
+
+    { "id": "deixis_this", "role": "demonstrative", "gloss": "this; nearby referent", "group": "deixis" },
+    { "id": "deixis_that", "role": "demonstrative", "gloss": "that; distal referent", "group": "deixis" },
+    { "id": "query_what", "role": "interrogative", "gloss": "what; which thing or idea", "group": "interrogative" },
+    { "id": "query_who", "role": "interrogative", "gloss": "who; which person", "group": "interrogative" },
+    { "id": "query_when", "role": "interrogative", "gloss": "when; at what time", "group": "interrogative" },
+    { "id": "query_where", "role": "interrogative", "gloss": "where; at what place", "group": "interrogative" },
+    { "id": "query_why", "role": "interrogative", "gloss": "why; for what reason", "group": "interrogative" },
+    { "id": "query_how", "role": "interrogative", "gloss": "how; by what manner", "group": "interrogative" }
+  ],
+  "particle_count": 32
+}

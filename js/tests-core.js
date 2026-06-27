@@ -587,6 +587,13 @@ export function runTests(options) {
     assert(html.includes('<td>1</td>'));
   });
 
+  t('markdown renderer handles bold and italic', () => {
+    const html = renderMarkdown('**bold** and *italic*', { docPath: 'docs/README.md' });
+    assert(html.includes('<strong>bold</strong>'));
+    assert(html.includes('<em>italic</em>'));
+    assert(!html.includes('*italic*'));
+  });
+
   const passed = results.filter((r) => r.ok).length;
   const failed = results.filter((r) => !r.ok);
   return { passed, total: results.length, failed, results, bundle: rulesBundle };

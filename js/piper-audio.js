@@ -269,9 +269,9 @@ function decodeWavPcm(bytes) {
   return { samples: pcm, sampleRate };
 }
 
-export async function playPiperIpa(ipa, voice = 'en_US-lessac-medium', onProgress) {
+export async function playPiperIpa(ipa, voice = 'en_US-lessac-medium', onProgress, options = {}) {
   primeAudioContext();
   const decoded = await synthesizePiperIpa(ipa, voice, onProgress);
   if (!decoded?.samples?.length) return;
-  await playEspeakSamples(decoded.samples, decoded.sampleRate);
+  await playEspeakSamples(decoded.samples, decoded.sampleRate, options);
 }

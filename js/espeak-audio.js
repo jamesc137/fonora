@@ -176,7 +176,8 @@ export function cancelEspeakAudio() {
   stopCurrentPlayback();
 }
 
-export async function playEspeakSamples(samples, sampleRate = 22050) {
+export async function playEspeakSamples(samples, sampleRate = 22050, options = {}) {
+  const playbackRate = Math.max(0.25, Math.min(2, Number(options.playbackRate) || 1));
   if (!samples?.length) return;
 
   if (!audioContext) {
@@ -198,6 +199,7 @@ export async function playEspeakSamples(samples, sampleRate = 22050) {
     const source = audioContext.createBufferSource();
     currentSource = source;
     source.buffer = buffer;
+    source.playbackRate.value = playbackRate;
     source.connect(audioContext.destination);
     source.onended = () => {
       if (currentSource === source) currentSource = null;

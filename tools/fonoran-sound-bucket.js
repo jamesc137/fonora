@@ -280,10 +280,25 @@ function snapshotCompound(c) {
     components: c.components ? c.components.map(x => ({ ...x })) : undefined,
     derivation: c.derivation ? JSON.parse(JSON.stringify(c.derivation)) : undefined,
     meaning: c.meaning ?? null,
+    aliases: c.aliases ? [...c.aliases] : undefined,
     state: c.state ?? null,
     named_at: c.named_at ?? null,
     removed: false,
   };
+}
+
+function normalizeCompoundAliases(raw) {
+  if (raw == null) return [];
+  const list = Array.isArray(raw) ? raw : String(raw).split(/[\n,]+/);
+  const out = [];
+  const seen = new Set();
+  for (const item of list) {
+    const a = String(item ?? '').trim();
+    if (!a || seen.has(a.toLowerCase())) continue;
+    seen.add(a.toLowerCase());
+    out.push(a);
+  }
+  return out;
 }
 
 function normalizeState(state) {
@@ -296,7 +311,7 @@ function normalizeState(state) {
  * Update a base sound's spelling and/or meaning and/or review state.
  * Renaming updates every compound that uses this root (new spellings derived from parts).
  */
-export async function patchSound(spelling, { new_spelling, meaning, state, clear_affected_compounds = false } = {}) {
+export async function patchSound(spelling, { new_spelling, meaning, state, concept_id, clear_affected_compounds = false } = {}) {
   const bucket = await loadBucket();
   const old = spelling.trim().toLowerCase();
   const s = bucket.sounds.find(x => x.spelling === old);
@@ -353,6 +368,7 @@ export async function patchSound(spelling, { new_spelling, meaning, state, clear
     markDdaStale(s);
     markRootImpactDdaStale(s.spelling, bucket);
   }
+  if (concept_id !== undefined) s.concept_id = concept_id?.trim() || null;
   if (nextState) s.state = nextState;
   if (spellingChanged) {
     markDdaStale(s);
@@ -404,7 +420,7 @@ export async function assignSoundMeaning(spelling, meaning, { clearAffectedCompo
   });
 }
 
-export async function assignCompoundMeaning(id, meaning, { state } = {}) {
+export async function assignCompoundMeaning(id, meaning, { state, aliases } = {}) {
   const bucket = await loadBucket();
   const c = bucket.compounds.find(x => x.id === id);
   if (!c) throw new Error(`Unknown compound: ${id}`);
@@ -417,9 +433,19 @@ export async function assignCompoundMeaning(id, meaning, { state } = {}) {
     markDdaStale(c);
     markDescendantsDdaStale(c.id, bucket);
   }
+  if (aliases !== undefined) {
+    const normalized = normalizeCompoundAliases(aliases);
+    c.aliases = normalized.length ? normalized : undefined;
+  }
   if (nextState) {
     c.state = nextState;
-    if (nextState === 'approved') markDdaStale(c);
+    if (nextState === 'approved') {
+      markDdaStale(c);
+      if (c.generator_hint) {
+        c.generator_hint = null;
+        c.created_by = 'user';
+      }
+    }
   }
   const meaningChanged = meaning !== undefined && (prevMeaning ?? '') !== (meaning?.trim() ?? '');
   if (nextState === 'approved') pushEvent(bucket, 'approved', 'compound', c.spelling, c.meaning);
@@ -492,7 +518,12 @@ export async function undoLast() {
         bucket.compounds = bucket.compounds.filter(c => c.id !== snap.id);
       } else {
         const c = bucket.compounds.find(x => x.id === snap.id);
-        if (c) { c.meaning = snap.meaning; c.state = snap.state ?? undefined; c.named_at = snap.named_at; }
+        if (c) {
+          c.meaning = snap.meaning;
+          c.state = snap.state ?? undefined;
+          c.named_at = snap.named_at;
+          c.aliases = snap.aliases ? [...snap.aliases] : undefined;
+        }
       }
     }
   }
@@ -540,7 +571,7 @@ export async function recomposeCompound(id, input = {}) {
   return enrichCompound(c, bucket, soundsBySpelling);
 }
 
-export async function addSound({ spelling, meaning }) {
+export async function addSound({ spelling, meaning, concept_id = null }) {
   const sp = spelling?.trim().toLowerCase();
   if (!sp) throw new Error('spelling required');
   const syl = parseSyllable(sp);
@@ -555,6 +586,7 @@ export async function addSound({ spelling, meaning }) {
     id: `snd-custom-${sp}`,
     spelling: sp,
     meaning: meaning?.trim() || null,
+    concept_id: concept_id?.trim() || null,
     state: 'needs_review',
     generator_hint: null,
     created_by: 'user',
@@ -615,6 +647,8 @@ export async function addCompound(input) {
       existing.parts = resolvePartSpellings(components, bucket, { flatOnly: true });
       existing.derivation = buildDerivationTree(components, bucket);
       existing.meaning = input.meaning?.trim() || null;
+      const aliases = normalizeCompoundAliases(input.aliases);
+      existing.aliases = aliases.length ? aliases : undefined;
       existing.state = normalizeState(input.state) ?? (input.meaning?.trim() ? 'needs_review' : effectiveState(existing));
       existing.generator_hint = null;
       existing.created_by = 'user';
@@ -635,6 +669,10 @@ export async function addCompound(input) {
     derivation: buildDerivationTree(components, bucket),
     phonetic: { form: spelling },
     meaning: input.meaning?.trim() || null,
+    aliases: (() => {
+      const list = normalizeCompoundAliases(input.aliases);
+      return list.length ? list : undefined;
+    })(),
     state: normalizeState(input.state) ?? (input.meaning?.trim() ? 'needs_review' : 'draft'),
     generator_hint: null,
     created_by: 'user',

@@ -20,6 +20,9 @@
 
   const FONORAN_PAGES = new Set([
     'home',
+    'root-review',
+    'concepts',
+    'translator',
     'roots',
     'create',
     'matcher',
@@ -38,8 +41,9 @@
 
   if (path.includes('/fonoran')) {
     const page = hash && FONORAN_PAGES.has(hash) ? hash : 'home';
+    const tab = page === 'root-review' ? 'review' : page;
     html.setAttribute('data-fonora-nav', 'language');
-    html.setAttribute('data-fonora-tab', page);
+    html.setAttribute('data-fonora-tab', tab);
     html.setAttribute('data-fonora-page', page);
     return;
   }

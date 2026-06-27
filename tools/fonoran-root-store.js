@@ -1,0 +1,203 @@
+/**
+ * File-backed store for Fonoran root candidate review workflow.
+ */
+
+import { readFile, writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { romanToIpa, parseSyllable } from './fonoran-pronunciation.js';
+import {
+  buildSyllablePool,
+  easeLabel,
+  pronunciationEaseScore,
+  regenerateRoot,
+  usefulnessLabel,
+} from './fonoran-root-sound-assign.js';
+import { addSound, patchSound } from './fonoran-sound-bucket.js';
+import { generateRootCandidates } from './fonoran-root-candidates.js';
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+const CANDIDATES_PATH = join(ROOT, 'data/fonoran-root-candidates.json');
+const CANONICAL_PATH = join(ROOT, 'data/fonoran-approved-roots.json');
+const PHONETICS_PATH = join(ROOT, 'data/fonoran-primitive-roots-config.json');
+
+async function readJson(path, fallback = null) {
+  try {
+    return JSON.parse(await readFile(path, 'utf8'));
+  } catch {
+    return fallback;
+  }
+}
+
+async function writeJson(path, data) {
+  await writeFile(path, JSON.stringify(data, null, 2) + '\n');
+}
+
+function refreshSummary(store) {
+  store.summary = {
+    total: store.candidates.length,
+    pending: store.candidates.filter(c => c.status === 'pending').length,
+    approved: store.candidates.filter(c => c.status === 'approved').length,
+    rejected: store.candidates.filter(c => c.status === 'rejected').length,
+  };
+  return store;
+}
+
+function findCandidate(store, id) {
+  const c = store.candidates.find(x => x.id === id);
+  if (!c) throw new Error(`Unknown root candidate: ${id}`);
+  return c;
+}
+
+function usedSpellings(store, { exceptId = null } = {}) {
+  return store.candidates
+    .filter(c => c.id !== exceptId && (c.status === 'approved' || c.status === 'pending'))
+    .map(c => c.spelling.toLowerCase());
+}
+
+function validateSpelling(spelling) {
+  const sp = spelling?.trim().toLowerCase();
+  if (!sp) throw new Error('spelling required');
+  const syl = parseSyllable(sp);
+  if (!syl || syl.unparsed) throw new Error(`Not a valid Fonoran syllable: ${sp}`);
+  return sp;
+}
+
+async function syncToLab(candidate) {
+  const meaning = candidate.concept?.trim() || candidate.id;
+  try {
+    await addSound({ spelling: candidate.spelling, meaning, concept_id: candidate.id });
+  } catch (err) {
+    if (!String(err.message).includes('already exists')) throw err;
+  }
+  await patchSound(candidate.spelling, { meaning, state: 'approved', concept_id: candidate.id });
+}
+
+async function writeCanonicalFromApproved(store) {
+  const approved = store.candidates.filter(c => c.status === 'approved');
+  const canonical = {
+    version: '1.0-approved-roots',
+    updated_at: new Date().toISOString(),
+    philosophy: 'Only human-approved roots from Root Review are canonical.',
+    root_count: approved.length,
+    roots: approved.map(c => ({
+      id: c.id,
+      spelling: c.spelling,
+      ipa: c.ipa,
+      concept: c.concept,
+      domain: c.domain,
+      reason: c.reason,
+      approved_at: c.review?.approved_at,
+    })),
+  };
+  await writeJson(CANONICAL_PATH, canonical);
+  return canonical;
+}
+
+export async function getRootCandidates({ status = null } = {}) {
+  const store = await readJson(CANDIDATES_PATH);
+  if (!store) {
+    return { version: '1.0-root-workflow', candidates: [], summary: { total: 0, pending: 0, approved: 0, rejected: 0 } };
+  }
+  let candidates = store.candidates ?? [];
+  if (status) candidates = candidates.filter(c => c.status === status);
+  return { ...store, candidates };
+}
+
+export async function getCanonicalRoots() {
+  return (await readJson(CANONICAL_PATH)) ?? { version: '1.0-approved-roots', roots: [], root_count: 0 };
+}
+
+export async function getRootCandidate(id) {
+  const store = await readJson(CANDIDATES_PATH);
+  if (!store) throw new Error('No root candidates file. Run npm run fonoran:root-candidates');
+  return findCandidate(store, id);
+}
+
+export async function regenerateRootCandidate(id) {
+  const store = await readJson(CANDIDATES_PATH);
+  if (!store) throw new Error('No root candidates file');
+  const candidate = findCandidate(store, id);
+  if (candidate.status === 'approved') throw new Error('Cannot regenerate an approved root');
+
+  const phoneticsConfig = await readJson(PHONETICS_PATH);
+  const pool = buildSyllablePool(phoneticsConfig);
+  const taken = usedSpellings(store, { exceptId: id });
+  const concept = {
+    id: candidate.id,
+    gloss: candidate.concept,
+    domain: candidate.domain,
+    priority: candidate.priority ?? 500,
+  };
+
+  const newSpelling = regenerateRoot(concept, pool, phoneticsConfig, taken);
+  const template = pool.find(p => p.form === newSpelling)?.template ?? 'CV';
+  const cost = pool.find(p => p.form === newSpelling)?.phonetic_cost ?? null;
+  const pronScore = pronunciationEaseScore(cost, template);
+
+  candidate.spelling = newSpelling;
+  candidate.ipa = romanToIpa(newSpelling);
+  candidate.pronunciation_ease = pronScore;
+  candidate.pronunciation_ease_label = easeLabel(pronScore);
+  candidate.status = 'pending';
+  candidate.generation = { phonetic_cost: cost, template, tier: pool.find(p => p.form === newSpelling)?.tier ?? null };
+  candidate.review = { ...candidate.review, edited_at: new Date().toISOString(), note: 'regenerated' };
+
+  refreshSummary(store);
+  await writeJson(CANDIDATES_PATH, store);
+  return candidate;
+}
+
+export async function patchRootCandidate(id, body) {
+  const store = await readJson(CANDIDATES_PATH);
+  if (!store) throw new Error('No root candidates file');
+  const candidate = findCandidate(store, id);
+  const action = body.action;
+
+  if (action === 'approve') {
+    const spelling = validateSpelling(body.spelling ?? candidate.spelling);
+    const dup = store.candidates.find(c => c.id !== id && c.spelling === spelling && c.status === 'approved');
+    if (dup) throw new Error(`Spelling "${spelling}" already approved for ${dup.id}`);
+
+    candidate.spelling = spelling;
+    candidate.ipa = body.ipa?.trim() || romanToIpa(spelling);
+    if (body.concept?.trim()) candidate.concept = body.concept.trim();
+    candidate.status = 'approved';
+    candidate.review = {
+      ...candidate.review,
+      approved_at: new Date().toISOString(),
+      note: body.note?.trim() || candidate.review?.note || null,
+    };
+    await syncToLab(candidate);
+    await writeCanonicalFromApproved(store);
+  } else if (action === 'reject') {
+    candidate.status = 'rejected';
+    candidate.review = {
+      ...candidate.review,
+      rejected_at: new Date().toISOString(),
+      note: body.note?.trim() || null,
+    };
+    await writeCanonicalFromApproved(store);
+  } else if (action === 'edit') {
+    if (body.spelling != null) candidate.spelling = validateSpelling(body.spelling);
+    if (body.ipa?.trim()) candidate.ipa = body.ipa.trim();
+    else if (body.spelling != null) candidate.ipa = romanToIpa(candidate.spelling);
+    if (body.concept?.trim()) candidate.concept = body.concept.trim();
+    if (body.reason?.trim()) candidate.reason = body.reason.trim();
+    candidate.review = { ...candidate.review, edited_at: new Date().toISOString(), note: body.note?.trim() || null };
+    if (candidate.status === 'rejected') candidate.status = 'pending';
+  } else if (action === 'reopen') {
+    candidate.status = 'pending';
+    candidate.review = { ...candidate.review, rejected_at: null };
+  } else {
+    throw new Error('action must be approve, reject, edit, or reopen');
+  }
+
+  refreshSummary(store);
+  await writeJson(CANDIDATES_PATH, store);
+  return candidate;
+}
+
+export async function runRootCandidateGeneration() {
+  return generateRootCandidates({ preserveReview: true });
+}

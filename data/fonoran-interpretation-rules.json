@@ -1,0 +1,113 @@
+{
+  "version": "1.0",
+  "description": "English → nearest Fonoran concept. Interpretation picks approved concepts, not literal glosses.",
+  "spatial_path": {
+    "over": { "concept_id": "up", "reason": "spatial path above" },
+    "above": { "concept_id": "up", "reason": "spatial path above" },
+    "up": { "concept_id": "up", "reason": "spatial path above" },
+    "across": { "concept_id": "path", "reason": "spatial path across" },
+    "through": { "concept_id": "path", "reason": "spatial path through" },
+    "under": { "concept_id": "down", "reason": "spatial path below" },
+    "below": { "concept_id": "down", "reason": "spatial path below" },
+    "down": { "concept_id": "down", "reason": "spatial path below" },
+    "into": { "concept_id": "inside", "reason": "spatial path inward" },
+    "inside": { "concept_id": "inside", "reason": "spatial path inward" },
+    "outside": { "concept_id": "outside", "reason": "spatial path outward" },
+    "toward": { "concept_id": "path", "reason": "spatial path toward" },
+    "towards": { "concept_id": "path", "reason": "spatial path toward" },
+    "to": { "concept_id": "path", "reason": "spatial path toward" }
+  },
+  "classes": {
+    "locomotion": {
+      "concept_id": "move",
+      "reason": "locomotion verb",
+      "words": [
+        "jump", "jumped", "jumping", "jumps",
+        "leap", "leapt", "leaped", "leaping", "leaps",
+        "hop", "hopped", "hopping", "hops",
+        "run", "ran", "running", "runs",
+        "walk", "walked", "walking", "walks",
+        "fly", "flew", "flying", "flies", "flown",
+        "swim", "swam", "swimming", "swims", "swum",
+        "crawl", "crawled", "crawling", "crawls",
+        "climb", "climbed", "climbing", "climbs",
+        "slide", "slid", "sliding", "slides",
+        "roll", "rolled", "rolling", "rolls",
+        "dance", "danced", "dancing", "dances",
+        "travel", "traveled", "travelled", "traveling", "travelling", "travels"
+      ]
+    },
+    "speech": {
+      "concept_id": "speak",
+      "reason": "speech verb",
+      "words": ["tell", "told", "telling", "tells", "shout", "shouted", "shouting", "whisper", "whispered", "whispering"]
+    },
+    "perception_see": {
+      "concept_id": "see",
+      "reason": "vision verb",
+      "words": ["watch", "watched", "watching", "watches", "stare", "stared", "staring", "gaze", "gazed", "gazing"]
+    },
+    "conflict": {
+      "concept_id": "conflict",
+      "reason": "conflict verb",
+      "words": ["battle", "battled", "battling", "battles", "attack", "attacked", "attacking", "attacks"]
+    }
+  },
+  "irregular_past": {
+    "ate": "eat",
+    "eaten": "eat",
+    "drank": "drink",
+    "drunk": "drink",
+    "ran": "run",
+    "spoke": "speak",
+    "spoken": "speak",
+    "saw": "see",
+    "seen": "see",
+    "heard": "hear",
+    "made": "make",
+    "took": "take",
+    "taken": "take",
+    "gave": "give",
+    "given": "give",
+    "thought": "think",
+    "slept": "sleep",
+    "sang": "sing",
+    "sung": "sing",
+    "wrote": "write",
+    "written": "write",
+    "bought": "buy",
+    "sold": "sell",
+    "caught": "catch",
+    "taught": "teach",
+    "brought": "bring",
+    "fought": "fight",
+    "found": "find",
+    "lost": "lose",
+    "won": "win",
+    "sent": "send",
+    "built": "build",
+    "felt": "feel",
+    "held": "hold",
+    "stood": "stand",
+    "sat": "sit",
+    "lay": "lie",
+    "laid": "lay",
+    "paid": "pay",
+    "meant": "mean",
+    "kept": "keep",
+    "left": "leave",
+    "met": "meet",
+    "read": "read",
+    "hid": "hide",
+    "hit": "hit",
+    "cut": "cut",
+    "put": "put"
+  },
+  "phrase_patterns": [
+    {
+      "id": "verb_spatial_np",
+      "description": "VERB + spatial prep + (article) + NP → event + path + landmark",
+      "spatial_preps": ["over", "above", "under", "below", "across", "through", "into", "inside", "outside", "toward", "towards", "to", "up", "down"]
+    }
+  ]
+}

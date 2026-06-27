@@ -1,75 +1,60 @@
 /**
- * English reference lexicon for manual Fonoran naming.
- * Not assigned to phonetic bases: browse-only vocabulary.
+ * Concept lexicon for Fonoran naming tools.
+ * Built from root candidates — concepts, not loose English words.
  */
 
-import { readFile, writeFile } from 'node:fs/promises';
+import { writeFile } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { loadConceptInventory } from './fonoran-concepts.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 export const LEXICON_PATH = join(ROOT, 'data/fonoran-english-lexicon.json');
-const ROOTS_PATH = join(ROOT, 'data/fonoran-english-roots.json');
-const GEN31_PATH = join(ROOT, 'data/fonoran-gen3-1-roots.json');
-const CONCEPTS_PATH = join(ROOT, 'data/fonoran-stress-test-concepts.json');
 
-const DOMAIN_LABELS = {
-  interface: 'interface',
-  index: 'index',
-  emanation: 'emanation',
-  junction: 'junction',
-  cavity: 'cavity',
-  stream: 'stream',
-};
-
-/** @returns {Promise<{ version: string, generated_at: string, categories: string[], words: { word: string, gloss: string, category: string, source: string }[] }>} */
+/** @returns {Promise<{ version: string, concepts: object[], words: object[], categories: string[] }>} */
 export async function buildEnglishLexicon() {
+  const inventory = await loadConceptInventory();
   const words = [];
   const seen = new Set();
 
-  const add = (word, gloss, category, source) => {
-    const w = String(word ?? '').trim().toLowerCase();
-    if (!w || seen.has(w)) return;
-    seen.add(w);
+  for (const c of inventory.concepts) {
     words.push({
-      word: w,
-      gloss: String(gloss ?? '').trim(),
-      category: String(category ?? 'other').trim(),
-      source,
+      word: c.id,
+      gloss: c.concept,
+      category: c.domain,
+      source: 'concept',
+      concept_id: c.id,
+      aliases: c.aliases,
+      spelling: c.spelling,
     });
-  };
-
-  try {
-    const rootsFile = JSON.parse(await readFile(ROOTS_PATH, 'utf8'));
-    for (const item of rootsFile.words ?? []) {
-      add(item.word, item.gloss, item.category, 'roots');
+    for (const alias of c.aliases) {
+      const a = alias.toLowerCase();
+      if (seen.has(a)) continue;
+      seen.add(a);
+      if (a === c.id) continue;
+      words.push({
+        word: a,
+        gloss: c.concept,
+        category: c.domain,
+        source: 'alias',
+        concept_id: c.id,
+        aliases: c.aliases,
+        spelling: c.spelling,
+      });
     }
-  } catch {
-    // roots file built via npm run fonoran:roots
-  }
-
-  const gen31 = JSON.parse(await readFile(GEN31_PATH, 'utf8'));
-  for (const item of gen31.inventory ?? []) {
-    const gloss = item.gloss?.split(';')[0]?.trim() ?? '';
-    const domain = item.coordinates?.D ?? 'primitive';
-    const category = DOMAIN_LABELS[domain] ?? domain;
-    add(item.id, gloss, category, 'primitive');
-  }
-
-  const concepts = JSON.parse(await readFile(CONCEPTS_PATH, 'utf8'));
-  for (const c of concepts.concepts ?? []) {
-    add(c.concept, c.gloss, 'everyday', 'concept');
   }
 
   words.sort((a, b) => a.word.localeCompare(b.word));
-  const categories = [...new Set(words.map(w => w.category))].sort();
+  const categories = [...new Set(inventory.concepts.map(c => c.domain))].sort();
 
   return {
-    version: '1.0',
-    description: 'English words for manual naming. Not linked to Fonoran spellings.',
+    version: '2.0-concepts',
+    description: 'Fonoran root concepts from root-candidates. Aliases support fuzzy English matching.',
     generated_at: new Date().toISOString(),
+    concept_count: inventory.concept_count,
     word_count: words.length,
     categories,
+    concepts: inventory.concepts,
     words,
   };
 }
@@ -81,9 +66,6 @@ export async function writeEnglishLexicon() {
 }
 
 export async function loadEnglishLexicon() {
-  try {
-    return JSON.parse(await readFile(LEXICON_PATH, 'utf8'));
-  } catch {
-    return writeEnglishLexicon();
-  }
+  const lexicon = await buildEnglishLexicon();
+  return lexicon;
 }

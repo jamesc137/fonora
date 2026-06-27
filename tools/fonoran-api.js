@@ -21,6 +21,24 @@ import {
   recomposeCompound,
 } from './fonoran-sound-bucket.js';
 import { loadEnglishLexicon } from './fonoran-english-lexicon.js';
+import { translateEnglish } from './fonoran-translator.js';
+import { importPrimitiveRootsVocabulary } from './fonoran-primitive-roots-import.js';
+import {
+  getRootCandidates,
+  getRootCandidate,
+  getCanonicalRoots,
+  patchRootCandidate,
+  regenerateRootCandidate,
+  runRootCandidateGeneration,
+} from './fonoran-root-store.js';
+import { loadConceptInventory } from './fonoran-concepts.js';
+import {
+  createConcept,
+  deleteConcept,
+  getConceptForEditor,
+  listConceptDomains,
+  patchConcept,
+} from './fonoran-concept-store.js';
 import {
   getSessionUser,
   isWriteAuthRequired,
@@ -60,6 +78,32 @@ export async function handleFonoranApi(req, res, pathname, method) {
     if (pathname === '/api/fonoran/lexicon' && method === 'GET') {
       return done(200, await loadEnglishLexicon());
     }
+    if (pathname === '/api/fonoran/concepts' && method === 'GET') {
+      return done(200, await loadConceptInventory());
+    }
+    if (pathname === '/api/fonoran/concepts/domains' && method === 'GET') {
+      return done(200, { domains: await listConceptDomains() });
+    }
+    if (pathname === '/api/fonoran/concepts' && method === 'POST') {
+      const body = await readJsonBody(req);
+      return done(201, await createConcept(body));
+    }
+    const conceptMatch = pathname.match(/^\/api\/fonoran\/concepts\/([^/]+)$/);
+    if (conceptMatch && method === 'GET') {
+      return done(200, await getConceptForEditor(decodeURIComponent(conceptMatch[1])));
+    }
+    if (conceptMatch && method === 'PATCH') {
+      const body = await readJsonBody(req);
+      return done(200, await patchConcept(decodeURIComponent(conceptMatch[1]), body));
+    }
+    if (conceptMatch && method === 'DELETE') {
+      return done(200, await deleteConcept(decodeURIComponent(conceptMatch[1])));
+    }
+    if (pathname === '/api/fonoran/translate' && method === 'POST') {
+      const body = await readJsonBody(req);
+      const lab = await getLab();
+      return done(200, await translateEnglish(body.text ?? '', { lab }));
+    }
     if (pathname === '/api/fonoran/lab/health' && method === 'GET') {
       return done(200, await getHealth());
     }
@@ -86,6 +130,9 @@ export async function handleFonoranApi(req, res, pathname, method) {
     }
     if (pathname === '/api/fonoran/lab/seed' && method === 'POST') {
       return done(200, await seedBucket());
+    }
+    if (pathname === '/api/fonoran/lab/import-vocabulary' && method === 'POST') {
+      return done(200, await importPrimitiveRootsVocabulary());
     }
     if (pathname === '/api/fonoran/lab/reset-review' && method === 'POST') {
       return done(200, await resetReviewStates());
@@ -114,6 +161,7 @@ export async function handleFonoranApi(req, res, pathname, method) {
         new_spelling: newSp && newSp !== spelling.trim().toLowerCase() ? newSp : undefined,
         meaning: body.meaning,
         state: body.state,
+        concept_id: body.concept_id,
         clear_affected_compounds: Boolean(body.clear_affected_compounds),
       }));
     }
@@ -124,11 +172,36 @@ export async function handleFonoranApi(req, res, pathname, method) {
       if (Array.isArray(body.components) || Array.isArray(body.parts)) {
         return done(200, await recomposeCompound(id, body));
       }
-      return done(200, await assignCompoundMeaning(id, body.meaning, { state: body.state }));
+      return done(200, await assignCompoundMeaning(id, body.meaning, { state: body.state, aliases: body.aliases }));
     }
     if (pathname === '/api/fonoran/lab/compounds' && method === 'POST') {
       const body = await readJsonBody(req);
       return done(201, await addCompound(body));
+    }
+    if (pathname === '/api/fonoran/roots/candidates' && method === 'GET') {
+      const url = new URL(req.url ?? '', 'http://localhost');
+      const status = url.searchParams.get('status');
+      return done(200, await getRootCandidates({ status: status || null }));
+    }
+    if (pathname === '/api/fonoran/roots/canonical' && method === 'GET') {
+      return done(200, await getCanonicalRoots());
+    }
+    if (pathname === '/api/fonoran/roots/generate' && method === 'POST') {
+      return done(200, await runRootCandidateGeneration());
+    }
+    const rootCandidateMatch = pathname.match(/^\/api\/fonoran\/roots\/candidates\/([^/]+)$/);
+    if (rootCandidateMatch && method === 'GET') {
+      return done(200, await getRootCandidate(decodeURIComponent(rootCandidateMatch[1])));
+    }
+    if (rootCandidateMatch && method === 'PATCH') {
+      const id = decodeURIComponent(rootCandidateMatch[1]);
+      const body = await readJsonBody(req);
+      return done(200, await patchRootCandidate(id, body));
+    }
+    const rootRegenMatch = pathname.match(/^\/api\/fonoran\/roots\/candidates\/([^/]+)\/regenerate$/);
+    if (rootRegenMatch && method === 'POST') {
+      const id = decodeURIComponent(rootRegenMatch[1]);
+      return done(200, await regenerateRootCandidate(id));
     }
     return false;
   } catch (err) {

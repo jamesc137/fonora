@@ -107,23 +107,9 @@ function buildSyllablePool(config) {
     }
   }
 
-  cost = 70;
-  for (const o1 of phonetics.preferred_onsets) {
-    for (const o2 of phonetics.preferred_onsets) {
-      if (o1 === o2) continue;
-      add(o1 + 'a' + o2 + 'a', 'CV-CV', cost, 'disyllabic');
-      add(o1 + 'a' + o2 + 'e', 'CV-CV', cost + 1, 'disyllabic');
-      cost += 0.3;
-    }
-  }
-
-  cost = 90;
-  for (const o1 of phonetics.preferred_onsets) {
-    for (const o2 of phonetics.secondary_onsets) {
-      add(o1 + 'a' + o2 + 'a', 'CV-CV', cost, 'disyllabic');
-      cost += 0.5;
-    }
-  }
+  // CV-CV disyllabic forms intentionally excluded.
+  // Primitive roots are one syllable only: CV or CVC.
+  // Multi-syllable forms are reserved for compounds and derived words.
 
   pool.sort((a, b) => a.phonetic_cost - b.phonetic_cost || a.form.localeCompare(b.form));
   return pool;
@@ -139,9 +125,7 @@ function tierGate(priority, minP, maxP, syllable) {
   const span = maxP - minP || 1;
   const t = (priority - minP) / span;
   if (t >= 0.92 && syllable.template !== 'CV') return 4000;
-  if (t >= 0.75 && (syllable.template === 'CV-CV' || syllable.template === 'CVC')) return 2500;
-  if (t >= 0.55 && syllable.template === 'CV-CV') return 3500;
-  if (t >= 0.35 && syllable.template === 'CV-CV') return 2000;
+  if (t >= 0.75 && syllable.template === 'CVC') return 2500;
   return 0;
 }
 
@@ -229,7 +213,6 @@ function assignRoots(concepts, syllablePool, config) {
         + onsetOverload * 120
         + rhymeOverload * 150
         + (syllable.template === 'CVC' ? 30 : 0)
-        + (syllable.template === 'CV-CV' ? 50 : 0)
         + (syllable.tier === 'tertiary-cv' ? 40 : 0);
 
       const candidate = {
@@ -468,7 +451,7 @@ function buildReport(config, assignments, pool, analysis, compounds, vocabulary)
   lines.push('3. **Particle flow**: penalizes roots that echo particles in `mi ___`, `mi ta ___`, `mi na ___`');
   lines.push('4. **Compound flow** — penalizes awkward concatenations with recently assigned roots');
   lines.push('5. **Distribution caps** — soft limits on rhyme class and onset reuse');
-  lines.push('6. **Tier gates** — top-priority concepts blocked from CVC/CV-CV; relaxed for lower deciles');
+  lines.push('6. **Tier gates** — top-priority concepts blocked from CVC; relaxed for lower deciles');
   lines.push('');
   lines.push('### Syllable pool tiers (lowest cost first)');
   lines.push('');
@@ -477,7 +460,7 @@ function buildReport(config, assignments, pool, analysis, compounds, vocabulary)
   lines.push('3. Secondary onsets (`h w y`)');
   lines.push('4. Tertiary onsets (`p ch sh j r`) — `p` only with safe vowels; `pi`/`po` excluded');
   lines.push('5. CVC extensions');
-  lines.push('6. Disyllabic CV-CV for lowest-priority concepts');
+  lines.push('6. CVC for lower-priority concepts when CV pool is exhausted');
   lines.push('');
   lines.push('## Priority ↔ phonetic cost correlation');
   lines.push('');

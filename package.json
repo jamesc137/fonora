@@ -43,6 +43,8 @@
     "fonoran:build": "node tools/fonoran-build.js",
     "fonoran:build:approved": "node tools/fonoran-build.js --approve-all",
     "fonoran:root-candidates": "node tools/fonoran-root-candidates.js",
+    "fonoran:root-capacity": "node scripts/fonoran-root-capacity.js",
+    "fonoran:root-capacity:tiers": "node scripts/fonoran-root-capacity-tiers.js",
     "fonoran:primitive-roots": "node -e \"console.error('DEPRECATED: use npm run fonoran:build (converged pipeline). See docs/fonoran-root-workflow.md')\" && exit 1",
     "fonoran:primitive-roots:gen": "node -e \"console.error('DEPRECATED: use npm run fonoran:build')\" && exit 1",
     "fonoran:primitive-roots:import": "node -e \"console.error('DEPRECATED: use npm run fonoran:build')\" && exit 1"

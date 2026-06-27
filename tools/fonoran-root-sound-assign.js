@@ -70,15 +70,9 @@ export function buildSyllablePool(config) {
     }
   }
 
-  cost = 70;
-  for (const o1 of phonetics.preferred_onsets) {
-    for (const o2 of phonetics.preferred_onsets) {
-      if (o1 === o2) continue;
-      add(o1 + 'a' + o2 + 'a', 'CV-CV', cost, 'disyllabic');
-      add(o1 + 'a' + o2 + 'e', 'CV-CV', cost + 1, 'disyllabic');
-      cost += 0.3;
-    }
-  }
+  // CV-CV disyllabic forms intentionally excluded.
+  // Primitive roots are one syllable only: CV or CVC.
+  // Multi-syllable forms are reserved for compounds and derived words.
 
   pool.sort((a, b) => a.phonetic_cost - b.phonetic_cost || a.form.localeCompare(b.form));
   return pool;
@@ -94,9 +88,7 @@ function tierGate(priority, minP, maxP, syllable) {
   const span = maxP - minP || 1;
   const t = (priority - minP) / span;
   if (t >= 0.92 && syllable.template !== 'CV') return 4000;
-  if (t >= 0.75 && (syllable.template === 'CV-CV' || syllable.template === 'CVC')) return 2500;
-  if (t >= 0.55 && syllable.template === 'CV-CV') return 3500;
-  if (t >= 0.35 && syllable.template === 'CV-CV') return 2000;
+  if (t >= 0.75 && syllable.template === 'CVC') return 2500;
   return 0;
 }
 
@@ -169,7 +161,6 @@ function pickBestSyllable(concept, syllablePool, config, usedRoots, rhymeCounts,
       + onsetOverload * 120
       + rhymeOverload * 150
       + (syllable.template === 'CVC' ? 30 : 0)
-      + (syllable.template === 'CV-CV' ? 50 : 0)
       + (syllable.tier === 'tertiary-cv' ? 40 : 0);
 
     const candidate = {
@@ -284,8 +275,7 @@ export function pronunciationEaseScore(phoneticCost, template) {
   if (phoneticCost <= 4 && template === 'CV') return 5;
   if (phoneticCost <= 10 && template === 'CV') return 4;
   if (phoneticCost <= 25) return 3;
-  if (template === 'CVC') return 2;
-  return 1;
+  return 2; // CVC
 }
 
 export function easeLabel(score) {

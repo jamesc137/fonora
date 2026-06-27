@@ -77,6 +77,30 @@ Each proposed root includes:
 | Pronunciation ease | very easy (1–5) |
 | Semantic usefulness | very high (1–5) |
 
+## Syllable structure rule
+
+> **Fonoran primitive roots are atomic one-syllable forms. Multi-syllable forms are reserved for compounds and derived words.**
+
+Every primitive root must be exactly one syllable and match one of two allowed templates:
+
+| Template | Pattern | Examples |
+| --- | --- | --- |
+| **CV** | consonant + vowel | `ba`, `te`, `go`, `lu` |
+| **CVC** | consonant + vowel + consonant | `bel`, `dam`, `tes`, `kil` |
+
+**Disallowed for primitives:** CV-CV and any multi-syllable form (e.g. `kasa`, `daba`). These are structurally compounds of two CV syllables and must not be assigned as primitive roots.
+
+Allowed onsets: `b d f g k l m n s t` (preferred), `h w y` (secondary), `p ch sh j r` (tertiary)  
+Allowed vowels: `a e i o u`  
+Allowed codas: `n m t k s l` (core); digraph/complex onsets kept in reserve  
+Reserved (never use as roots): `mi na ta` (grammar particles)  
+Excluded (aesthetically): `pi pee po poo`
+
+This rule is enforced at two points in the pipeline:
+
+1. **Generator** (`fonoran-root-candidates.js`) — fails fast if `buildSyllablePool` produces any non-CV/CVC form.
+2. **Build** (`fonoran-build.js`) — asserts all active primitive roots pass `parseSyllable` before compounds are resolved.
+
 Sound assignment optimizes for:
 
 - Shortest, easiest syllables on highest-leverage concepts

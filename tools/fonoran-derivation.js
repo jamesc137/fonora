@@ -217,6 +217,13 @@ export function normalizeSoundRecord(s) {
 }
 
 export function migrateBucket(bucket) {
+  for (const c of bucket.compounds ?? []) {
+    // Converged build compounds are curated vocabulary, not experimental imports.
+    if (c.generator_hint && c.concept_id && c.meaning?.trim()) {
+      c.composition_readable = c.composition_readable ?? c.generator_hint;
+      delete c.generator_hint;
+    }
+  }
   for (const s of bucket.sounds ?? []) normalizeSoundRecord(s);
   for (const c of bucket.compounds ?? []) normalizeCompoundRecord(c, bucket);
   return bucket;

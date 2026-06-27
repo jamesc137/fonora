@@ -9,7 +9,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { romanToIpa } from './fonoran-pronunciation.js';
+import { romanToIpa, parseSyllable } from './fonoran-pronunciation.js';
 import {
   assignRoots,
   buildSyllablePool,
@@ -96,6 +96,20 @@ export async function generateRootCandidates({ preserveReview = true } = {}) {
   const pool = buildSyllablePool(phoneticsConfig);
   if (pool.length < concepts.length) {
     throw new Error(`Syllable pool (${pool.length}) smaller than concepts (${concepts.length})`);
+  }
+
+  // Primitive roots must be exactly one syllable: CV or CVC.
+  // Fail fast if the pool builder somehow produced a multi-syllable or unparseable form.
+  const poolViolations = pool.filter(s => {
+    const parsed = parseSyllable(s.form);
+    return !parsed || parsed.unparsed || !parsed.vowel;
+  });
+  if (poolViolations.length > 0) {
+    throw new Error(
+      `Generator pool contains ${poolViolations.length} non-CV/CVC form(s) — ` +
+      `CV-CV and multi-syllable roots are not allowed for primitives:\n` +
+      poolViolations.map(s => `  ${s.form} (template: ${s.template})`).join('\n')
+    );
   }
 
   let existing = null;

@@ -345,12 +345,36 @@
     function hasMeaning(item) {
       return Boolean(item?.meaning?.trim());
     }
+    /** Search haystack for lab roots — matches Dictionary scope (aliases, gloss, concept id). */
+    function labSoundSearchHay(s) {
+      return [
+        s.spelling,
+        s.meaning,
+        s.legacy_label,
+        s.gloss,
+        s.concept_id,
+        ...(s.aliases ?? []),
+      ].filter(Boolean).join(' ').toLowerCase();
+    }
+    /** Search haystack for lab compounds — matches Dictionary scope. */
+    function labCompoundSearchHay(c) {
+      return [
+        c.spelling,
+        c.meaning,
+        c.gloss,
+        c.concept_id,
+        ...(c.aliases ?? []),
+        c.composition_readable,
+        c.generator_hint,
+        ...(c.parts ?? []),
+      ].filter(Boolean).join(' ').toLowerCase();
+    }
     function pickableRoots(query, { omit = [], showUnnamed = false } = {}) {
       const q = (query ?? '').trim().toLowerCase();
       const skip = new Set(omit);
       return STATE.lab.sounds.filter(s => s.state !== 'rejected' && !skip.has(s.spelling))
         .filter(s => showUnnamed || hasMeaning(s))
-        .filter(s => !q || `${s.spelling} ${s.meaning ?? ''} ${s.legacy_label ?? ''}`.toLowerCase().includes(q))
+        .filter(s => !q || labSoundSearchHay(s).includes(q))
         .sort((a, b) => (a.meaning || a.spelling).localeCompare(b.meaning || b.spelling));
     }
     function pickableWords(query, { omitIds = [], showUnnamed = false } = {}) {
@@ -362,7 +386,7 @@
       return STATE.lab.compounds.filter(c => allowed.includes(c.state) && !skip.has(c.id))
         .filter(c => !c.generator_hint)
         .filter(c => showUnnamed || hasMeaning(c))
-        .filter(c => !q || `${c.spelling} ${c.meaning ?? ''}`.toLowerCase().includes(q))
+        .filter(c => !q || labCompoundSearchHay(c).includes(q))
         .sort((a, b) => (a.meaning || a.spelling).localeCompare(b.meaning || b.spelling));
     }
     function wordCellBodyHtml(c) {
@@ -1904,7 +1928,7 @@
           <p class="root-review__concept review-meaning${conceptText ? '' : ' unnamed'}">${escapeHtml(conceptText || 'not named yet')}</p>
         </div>
         ${concept?.reason ? `<div class="root-review__reason sans">${escapeHtml(concept.reason)}</div>` : ''}
-        ${!isSound && item.generator_hint ? `<div class="root-review__reason sans root-review__reason--hint">Generator: ${escapeHtml(item.generator_hint)}</div>` : ''}
+        ${!isSound && (item.composition_readable || item.generator_hint) ? `<div class="root-review__reason sans root-review__reason--hint">Composition: ${escapeHtml(item.composition_readable || item.generator_hint)}</div>` : ''}
       </div>`;
     }
 

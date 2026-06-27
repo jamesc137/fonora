@@ -194,7 +194,7 @@ async function loadTranslationIndex(lab) {
       gloss: compound.meaning ?? '',
       fonoran: compound.spelling,
       kind: 'compound',
-      composition_readable: compound.generator_hint ?? null,
+      composition_readable: compound.composition_readable ?? compound.generator_hint ?? null,
       composition_roots: compound.parts ?? null,
       parts: compound.parts ?? [compound.spelling],
       source: 'lab',

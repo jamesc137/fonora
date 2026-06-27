@@ -23,6 +23,7 @@ import { writeBucketRaw } from './fonoran-store.js';
 import { emptyDda, migrateBucket, normalizeCompoundRecord, normalizeSoundRecord } from './fonoran-derivation.js';
 import { analyzeAmbiguity, auditScores, segmentCompound } from './fonoran-gen3-readability.js';
 import { aliasesForConcept, loadLocalization } from './fonoran-concepts.js';
+import { parseSyllable } from './fonoran-pronunciation.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const COMPOUNDS_PATH = join(ROOT, 'data/fonoran-compounds.json');
@@ -164,6 +165,22 @@ export async function buildFonoran({ preserveReview = true, approveAll = false }
   // 1. Roots — regenerate, locking everything already approved.
   const rootOutput = await generateRootCandidates({ preserveReview });
   const candidates = rootOutput.candidates.filter(c => c.status !== 'rejected');
+
+  // Build-time gate: every primitive root must be a valid single-syllable CV or CVC form.
+  // CV-CV and multi-syllable spellings are not allowed for primitive roots.
+  const syllableViolations = candidates.filter(c => {
+    const parsed = parseSyllable(c.spelling);
+    return !parsed || parsed.unparsed || !parsed.vowel;
+  });
+  if (syllableViolations.length > 0) {
+    const list = syllableViolations.map(c => `  ${c.spelling} (${c.id})`).join('\n');
+    throw new Error(
+      `Build halted: ${syllableViolations.length} primitive root(s) are not valid CV/CVC syllables.\n` +
+      `Primitive roots must be one syllable only. CV-CV forms are reserved for compounds.\n` +
+      `Invalid roots:\n${list}`
+    );
+  }
+
   const rootById = Object.fromEntries(candidates.map(c => [c.id, c.spelling]));
   const rootSpellings = candidates.map(c => c.spelling);
 
@@ -203,7 +220,7 @@ export async function buildFonoran({ preserveReview = true, approveAll = false }
         gloss: def.gloss ?? '',
         aliases: aliasesForConcept({ id: def.concept, concept: def.gloss ?? def.concept }, locData),
         state: approveAll ? 'approved' : 'needs_review',
-        generator_hint: `${def.concept} = ${def.composition.join(' + ')}`,
+        composition_readable: `${def.concept} = ${def.composition.join(' + ')}`,
         created_by: 'generator',
         named_at: now,
         dda: emptyDda(),

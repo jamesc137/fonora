@@ -591,6 +591,44 @@ This architecture allows multiple English expressions to converge into the **sam
 - inflection mimicry
 - opaque lexical lookup when a compound path exists
 
+## Semantic coordinates
+
+Every word in Fonoran carries three internal coordinates called **depth**, **mode**, and **aspect**. Together they form a compact address in semantic space — where a concept sits relative to others.
+
+| Coordinate | What it captures | Example values |
+| --- | --- | --- |
+| **Depth** | How abstract or concrete the concept is | `interface`, `index`, `junction`, `emanation`, `origin` |
+| **Mode** | How the concept moves or acts in the world | `packet`, `live`, `flux`, `hollow`, `passage` |
+| **Aspect** | How it relates to its surroundings | `contact`, `focal`, `field` |
+
+You do not edit these coordinates directly. They are assigned automatically by the language lab — a process called **DDA inference** — and are an internal mapping layer, not something the language creator needs to manage word by word.
+
+### How coordinates are assigned
+
+Coordinates start as **pending** the moment a root or compound is created. The lab infers them on demand using two signals:
+
+1. **Sound shape** — the onset consonant and vowel of a syllable carry phonetic weight that maps loosely onto depth and mode. This gives a starting guess with moderate confidence.
+2. **Meaning match** — the English gloss is matched against a reference inventory of 36 primitive concepts, each with authoritative coordinates. An exact match raises confidence significantly.
+
+For **compound words**, the system blends the coordinates of each component root. The dominant depth comes from the first component; mode consolidates when multiple parts are combined.
+
+After inference, each coordinate gets a **status**:
+
+- `inferred` — assigned automatically, confidence below 80 %
+- `confirmed` — high-confidence assignment (≥ 80 %)
+- `stale` — the word's meaning or composition changed after the last inference; re-run DDA to refresh
+- `pending` — not yet processed
+
+### When to re-run
+
+Coordinates go **stale** automatically whenever a word's meaning or recipe changes. The lab never silently overwrites them. To refresh stale coordinates, open the Advanced tab in the lab and click **Run DDA**.
+
+Over time, coordinates that started as `inferred` can be locked in manually by confirming them — making the language progressively more stable as it matures.
+
+### What the UI shows
+
+The word detail view labels these as **Semantic coordinates**, not DDA. Non-technical users see the three named values — depth, mode, aspect — along with a note indicating whether the coordinate was matched by meaning, inferred from sound, or blended from parent words. A visual relationship chart shows how the parts of a compound word combine into its final coordinates.
+
 ## Future Work
 
 The following topics are **intentionally incomplete**. They will extend this specification without breaking Rules 1 through 7.

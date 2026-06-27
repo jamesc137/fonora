@@ -920,10 +920,12 @@
       const out = [];
 
       for (const c of conceptList()) {
-        if (seen.has(c.spelling)) continue;
-        if (labSoundForSpelling(c.spelling)?.meaning?.trim()) continue;
-        seen.add(c.spelling);
-        out.push({ spelling: c.spelling, onset: '', vowel: '', coda: '', proposed: true });
+        const sp = c.spelling?.trim();
+        if (!sp) continue;
+        if (seen.has(sp)) continue;
+        if (labSoundForSpelling(sp)?.meaning?.trim()) continue;
+        seen.add(sp);
+        out.push({ spelling: sp, onset: '', vowel: '', coda: '', proposed: true });
       }
 
       for (const entry of catalog) {
@@ -958,7 +960,7 @@
         if (valEl) {
           valEl.innerHTML = sp
             ? `<span class="mono">${escapeHtml(sp)}</span>`
-            : '<span class="fonoran-match-eq__placeholder">Fonoran</span>';
+            : '<span class="fonoran-match-eq__placeholder">Fonora sound</span>';
         }
       }
       if (engPick) {
@@ -1047,7 +1049,7 @@
           const selected = STATE.matcherSelectedFonoran === entry.spelling;
           return `<button type="button" class="root-cell${selected ? ' is-selected' : ''}${meaning ? ' is-named' : ''}${dismissed ? ' is-dismissed' : ''}" data-wm-fonoran="${escapeHtml(entry.spelling)}">${matcherCellBodyHtml(entry.spelling, meaning)}</button>`;
         }).join('')
-        : '<p class="empty sans" style="margin:0">No unmatched Fonoran roots.</p>';
+        : '<p class="empty sans" style="margin:0">No unmatched Fonora sounds.</p>';
 
       const concepts = matcherConcepts();
       engEl.innerHTML = concepts.length
@@ -1064,7 +1066,7 @@
       const namedCount = (STATE.lab.sounds ?? []).filter(s => s.meaning?.trim() && s.state !== 'rejected').length;
       const statsEl = $('wm-stats');
       if (statsEl) {
-        statsEl.textContent = `${visibleFon.length} Fonoran · ${concepts.length} concepts · ${namedCount} named in lab`;
+        statsEl.textContent = `${visibleFon.length} sounds · ${concepts.length} concepts · ${namedCount} named in lab`;
       }
 
       fonEl.querySelectorAll('[data-wm-fonoran]').forEach(btn => {
@@ -2126,7 +2128,7 @@
       const resolved = resolveReviewSelection();
 
       if (!resolved) {
-        workspace.innerHTML = `<div class="fonoran-split-empty"><p>${candidates.length + roots.length + words.length + generated.length ? 'Select an item on the left.' : 'Nothing to review yet. Create roots or words, or run <code>npm run fonoran:root-candidates</code>.'}</p></div>`;
+        workspace.innerHTML = `<div class="fonoran-split-empty"><p>${candidates.length + roots.length + words.length + generated.length ? 'Select an item on the left.' : 'Nothing to review yet. Run <code>npm run fonoran:reset && npm run fonoran:build</code>, or <code>npm run fonoran:build:approved</code> after a reset.'}</p></div>`;
         requestAnimationFrame(syncSplitStickyOffsets);
         return;
       }
@@ -2748,7 +2750,7 @@
           </div>
           <p class="concept-editor__invalid syl-invalid" id="ce-pron-invalid" hidden></p>
           <label class="fld" for="ce-aliases">English word bank</label>
-          <p class="concept-editor__hint sans">One word or phrase per line. Used by the matcher and translator for fuzzy English matching.</p>
+          <p class="concept-editor__hint sans">One word or phrase per line. Saved to the English localization layer — used by the matcher and translator for fuzzy matching.</p>
           <textarea id="ce-aliases" rows="3" data-write-input>${escapeHtml(d.aliases)}</textarea>
           <div class="concept-editor__preview" hidden>
             <span class="concept-editor__preview-label sans">Effective matches after save</span>
@@ -2827,7 +2829,7 @@
         toast('Id, concept phrase, domain, and sound are required.');
         return;
       }
-      const body = { gloss: concept, domain, spelling, aliases };
+      const body = { description: concept, domain, spelling, aliases };
       try {
         if (STATE.conceptEditorIsNew) {
           await api('/api/fonoran/concepts', { method: 'POST', body: JSON.stringify({ id, ...body }) });
@@ -2878,7 +2880,7 @@
         ? list.map(c => {
           const selected = STATE.conceptEditorSelected === c.id && !STATE.conceptEditorIsNew;
           return `<button type="button" class="dict-item concept-editor__item${selected ? ' is-selected' : ''}" data-ce-id="${escapeHtml(c.id)}">
-            <span class="dict-item__word mono">${escapeHtml(c.spelling)}</span>
+            <span class="dict-item__word mono">${c.spelling ? escapeHtml(c.spelling) : '—'}</span>
             <span class="dict-item__english">${escapeHtml(c.concept.split(';')[0])}</span>
             <span class="dict-item__meta sans">${escapeHtml(c.domain)} · ${escapeHtml(c.id)}</span>
           </button>`;
@@ -3043,7 +3045,7 @@
       $('dict-list').innerHTML = list.length
         ? list.map(dictItemHtml).join('')
         : (STATE.lab.sounds.length + STATE.lab.compounds.length === 0
-          ? '<p class="empty">No vocabulary yet. Run <code>npm run fonoran:primitive-roots</code> or use Advanced → Import generated vocabulary.</p>'
+          ? '<p class="empty">No vocabulary yet. <br/> <code>npm run fonoran:reset <br/> npm run fonoran:build</code></p>'
           : '<p class="empty">Nothing matches.</p>');
       $('dict-list').querySelectorAll('.dict-item').forEach(b => b.addEventListener('click', () => {
         selectDictionaryEntry(b.dataset.kind, b.dataset.id);
@@ -3841,11 +3843,12 @@
       await load();
     });
     $('adv-reseed').addEventListener('click', async () => {
-      if (!confirm('Clear every root and word you have built? English word list stays for reference. Cannot be undone.')) return;
+      if (!confirm('Clear the lab vocabulary, review queue, and all assigned Fonoran sounds? English concept definitions stay — run `npm run fonoran:build` or `npm run fonoran:build:approved` to start fresh. Cannot be undone.')) return;
       await api('/api/fonoran/lab/seed', { method: 'POST', body: '{}' });
       STATE.lexicon = null;
+      STATE.rootCandidates = null;
       await ensureLexicon();
-      toast('Lab reset. Start from scratch');
+      toast('Lab reset — vocabulary and review queue cleared');
       await load();
     });
 

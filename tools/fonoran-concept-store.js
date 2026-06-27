@@ -1,20 +1,21 @@
 /**
  * CRUD for Fonoran semantic concepts (primitives inventory).
  * Syncs semantic-primitives.json ↔ root-candidates.json ↔ lab when approved.
+ * Concept descriptions live in the inventory; English aliases live in data/localizations/en.json.
  */
 
 import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { romanToIpa, parseSyllable } from './fonoran-pronunciation.js';
-import { loadConceptInventory } from './fonoran-concepts.js';
+import { loadConceptInventory, clearLocalizationCache } from './fonoran-concepts.js';
 import { addSound, patchSound } from './fonoran-sound-bucket.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-// Converged single source of truth for concepts (99 core + extended dimensions).
 const SEMANTIC_PATH = join(ROOT, 'data/fonoran-concept-inventory.json');
 const CANDIDATES_PATH = join(ROOT, 'data/fonoran-root-candidates.json');
 const CANONICAL_PATH = join(ROOT, 'data/fonoran-approved-roots.json');
+const EN_LOCALE_PATH = join(ROOT, 'data/localizations/en.json');
 
 async function readJson(path, fallback = null) {
   try {
@@ -93,6 +94,16 @@ async function syncApprovedToLab(candidate) {
   await patchSound(candidate.spelling, { meaning, state: 'approved', concept_id: candidate.id });
 }
 
+/** Write updated aliases for a concept id into the English locale file. */
+async function writeEnLocaleAliases(id, aliases) {
+  const locale = await readJson(EN_LOCALE_PATH, { version: '1.0-localization', locale: 'en', entries: {} });
+  if (!locale.entries) locale.entries = {};
+  if (!locale.entries[id]) locale.entries[id] = { label: id };
+  locale.entries[id].aliases = aliases;
+  await writeJson(EN_LOCALE_PATH, locale);
+  clearLocalizationCache('en');
+}
+
 async function writeCanonicalFromCandidates(store) {
   const approved = store.candidates.filter(c => c.status === 'approved');
   const canonical = {
@@ -112,6 +123,11 @@ async function writeCanonicalFromCandidates(store) {
   };
   await writeJson(CANONICAL_PATH, canonical);
   return canonical;
+}
+
+/** Read the description from a request body, accepting legacy field names. */
+function bodyDescription(body) {
+  return body.description ?? body.gloss ?? body.concept ?? null;
 }
 
 async function renameLabSound(oldSpelling, newSpelling, candidate) {
@@ -165,11 +181,12 @@ export async function patchConcept(id, body) {
   const prevSpelling = candidate.spelling;
   let spellingChanged = false;
 
-  if (body.gloss != null || body.concept != null) {
-    const gloss = String(body.gloss ?? body.concept ?? '').trim();
-    if (!gloss) throw new Error('Concept phrase is required');
-    primitive.gloss = gloss;
-    candidate.concept = gloss;
+  const rawDescription = bodyDescription(body);
+  if (rawDescription != null) {
+    const description = String(rawDescription).trim();
+    if (!description) throw new Error('Concept phrase is required');
+    primitive.description = description;
+    candidate.concept = description;
   }
 
   if (body.domain != null) {
@@ -180,7 +197,10 @@ export async function patchConcept(id, body) {
   }
 
   if (body.aliases != null) {
-    primitive.aliases = normalizeAliases(body.aliases);
+    const normalized = normalizeAliases(body.aliases);
+    await writeEnLocaleAliases(key, normalized);
+    // Remove any legacy aliases stored directly on the primitive.
+    delete primitive.aliases;
   }
 
   if (body.spelling != null) {
@@ -216,10 +236,11 @@ export async function patchConcept(id, body) {
 
 export async function createConcept(body) {
   const key = validateId(body.id);
-  const gloss = String(body.gloss ?? body.concept ?? '').trim();
+  const rawDescription = bodyDescription(body);
+  const description = String(rawDescription ?? '').trim();
   const domain = String(body.domain ?? '').trim().toLowerCase();
   const spelling = validateSpelling(body.spelling);
-  if (!gloss) throw new Error('Concept phrase is required');
+  if (!description) throw new Error('Concept phrase is required');
   if (!domain) throw new Error('Domain is required');
 
   const semantic = await readJson(SEMANTIC_PATH, { version: '1.2-semantic-foundation', primitives: [] });
@@ -233,16 +254,15 @@ export async function createConcept(body) {
   if (dup) throw new Error(`Spelling "${spelling}" is already used by ${dup.id}`);
 
   const aliases = normalizeAliases(body.aliases);
-  const primitive = { id: key, gloss, domain };
-  if (aliases.length) primitive.aliases = aliases;
+  const primitive = { id: key, description, domain };
 
   const candidate = {
     id: key,
     spelling,
     ipa: romanToIpa(spelling),
-    concept: gloss,
+    concept: description,
     domain,
-    reason: body.reason?.trim() || `New concept: ${gloss.split(';')[0].trim()}.`,
+    reason: body.reason?.trim() || `New concept: ${description.split(';')[0].trim()}.`,
     pronunciation_ease: null,
     pronunciation_ease_label: null,
     semantic_usefulness: null,
@@ -260,6 +280,10 @@ export async function createConcept(body) {
   await writeJson(SEMANTIC_PATH, semantic);
   refreshCandidateSummary(store);
   await writeJson(CANDIDATES_PATH, store);
+
+  if (aliases.length) {
+    await writeEnLocaleAliases(key, aliases);
+  }
 
   return getConceptForEditor(key);
 }

@@ -14,12 +14,12 @@ import {
   addCompound,
   addSound,
   resetReviewStates,
-  seedBucket,
   setReviewState,
   previewSoundImpact,
   undoLast,
   recomposeCompound,
 } from './fonoran-sound-bucket.js';
+import { resetProject } from './fonoran-reset.js';
 import { loadEnglishLexicon } from './fonoran-english-lexicon.js';
 import { translateEnglish } from './fonoran-translator.js';
 import { buildFonoran } from './fonoran-build.js';
@@ -135,7 +135,7 @@ export async function handleFonoranApi(req, res, pathname, method) {
       return done(200, await undoLast());
     }
     if (pathname === '/api/fonoran/lab/seed' && method === 'POST') {
-      return done(200, await seedBucket());
+      return done(200, await resetProject());
     }
     if ((pathname === '/api/fonoran/lab/build' || pathname === '/api/fonoran/lab/import-vocabulary') && method === 'POST') {
       const body = await readJsonBody(req);

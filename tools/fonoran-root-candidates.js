@@ -25,7 +25,7 @@ const PHONETICS_PATH = join(ROOT, 'data/fonoran-primitive-roots-config.json');
 const OUTPUT_PATH = join(ROOT, 'data/fonoran-root-candidates.json');
 
 function buildReason(concept, highLeverage) {
-  const lead = concept.gloss.split(';')[0].trim();
+  const lead = (concept.description ?? concept.gloss ?? '').split(';')[0].trim();
   if (highLeverage.has(concept.id)) {
     return `High-leverage root: ${lead}. Appears frequently inside compounds.`;
   }
@@ -88,7 +88,7 @@ export async function generateRootCandidates({ preserveReview = true } = {}) {
   const primitives = semantic.primitives ?? [];
   const concepts = primitives.map((p, i) => ({
     id: p.id,
-    gloss: p.gloss,
+    gloss: p.description ?? p.gloss,
     domain: p.domain,
     priority: 1000 - i,
   }));

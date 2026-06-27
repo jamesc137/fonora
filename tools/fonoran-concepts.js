@@ -1,6 +1,7 @@
 /**
- * Unified Fonoran concept inventory from root candidates.
+ * Unified Fonoran concept inventory.
  * Concepts (not English words) are the semantic authority across UI and translator.
+ * English is one localization stored in data/localizations/en.json — not the canonical meaning.
  */
 
 import { readFile } from 'node:fs/promises';
@@ -12,115 +13,46 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CANDIDATES_PATH = join(ROOT, 'data/fonoran-root-candidates.json');
 const APPROVED_PATH = join(ROOT, 'data/fonoran-approved-roots.json');
 const SEMANTIC_PATH = join(ROOT, 'data/fonoran-concept-inventory.json');
+const LOCALIZATIONS_DIR = join(ROOT, 'data/localizations');
 
 const STOP = new Set([
   'a', 'an', 'the', 'of', 'to', 'in', 'on', 'at', 'for', 'and', 'or', 'is', 'are', 'be', 'with',
   'any', 'all', 'one', 'not', 'that', 'this', 'from', 'into', 'by', 'as', 'it', 'its',
 ]);
 
-/** Default English word bank before a concept is saved from the editor. */
-export function extraAliasesForId(id) {
-  return [...(EXTRA_ALIASES[id] ?? [])];
+/** Cache: locale code → entries object from localization JSON. */
+const localizationCache = new Map();
+
+/**
+ * Load the localization file for a given locale (e.g. 'en').
+ * Returns an object keyed by concept id: { label, aliases }.
+ * Caches the result in memory until clearLocalizationCache() is called.
+ */
+export async function loadLocalization(locale = 'en') {
+  if (localizationCache.has(locale)) return localizationCache.get(locale);
+  try {
+    const data = JSON.parse(await readFile(join(LOCALIZATIONS_DIR, `${locale}.json`), 'utf8'));
+    const entries = data.entries ?? {};
+    localizationCache.set(locale, entries);
+    return entries;
+  } catch {
+    localizationCache.set(locale, {});
+    return {};
+  }
 }
 
-/** Common English aliases → concept id (fuzzy translator + matcher labels). */
-const EXTRA_ALIASES = {
-  person: ['human', 'someone', 'somebody', 'people', 'man', 'woman', 'men', 'women'],
-  self: ['me', 'myself', 'mine', 'oneself'],
-  collective: ['group', 'groups', 'community', 'together', 'team'],
-  body: ['form', 'physique'],
-  life: ['alive', 'living', 'live'],
-  death: ['dead', 'die', 'dying'],
-  birth: ['born', 'birth'],
-  move: ['motion', 'moving', 'go', 'going', 'went', 'travel', 'traveling', 'journey'],
-  give: ['gift', 'giving'],
-  take: ['taking', 'receive'],
-  hold: ['holding', 'keep', 'keeping'],
-  use: ['using', 'employ'],
-  help: ['helping', 'aid', 'assist'],
-  make: ['making', 'create', 'creating'],
-  do: ['doing', 'act', 'action'],
-  speak: ['say', 'saying', 'said', 'talk', 'talking', 'speech', 'language', 'tell', 'telling', 'told', 'narrate', 'narrating', 'narration', 'story', 'stories', 'recount', 'recounting'],
-  see: ['seeing', 'sight', 'look', 'looking'],
-  hear: ['hearing', 'listen', 'listening'],
-  touch: ['touching', 'feel'],
-  know: ['knowing', 'knowledge'],
-  think: ['thinking', 'thought'],
-  want: ['wanting', 'wish', 'desire'],
-  eat: ['eating', 'food'],
-  sleep: ['sleeping', 'rest'],
-  thing: ['object', 'entity', 'item'],
-  substance: ['matter', 'stuff', 'material'],
-  form: ['shape', 'appearance'],
-  change: ['changing', 'transform', 'become'],
-  empty: ['nothing', 'void', 'absence'],
-  water: ['liquid', 'drink'],
-  fire: ['flame', 'burn', 'burning'],
-  earth: ['ground', 'dirt', 'soil', 'land'],
-  air: ['atmosphere', 'breath', 'wind'],
-  light: ['bright', 'brightness'],
-  dark: ['darkness', 'dim'],
-  hot: ['heat', 'warm', 'warmth'],
-  cold: ['cool', 'chill'],
-  stone: ['rock', 'rocks'],
-  plant: ['vegetation', 'tree', 'trees', 'grass'],
-  animal: ['creature', 'beast'],
-  inside: ['within', 'interior', 'inner'],
-  outside: ['exterior', 'outer'],
-  here: ['nearby'],
-  there: ['yonder'],
-  near: ['close', 'nearby'],
-  far: ['distant', 'away'],
-  up: ['above', 'higher'],
-  down: ['below', 'lower'],
-  path: ['road', 'way', 'route'],
-  place: ['location', 'spot', 'somewhere'],
-  before: ['prior', 'earlier', 'past', 'yesterday'],
-  after: ['later', 'future', 'tomorrow', 'next'],
-  now: ['today', 'present'],
-  time: ['while', 'duration'],
-  one: ['single', 'unity'],
-  many: ['multiple', 'plenty', 'several'],
-  all: ['every', 'everything', 'whole'],
-  some: ['few', 'part'],
-  more: ['greater', 'increase'],
-  less: ['fewer', 'decrease', 'smaller'],
-  fast: ['quick', 'quickly', 'speed'],
-  love: ['loving', 'affection', 'care'],
-  fear: ['afraid', 'scared', 'dread'],
-  joy: ['happy', 'happiness', 'delight', 'glad'],
-  pain: ['hurt', 'hurting', 'ache', 'suffering'],
-  sad: ['sorrow', 'unhappy', 'grief'],
-  good: ['well', 'better', 'best'],
-  bad: ['evil', 'harm', 'harmful', 'worse', 'worst'],
-  true: ['truth', 'real', 'correct'],
-  false: ['lie', 'wrong', 'untrue'],
-  equal: ['same', 'balance', 'fair', 'fairness', 'match'],
-  bond: ['connection', 'tie', 'link', 'family', 'friend', 'friendship'],
-  conflict: ['fight', 'fighting', 'clash', 'enemy'],
-  same: ['identical', 'alike'],
-  different: ['other', 'another', 'distinct'],
-  part: ['piece', 'portion', 'section'],
-  whole: ['entire', 'complete', 'full'],
-  mark: ['sign', 'symbol', 'write', 'writing'],
-  source: ['origin', 'beginning', 'start'],
-  container: ['box', 'vessel', 'hold'],
-  flow: ['stream', 'river', 'flowing'],
-  pulse: ['beat', 'rhythm'],
-  still: ['stillness', 'stop', 'stopped'],
-  will: ['intent', 'intention', 'purpose'],
-  strong: ['strength', 'power', 'force', 'hard'],
-  reach: ['extend', 'stretch'],
-  wave: ['ripple', 'surge'],
-  food: ['meal', 'eat'],
-  hand: ['hands', 'grasp'],
-  eye: ['eyes', 'sight'],
-  skin: ['hide'],
-  bone: ['bones', 'skeleton'],
-};
+/** Invalidate the in-memory cache for a locale after a write. */
+export function clearLocalizationCache(locale = 'en') {
+  localizationCache.delete(locale);
+}
 
-function glossTokens(gloss) {
-  return String(gloss ?? '')
+/** Return the English-localized aliases for a concept id. */
+export function extraAliasesForLocale(id, locData) {
+  return [...(locData[id]?.aliases ?? [])];
+}
+
+function glossTokens(text) {
+  return String(text ?? '')
     .toLowerCase()
     .replace(/[;,.]/g, ' ')
     .split(/\s+/)
@@ -128,39 +60,45 @@ function glossTokens(gloss) {
     .filter(w => w.length >= 3 && !STOP.has(w));
 }
 
-export function aliasesForConcept(candidate) {
+/**
+ * Build the full alias list for a concept.
+ * locData: the entries object from loadLocalization(locale).
+ * Falls back gracefully to an empty set when locData is omitted.
+ */
+export function aliasesForConcept(candidate, locData = {}) {
   const out = new Set();
   const id = candidate.id;
   out.add(id);
   out.add(id.replace(/_/g, ' '));
 
-  const lead = String(candidate.concept ?? candidate.gloss ?? '').split(';')[0].trim().toLowerCase();
-  if (lead) out.add(lead);
+  const display = String(candidate.concept ?? candidate.description ?? candidate.gloss ?? '').split(';')[0].trim().toLowerCase();
+  if (display) out.add(display);
 
-  for (const w of glossTokens(candidate.concept ?? candidate.gloss)) out.add(w);
+  for (const w of glossTokens(candidate.concept ?? candidate.description ?? candidate.gloss)) out.add(w);
 
   const stored = candidate.aliases ?? candidate.stored_aliases;
   if (Array.isArray(stored) && stored.length) {
     for (const a of stored) out.add(String(a).toLowerCase());
   } else {
-    for (const a of EXTRA_ALIASES[id] ?? []) out.add(a.toLowerCase());
+    for (const a of locData[id]?.aliases ?? []) out.add(a.toLowerCase());
   }
 
   return [...out].filter(Boolean);
 }
 
-export function conceptRecord(candidate, approvedRoot = null, primitive = null) {
-  const gloss = primitive?.gloss ?? candidate.concept;
+export function conceptRecord(candidate, approvedRoot = null, primitive = null, locData = {}) {
+  const description = primitive?.description ?? primitive?.gloss ?? candidate.concept;
   const domain = primitive?.domain ?? candidate.domain;
   const spelling = approvedRoot?.spelling ?? candidate.spelling;
-  const storedAliases = primitive?.aliases ?? null;
+  // Aliases stored directly on the primitive (legacy) take precedence; otherwise use locale data.
+  const storedAliases = primitive?.aliases ?? locData[candidate.id]?.aliases ?? null;
   return {
     id: candidate.id,
-    concept: gloss,
+    concept: description,
     domain,
     spelling,
     ipa: approvedRoot?.ipa ?? candidate.ipa ?? romanToIpa(spelling),
-    aliases: aliasesForConcept({ id: candidate.id, concept: gloss, aliases: storedAliases }),
+    aliases: aliasesForConcept({ id: candidate.id, concept: description, aliases: storedAliases }, locData),
     stored_aliases: storedAliases,
     status: candidate.status,
     reason: candidate.reason ?? null,
@@ -169,7 +107,9 @@ export function conceptRecord(candidate, approvedRoot = null, primitive = null) 
   };
 }
 
-export async function loadConceptInventory() {
+export async function loadConceptInventory(locale = 'en') {
+  const locData = await loadLocalization(locale);
+
   let candidatesFile;
   try {
     candidatesFile = JSON.parse(await readFile(CANDIDATES_PATH, 'utf8'));
@@ -194,7 +134,29 @@ export async function loadConceptInventory() {
     primitiveById = {};
   }
 
-  const concepts = (candidatesFile.candidates ?? []).map(c => conceptRecord(c, approvedById[c.id], primitiveById[c.id]));
+  const candidates = candidatesFile.candidates ?? [];
+
+  // After a blank-slate reset the review queue is empty, but the semantic
+  // inventory still lists concepts — just without assigned sounds yet.
+  if (!candidates.length && Object.keys(primitiveById).length) {
+    const concepts = Object.values(primitiveById).map(p => conceptRecord({
+      id: p.id,
+      concept: p.description ?? p.gloss,
+      domain: p.domain,
+      status: 'pending',
+      spelling: '',
+      aliases: p.aliases,
+    }, null, p, locData));
+    return {
+      version: '1.0-concepts',
+      source: SEMANTIC_PATH,
+      generated_at: candidatesFile.generated_at ?? null,
+      concept_count: concepts.length,
+      concepts,
+    };
+  }
+
+  const concepts = candidates.map(c => conceptRecord(c, approvedById[c.id], primitiveById[c.id], locData));
 
   return {
     version: '1.0-concepts',
@@ -206,7 +168,7 @@ export async function loadConceptInventory() {
 }
 
 /** Build translator lookup: alias → concept entry with fonoran spelling. */
-export function buildConceptAliasIndex(concepts, lab = null) {
+export function buildConceptAliasIndex(concepts, lab = null, locData = {}) {
   const index = new Map();
 
   const register = (alias, entry) => {
@@ -226,17 +188,19 @@ export function buildConceptAliasIndex(concepts, lab = null) {
     domain: c.domain,
   });
 
-  // Strong aliases (concept id + curated/stored synonyms) claim keys first so an
-  // incidental gloss word (e.g. "time" inside before's gloss) can never shadow the
-  // real concept (time).
+  // Strong aliases claim keys first so an incidental description token can never
+  // shadow the real concept (e.g. "time" inside before's description).
   const strongAliases = (c) => {
     const out = [c.id, c.id.replace(/_/g, ' ')];
     const stored = c.stored_aliases;
-    if (Array.isArray(stored) && stored.length) out.push(...stored.map(a => String(a).toLowerCase()));
-    else out.push(...(EXTRA_ALIASES[c.id] ?? []).map(a => a.toLowerCase()));
+    if (Array.isArray(stored) && stored.length) {
+      out.push(...stored.map(a => String(a).toLowerCase()));
+    } else {
+      out.push(...(locData[c.id]?.aliases ?? []).map(a => a.toLowerCase()));
+    }
     return out;
   };
-  // Weak aliases derived from the gloss text: only fill gaps left by strong ones.
+  // Weak aliases derived from the description text: only fill gaps left by strong ones.
   const weakAliases = (c) => {
     const lead = String(c.concept ?? '').split(';')[0].trim().toLowerCase();
     return [lead, ...glossTokens(c.concept)];
@@ -288,7 +252,7 @@ export function buildConceptAliasIndex(concepts, lab = null) {
 
 export function isConceptMatchedInLab(concept, lab) {
   if (!lab?.sounds?.length) return concept.status === 'approved';
-  const gloss = concept.concept?.trim().toLowerCase();
+  const display = concept.concept?.trim().toLowerCase();
   const id = concept.id?.toLowerCase();
   return lab.sounds.some(s => {
     if (s.state === 'rejected') return false;
@@ -296,7 +260,7 @@ export function isConceptMatchedInLab(concept, lab) {
     if (s.concept_id === concept.id) return true;
     if (s.spelling === concept.spelling) return true;
     const m = s.meaning.trim().toLowerCase();
-    return m === gloss || m === id;
+    return m === display || m === id;
   }) || concept.status === 'approved';
 }
 

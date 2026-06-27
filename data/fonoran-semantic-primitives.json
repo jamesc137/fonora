@@ -8,498 +8,498 @@
   "primitives": [
     {
       "id": "person",
-      "gloss": "a sentient being; someone",
-      "domain": "being"
+      "domain": "being",
+      "description": "a sentient being; someone"
     },
     {
       "id": "self",
-      "gloss": "oneself; me or mine",
-      "domain": "being"
+      "domain": "being",
+      "description": "oneself; me or mine"
     },
     {
       "id": "collective",
-      "gloss": "many treated as one",
-      "domain": "being"
+      "domain": "being",
+      "description": "many treated as one"
     },
     {
       "id": "body",
-      "gloss": "the physical form of a being",
-      "domain": "being"
+      "domain": "being",
+      "description": "the physical form of a being"
     },
     {
       "id": "life",
-      "gloss": "the state of being alive",
-      "domain": "being"
+      "domain": "being",
+      "description": "the state of being alive"
     },
     {
       "id": "death",
-      "gloss": "the end of life",
-      "domain": "being"
+      "domain": "being",
+      "description": "the end of life"
     },
     {
       "id": "birth",
-      "gloss": "the beginning of an individual life",
-      "domain": "being"
+      "domain": "being",
+      "description": "the beginning of an individual life"
     },
     {
       "id": "breath",
-      "gloss": "the air stream of living",
-      "domain": "being"
+      "domain": "being",
+      "description": "the air stream of living"
     },
     {
       "id": "move",
-      "gloss": "change position in space; all locomotion inherits from this",
-      "domain": "action"
+      "domain": "action",
+      "description": "change position in space; all locomotion inherits from this"
     },
     {
       "id": "give",
-      "gloss": "transfer something to another",
-      "domain": "action"
+      "domain": "action",
+      "description": "transfer something to another"
     },
     {
       "id": "take",
-      "gloss": "receive something from another",
-      "domain": "action"
+      "domain": "action",
+      "description": "receive something from another"
     },
     {
       "id": "hold",
-      "gloss": "retain in grasp or keeping",
-      "domain": "action"
+      "domain": "action",
+      "description": "retain in grasp or keeping"
     },
     {
       "id": "use",
-      "gloss": "employ a thing for a purpose",
-      "domain": "action"
+      "domain": "action",
+      "description": "employ a thing for a purpose"
     },
     {
       "id": "help",
-      "gloss": "act so another can do or have",
-      "domain": "action"
+      "domain": "action",
+      "description": "act so another can do or have"
     },
     {
       "id": "make",
-      "gloss": "bring something into being",
-      "domain": "action"
+      "domain": "action",
+      "description": "bring something into being"
     },
     {
       "id": "do",
-      "gloss": "perform an action; act",
-      "domain": "action"
+      "domain": "action",
+      "description": "perform an action; act"
     },
     {
       "id": "speak",
-      "gloss": "talk; use the voice with words",
-      "domain": "action"
+      "domain": "action",
+      "description": "talk; use the voice with words"
     },
     {
       "id": "see",
-      "gloss": "perceive with the eyes",
-      "domain": "action"
+      "domain": "action",
+      "description": "perceive with the eyes"
     },
     {
       "id": "hear",
-      "gloss": "perceive with the ears",
-      "domain": "action"
+      "domain": "action",
+      "description": "perceive with the ears"
     },
     {
       "id": "touch",
-      "gloss": "feel by contact with skin",
-      "domain": "action"
+      "domain": "action",
+      "description": "feel by contact with skin"
     },
     {
       "id": "smell",
-      "gloss": "perceive with the nose",
-      "domain": "action"
+      "domain": "action",
+      "description": "perceive with the nose"
     },
     {
       "id": "taste",
-      "gloss": "perceive with the mouth",
-      "domain": "action"
+      "domain": "action",
+      "description": "perceive with the mouth"
     },
     {
       "id": "know",
-      "gloss": "understand; hold as true",
-      "domain": "action"
+      "domain": "action",
+      "description": "understand; hold as true"
     },
     {
       "id": "think",
-      "gloss": "use the mind",
-      "domain": "action"
+      "domain": "action",
+      "description": "use the mind"
     },
     {
       "id": "feel",
-      "gloss": "experience inner sensation",
-      "domain": "action"
+      "domain": "action",
+      "description": "experience inner sensation"
     },
     {
       "id": "want",
-      "gloss": "desire; wish for",
-      "domain": "action"
+      "domain": "action",
+      "description": "desire; wish for"
     },
     {
       "id": "eat",
-      "gloss": "consume food",
-      "domain": "action"
+      "domain": "action",
+      "description": "consume food"
     },
     {
       "id": "sleep",
-      "gloss": "rest in unconsciousness",
-      "domain": "action"
+      "domain": "action",
+      "description": "rest in unconsciousness"
     },
     {
       "id": "thing",
-      "gloss": "any entity; the primary noun dimension — book, meal, vehicle, lamp inherit from thing + X",
-      "domain": "ontology"
+      "domain": "ontology",
+      "description": "any entity; the primary noun dimension — book, meal, vehicle, lamp inherit from thing + X"
     },
     {
       "id": "substance",
-      "gloss": "physical stuff; matter",
-      "domain": "ontology"
+      "domain": "ontology",
+      "description": "physical stuff; matter"
     },
     {
       "id": "form",
-      "gloss": "shape or look of something",
-      "domain": "ontology"
+      "domain": "ontology",
+      "description": "shape or look of something"
     },
     {
       "id": "change",
-      "gloss": "become different; grow, age, damage, improve inherit from this",
-      "domain": "ontology"
+      "domain": "ontology",
+      "description": "become different; grow, age, damage, improve inherit from this"
     },
     {
       "id": "empty",
-      "gloss": "contains nothing; nothing inside",
-      "domain": "ontology"
+      "domain": "ontology",
+      "description": "contains nothing; nothing inside"
     },
     {
       "id": "water",
-      "gloss": "liquid water to drink or touch",
-      "domain": "element"
+      "domain": "element",
+      "description": "liquid water to drink or touch"
     },
     {
       "id": "fire",
-      "gloss": "flame; hot bright burning",
-      "domain": "element"
+      "domain": "element",
+      "description": "flame; hot bright burning"
     },
     {
       "id": "earth",
-      "gloss": "ground; dirt underfoot",
-      "domain": "element"
+      "domain": "element",
+      "description": "ground; dirt underfoot"
     },
     {
       "id": "air",
-      "gloss": "what we breathe; invisible atmosphere",
-      "domain": "element"
+      "domain": "element",
+      "description": "what we breathe; invisible atmosphere"
     },
     {
       "id": "light",
-      "gloss": "brightness you can see by",
-      "domain": "element"
+      "domain": "element",
+      "description": "brightness you can see by"
     },
     {
       "id": "dark",
-      "gloss": "absence of light",
-      "domain": "element"
+      "domain": "element",
+      "description": "absence of light"
     },
     {
       "id": "hot",
-      "gloss": "high temperature; burns",
-      "domain": "element"
+      "domain": "element",
+      "description": "high temperature; burns"
     },
     {
       "id": "cold",
-      "gloss": "low temperature; shiver",
-      "domain": "element"
+      "domain": "element",
+      "description": "low temperature; shiver"
     },
     {
       "id": "stone",
-      "gloss": "hard rock",
-      "domain": "element"
+      "domain": "element",
+      "description": "hard rock"
     },
     {
       "id": "plant",
-      "gloss": "living vegetation",
-      "domain": "element"
+      "domain": "element",
+      "description": "living vegetation"
     },
     {
       "id": "animal",
-      "gloss": "living creature that is not a person",
-      "domain": "element"
+      "domain": "element",
+      "description": "living creature that is not a person"
     },
     {
       "id": "inside",
-      "gloss": "within an interior",
-      "domain": "space"
+      "domain": "space",
+      "description": "within an interior"
     },
     {
       "id": "outside",
-      "gloss": "beyond a boundary; exterior",
-      "domain": "space"
+      "domain": "space",
+      "description": "beyond a boundary; exterior"
     },
     {
       "id": "here",
-      "gloss": "at this place",
-      "domain": "space"
+      "domain": "space",
+      "description": "at this place"
     },
     {
       "id": "there",
-      "gloss": "at that place",
-      "domain": "space"
+      "domain": "space",
+      "description": "at that place"
     },
     {
       "id": "near",
-      "gloss": "close in space",
-      "domain": "space"
+      "domain": "space",
+      "description": "close in space"
     },
     {
       "id": "far",
-      "gloss": "distant in space",
-      "domain": "space"
+      "domain": "space",
+      "description": "distant in space"
     },
     {
       "id": "up",
-      "gloss": "higher position",
-      "domain": "space"
+      "domain": "space",
+      "description": "higher position"
     },
     {
       "id": "down",
-      "gloss": "lower position",
-      "domain": "space"
+      "domain": "space",
+      "description": "lower position"
     },
     {
       "id": "path",
-      "gloss": "a way leading through space",
-      "domain": "space"
+      "domain": "space",
+      "description": "a way leading through space"
     },
     {
       "id": "place",
-      "gloss": "a location; somewhere",
-      "domain": "space"
+      "domain": "space",
+      "description": "a location; somewhere"
     },
     {
       "id": "surface",
-      "gloss": "outer face; what you touch on the outside",
-      "domain": "space"
+      "domain": "space",
+      "description": "outer face; what you touch on the outside"
     },
     {
       "id": "bound",
-      "gloss": "edge; where something stops",
-      "domain": "space"
+      "domain": "space",
+      "description": "edge; where something stops"
     },
     {
       "id": "center",
-      "gloss": "middle point",
-      "domain": "space"
+      "domain": "space",
+      "description": "middle point"
     },
     {
       "id": "before",
-      "gloss": "earlier in time; yesterday inherits from this",
-      "domain": "time"
+      "domain": "time",
+      "description": "earlier in time; yesterday inherits from this"
     },
     {
       "id": "after",
-      "gloss": "later in time; tomorrow inherits from this",
-      "domain": "time"
+      "domain": "time",
+      "description": "later in time; tomorrow inherits from this"
     },
     {
       "id": "now",
-      "gloss": "this moment",
-      "domain": "time"
+      "domain": "time",
+      "description": "this moment"
     },
     {
       "id": "time",
-      "gloss": "duration; while things happen",
-      "domain": "time"
+      "domain": "time",
+      "description": "duration; while things happen"
     },
     {
       "id": "one",
-      "gloss": "a single unit",
-      "domain": "quantity"
+      "domain": "quantity",
+      "description": "a single unit"
     },
     {
       "id": "many",
-      "gloss": "large quantity; plurality",
-      "domain": "quantity"
+      "domain": "quantity",
+      "description": "large quantity; plurality"
     },
     {
       "id": "all",
-      "gloss": "every one without exception",
-      "domain": "quantity"
+      "domain": "quantity",
+      "description": "every one without exception"
     },
     {
       "id": "some",
-      "gloss": "an indefinite portion",
-      "domain": "quantity"
+      "domain": "quantity",
+      "description": "an indefinite portion"
     },
     {
       "id": "more",
-      "gloss": "greater amount",
-      "domain": "quantity"
+      "domain": "quantity",
+      "description": "greater amount"
     },
     {
       "id": "less",
-      "gloss": "smaller amount",
-      "domain": "quantity"
+      "domain": "quantity",
+      "description": "smaller amount"
     },
     {
       "id": "fast",
-      "gloss": "quick; high speed",
-      "domain": "quantity"
+      "domain": "quantity",
+      "description": "quick; high speed"
     },
     {
       "id": "love",
-      "gloss": "deep affection; care",
-      "domain": "emotion"
+      "domain": "emotion",
+      "description": "deep affection; care"
     },
     {
       "id": "fear",
-      "gloss": "apprehension of harm",
-      "domain": "emotion"
+      "domain": "emotion",
+      "description": "apprehension of harm"
     },
     {
       "id": "joy",
-      "gloss": "happiness; delight",
-      "domain": "emotion"
+      "domain": "emotion",
+      "description": "happiness; delight"
     },
     {
       "id": "pain",
-      "gloss": "hurt; suffering",
-      "domain": "emotion"
+      "domain": "emotion",
+      "description": "hurt; suffering"
     },
     {
       "id": "sad",
-      "gloss": "sorrow; unhappiness",
-      "domain": "emotion"
+      "domain": "emotion",
+      "description": "sorrow; unhappiness"
     },
     {
       "id": "good",
-      "gloss": "desirable; works well",
-      "domain": "evaluation"
+      "domain": "evaluation",
+      "description": "desirable; works well"
     },
     {
       "id": "bad",
-      "gloss": "undesirable; harmful",
-      "domain": "evaluation"
+      "domain": "evaluation",
+      "description": "undesirable; harmful"
     },
     {
       "id": "true",
-      "gloss": "corresponds to reality",
-      "domain": "evaluation"
+      "domain": "evaluation",
+      "description": "corresponds to reality"
     },
     {
       "id": "false",
-      "gloss": "does not correspond to reality",
-      "domain": "evaluation"
+      "domain": "evaluation",
+      "description": "does not correspond to reality"
     },
     {
       "id": "equal",
-      "gloss": "same amount; fair match; balance and exchange inherit from this",
-      "domain": "evaluation"
+      "domain": "evaluation",
+      "description": "same amount; fair match; balance and exchange inherit from this"
     },
     {
       "id": "bond",
-      "gloss": "connection that holds together",
-      "domain": "relationships"
+      "domain": "relationships",
+      "description": "connection that holds together"
     },
     {
       "id": "conflict",
-      "gloss": "opposition; clash; fight",
-      "domain": "relationships"
+      "domain": "relationships",
+      "description": "opposition; clash; fight"
     },
     {
       "id": "same",
-      "gloss": "not different; matching",
-      "domain": "relationships"
+      "domain": "relationships",
+      "description": "not different; matching"
     },
     {
       "id": "different",
-      "gloss": "not the same",
-      "domain": "relationships"
+      "domain": "relationships",
+      "description": "not the same"
     },
     {
       "id": "part",
-      "gloss": "a piece of a larger whole",
-      "domain": "relationships"
+      "domain": "relationships",
+      "description": "a piece of a larger whole"
     },
     {
       "id": "whole",
-      "gloss": "all parts together",
-      "domain": "relationships"
+      "domain": "relationships",
+      "description": "all parts together"
     },
     {
       "id": "mark",
-      "gloss": "a visible sign, drawing, or trace",
-      "domain": "process"
+      "domain": "process",
+      "description": "a visible sign, drawing, or trace"
     },
     {
       "id": "source",
-      "gloss": "where something begins",
-      "domain": "process"
+      "domain": "process",
+      "description": "where something begins"
     },
     {
       "id": "container",
-      "gloss": "something that holds other things",
-      "domain": "process"
+      "domain": "process",
+      "description": "something that holds other things"
     },
     {
       "id": "flow",
-      "gloss": "continuous passage without stopping",
-      "domain": "process"
+      "domain": "process",
+      "description": "continuous passage without stopping"
     },
     {
       "id": "pulse",
-      "gloss": "rhythmic recurrence",
-      "domain": "process"
+      "domain": "process",
+      "description": "rhythmic recurrence"
     },
     {
       "id": "still",
-      "gloss": "without motion; staying",
-      "domain": "process"
+      "domain": "process",
+      "description": "without motion; staying"
     },
     {
       "id": "will",
-      "gloss": "intent; directed purpose",
-      "domain": "process"
+      "domain": "process",
+      "description": "intent; directed purpose"
     },
     {
       "id": "strong",
-      "gloss": "great force; hard to break; power and leadership inherit from this",
-      "domain": "process"
+      "domain": "process",
+      "description": "great force; hard to break; power and leadership inherit from this"
     },
     {
       "id": "reach",
-      "gloss": "extension through space",
-      "domain": "process"
+      "domain": "process",
+      "description": "extension through space"
     },
     {
       "id": "wave",
-      "gloss": "disturbance that travels outward",
-      "domain": "process"
+      "domain": "process",
+      "description": "disturbance that travels outward"
     },
     {
       "id": "food",
-      "gloss": "what is eaten to sustain life",
-      "domain": "life"
+      "domain": "life",
+      "description": "what is eaten to sustain life"
     },
     {
       "id": "hand",
-      "gloss": "the grasping part of the body",
-      "domain": "body"
+      "domain": "body",
+      "description": "the grasping part of the body"
     },
     {
       "id": "eye",
-      "gloss": "the seeing part of the body",
-      "domain": "body"
+      "domain": "body",
+      "description": "the seeing part of the body"
     },
     {
       "id": "skin",
-      "gloss": "the outer covering of the body",
-      "domain": "body"
+      "domain": "body",
+      "description": "the outer covering of the body"
     },
     {
       "id": "bone",
-      "gloss": "the rigid inner frame of the body",
-      "domain": "body"
+      "domain": "body",
+      "description": "the rigid inner frame of the body"
     }
   ],
   "demoted_from_primitives": [

@@ -22,7 +22,7 @@ import { generateRootCandidates } from './fonoran-root-candidates.js';
 import { writeBucketRaw } from './fonoran-store.js';
 import { emptyDda, migrateBucket, normalizeCompoundRecord, normalizeSoundRecord } from './fonoran-derivation.js';
 import { analyzeAmbiguity, auditScores, segmentCompound } from './fonoran-gen3-readability.js';
-import { aliasesForConcept } from './fonoran-concepts.js';
+import { aliasesForConcept, loadLocalization } from './fonoran-concepts.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const COMPOUNDS_PATH = join(ROOT, 'data/fonoran-compounds.json');
@@ -159,6 +159,7 @@ function computeHealth(bucket) {
 
 export async function buildFonoran({ preserveReview = true, approveAll = false } = {}) {
   const now = new Date().toISOString();
+  const locData = await loadLocalization('en');
 
   // 1. Roots — regenerate, locking everything already approved.
   const rootOutput = await generateRootCandidates({ preserveReview });
@@ -179,7 +180,7 @@ export async function buildFonoran({ preserveReview = true, approveAll = false }
         meaning: labelFromId(c.id),
         concept_id: c.id,
         gloss: c.concept,
-        aliases: aliasesForConcept({ id: c.id, concept: c.concept }),
+        aliases: aliasesForConcept({ id: c.id, concept: c.concept }, locData),
         state: approveAll || c.status === 'approved' ? 'approved' : 'needs_review',
         generator_hint: `${c.id} · primitive root${c.status === 'approved' ? ' · approved' : ''}`,
         created_by: 'generator',
@@ -200,7 +201,7 @@ export async function buildFonoran({ preserveReview = true, approveAll = false }
         meaning: labelFromId(def.concept),
         concept_id: def.concept,
         gloss: def.gloss ?? '',
-        aliases: aliasesForConcept({ id: def.concept, concept: def.gloss ?? def.concept }),
+        aliases: aliasesForConcept({ id: def.concept, concept: def.gloss ?? def.concept }, locData),
         state: approveAll ? 'approved' : 'needs_review',
         generator_hint: `${def.concept} = ${def.composition.join(' + ')}`,
         created_by: 'generator',

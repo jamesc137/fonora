@@ -1,0 +1,170 @@
+{
+  "version": "1.0-approved-roots",
+  "updated_at": "2026-06-26T05:23:39.442Z",
+  "philosophy": "Only human-approved roots from Root Review are canonical.",
+  "root_count": 18,
+  "roots": [
+    {
+      "id": "person",
+      "spelling": "ba",
+      "ipa": "/bʌ/",
+      "concept": "a sentient being; someone",
+      "domain": "being",
+      "reason": "High-leverage root: a sentient being. Appears frequently inside compounds.",
+      "approved_at": "2026-06-26T05:20:40.581Z"
+    },
+    {
+      "id": "self",
+      "spelling": "de",
+      "ipa": "/dɛ/",
+      "concept": "oneself; me or mine",
+      "domain": "being",
+      "reason": "High-leverage root: oneself. Appears frequently inside compounds.",
+      "approved_at": "2026-06-26T05:20:44.430Z"
+    },
+    {
+      "id": "body",
+      "spelling": "go",
+      "ipa": "/gɑ/",
+      "concept": "the physical form of a being",
+      "domain": "being",
+      "reason": "Fundamental being concept: the physical form of a being. Cannot be naturally reduced into simpler Fonoran roots.",
+      "approved_at": "2026-06-26T05:22:10.749Z"
+    },
+    {
+      "id": "life",
+      "spelling": "ku",
+      "ipa": "/kʊ/",
+      "concept": "the state of being alive",
+      "domain": "being",
+      "reason": "High-leverage root: the state of being alive. Appears frequently inside compounds.",
+      "approved_at": "2026-06-26T05:22:18.381Z"
+    },
+    {
+      "id": "move",
+      "spelling": "so",
+      "ipa": "/sɑ/",
+      "concept": "change position in space; all locomotion inherits from this",
+      "domain": "action",
+      "reason": "High-leverage root: change position in space. Appears frequently inside compounds.",
+      "approved_at": "2026-06-26T05:22:48.400Z"
+    },
+    {
+      "id": "give",
+      "spelling": "tu",
+      "ipa": "/tʊ/",
+      "concept": "transfer something to another",
+      "domain": "action",
+      "reason": "High-leverage root: transfer something to another. Appears frequently inside compounds.",
+      "approved_at": "2026-06-26T05:22:55.914Z"
+    },
+    {
+      "id": "take",
+      "spelling": "ha",
+      "ipa": "/hʌ/",
+      "concept": "receive something from another",
+      "domain": "action",
+      "reason": "High-leverage root: receive something from another. Appears frequently inside compounds.",
+      "approved_at": "2026-06-26T05:22:58.196Z"
+    },
+    {
+      "id": "use",
+      "spelling": "yi",
+      "ipa": "/jɪ/",
+      "concept": "employ a thing for a purpose",
+      "domain": "action",
+      "reason": "Fundamental action concept: employ a thing for a purpose. Cannot be naturally reduced into simpler Fonoran roots.",
+      "approved_at": "2026-06-26T05:23:08.750Z"
+    },
+    {
+      "id": "help",
+      "spelling": "nu",
+      "ipa": "/nʊ/",
+      "concept": "act so another can do or have",
+      "domain": "action",
+      "reason": "Fundamental action concept: act so another can do or have. Cannot be naturally reduced into simpler Fonoran roots.",
+      "approved_at": "2026-06-26T05:23:17.564Z"
+    },
+    {
+      "id": "make",
+      "spelling": "to",
+      "ipa": "/tɑ/",
+      "concept": "bring something into being",
+      "domain": "action",
+      "reason": "Fundamental action concept: bring something into being. Cannot be naturally reduced into simpler Fonoran roots.",
+      "approved_at": "2026-06-26T05:23:20.115Z"
+    },
+    {
+      "id": "do",
+      "spelling": "che",
+      "ipa": "/tʃɛ/",
+      "concept": "perform an action; act",
+      "domain": "action",
+      "reason": "Fundamental action concept: perform an action. Cannot be naturally reduced into simpler Fonoran roots.",
+      "approved_at": "2026-06-26T05:23:21.396Z"
+    },
+    {
+      "id": "speak",
+      "spelling": "shu",
+      "ipa": "/ʃʊ/",
+      "concept": "talk; use the voice with words",
+      "domain": "action",
+      "reason": "High-leverage root: talk. Appears frequently inside compounds.",
+      "approved_at": "2026-06-26T05:23:24.863Z"
+    },
+    {
+      "id": "see",
+      "spelling": "si",
+      "ipa": "/sɪ/",
+      "concept": "perceive with the eyes",
+      "domain": "action",
+      "reason": "Fundamental action concept: perceive with the eyes. Cannot be naturally reduced into simpler Fonoran roots.",
+      "approved_at": "2026-06-26T05:23:26.563Z"
+    },
+    {
+      "id": "hear",
+      "spelling": "wa",
+      "ipa": "/wʌ/",
+      "concept": "perceive with the ears",
+      "domain": "action",
+      "reason": "Fundamental action concept: perceive with the ears. Cannot be naturally reduced into simpler Fonoran roots.",
+      "approved_at": "2026-06-26T05:23:27.929Z"
+    },
+    {
+      "id": "smell",
+      "spelling": "ye",
+      "ipa": "/jɛ/",
+      "concept": "perceive with the nose",
+      "domain": "action",
+      "reason": "Fundamental action concept: perceive with the nose. Cannot be naturally reduced into simpler Fonoran roots.",
+      "approved_at": "2026-06-26T05:23:34.431Z"
+    },
+    {
+      "id": "taste",
+      "spelling": "pu",
+      "ipa": "/pʊ/",
+      "concept": "perceive with the mouth",
+      "domain": "action",
+      "reason": "Fundamental action concept: perceive with the mouth. Cannot be naturally reduced into simpler Fonoran roots.",
+      "approved_at": "2026-06-26T05:23:36.130Z"
+    },
+    {
+      "id": "know",
+      "spelling": "ja",
+      "ipa": "/dʒʌ/",
+      "concept": "understand; hold as true",
+      "domain": "action",
+      "reason": "High-leverage root: understand. Appears frequently inside compounds.",
+      "approved_at": "2026-06-26T05:23:38.081Z"
+    },
+    {
+      "id": "think",
+      "spelling": "mo",
+      "ipa": "/mɑ/",
+      "concept": "use the mind",
+      "domain": "action",
+      "reason": "Fundamental action concept: use the mind. Cannot be naturally reduced into simpler Fonoran roots.",
+      "approved_at": "2026-06-26T05:23:39.431Z"
+    }
+  ]
+}

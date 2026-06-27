@@ -1,7 +1,8 @@
-    import { toSpeakable, compoundSpeakable, phoneticKeyBold, compoundPhoneticKey, englishGuide, compoundEnglishGuide, parseSyllable, buildSyllable, isValidSyllable, pieceHint, ONSET_GROUPS, VOWEL_DISPLAY, CODA_DISPLAY, enumerateOpenSyllables } from '../tools/fonoran-pronunciation.js';
+    import { toSpeakable, compoundSpeakable, phoneticKeyBold, compoundPhoneticKey, englishGuide, compoundEnglishGuide, parseSyllable, buildSyllable, isValidSyllable, pieceHint, ONSET_GROUPS, VOWEL_DISPLAY, CODA_DISPLAY, enumerateOpenSyllables, romanToIpa } from '../tools/fonoran-pronunciation.js';
     import { romanToFonoraScript, pieceToFonoraSymbols } from '../tools/fonoran-fonora-bridge.js';
     import { loadLanguageRules } from '../js/load-language-rules.js';
     import { speakFonoraPhrase, cancelSpeech } from '../js/fonora-tts.js';
+    import { primeAudioContext } from '../js/espeak-audio.js';
     import { initUniversalNav, setActiveTab, setFonoranUndoDisabled, setFonoranAuth } from '../js/universal-nav.js';
     import { bindModalDismiss, setModalBackdropOpen } from '../js/modal-dismiss.js';
     import { extractMarkdownHeadings, normalizeGrammarSource, renderMarkdown } from '../js/markdown-render.js';
@@ -12,7 +13,7 @@
       email: null,
       loginUrl: '/auth/google?returnTo=/fonoran/',
     };
-    const WRITE_PAGES = new Set(['roots', 'create', 'matcher', 'review', 'advanced']);
+    const WRITE_PAGES = new Set(['roots', 'create', 'matcher', 'review', 'root-review', 'concepts', 'advanced']);
     const SPLIT_WRITE_PAGES = new Set(['roots', 'create', 'matcher']);
     const MATCHER_DISMISSED_KEY = 'fonoran:matcher:dismissed';
 
@@ -42,7 +43,7 @@
     function syncWordComposerControls() {
       const picks = STATE.wordComposer;
       const spelling = picks.length ? resolveComposerSpelling(picks) : '';
-      const match = renderSpellingMatch('wc-match', spelling);
+      const match = renderSpellingMatch('wc-match', spelling, { compact: true });
       setWriteButton($('wc-save'), picks.length < 2 || spellingBlocksSave(match));
     }
 
@@ -154,9 +155,7 @@
       wordCursor: 0,
       reviewFocusPending: false,
       rootsFilter: '',
-      editing: false, editMeaning: '', clearAffected: false,
       justSaved: null,
-      recipe: null, recipeFilter: '',
       dictFilter: 'all', dictQuery: '', dictSelection: null,
       wordComposer: [], wordComposerFilter: '',
       wordComposerShowRoots: true,
@@ -175,6 +174,26 @@
       matcherCatalog: null,
       toolReturnPage: 'roots',
       healthOpen: false,
+      translatorInput: '',
+      translatorResult: null,
+      translatorBusy: false,
+      translatorPlaying: false,
+      translatorCancel: false,
+      rootCandidates: null,
+      rootCursor: 0,
+      rootReviewFocusPending: false,
+      reviewFilter: '',
+      reviewShowCandidates: true,
+      reviewShowLabRoots: true,
+      reviewShowLabWords: true,
+      reviewShowGeneratedWords: true,
+      reviewNeedsReviewOnly: false,
+      reviewSelection: null,
+      conceptEditorFilter: '',
+      conceptEditorSelected: null,
+      conceptEditorIsNew: false,
+      conceptEditorDraft: null,
+      conceptEditorDomains: [],
     };
     const $ = (id) => document.getElementById(id);
 
@@ -267,7 +286,6 @@
     function wireNeighbors(list, cursorKey, rerender) {
       document.querySelectorAll('.neighbor[data-go]').forEach(b => b.addEventListener('click', () => {
         STATE[cursorKey] = Number(b.dataset.go);
-        STATE.editing = false;
         STATE.justSaved = null;
         rerender();
       }));
@@ -353,17 +371,18 @@
     async function load(opts = {}) {
       try {
         await ensureRules();
+        STATE.lexicon = null;
         await ensureLexicon();
         STATE.lab = await api('/api/fonoran/lab');
         $('load-error').hidden = true;
         setFonoranUndoDisabled(!STATE.lab.can_undo || !canWrite());
         if (!opts.skipRender) renderActivePage();
-        wireMeaningPicker('wc', 'wc-meaning');
       } catch { $('load-error').hidden = false; }
     }
 
     function renderActivePage() {
-      if (STATE.page !== 'home' && !STATE.lab) return;
+      const labOptional = new Set(['home', 'grammar', 'translator', 'concepts']);
+      if (!labOptional.has(STATE.page) && !STATE.lab) return;
       if (STATE.page === 'home') {
         wireLander();
         renderLanderShowcase();
@@ -371,10 +390,12 @@
       }
       else if (STATE.page === 'create') renderWordComposer();
       else if (STATE.page === 'matcher') renderWordMatcher();
-      else if (STATE.page === 'review') renderWords();
+      else if (STATE.page === 'review') renderUnifiedReview();
+      else if (STATE.page === 'concepts') renderConceptEditor();
       else if (STATE.page === 'roots') renderRoots();
       else if (STATE.page === 'dictionary') renderDictionary();
       else if (STATE.page === 'grammar') renderGrammar();
+      else if (STATE.page === 'translator') renderTranslator();
       else if (STATE.page === 'health') renderHealth();
       else if (STATE.page === 'advanced') renderAdvanced();
       applyWriteAccessUI();
@@ -411,10 +432,10 @@
 
     function meaningPickerHtml(prefix) {
       return `<div class="lex-pick sans">
-        <label class="lex-label" for="${prefix}-lex-cat">Browse English words</label>
+        <label class="lex-label" for="${prefix}-lex-cat">Browse concepts</label>
         <div class="lex-row">
-          <select id="${prefix}-lex-cat" aria-label="Category" data-write-input><option value="">All categories</option></select>
-          <select id="${prefix}-lex-word" aria-label="English word" data-write-input><option value="">Pick a word…</option></select>
+          <select id="${prefix}-lex-cat" aria-label="Domain" data-write-input><option value="">All domains</option></select>
+          <select id="${prefix}-lex-word" aria-label="Concept" data-write-input><option value="">Pick a concept…</option></select>
         </div>
       </div>`;
     }
@@ -424,19 +445,42 @@
       return STATE.lexicon;
     }
 
+    function conceptList() {
+      return STATE.lexicon?.concepts ?? [];
+    }
+
+    function conceptMatchedInLab(concept) {
+      if (!concept || !STATE.lab) return concept?.status === 'approved';
+      if (concept.status === 'approved') return true;
+      const gloss = concept.concept?.trim().toLowerCase();
+      const id = concept.id?.toLowerCase();
+      return STATE.lab.sounds.some(s => {
+        if (s.state === 'rejected' || !s.meaning?.trim()) return false;
+        if (s.concept_id === concept.id) return true;
+        if (s.spelling === concept.spelling) return true;
+        const m = s.meaning.trim().toLowerCase();
+        return m === gloss || m === id;
+      });
+    }
+
     function populateLexCategories(selectEl) {
       if (!selectEl || !STATE.lexicon) return;
       const cur = selectEl.value;
-      selectEl.innerHTML = '<option value="">All categories</option>'
+      selectEl.innerHTML = '<option value="">All domains</option>'
         + STATE.lexicon.categories.map(c => `<option value="${escapeHtml(c)}"${c === cur ? ' selected' : ''}>${escapeHtml(c)}</option>`).join('');
     }
 
     function populateLexWords(selectEl, category = '') {
       if (!selectEl || !STATE.lexicon) return;
       const cur = selectEl.value;
-      const words = category ? STATE.lexicon.words.filter(w => w.category === category) : STATE.lexicon.words;
-      selectEl.innerHTML = '<option value="">Pick a word…</option>'
-        + words.map(w => `<option value="${escapeHtml(w.word)}" title="${escapeHtml(w.gloss)}"${w.word === cur ? ' selected' : ''}>${escapeHtml(w.word)}</option>`).join('');
+      const concepts = category
+        ? conceptList().filter(c => c.domain === category)
+        : conceptList();
+      selectEl.innerHTML = '<option value="">Pick a concept…</option>'
+        + concepts.map(c => {
+          const label = c.concept.length > 48 ? `${c.concept.slice(0, 45)}…` : c.concept;
+          return `<option value="${escapeHtml(c.id)}" title="${escapeHtml(c.concept)}"${c.id === cur ? ' selected' : ''}>${escapeHtml(label)}</option>`;
+        }).join('');
     }
 
     function wireMeaningPicker(prefix, inputId) {
@@ -449,8 +493,10 @@
       populateLexWords(word, cat.value);
       cat.addEventListener('change', () => populateLexWords(word, cat.value));
       word.addEventListener('change', () => {
-        if (word.value) {
-          inp.value = word.value;
+        if (!word.value) return;
+        const concept = conceptList().find(c => c.id === word.value);
+        if (concept) {
+          inp.value = concept.concept;
           inp.dispatchEvent(new Event('input', { bubbles: true }));
         }
       });
@@ -506,6 +552,10 @@
 
     function userWords() {
       return STATE.lab.compounds.filter(c => !c.generator_hint && c.state !== 'rejected');
+    }
+
+    function generatedLabWords() {
+      return STATE.lab.compounds.filter(c => c.generator_hint && c.state !== 'rejected');
     }
 
     /** Roots first, then compounds, matches computeNextStep in the lab API. */
@@ -731,8 +781,10 @@
             speakParts: composerCanListen(picks) ? composerFlatSpellings(picks) : [],
             showBadges: false,
             builtFromRemovable: true,
+            builtFromHideBadges: true,
             hearId: 'wc-hear',
             showHear: composerCanListen(picks),
+            hearRowExtra: '<button type="button" class="btn" id="wc-explore" disabled>Explore preview</button>',
           });
           previewEl.querySelectorAll('[data-remove-idx]').forEach((piece) => {
             piece.addEventListener('click', () => {
@@ -745,9 +797,10 @@
       const spelling = picks.length ? resolveComposerSpelling(picks) : '';
       if (picks.length >= 2 && !meaning) {
         const sug = picks.map(compDisplayLabel).join(' + ');
-        $('wc-meaning').placeholder = sug;
+        $('wc-meaning').placeholder = `e.g. ${sug}`;
+      } else if ($('wc-meaning')) {
+        $('wc-meaning').placeholder = 'Primary gloss shown in the dictionary';
       }
-      const match = renderSpellingMatch('wc-match', spelling);
       const hearBtn = $('wc-hear');
       if (hearBtn) {
         const flat = composerFlatSpellings(picks);
@@ -833,16 +886,39 @@
       return false;
     }
 
-    function matcherEnglishWords() {
-      if (!STATE.lexicon) return [];
-      const words = STATE.lexicon.words.filter(w => w.source === 'roots');
+    function matcherConcepts() {
+      const concepts = conceptList().filter(c => !conceptMatchedInLab(c));
       const q = (STATE.matcherEnglishFilter ?? '').trim().toLowerCase();
-      if (!q) return words;
+      if (!q) return concepts;
       const tokens = q.split(/[\s-]+/).filter(Boolean);
-      return words.filter(w => {
-        const hay = `${w.word} ${w.gloss ?? ''} ${w.category ?? ''}`.toLowerCase();
+      return concepts.filter(c => {
+        const hay = `${c.id} ${c.concept}`.toLowerCase();
         return hay.includes(q) || tokens.every(t => hay.includes(t));
       });
+    }
+
+    function matcherFonoranEntries() {
+      ensureMatcherCatalog();
+      const catalog = STATE.matcherCatalog;
+      const seen = new Set();
+      const out = [];
+
+      for (const c of conceptList()) {
+        if (seen.has(c.spelling)) continue;
+        if (labSoundForSpelling(c.spelling)?.meaning?.trim()) continue;
+        seen.add(c.spelling);
+        out.push({ spelling: c.spelling, onset: '', vowel: '', coda: '', proposed: true });
+      }
+
+      for (const entry of catalog) {
+        if (seen.has(entry.spelling)) continue;
+        if (labSoundForSpelling(entry.spelling)?.meaning?.trim()) continue;
+        if (STATE.matcherDismissed.has(entry.spelling) && !STATE.matcherShowDismissed) continue;
+        seen.add(entry.spelling);
+        out.push({ ...entry, proposed: false });
+      }
+
+      return out.filter(entry => matcherFonoranMatchesFilter(entry, STATE.matcherFilter));
     }
 
     function matcherCellBodyHtml(spelling, meaning) {
@@ -875,14 +951,14 @@
         engPick.classList.toggle('is-filled', Boolean(eng));
         if (valEl) {
           valEl.innerHTML = eng
-            ? `<strong>${escapeHtml(eng.word)}</strong>`
-            : '<span class="fonoran-match-eq__placeholder">English</span>';
+            ? `<span class="matcher-concept-label mono">${escapeHtml(eng.id)}</span>`
+            : '<span class="fonoran-match-eq__placeholder">Concept</span>';
         }
       }
       if (meaningInp && document.activeElement !== meaningInp) {
         if (STATE.matcherSelectedEnglish && !meaningInp.dataset.userEdited) {
           const lab = STATE.matcherSelectedFonoran ? labSoundForSpelling(STATE.matcherSelectedFonoran) : null;
-          meaningInp.value = lab?.meaning?.trim() || STATE.matcherSelectedEnglish.word;
+          meaningInp.value = lab?.meaning?.trim() || STATE.matcherSelectedEnglish.concept || STATE.matcherSelectedEnglish.id;
         } else if (!STATE.matcherSelectedEnglish && !STATE.matcherSelectedFonoran) {
           meaningInp.value = '';
           delete meaningInp.dataset.userEdited;
@@ -912,22 +988,24 @@
 
     async function assignMatcherPair() {
       const spelling = STATE.matcherSelectedFonoran;
+      const concept = STATE.matcherSelectedEnglish;
       const meaning = $('wm-meaning')?.value.trim();
-      if (!spelling || !STATE.matcherSelectedEnglish || !meaning) return;
+      if (!spelling || !concept || !meaning) return;
       try {
         const exists = labSoundForSpelling(spelling);
+        const body = { meaning, concept_id: concept.id };
         if (exists) {
           await api(`/api/fonoran/lab/sounds/${encodeURIComponent(spelling)}`, {
             method: 'PATCH',
-            body: JSON.stringify({ meaning }),
+            body: JSON.stringify(body),
           });
         } else {
           await api('/api/fonoran/lab/sounds', {
             method: 'POST',
-            body: JSON.stringify({ spelling, meaning }),
+            body: JSON.stringify({ spelling, ...body }),
           });
         }
-        toast(`Assigned ${spelling} = ${meaning}`);
+        toast(`Assigned ${spelling} → ${concept.id}`);
         const meaningInp = $('wm-meaning');
         if (meaningInp) delete meaningInp.dataset.userEdited;
         await load({ skipRender: true });
@@ -937,18 +1015,13 @@
 
     function renderWordMatcher() {
       if (!STATE.lab || !$('wm-fonoran')) return;
-      ensureMatcherCatalog();
+      ensureLexicon();
       loadMatcherDismissed();
-      const catalog = STATE.matcherCatalog;
       const fonEl = $('wm-fonoran');
       const engEl = $('wm-english');
       if (!fonEl || !engEl) return;
 
-      const visibleFon = catalog.filter(entry => {
-        const dismissed = STATE.matcherDismissed.has(entry.spelling);
-        if (dismissed && !STATE.matcherShowDismissed) return false;
-        return matcherFonoranMatchesFilter(entry, STATE.matcherFilter);
-      });
+      const visibleFon = matcherFonoranEntries();
 
       fonEl.innerHTML = visibleFon.length
         ? visibleFon.map(entry => {
@@ -958,24 +1031,24 @@
           const selected = STATE.matcherSelectedFonoran === entry.spelling;
           return `<button type="button" class="root-cell${selected ? ' is-selected' : ''}${meaning ? ' is-named' : ''}${dismissed ? ' is-dismissed' : ''}" data-wm-fonoran="${escapeHtml(entry.spelling)}">${matcherCellBodyHtml(entry.spelling, meaning)}</button>`;
         }).join('')
-        : '<p class="empty sans" style="margin:0">No syllables match this filter.</p>';
+        : '<p class="empty sans" style="margin:0">No unmatched Fonoran roots.</p>';
 
-      const engWords = matcherEnglishWords();
-      engEl.innerHTML = engWords.length
-        ? engWords.map(w => {
-          const selected = STATE.matcherSelectedEnglish?.word === w.word;
-          return `<button type="button" class="root-cell eng-cell${selected ? ' is-selected' : ''}" data-wm-english="${escapeHtml(w.word)}">
-            <span class="sp">${escapeHtml(w.word)}</span>
-            <span class="mn gloss">${escapeHtml(w.gloss || w.word)}</span>
-            <span class="matcher-cat">${escapeHtml(w.category || '')}</span>
+      const concepts = matcherConcepts();
+      engEl.innerHTML = concepts.length
+        ? concepts.map(c => {
+          const selected = STATE.matcherSelectedEnglish?.id === c.id;
+          return `<button type="button" class="root-cell eng-cell concept-cell${selected ? ' is-selected' : ''}" data-wm-concept="${escapeHtml(c.id)}">
+            <span class="sp">${escapeHtml(c.id)}</span>
+            <span class="mn gloss">${escapeHtml(c.concept.split(';')[0])}</span>
+            <span class="matcher-cat">${escapeHtml(c.domain || '')}</span>
           </button>`;
         }).join('')
-        : '<p class="empty sans" style="margin:0">No English roots match.</p>';
+        : '<p class="empty sans" style="margin:0">All concepts are matched in your lab.</p>';
 
-      const namedCount = catalog.filter(e => labSoundForSpelling(e.spelling)?.meaning?.trim()).length;
+      const namedCount = (STATE.lab.sounds ?? []).filter(s => s.meaning?.trim() && s.state !== 'rejected').length;
       const statsEl = $('wm-stats');
       if (statsEl) {
-        statsEl.textContent = `${visibleFon.length} Fonoran · ${engWords.length} English roots · ${namedCount} named in lab`;
+        statsEl.textContent = `${visibleFon.length} Fonoran · ${concepts.length} concepts · ${namedCount} named in lab`;
       }
 
       fonEl.querySelectorAll('[data-wm-fonoran]').forEach(btn => {
@@ -987,7 +1060,7 @@
           if (meaningInp) {
             delete meaningInp.dataset.userEdited;
             if (STATE.matcherSelectedEnglish) {
-              meaningInp.value = lab?.meaning?.trim() || STATE.matcherSelectedEnglish.word;
+              meaningInp.value = lab?.meaning?.trim() || STATE.matcherSelectedEnglish.concept;
             } else if (lab?.meaning) {
               meaningInp.value = lab.meaning;
             }
@@ -995,16 +1068,16 @@
           renderWordMatcher();
         });
       });
-      engEl.querySelectorAll('[data-wm-english]').forEach(btn => {
+      engEl.querySelectorAll('[data-wm-concept]').forEach(btn => {
         btn.addEventListener('click', () => {
-          const word = btn.dataset.wmEnglish;
-          const entry = STATE.lexicon?.words?.find(w => w.word === word);
-          STATE.matcherSelectedEnglish = entry ?? { word, gloss: word, category: '' };
+          const id = btn.dataset.wmConcept;
+          const entry = conceptList().find(c => c.id === id);
+          STATE.matcherSelectedEnglish = entry ?? null;
           const meaningInp = $('wm-meaning');
           if (meaningInp && document.activeElement !== meaningInp) {
             delete meaningInp.dataset.userEdited;
             const lab = STATE.matcherSelectedFonoran ? labSoundForSpelling(STATE.matcherSelectedFonoran) : null;
-            meaningInp.value = lab?.meaning?.trim() || word;
+            meaningInp.value = lab?.meaning?.trim() || entry?.concept || '';
           }
           renderWordMatcher();
         });
@@ -1079,7 +1152,7 @@
       };
     }
 
-    function buildBuiltFromComposeHtml(f, { removable = false } = {}) {
+    function buildBuiltFromComposeHtml(f, { removable = false, hideTypeBadge = false } = {}) {
       const components = f.components ?? [];
       if (!components.length) return '';
       return components.map((c, i) => {
@@ -1088,17 +1161,22 @@
         const removeAttrs = removable
           ? ` class="word-compose__piece word-compose__piece--removable" data-remove-idx="${i}" data-write title="Remove ${escapeHtml(spelling)}"`
           : ' class="word-compose__piece"';
+        const head = hideTypeBadge
+          ? `<span class="mono">${escapeHtml(spelling)}</span>`
+          : `${typeBadge(c.type)} <span class="mono">${escapeHtml(spelling)}</span>`;
         return `${op}<div${removeAttrs}>
-          <span class="word-compose__piece-head">${typeBadge(c.type)} <span class="mono">${escapeHtml(spelling)}</span></span>
+          <div class="word-compose__piece-row">
+            <span class="word-compose__piece-head">${head}</span>
+            ${removable ? '<span class="word-compose__remove" aria-hidden="true">×</span>' : ''}
+          </div>
           <span class="word-compose__piece-meaning">${escapeHtml(meaning)}</span>
-          ${removable ? '<span class="word-compose__remove" aria-hidden="true">×</span>' : ''}
         </div>`;
       }).join('');
     }
 
-    function buildBuiltFromSectionHtml(f, { removable = false, wrapSection = true } = {}) {
+    function buildBuiltFromSectionHtml(f, { removable = false, wrapSection = true, hideTypeBadge = false } = {}) {
       const components = f.components ?? [];
-      const compose = buildBuiltFromComposeHtml(f, { removable });
+      const compose = buildBuiltFromComposeHtml(f, { removable, hideTypeBadge });
       if (!components.length) {
         const empty = '<p class="word-preview__footnote sans">Primitive root. Not built from other pieces.</p>';
         return wrapSection ? empty : empty;
@@ -1139,9 +1217,11 @@
       previewNote = '',
       metaExtra = '',
       hearId = '',
+      hearRowExtra = '',
       showBadges = true,
       showBuiltFrom = true,
       builtFromRemovable = false,
+      builtFromHideBadges = false,
       unnamedStyle = 'default',
       showHear = true,
       footerHtml = '',
@@ -1157,10 +1237,10 @@
           : '<span style="color:var(--draft);font-style:italic">unnamed</span>');
       const meaningClass = focus.meaning ? '' : 'unnamed';
       const badgeKind = kind === 'root' ? 'root' : 'word';
-      const builtFromHtml = showBuiltFrom ? buildBuiltFromSectionHtml(focus, { removable: builtFromRemovable }) : '';
+      const builtFromHtml = showBuiltFrom ? buildBuiltFromSectionHtml(focus, { removable: builtFromRemovable, hideTypeBadge: builtFromHideBadges }) : '';
       const hearHtml = showHear && hasSpelling
-        ? `<div class="word-preview__hear-row"><button type="button" class="hear-min word-preview__hear"${hearId ? ` id="${hearId}"` : ''} aria-label="Listen to ${escapeHtml(focus.spelling)}">▶ Listen</button></div>`
-        : '';
+        ? `<div class="word-preview__hear-row"><button type="button" class="hear-min word-preview__hear"${hearId ? ` id="${hearId}"` : ''} aria-label="Listen to ${escapeHtml(focus.spelling)}">▶ Listen</button>${hearRowExtra}</div>`
+        : (hearRowExtra ? `<div class="word-preview__hear-row">${hearRowExtra}</div>` : '');
       const showToolbar = showBadges || metaExtra;
 
       return `<div class="word-preview">
@@ -1480,240 +1560,343 @@
 
     function firstOpenIndex(list) { return list.findIndex(i => isOpen(i.state)); }
 
-    function renderWords() {
-      if (!STATE.lab) return;
-      const list = reviewItems();
-      const total = list.length;
-      const reviewEl = $('word-review');
-      if (!total) {
-        reviewEl.innerHTML = `
-          <div class="all-done">
-            <p class="big">🌱</p>
-            <h2>Nothing to review yet</h2>
-            <p class="sans" style="color:var(--muted);max-width:28rem;margin:0.5rem auto 1.25rem">Roots you add on <strong>Root Creator</strong> and words you save on <strong>Word Creator</strong> show up here one at a time.</p>
-            <button type="button" class="btn btn-primary" id="review-go-create">Create a root</button>
-          </div>`;
-        $('review-go-create')?.addEventListener('click', () => switchPage('roots'));
-        return;
+    function conceptForLabItem(item) {
+      if (!item) return null;
+      if (item.concept_id) return conceptList().find(c => c.id === item.concept_id) ?? null;
+      const m = item.meaning?.trim().toLowerCase();
+      if (!m) return null;
+      return conceptList().find(c => c.id === m || c.concept.toLowerCase() === m) ?? null;
+    }
+
+    function buildLabReviewCardHtml(item, { isSound = true } = {}) {
+      const concept = conceptForLabItem(item);
+      const conceptText = concept?.concept ?? item.meaning ?? '';
+      const domain = concept?.domain ?? (isSound ? 'root' : 'word');
+      const script = STATE.rules ? romanToFonoraScript(item.spelling, STATE.rules).phrase : '';
+      const ipa = concept?.ipa ?? romanToIpa(isSound ? item.spelling : (item.parts?.[0] ?? item.spelling));
+      return `<div class="root-review__card">
+        <div class="root-review__hero">
+          ${script ? `<div class="word-preview__script fonora-script symbol-text root-review__script">${escapeHtml(script)}</div>` : ''}
+          <p class="root-review__spelling review-word">${escapeHtml(item.spelling)}</p>
+          <p class="root-review__ipa mono">${escapeHtml(ipa)}</p>
+          <p class="root-review__concept review-meaning${conceptText ? '' : ' unnamed'}">${escapeHtml(conceptText || 'not named yet')}</p>
+        </div>
+        <div class="root-review__meta">
+          <span class="root-review__domain">${escapeHtml(domain)}</span>
+          ${badge(item.state || 'draft')}
+          ${typeBadge(isSound ? 'root' : 'word')}
+        </div>
+        ${concept?.reason ? `<div class="root-review__reason sans">${escapeHtml(concept.reason)}</div>` : ''}
+        ${!isSound && item.generator_hint ? `<div class="root-review__reason sans">Generator: ${escapeHtml(item.generator_hint)}</div>` : ''}
+      </div>`;
+    }
+
+    function reviewPickableCandidates() {
+      const q = (STATE.reviewFilter ?? '').trim().toLowerCase();
+      let list = rootReviewList();
+      if (STATE.reviewNeedsReviewOnly) list = list.filter(c => c.status === 'pending');
+      if (!q) return list;
+      return list.filter(c => `${c.id} ${c.spelling} ${c.concept} ${c.domain}`.toLowerCase().includes(q));
+    }
+
+    function reviewPickableLabSounds() {
+      if (!STATE.lab) return [];
+      const q = (STATE.reviewFilter ?? '').trim().toLowerCase();
+      let list = userSounds().map(s => ({ ...s, reviewKind: 'sound' }));
+      if (STATE.reviewNeedsReviewOnly) list = list.filter(s => isOpen(s.state));
+      if (!q) return list;
+      return list.filter(s => `${s.spelling} ${s.meaning ?? ''} ${s.legacy_label ?? ''}`.toLowerCase().includes(q));
+    }
+
+    function reviewPickableLabCompounds() {
+      if (!STATE.lab) return [];
+      const q = (STATE.reviewFilter ?? '').trim().toLowerCase();
+      let list = userWords().map(c => ({ ...c, reviewKind: 'compound' }));
+      if (STATE.reviewNeedsReviewOnly) list = list.filter(c => isOpen(c.state));
+      if (!q) return list;
+      return list.filter(c => `${c.spelling} ${c.meaning ?? ''}`.toLowerCase().includes(q));
+    }
+
+    function reviewPickableGeneratedCompounds() {
+      if (!STATE.lab) return [];
+      const q = (STATE.reviewFilter ?? '').trim().toLowerCase();
+      let list = generatedLabWords().map(c => ({ ...c, reviewKind: 'compound' }));
+      if (STATE.reviewNeedsReviewOnly) list = list.filter(c => isOpen(c.state));
+      if (!q) return list;
+      return list.filter(c => `${c.spelling} ${c.meaning ?? ''} ${c.generator_hint ?? ''}`.toLowerCase().includes(q));
+    }
+
+    function reviewSelectionKey(sel) {
+      return sel ? `${sel.type}:${sel.ref}` : '';
+    }
+
+    function isReviewSelected(type, ref) {
+      const sel = STATE.reviewSelection;
+      return sel?.type === type && sel.ref === ref;
+    }
+
+    function resolveReviewSelection() {
+      const sel = STATE.reviewSelection;
+      if (!sel) return null;
+      if (sel.type === 'candidate') {
+        const c = rootReviewList().find(x => x.id === sel.ref);
+        return c ? { kind: 'candidate', item: c } : null;
+      }
+      if (sel.type === 'sound') {
+        const s = userSounds().find(x => x.spelling === sel.ref);
+        return s ? { kind: 'sound', item: { ...s, reviewKind: 'sound' } } : null;
+      }
+      if (sel.type === 'compound') {
+        const c = userWords().find(x => x.id === sel.ref)
+          ?? generatedLabWords().find(x => x.id === sel.ref);
+        return c ? { kind: 'compound', item: { ...c, reviewKind: 'compound' } } : null;
+      }
+      return null;
+    }
+
+    function candidatePickerMarkup(candidates) {
+      return candidates.length ? candidates.map(c => {
+        const selected = isReviewSelected('candidate', c.id);
+        const glyphs = STATE.rules ? romanToFonoraScript(c.spelling, STATE.rules).phrase : '';
+        return `<button type="button" class="root-cell review-pick${selected ? ' is-selected' : ''}" data-review-type="candidate" data-review-ref="${escapeHtml(c.id)}">
+          ${typeBadge('root')}
+          <span class="sp">${escapeHtml(c.spelling)}</span>
+          ${glyphs ? `<span class="root-glyphs symbol-text">${escapeHtml(glyphs)}</span>` : ''}
+          <span class="mn">${escapeHtml(c.concept.split(';')[0])}</span>
+          <span class="review-pick__meta">${escapeHtml(c.id)} · ${rootStatusBadge(c.status)}</span>
+        </button>`;
+      }).join('') : '<p class="empty" style="grid-column:1/-1">No candidates match.</p>';
+    }
+
+    function reviewLabRootPickerMarkup(sounds) {
+      return sounds.length ? sounds.map(s => {
+        const selected = isReviewSelected('sound', s.spelling);
+        return `<button type="button" class="root-cell review-pick${selected ? ' is-selected' : ''}" data-review-type="sound" data-review-ref="${escapeHtml(s.spelling)}">
+          ${typeBadge('root')}${rootCellBodyHtml(s)}
+          <span class="review-pick__meta">${badge(s.state)}</span>
+        </button>`;
+      }).join('') : '<p class="empty" style="grid-column:1/-1">No roots match.</p>';
+    }
+
+    function reviewLabWordPickerMarkup(words) {
+      return words.length ? words.map(c => {
+        const selected = isReviewSelected('compound', c.id);
+        return `<button type="button" class="root-cell review-pick${selected ? ' is-selected' : ''}" data-review-type="compound" data-review-ref="${escapeHtml(c.id)}">
+          ${wordCellBodyHtml(c)}
+          <span class="review-pick__meta">${badge(c.state)}</span>
+        </button>`;
+      }).join('') : '<p class="empty" style="grid-column:1/-1">No words match.</p>';
+    }
+
+    function wireReviewPicker(container) {
+      container?.querySelectorAll('[data-review-type]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          STATE.reviewSelection = { type: btn.dataset.reviewType, ref: btn.dataset.reviewRef };
+          STATE.justSaved = null;
+          renderUnifiedReview();
+        });
+      });
+    }
+
+    function ensureReviewSelection(candidates, roots, words, generated) {
+      const resolved = resolveReviewSelection();
+      if (resolved) return;
+      const first = candidates[0]
+        ? { type: 'candidate', ref: candidates[0].id }
+        : roots[0]
+          ? { type: 'sound', ref: roots[0].spelling }
+          : words[0]
+            ? { type: 'compound', ref: words[0].id }
+            : generated[0]
+              ? { type: 'compound', ref: generated[0].id }
+              : null;
+      STATE.reviewSelection = first;
+    }
+
+    function renderReviewPicker() {
+      const showCandidates = STATE.reviewShowCandidates;
+      const showRoots = STATE.reviewShowLabRoots;
+      const showWords = STATE.reviewShowLabWords;
+      const showGenerated = STATE.reviewShowGeneratedWords;
+
+      $('rv-filters')?.querySelectorAll('[data-rv-filter]').forEach(chip => {
+        const key = chip.dataset.rvFilter;
+        const on = key === 'candidates' ? showCandidates
+          : key === 'roots' ? showRoots
+            : key === 'words' ? showWords
+              : key === 'generated' ? showGenerated
+                : STATE.reviewNeedsReviewOnly;
+        chip.classList.toggle('active', on);
+      });
+
+      $('rv-candidates-h')?.toggleAttribute('hidden', !showCandidates);
+      $('rv-candidates')?.toggleAttribute('hidden', !showCandidates);
+      $('rv-roots-h')?.toggleAttribute('hidden', !showRoots);
+      $('rv-roots')?.toggleAttribute('hidden', !showRoots);
+      $('rv-words-h')?.toggleAttribute('hidden', !showWords);
+      $('rv-words')?.toggleAttribute('hidden', !showWords);
+      $('rv-generated-h')?.toggleAttribute('hidden', !showGenerated);
+      $('rv-generated')?.toggleAttribute('hidden', !showGenerated);
+      $('rv-picker-empty')?.toggleAttribute('hidden', showCandidates || showRoots || showWords || showGenerated);
+
+      const candidates = showCandidates ? reviewPickableCandidates() : [];
+      const roots = showRoots ? reviewPickableLabSounds() : [];
+      const words = showWords ? reviewPickableLabCompounds() : [];
+      const generated = showGenerated ? reviewPickableGeneratedCompounds() : [];
+
+      if (STATE.rootReviewFocusPending) {
+        STATE.rootReviewFocusPending = false;
+        const pending = candidates.find(c => c.status === 'pending') ?? reviewPickableCandidates().find(c => c.status === 'pending');
+        if (pending) STATE.reviewSelection = { type: 'candidate', ref: pending.id };
       }
       if (STATE.reviewFocusPending) {
         STATE.reviewFocusPending = false;
-        const openIdx = firstOpenIndex(list);
-        if (openIdx >= 0) {
-          STATE.wordCursor = openIdx;
-          STATE.justSaved = null;
-        }
+        const openRoot = roots.find(s => isOpen(s.state)) ?? reviewPickableLabSounds().find(s => isOpen(s.state));
+        const openWord = words.find(c => isOpen(c.state)) ?? reviewPickableLabCompounds().find(c => isOpen(c.state));
+        const openGenerated = generated.find(c => isOpen(c.state)) ?? reviewPickableGeneratedCompounds().find(c => isOpen(c.state));
+        if (openRoot) STATE.reviewSelection = { type: 'sound', ref: openRoot.spelling };
+        else if (openWord) STATE.reviewSelection = { type: 'compound', ref: openWord.id };
+        else if (openGenerated) STATE.reviewSelection = { type: 'compound', ref: openGenerated.id };
       }
-      const open = list.filter(i => isOpen(i.state)).length;
-      if (STATE.wordCursor >= total) STATE.wordCursor = total - 1;
-      if (STATE.wordCursor < 0) STATE.wordCursor = 0;
-      const c = list[STATE.wordCursor];
+
+      ensureReviewSelection(candidates, roots, words, generated);
+
+      if (showCandidates) {
+        $('rv-candidates').innerHTML = candidatePickerMarkup(candidates);
+        wireReviewPicker($('rv-candidates'));
+      } else $('rv-candidates').innerHTML = '';
+
+      if (showRoots) {
+        $('rv-roots').innerHTML = reviewLabRootPickerMarkup(roots);
+        wireReviewPicker($('rv-roots'));
+      } else $('rv-roots').innerHTML = '';
+
+      if (showWords) {
+        $('rv-words').innerHTML = reviewLabWordPickerMarkup(words);
+        wireReviewPicker($('rv-words'));
+      } else $('rv-words').innerHTML = '';
+
+      if (showGenerated) {
+        $('rv-generated').innerHTML = reviewLabWordPickerMarkup(generated);
+        wireReviewPicker($('rv-generated'));
+      } else $('rv-generated').innerHTML = '';
+
+      return { candidates, roots, words, generated };
+    }
+
+    async function renderUnifiedReview() {
+      if (STATE.page !== 'review') return;
+      ensureSplitStickyObserver();
+
+      const workspace = $('word-review');
+      if (!workspace) return;
+
+      try {
+        await ensureRules();
+        if (STATE.reviewShowCandidates) {
+          try { await ensureRootCandidates(); } catch { /* candidates optional */ }
+        }
+        if (STATE.lab && (STATE.reviewShowLabRoots || STATE.reviewShowLabWords || STATE.reviewShowGeneratedWords)) {
+          await ensureLexicon();
+        }
+      } catch (err) {
+        workspace.innerHTML = `<div class="fonoran-split-empty"><p>${escapeHtml(err.message)}</p></div>`;
+        return;
+      }
+
+      const filterEl = $('rv-filter');
+      if (filterEl && filterEl.value !== STATE.reviewFilter) filterEl.value = STATE.reviewFilter;
+
+      const { candidates, roots, words, generated } = renderReviewPicker();
+      const resolved = resolveReviewSelection();
+
+      if (!resolved) {
+        workspace.innerHTML = `<div class="fonoran-split-empty"><p>${candidates.length + roots.length + words.length + generated.length ? 'Select an item on the left.' : 'Nothing to review yet. Create roots or words, or run <code>npm run fonoran:root-candidates</code>.'}</p></div>`;
+        requestAnimationFrame(syncSplitStickyOffsets);
+        return;
+      }
+
+      if (resolved.kind === 'candidate') renderCandidateReviewWorkspace(resolved.item);
+      else renderLabReviewWorkspace(resolved.item);
+
+      requestAnimationFrame(syncSplitStickyOffsets);
+    }
+
+    function renderLabReviewWorkspace(c) {
+      const reviewEl = $('word-review');
+      if (!reviewEl || !c) return;
       const isSound = c.reviewKind === 'sound';
-      const kindLabel = isSound ? 'Root' : 'Word';
-      const focus = focusFromReviewItem(c);
       const savedNote = STATE.justSaved === c.spelling
-        ? `<div class="saved-banner">✓ Saved <strong>${escapeHtml(c.spelling)}</strong>. You're still on this ${isSound ? 'root' : 'word'}. Find it anytime in Dictionary.</div>` : '';
+        ? `<div class="saved-banner">✓ Saved <strong>${escapeHtml(c.spelling)}</strong>. Find it anytime in Dictionary.</div>` : '';
       const feelPrompt = c.meaning
         ? `Does this ${isSound ? 'root' : 'word'} feel right?`
-        : `This ${isSound ? 'root' : 'word'} needs a meaning.`;
-      const editPanel = STATE.editing
-        ? (isSound ? renderSoundEdit(c) : renderWordEdit(c))
-        : '';
-      const feelPanel = STATE.editing ? '' : `
-            <p class="feel">${feelPrompt}</p>
-            <div class="feel-actions">
-              <button type="button" class="fa-approve" id="approve"${writeDisabledAttr(!c.meaning)} data-write>✓ Approve</button>
-              <button type="button" class="fa-edit" id="edit" data-write>✎ Edit</button>
-              <button type="button" class="fa-reject" id="reject" data-write>✕ Reject</button>
-            </div>`;
-      $('word-review').innerHTML = `
-        <div class="review">
-          ${neighborStrip(list, STATE.wordCursor)}
-          <div class="position">${kindLabel} ${STATE.wordCursor + 1} of ${total} · ${open} need review · ${badge(isSound ? 'base' : 'compound')} ${badge(c.state)}</div>
-          ${buildWordPreviewHtml(focus, {
-            kind: isSound ? 'root' : 'word',
-            speakParts: isSound ? [c.spelling] : c.parts,
-            showBadges: false,
-            unnamedStyle: 'review',
-            hearId: 'hear',
-          })}
+        : `This ${isSound ? 'root' : 'word'} needs a concept.`;
+      reviewEl.innerHTML = `
+        <div class="review root-review word-review review-workspace">
+          ${buildLabReviewCardHtml(c, { isSound })}
+          <button type="button" class="hear-min" id="hear">▶ Listen</button>
           <button type="button" class="btn" id="explore-item" style="margin-top:0.5rem">Explore family tree</button>
           ${savedNote}
-          ${editPanel}${feelPanel}
-          ${cardNav(STATE.wordCursor, total, 'word')}
+          <p class="feel">${feelPrompt}</p>
+          <div class="feel-actions root-review__actions">
+            <button type="button" class="fa-approve" id="approve"${writeDisabledAttr(!c.meaning)} data-write>✓ Approve</button>
+            <button type="button" class="fa-reject" id="reject" data-write>✕ Reject</button>
+          </div>
         </div>`;
-      wireCommon(c);
+      wireLabReviewCommon(c);
       $('explore-item')?.addEventListener('click', () => openExplorer(isSound ? 'root' : 'word', isSound ? c.spelling : c.id));
-      wireNeighbors(list, 'wordCursor', renderWords);
-      if (STATE.editing) {
-        if (isSound) wireSoundEdit(c);
-        else wireWordEdit(c);
-      } else wireFeel(c);
-    }
-
-    function renderSoundEdit(s) {
-      return `
-        <div class="edit-panel">
-          <div id="ed-live-pron">${pronBlock(s.spelling)}</div>
-          <button type="button" class="hear-min" id="ed-hear" style="margin:0.5rem 0 0" aria-label="Listen to this syllable">▶ Listen</button>
-          <label class="fld" for="ed-meaning">Meaning: name this root</label>
-          ${meaningPickerHtml('ed')}
-          <input type="text" id="ed-meaning" value="${escapeHtml(s.meaning ?? '')}" placeholder="e.g. water, motion…" data-write-input>
-          <div id="ed-dupe"></div>
-          <div class="edit-actions">
-            <button type="button" class="btn btn-primary" id="ed-save" data-write>Save &amp; approve</button>
-            <button type="button" class="btn" id="ed-cancel">Cancel</button>
-          </div>
-        </div>`;
-    }
-
-    function wireSoundEdit(s) {
-      STATE.editMeaning = s.meaning ?? '';
-      const inp = $('ed-meaning');
-      inp.addEventListener('input', () => { STATE.editMeaning = inp.value; renderDupe('sound', s.spelling); });
-      wireMeaningPicker('ed', 'ed-meaning');
-      renderDupe('sound', s.spelling);
-      $('ed-cancel').addEventListener('click', () => { STATE.editing = false; renderWords(); });
-      $('ed-hear')?.addEventListener('click', () => speakNeural(s.spelling));
-      $('ed-save').addEventListener('click', async () => {
-        const meaning = STATE.editMeaning.trim();
-        if (!meaning) { toast('Type a meaning first.'); return; }
-        try {
-          const changed = meaning !== (s.meaning ?? '');
-          await api(`/api/fonoran/lab/sounds/${encodeURIComponent(s.spelling)}`, {
-            method: 'PATCH',
-            body: JSON.stringify({ meaning, state: changed && s.meaning ? 'revised' : 'approved' }),
-          });
-          STATE.editing = false;
-          STATE.justSaved = s.spelling;
-          await load({ skipRender: true });
-          const list = reviewItems();
-          const idx = list.findIndex(x => x.spelling === s.spelling && x.reviewKind === 'sound');
-          STATE.wordCursor = idx >= 0 ? idx : STATE.wordCursor;
-          toast(`Saved ${s.spelling}`);
-          renderWords();
-        } catch (e) { toast(e.message); }
-      });
-    }
-
-    function renderWordEdit(c) {
-      return `
-        <div class="edit-panel">
-          <div id="ed-live-pron"></div>
-          <button type="button" class="hear-min" id="ed-hear" style="margin:0.5rem 0 0" aria-label="Listen to this recipe">▶ Listen</button>
-          <label class="fld" for="ed-meaning">Meaning: keep it, or rename the word</label>
-          ${meaningPickerHtml('ed')}
-          <input type="text" id="ed-meaning" value="${escapeHtml(c.meaning ?? '')}" placeholder="${escapeHtml(c.suggested_meaning || 'e.g. river, friend…')}" data-write-input>
-          <div id="ed-dupe"></div>
-          <label class="fld">Recipe: which sounds build it (tap to remove)</label>
-          <div class="pick" id="ed-recipe-pick"></div>
-          <div class="recipe-preview" id="ed-recipe-preview"></div>
-          <input type="search" id="ed-recipe-filter" placeholder="Find a sound by meaning… e.g. bond, motion">
-          <div class="sound-grid" id="ed-recipe-sounds"></div>
-          <div class="edit-actions">
-            <button type="button" class="btn btn-primary" id="ed-save" data-write>Save &amp; approve</button>
-            <button type="button" class="btn" id="ed-cancel">Cancel</button>
-          </div>
-        </div>`;
-    }
-
-    function wireWordEdit(c) {
-      STATE.editMeaning = c.meaning ?? '';
-      STATE.recipe = (c.components ?? c.parts.map(p => ({ type: 'root', ref: p, spelling: p }))).map(x => ({ ...x }));
-      STATE.recipeFilter = '';
-      const inp = $('ed-meaning');
-      inp.addEventListener('input', () => { STATE.editMeaning = inp.value; renderDupe('compound', c.id); });
-      wireMeaningPicker('ed', 'ed-meaning');
-      renderDupe('compound', c.id);
-      renderRecipe(c);
-      $('ed-cancel').addEventListener('click', () => { STATE.editing = false; renderWords(); });
-      $('ed-hear')?.addEventListener('click', () => speakNeural(composerFlatSpellings(STATE.recipe)));
-      $('ed-save').addEventListener('click', async () => {
-        const meaning = STATE.editMeaning.trim();
-        if (!meaning) { toast('Type a meaning first.'); return; }
-        const recipeChanged = resolveComposerSpelling(STATE.recipe) !== c.spelling;
-        let savedSpelling = recipeChanged ? resolveComposerSpelling(STATE.recipe) : c.spelling;
-        try {
-          if (recipeChanged) {
-            if (STATE.recipe.length < 2) { toast('A word needs at least 2 components.'); return; }
-            const res = await api(`/api/fonoran/lab/compounds/${encodeURIComponent(c.id)}`, {
-              method: 'PATCH',
-              body: JSON.stringify({ components: composerToApi(STATE.recipe), meaning, allow_unapproved: STATE.showUnapprovedWords }),
-            });
-            savedSpelling = res.spelling ?? savedSpelling;
-          } else {
-            const changed = meaning !== (c.meaning ?? '');
-            await api(`/api/fonoran/lab/compounds/${encodeURIComponent(c.id)}`, { method: 'PATCH', body: JSON.stringify({ meaning, state: changed && c.meaning ? 'revised' : 'approved' }) });
-          }
-          STATE.editing = false;
-          STATE.justSaved = savedSpelling;
-          await load({ skipRender: true });
-          const list = reviewItems();
-          const idx = list.findIndex(x => x.spelling === savedSpelling && x.reviewKind === 'compound');
-          STATE.wordCursor = idx >= 0 ? idx : STATE.wordCursor;
-          toast(`Saved ${savedSpelling}`);
-          renderWords();
-        } catch (e) { toast(e.message); }
-      });
-    }
-
-    function renderRecipe(c) {
-      const comps = STATE.recipe;
-      const spelling = resolveComposerSpelling(comps);
-      $('ed-recipe-pick').innerHTML = comps.length
-        ? comps.map((comp, i) => `<span class="tok" data-idx="${i}" data-write>${typeBadge(comp.type)} <span class="mono">${escapeHtml(comp.spelling || comp.ref)}</span> = ${escapeHtml(compDisplayLabel(comp))} ×</span>`).join('')
-        : '<span class="sans" style="color:var(--muted);font-size:0.84rem">Add at least 2 components…</span>';
-      const gloss = comps.map(compDisplayLabel).map(escapeHtml).join(' + ');
-      $('ed-recipe-preview').innerHTML = `
-        <span class="mono" style="font-size:1.2rem;font-weight:700;color:var(--word)">${spelling || '-'}</span>
-        ${comps.length ? `<span class="sans" style="font-size:0.86rem">${gloss}</span>` : ''}`;
-      const live = $('ed-live-pron');
-      if (live) live.innerHTML = comps.length ? pronBlock(composerFlatSpellings(comps)) : '<p class="sans" style="color:var(--muted);font-size:0.84rem">Add components to preview script &amp; pronunciation.</p>';
-      $('ed-recipe-pick').querySelectorAll('.tok').forEach(t => t.addEventListener('click', () => { STATE.recipe.splice(Number(t.dataset.idx), 1); renderRecipe(c); }));
-      const f = $('ed-recipe-filter');
-      f.addEventListener('input', e => { STATE.recipeFilter = e.target.value; renderRecipeSounds(c); });
-      renderRecipeSounds(c);
-    }
-    function renderRecipeSounds(c) {
-      const grid = $('ed-recipe-sounds'); if (!grid) return;
-      const omitIds = [...STATE.recipe.filter(x => x.type === 'word').map(x => x.ref), c.id];
-      grid.innerHTML = `<h4 class="picker-h">Primitive roots</h4><div class="sound-grid">${rootPickerWithBadge(pickableRoots(STATE.recipeFilter))}</div>
-        <h4 class="picker-h">Approved words</h4><div class="sound-grid">${wordPickerMarkup(pickableWords(STATE.recipeFilter, { omitIds }))}</div>`;
-      grid.querySelectorAll('[data-add-root]').forEach(b => b.addEventListener('click', () => {
-        STATE.recipe.push({ type: 'root', ref: b.dataset.addRoot, spelling: b.dataset.addRoot });
-        renderRecipe(c);
-      }));
-      grid.querySelectorAll('[data-add-word]').forEach(b => b.addEventListener('click', () => {
-        const w = STATE.lab.compounds.find(x => x.id === b.dataset.addWord);
-        if (!w) return;
-        STATE.recipe.push({ type: 'word', ref: w.id, spelling: w.spelling, meaning: w.meaning });
-        renderRecipe(c);
-      }));
+      wireFeel(c);
     }
 
     /* ---------- shared review wiring ---------- */
-    function cardNav(cursor, total, kind) {
+    function cardNav(cursor, total, kind, footerHtml = null) {
       return `<div class="card-nav">
         <button type="button" id="nav-prev" ${cursor === 0 ? 'disabled' : ''}>← Prev</button>
         <span class="pos">${cursor + 1} / ${total}</span>
         <button type="button" id="nav-next" ${cursor >= total - 1 ? 'disabled' : ''}>Next →</button>
-      </div>${progressBar()}`;
+      </div>${footerHtml ?? ''}`;
     }
-    function progressBar() {
-      const all = reviewItems();
-      const done = all.filter(i => reviewed(i.state)).length;
-      const pct = all.length ? Math.round((done / all.length) * 100) : 0;
-      return `<div class="progress"><span style="width:${pct}%"></span></div><div class="progress-label">${done} of ${all.length} reviewed (${pct}%)</div>`;
+    function buildReviewProgressHtml() {
+      const tracks = [];
+      const labAll = reviewItems();
+      if (labAll.length) {
+        const done = labAll.filter(i => reviewed(i.state)).length;
+        const pct = Math.round((done / labAll.length) * 100);
+        const open = labAll.filter(i => isOpen(i.state)).length;
+        tracks.push({
+          label: 'Roots & words reviewed',
+          done,
+          total: labAll.length,
+          pct,
+          note: open ? `${open} need review` : '',
+        });
+      }
+      const roots = rootReviewList();
+      if (roots.length) {
+        const done = roots.filter(x => x.status === 'approved' || x.status === 'rejected').length;
+        const pct = Math.round((done / roots.length) * 100);
+        const pending = roots.filter(x => x.status === 'pending').length;
+        tracks.push({
+          label: 'Root candidates decided',
+          done,
+          total: roots.length,
+          pct,
+          note: pending ? `${pending} pending` : '',
+        });
+      }
+      if (!tracks.length) return '';
+      return `<div class="health-review-stats">${tracks.map(t => `
+        <div class="health-review-stat">
+          <p class="health-review-stat__label">${escapeHtml(t.label)}</p>
+          <div class="progress"><span style="width:${t.pct}%"></span></div>
+          <p class="progress-label">${t.done} of ${t.total} (${t.pct}%)${t.note ? ` · ${escapeHtml(t.note)}` : ''}</p>
+        </div>`).join('')}</div>`;
     }
-    function wireCommon(item) {
+    function wireLabReviewCommon(item) {
       const speakParts = item.reviewKind === 'sound' ? [item.spelling] : item.parts;
-      $('hear').addEventListener('click', () => speakNeural(speakParts));
-      const prev = $('nav-prev'), next = $('nav-next');
-      prev?.addEventListener('click', () => { if (STATE.wordCursor > 0) { STATE.wordCursor--; STATE.editing = false; STATE.justSaved = null; renderWords(); } });
-      next?.addEventListener('click', () => { const t = reviewItems().length; if (STATE.wordCursor < t - 1) { STATE.wordCursor++; STATE.editing = false; STATE.justSaved = null; renderWords(); } });
+      $('hear')?.addEventListener('click', () => speakNeural(speakParts));
     }
     function wireFeel(item) {
-      $('edit')?.addEventListener('click', () => { STATE.editing = true; renderWords(); });
       const isSound = item.reviewKind === 'sound';
       $('approve')?.addEventListener('click', async () => {
         if (isSound) {
@@ -1721,24 +1904,144 @@
         } else {
           await api(`/api/fonoran/lab/compounds/${encodeURIComponent(item.id)}`, { method: 'PATCH', body: JSON.stringify({ meaning: item.meaning, state: 'approved' }) });
         }
-        toast(`Approved ${item.spelling}`); await advanceWord();
+        toast(`Approved ${item.spelling}`); await advanceReviewItem(item);
       });
       $('reject')?.addEventListener('click', async () => {
         const kind = isSound ? 'sound' : 'compound';
         const id = isSound ? item.spelling : item.id;
         await api(`/api/fonoran/lab/state/${kind}/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify({ state: 'rejected' }) });
-        toast(`Rejected ${item.spelling}`); await advanceWord();
+        toast(`Rejected ${item.spelling}`); await advanceReviewItem(item);
       });
     }
-    async function advanceWord() {
-      const before = STATE.wordCursor;
+    async function advanceReviewItem(current) {
       await load({ skipRender: true });
-      const list = reviewItems();
-      let i = before + 1;
-      while (i < list.length && !isOpen(list[i].state)) i++;
-      if (i < list.length) STATE.wordCursor = i;
-      else { const f = firstOpenIndex(list); STATE.wordCursor = f >= 0 ? f : Math.min(before, list.length - 1); }
-      renderWords();
+      const pool = [
+        ...reviewPickableLabSounds().map(s => ({ type: 'sound', ref: s.spelling, open: isOpen(s.state) })),
+        ...reviewPickableLabCompounds().map(c => ({ type: 'compound', ref: c.id, open: isOpen(c.state) })),
+        ...reviewPickableGeneratedCompounds().map(c => ({ type: 'compound', ref: c.id, open: isOpen(c.state) })),
+      ];
+      const curKey = current.reviewKind === 'sound' ? `sound:${current.spelling}` : `compound:${current.id}`;
+      const idx = pool.findIndex(p => `${p.type}:${p.ref}` === curKey);
+      let next = null;
+      for (let i = idx + 1; i < pool.length; i++) {
+        if (pool[i].open) { next = pool[i]; break; }
+      }
+      if (!next) next = pool.find(p => p.open) ?? pool[idx + 1] ?? pool[idx] ?? null;
+      if (next) STATE.reviewSelection = { type: next.type, ref: next.ref };
+      STATE.justSaved = null;
+      renderUnifiedReview();
+    }
+
+    /* ---------- ROOT REVIEW ---------- */
+    function rootReviewList() {
+      return STATE.rootCandidates?.candidates ?? [];
+    }
+
+    function firstPendingRootIndex(list) {
+      return list.findIndex(c => c.status === 'pending');
+    }
+
+    function rootStatusBadge(status) {
+      const map = { pending: 'needs_review', approved: 'approved', rejected: 'rejected' };
+      return badge(map[status] ?? status);
+    }
+
+    function rootScoreBar(score, max = 5) {
+      const pct = Math.round((score / max) * 100);
+      return `<div class="root-review__bar" aria-hidden="true"><span style="width:${pct}%"></span></div>`;
+    }
+
+    function buildRootReviewCardHtml(c) {
+      const script = STATE.rules ? romanToFonoraScript(c.spelling, STATE.rules).phrase : '';
+      return `<div class="root-review__card">
+        <div class="root-review__hero">
+          ${script ? `<div class="word-preview__script fonora-script symbol-text root-review__script">${escapeHtml(script)}</div>` : ''}
+          <p class="root-review__spelling review-word">${escapeHtml(c.spelling)}</p>
+          <p class="root-review__ipa mono">${escapeHtml(c.ipa)}</p>
+          <p class="root-review__concept review-meaning">${escapeHtml(c.concept)}</p>
+        </div>
+        <div class="root-review__meta">
+          <span class="root-review__domain">${escapeHtml(c.domain)}</span>
+          ${rootStatusBadge(c.status)}
+        </div>
+        <div class="root-review__reason sans">${escapeHtml(c.reason)}</div>
+        <div class="root-review__scores">
+          <div class="root-review__score">
+            <span class="root-review__score-label">Pronunciation</span>
+            <strong>${escapeHtml(c.pronunciation_ease_label)}</strong>
+            ${rootScoreBar(c.pronunciation_ease)}
+          </div>
+          <div class="root-review__score">
+            <span class="root-review__score-label">Compound usefulness</span>
+            <strong>${escapeHtml(c.semantic_usefulness_label)}</strong>
+            ${rootScoreBar(c.semantic_usefulness)}
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function renderCandidateReviewWorkspace(c) {
+      const el = $('word-review');
+      if (!el || !c) return;
+
+      el.innerHTML = `
+        <div class="review root-review review-workspace">
+          ${buildRootReviewCardHtml(c)}
+          <button type="button" class="hear-min" id="root-hear">▶ Listen</button>
+          <p class="feel">Does this root feel right?</p>
+          <div class="feel-actions root-review__actions">
+            <button type="button" class="fa-approve" id="root-approve" data-write ${c.status === 'approved' ? 'disabled' : ''}>✓ Approve</button>
+            <button type="button" class="fa-reject" id="root-reject" data-write ${c.status === 'rejected' ? 'disabled' : ''}>✕ Reject</button>
+          </div>
+        </div>`;
+
+      $('root-hear')?.addEventListener('click', () => speakNeural([c.spelling]));
+      wireRootActions(c);
+    }
+
+    function wireRootActions(c) {
+      $('root-approve')?.addEventListener('click', async () => {
+        try {
+          await api(`/api/fonoran/roots/candidates/${encodeURIComponent(c.id)}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ action: 'approve' }),
+          });
+          STATE.rootCandidates = null;
+          await advanceRoot();
+          toast(`Approved ${c.spelling} → ${c.id}`);
+        } catch (err) { toast(err.message); }
+      });
+      $('root-reject')?.addEventListener('click', async () => {
+        try {
+          await api(`/api/fonoran/roots/candidates/${encodeURIComponent(c.id)}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ action: 'reject' }),
+          });
+          STATE.rootCandidates = null;
+          await advanceRoot();
+          toast(`Rejected ${c.id}`);
+        } catch (err) { toast(err.message); }
+      });
+    }
+
+    async function ensureRootCandidates() {
+      if (STATE.rootCandidates) return STATE.rootCandidates;
+      STATE.rootCandidates = await api('/api/fonoran/roots/candidates');
+      return STATE.rootCandidates;
+    }
+
+    async function advanceRoot() {
+      await ensureRootCandidates();
+      const list = reviewPickableCandidates();
+      const curId = STATE.reviewSelection?.type === 'candidate' ? STATE.reviewSelection.ref : null;
+      const idx = list.findIndex(c => c.id === curId);
+      let next = null;
+      for (let i = idx + 1; i < list.length; i++) {
+        if (list[i].status === 'pending') { next = list[i]; break; }
+      }
+      if (!next) next = list.find(c => c.status === 'pending') ?? list[idx + 1] ?? list[idx] ?? null;
+      if (next) STATE.reviewSelection = { type: 'candidate', ref: next.id };
+      renderUnifiedReview();
     }
 
     /* ---------- spelling lookup (word creator) ---------- */
@@ -1757,9 +2060,20 @@
       return !match.item.generator_hint;
     }
 
-    function spellingMatchHtml(match) {
+    function spellingMatchHtml(match, { compact = false } = {}) {
       if (!match) return '';
       const { kind, item } = match;
+      const id = kind === 'sound' ? item.spelling : item.id;
+      if (compact) {
+        const gloss = item.meaning?.trim();
+        const suffix = item.generator_hint && !gloss
+          ? ' · generator suggestion — save below to claim'
+          : (gloss ? ` · ${gloss}` : '');
+        return `<div class="word-match word-match--compact">
+          <p class="word-match__compact-line"><strong class="mono">${escapeHtml(item.spelling)}</strong> already in your lab${escapeHtml(suffix)}.
+          <button type="button" class="linkish" data-view-match="${kind}" data-match-id="${escapeHtml(id)}">Open</button></p>
+        </div>`;
+      }
       const focus = {
         spelling: item.spelling,
         meaning: item.meaning,
@@ -1769,7 +2083,6 @@
       const claimNote = item.generator_hint && !item.meaning?.trim()
         ? 'Generator suggestion. Save below to name it.'
         : item.generator_hint ? 'Generator suggestion.' : '';
-      const id = kind === 'sound' ? item.spelling : item.id;
       return `
         <div class="word-match">
           <p class="word-match__label">Already in your lab</p>
@@ -1784,30 +2097,16 @@
         </div>`;
     }
 
-    function renderSpellingMatch(boxId, spelling) {
+    function renderSpellingMatch(boxId, spelling, { compact = false } = {}) {
       const box = $(boxId);
       if (!box) return null;
       const match = spelling ? lookupSpelling(spelling) : null;
-      box.innerHTML = match ? spellingMatchHtml(match) : '';
+      box.innerHTML = match ? spellingMatchHtml(match, { compact }) : '';
       box.querySelector('[data-view-match]')?.addEventListener('click', e => {
         const btn = e.currentTarget;
         openChain(btn.dataset.viewMatch, btn.dataset.matchId);
       });
       return match;
-    }
-
-    /* ---------- live duplicate warning ---------- */
-    function meaningMatches(meaning, selfKind, selfId) {
-      const m = (meaning ?? '').trim().toLowerCase(); if (!m) return [];
-      const hits = [];
-      for (const s of STATE.lab.sounds) { if (s.state === 'rejected') continue; if (selfKind === 'sound' && s.spelling === selfId) continue; if ((s.meaning ?? '').trim().toLowerCase() === m) hits.push(`${s.spelling} (sound)`); }
-      for (const c of STATE.lab.compounds) { if (c.state === 'rejected') continue; if (selfKind === 'compound' && c.id === selfId) continue; if ((c.meaning ?? '').trim().toLowerCase() === m) hits.push(`${c.spelling} (compound)`); }
-      return hits;
-    }
-    function renderDupe(kind, id) {
-      const box = $('ed-dupe'); if (!box) return;
-      const hits = meaningMatches(STATE.editMeaning, kind, id);
-      box.innerHTML = hits.length ? `<div class="dupe"><strong>⚠ Already in use:</strong> “${escapeHtml(STATE.editMeaning.trim())}” also means <span class="mono">${hits.join('</span>, <span class="mono">')}</span>. Usually you want each word distinct.</div>` : '';
     }
 
     /* ---------- Language Explorer ---------- */
@@ -1910,6 +2209,315 @@
 
     function openChain(kind, id) {
       openExplorer(kind === 'sound' ? 'root' : 'word', kind === 'sound' ? id : id);
+    }
+
+    /* ---------- CONCEPT EDITOR ---------- */
+    function conceptEditorWordBankText(c) {
+      if (c.stored_aliases?.length) return c.stored_aliases.join('\n');
+      return (c.aliases ?? []).filter(a => a !== c.id).join('\n');
+    }
+
+    function conceptEditorEmptyDraft() {
+      return { id: '', concept: '', domain: 'being', spelling: '', ipa: '', aliases: '', status: 'pending' };
+    }
+
+    function conceptEditorDraftFrom(c) {
+      return {
+        id: c.id,
+        concept: c.concept,
+        domain: c.domain,
+        spelling: c.spelling,
+        ipa: c.ipa,
+        aliases: conceptEditorWordBankText(c),
+        status: c.status,
+      };
+    }
+
+    function conceptEditorFilteredList() {
+      const concepts = conceptList();
+      const q = (STATE.conceptEditorFilter ?? '').trim().toLowerCase();
+      if (!q) return concepts;
+      const tokens = q.split(/[\s-]+/).filter(Boolean);
+      return concepts.filter(c => {
+        const hay = `${c.id} ${c.concept} ${c.domain} ${c.spelling} ${(c.aliases ?? []).join(' ')}`.toLowerCase();
+        return hay.includes(q) || tokens.every(t => hay.includes(t));
+      });
+    }
+
+    function conceptEditorStatusBadge(status) {
+      if (status === 'approved') return '<span class="concept-editor__status concept-editor__status--approved">approved</span>';
+      if (status === 'rejected') return '<span class="concept-editor__status concept-editor__status--rejected">rejected</span>';
+      return '<span class="concept-editor__status concept-editor__status--pending">pending</span>';
+    }
+
+    function conceptEditorIpaForSpelling(spelling) {
+      const sp = (spelling ?? '').trim().toLowerCase();
+      return sp ? romanToIpa(sp) : '';
+    }
+
+    function updateConceptEditorPron(spelling) {
+      const sp = (spelling ?? '').trim();
+      const shell = document.querySelector('.concept-editor__pron-shell');
+      const scriptEl = $('ce-pron-script');
+      const sayEl = $('ce-pron-say');
+      const likeEl = $('ce-pron-like');
+      const ipaEl = $('ce-ipa-display');
+      const invalidEl = $('ce-pron-invalid');
+      const hearBtn = $('ce-hear');
+      if (!scriptEl || !sayEl || !likeEl || !ipaEl) return;
+
+      const valid = isValidSyllable(sp);
+      shell?.classList.toggle('is-empty', !sp);
+      shell?.classList.toggle('is-invalid', Boolean(sp && !valid));
+
+      if (!sp) {
+        scriptEl.textContent = '\u00a0';
+        scriptEl.classList.add('is-placeholder');
+        scriptEl.setAttribute('aria-hidden', 'true');
+        sayEl.textContent = '-';
+        likeEl.textContent = '-';
+        ipaEl.textContent = '-';
+        if (invalidEl) { invalidEl.hidden = true; invalidEl.textContent = ''; }
+        if (hearBtn) hearBtn.disabled = true;
+        return;
+      }
+
+      if (!valid) {
+        scriptEl.textContent = '\u00a0';
+        scriptEl.classList.add('is-placeholder');
+        scriptEl.setAttribute('aria-hidden', 'true');
+        sayEl.textContent = '-';
+        likeEl.textContent = '-';
+        ipaEl.textContent = '-';
+        if (invalidEl) {
+          invalidEl.hidden = false;
+          invalidEl.textContent = `“${sp}” isn’t a valid Fonoran syllable yet.`;
+        }
+        if (hearBtn) hearBtn.disabled = true;
+        return;
+      }
+
+      const { script, sayLine, englishLine } = wordPreviewPron(sp);
+      scriptEl.textContent = script || '\u00a0';
+      scriptEl.classList.toggle('is-placeholder', !script);
+      scriptEl.toggleAttribute('aria-hidden', !script);
+      sayEl.textContent = sayLine || '-';
+      likeEl.textContent = englishLine || '-';
+      ipaEl.textContent = conceptEditorIpaForSpelling(sp) || '-';
+      if (invalidEl) { invalidEl.hidden = true; invalidEl.textContent = ''; }
+      if (hearBtn) hearBtn.disabled = false;
+    }
+
+    function renderConceptEditorDetail() {
+      const panel = $('concept-editor-detail');
+      if (!panel) return;
+      const d = STATE.conceptEditorDraft;
+      if (!d) {
+        panel.innerHTML = `<div class="fonoran-split-empty"><p>Select a concept on the left, or create a new one.</p></div>`;
+        return;
+      }
+
+      const knownDomains = [...new Set([...(STATE.conceptEditorDomains ?? []), d.domain].filter(Boolean))].sort();
+      const isKnownDomain = knownDomains.includes(d.domain);
+      const domainOpts = knownDomains
+        .map(dom => `<option value="${escapeHtml(dom)}"${dom === d.domain ? ' selected' : ''}>${escapeHtml(dom)}</option>`).join('');
+
+      const selected = conceptList().find(c => c.id === STATE.conceptEditorSelected);
+      const effectivePreview = selected?.aliases?.length
+        ? selected.aliases.slice(0, 24).map(a => `<span class="concept-editor__chip">${escapeHtml(a)}</span>`).join('')
+        : '<span class="concept-editor__chip concept-editor__chip--muted">Save to preview translator matches</span>';
+
+      const headHtml = STATE.conceptEditorIsNew
+        ? `<input type="text" id="ce-id" class="mono concept-editor__id-input" value="${escapeHtml(d.id)}" placeholder="concept-id" data-write-input autocomplete="off" spellcheck="false" aria-label="Concept id">`
+        : `<h3>${escapeHtml(d.id)}</h3>${conceptEditorStatusBadge(d.status)}`;
+
+      panel.innerHTML = `
+        <form class="concept-editor__form" id="concept-editor-form">
+          <div class="concept-editor__form-head">${headHtml}</div>
+          <label class="fld" for="ce-concept">Concept phrase</label>
+          <input type="text" id="ce-concept" value="${escapeHtml(d.concept)}" data-write-input autocomplete="off">
+          <label class="fld" for="ce-domain">Domain</label>
+          <select id="ce-domain" data-write-input>
+            ${domainOpts}
+            <option value="_custom"${isKnownDomain ? '' : ' selected'}>Custom domain…</option>
+          </select>
+          <input type="text" id="ce-domain-custom" class="concept-editor__domain-custom" placeholder="new domain" value="${isKnownDomain ? '' : escapeHtml(d.domain)}"${isKnownDomain ? ' hidden' : ''} data-write-input>
+          <div class="concept-editor__sound-section">
+            <label class="fld" for="ce-spelling">Fonoran sound</label>
+            <div class="concept-editor__sound-line">
+              <div class="concept-editor__pron-shell is-empty" aria-live="polite">
+                <div class="concept-editor__script fonora-script symbol-text" id="ce-pron-script" aria-hidden="true">&nbsp;</div>
+                <div class="concept-editor__pron-text">
+                  <div class="concept-editor__say pron-line">Say: <strong id="ce-pron-say">-</strong></div>
+                  <div class="concept-editor__like pron-english">Sounds like: <span id="ce-pron-like">-</span></div>
+                  <p class="concept-editor__ipa mono" id="ce-ipa-display">-</p>
+                </div>
+              </div>
+              <div class="concept-editor__sound-controls">
+                <input type="text" id="ce-spelling" class="mono" value="${escapeHtml(d.spelling)}" data-write-input autocomplete="off" spellcheck="false">
+                <button type="button" class="btn" id="ce-hear">▶ Hear</button>
+              </div>
+            </div>
+          </div>
+          <p class="concept-editor__invalid syl-invalid" id="ce-pron-invalid" hidden></p>
+          <label class="fld" for="ce-aliases">English word bank</label>
+          <p class="concept-editor__hint sans">One word or phrase per line. Used by the matcher and translator for fuzzy English matching.</p>
+          <textarea id="ce-aliases" rows="3" data-write-input>${escapeHtml(d.aliases)}</textarea>
+          <div class="concept-editor__preview" hidden>
+            <span class="concept-editor__preview-label sans">Effective matches after save</span>
+            <div class="concept-editor__chips">${effectivePreview}</div>
+          </div>
+          <div class="concept-editor__actions">
+            <button type="submit" class="btn btn-primary" data-write>${STATE.conceptEditorIsNew ? 'Create concept' : 'Save changes'}</button>
+            <button type="button" class="btn" id="ce-cancel">Discard changes</button>
+            ${STATE.conceptEditorIsNew ? '' : `<button type="button" class="btn danger" id="ce-delete" data-write>Delete</button>`}
+          </div>
+        </form>`;
+
+      const domainSel = $('ce-domain');
+      const domainCustom = $('ce-domain-custom');
+      const syncDomainCustom = () => {
+        const custom = domainSel?.value === '_custom';
+        if (domainCustom) domainCustom.hidden = !custom;
+      };
+      domainSel?.addEventListener('change', syncDomainCustom);
+      syncDomainCustom();
+
+      $('ce-spelling')?.addEventListener('input', (e) => {
+        updateConceptEditorPron(e.target.value);
+      });
+
+      updateConceptEditorPron(d.spelling);
+
+      $('ce-hear')?.addEventListener('click', () => {
+        const sp = $('ce-spelling')?.value.trim();
+        if (sp) speakNeural(sp);
+      });
+
+      $('concept-editor-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await saveConceptEditor();
+      });
+
+      $('ce-cancel')?.addEventListener('click', () => {
+        if (STATE.conceptEditorIsNew) {
+          STATE.conceptEditorIsNew = false;
+          STATE.conceptEditorDraft = null;
+          STATE.conceptEditorSelected = null;
+        } else {
+          const c = conceptList().find(x => x.id === STATE.conceptEditorSelected);
+          STATE.conceptEditorDraft = c ? conceptEditorDraftFrom(c) : null;
+        }
+        renderConceptEditor();
+      });
+
+      $('ce-delete')?.addEventListener('click', async () => {
+        const id = STATE.conceptEditorSelected;
+        if (!id || !confirm(`Delete concept "${id}"? This cannot be undone.`)) return;
+        try {
+          await api(`/api/fonoran/concepts/${encodeURIComponent(id)}`, { method: 'DELETE' });
+          STATE.lexicon = null;
+          STATE.rootCandidates = null;
+          STATE.conceptEditorSelected = null;
+          STATE.conceptEditorDraft = null;
+          STATE.conceptEditorIsNew = false;
+          toast(`Deleted ${id}`);
+          renderConceptEditor();
+        } catch (err) { toast(err.message); }
+      });
+    }
+
+    async function saveConceptEditor() {
+      const id = STATE.conceptEditorIsNew
+        ? $('ce-id')?.value.trim().toLowerCase()
+        : STATE.conceptEditorSelected;
+      const concept = $('ce-concept')?.value.trim();
+      const domainSel = $('ce-domain')?.value;
+      const domain = domainSel === '_custom' ? $('ce-domain-custom')?.value.trim().toLowerCase() : domainSel;
+      const spelling = $('ce-spelling')?.value.trim().toLowerCase();
+      const aliases = $('ce-aliases')?.value ?? '';
+      if (!id || !concept || !domain || !spelling) {
+        toast('Id, concept phrase, domain, and sound are required.');
+        return;
+      }
+      const body = { gloss: concept, domain, spelling, aliases };
+      try {
+        if (STATE.conceptEditorIsNew) {
+          await api('/api/fonoran/concepts', { method: 'POST', body: JSON.stringify({ id, ...body }) });
+          STATE.conceptEditorIsNew = false;
+          STATE.conceptEditorSelected = id;
+          toast(`Created ${id}`);
+        } else {
+          await api(`/api/fonoran/concepts/${encodeURIComponent(STATE.conceptEditorSelected)}`, {
+            method: 'PATCH',
+            body: JSON.stringify(body),
+          });
+          if (id !== STATE.conceptEditorSelected) STATE.conceptEditorSelected = id;
+          toast(`Saved ${id}`);
+        }
+        STATE.lexicon = null;
+        STATE.rootCandidates = null;
+        await ensureLexicon();
+        const c = conceptList().find(x => x.id === id);
+        STATE.conceptEditorDraft = c ? conceptEditorDraftFrom(c) : conceptEditorEmptyDraft();
+        renderConceptEditor();
+      } catch (err) { toast(err.message); }
+    }
+
+    async function renderConceptEditor() {
+      const listEl = $('concept-editor-list');
+      const filterEl = $('ce-filter');
+      if (!listEl) return;
+
+      try {
+        await ensureLexicon();
+        if (!STATE.conceptEditorDomains.length) {
+          try {
+            const { domains } = await api('/api/fonoran/concepts/domains');
+            STATE.conceptEditorDomains = domains ?? [];
+          } catch {
+            STATE.conceptEditorDomains = [...new Set(conceptList().map(c => c.domain))].sort();
+          }
+        }
+      } catch (err) {
+        listEl.innerHTML = `<p class="empty sans">${escapeHtml(err.message)}</p>`;
+        return;
+      }
+
+      if (filterEl && filterEl.value !== STATE.conceptEditorFilter) filterEl.value = STATE.conceptEditorFilter;
+
+      const list = conceptEditorFilteredList();
+      listEl.innerHTML = list.length
+        ? list.map(c => {
+          const selected = STATE.conceptEditorSelected === c.id && !STATE.conceptEditorIsNew;
+          return `<button type="button" class="dict-item concept-editor__item${selected ? ' is-selected' : ''}" data-ce-id="${escapeHtml(c.id)}">
+            <span class="dict-item__word mono">${escapeHtml(c.spelling)}</span>
+            <span class="dict-item__english">${escapeHtml(c.concept.split(';')[0])}</span>
+            <span class="dict-item__meta sans">${escapeHtml(c.domain)} · ${escapeHtml(c.id)}</span>
+          </button>`;
+        }).join('')
+        : '<p class="empty sans" style="margin:0">No concepts match.</p>';
+
+      listEl.querySelectorAll('[data-ce-id]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const c = conceptList().find(x => x.id === btn.dataset.ceId);
+          if (!c) return;
+          STATE.conceptEditorSelected = c.id;
+          STATE.conceptEditorIsNew = false;
+          STATE.conceptEditorDraft = conceptEditorDraftFrom(c);
+          renderConceptEditor();
+        });
+      });
+
+      if (!STATE.conceptEditorDraft && !STATE.conceptEditorIsNew && list.length) {
+        const pick = list.find(c => c.id === STATE.conceptEditorSelected) ?? list[0];
+        STATE.conceptEditorSelected = pick.id;
+        STATE.conceptEditorDraft = conceptEditorDraftFrom(pick);
+      }
+
+      renderConceptEditorDetail();
+      ensureSplitStickyObserver();
+      requestAnimationFrame(syncSplitStickyOffsets);
     }
 
     /* ---------- DICTIONARY ---------- */
@@ -2043,7 +2651,11 @@
 
     function renderDictionaryList({ scrollToSelection = false } = {}) {
       const list = dictEntries();
-      $('dict-list').innerHTML = list.length ? list.map(dictItemHtml).join('') : '<p class="empty">Nothing matches.</p>';
+      $('dict-list').innerHTML = list.length
+        ? list.map(dictItemHtml).join('')
+        : (STATE.lab.sounds.length + STATE.lab.compounds.length === 0
+          ? '<p class="empty">No vocabulary yet. Run <code>npm run fonoran:primitive-roots</code> or use Advanced → Import generated vocabulary.</p>'
+          : '<p class="empty">Nothing matches.</p>');
       $('dict-list').querySelectorAll('.dict-item').forEach(b => b.addEventListener('click', () => {
         selectDictionaryEntry(b.dataset.kind, b.dataset.id);
       }));
@@ -2054,6 +2666,15 @@
       }
     }
 
+    function activeSplitPageEl(pageName = STATE.page) {
+      const fromAttr = document.documentElement.getAttribute('data-fonora-page');
+      const resolved = fromAttr === 'root-review' ? 'review' : (fromAttr || pageName);
+      const normalized = resolved === 'root-review' ? 'review' : resolved;
+      const el = normalized === 'review' ? $('page-review') : (normalized ? $(`page-${normalized}`) : null);
+      if (el?.classList.contains('fonoran-split-page')) return el;
+      return document.querySelector('.fonoran-split-page.active');
+    }
+
     function syncSplitStickyOffsets() {
       const header = document.getElementById('app-header-root');
       let headerBottom = 0;
@@ -2061,7 +2682,7 @@
         headerBottom = Math.ceil(header.getBoundingClientRect().bottom);
         document.documentElement.style.setProperty('--fonoran-header-offset', `${headerBottom}px`);
       }
-      const shell = document.querySelector('.fonoran-split-page.active [data-split-shell]');
+      const shell = activeSplitPageEl()?.querySelector('[data-split-shell]');
       if (shell) {
         const grid = shell.nextElementSibling;
         const gridGap = grid?.classList.contains('fonoran-split-grid')
@@ -2105,6 +2726,231 @@
       renderDictionaryList();
       syncDictSelection();
       requestAnimationFrame(syncSplitStickyOffsets);
+    }
+
+    /* ---------- TRANSLATOR ---------- */
+    let translatorToken = 0;
+
+    const TRANSLATOR_SPEED_KEY = 'fonoran:translator:speed';
+    const TRANSLATOR_SYLLABLE_MODE_KEY = 'fonoran:translator:syllable-by-syllable';
+    const TRANSLATOR_SYLLABLE_MODE_LEGACY_KEY = 'fonoran:translator:word-by-word';
+
+    function readTranslatorSpeed() {
+      const el = $('tr-speed');
+      const raw = el ? parseFloat(el.value) : parseFloat(localStorage.getItem(TRANSLATOR_SPEED_KEY));
+      return Number.isFinite(raw) ? Math.max(0.45, Math.min(1, raw)) : 0.7;
+    }
+
+    function syncTranslatorSpeedLabel() {
+      const val = $('tr-speed-val');
+      if (val) val.textContent = `${Math.round(readTranslatorSpeed() * 100)}%`;
+    }
+
+    function buildTranslatorScriptPhrase(result, { syllableBySyllable = true } = {}) {
+      if (!result?.tokens?.length || !STATE.rules) return { phrase: '', unitTokenIndex: [] };
+      const chunks = [];
+      const unitTokenIndex = [];
+      for (let i = 0; i < result.tokens.length; i++) {
+        const token = result.tokens[i];
+        if (!token.resolved || !token.parts?.length) continue;
+        if (syllableBySyllable && token.parts.length > 1) {
+          for (const part of token.parts) {
+            const { phrase } = romanToFonoraScript([part], STATE.rules);
+            if (phrase) {
+              chunks.push(phrase);
+              unitTokenIndex.push(i);
+            }
+          }
+        } else {
+          const { phrase } = romanToFonoraScript(token.parts, STATE.rules);
+          if (phrase) {
+            chunks.push(phrase);
+            unitTokenIndex.push(i);
+          }
+        }
+      }
+      return { phrase: chunks.join(' '), unitTokenIndex };
+    }
+
+    function highlightTranslatorToken(tokenIndex) {
+      document.querySelectorAll('.translator-token').forEach(el => el.classList.remove('translator-token--speaking'));
+      if (tokenIndex == null || tokenIndex < 0) return;
+      document.querySelector(`.translator-token[data-tr-word="${tokenIndex}"]`)?.classList.add('translator-token--speaking');
+    }
+
+    async function speakTranslatorResult(result) {
+      if (!result?.tokens?.some(t => t.resolved) || STATE.translatorPlaying) return;
+      await ensureRules();
+      primeAudioContext();
+
+      const syllableBySyllable = $('tr-syllable-by-syllable')?.checked !== false;
+      const playbackRate = readTranslatorSpeed();
+      const wordGapMs = syllableBySyllable ? Math.round(250 + (1 - playbackRate) * 450) : 0;
+      const { phrase, unitTokenIndex } = buildTranslatorScriptPhrase(result, { syllableBySyllable });
+      if (!phrase) {
+        speak(compoundSpeakable(result.tokens.flatMap(t => (t.resolved ? t.parts : []))));
+        return;
+      }
+
+      STATE.translatorPlaying = true;
+      STATE.translatorCancel = false;
+      const playBtn = $('tr-hear');
+      const stopBtn = $('tr-stop');
+      if (playBtn) { playBtn.disabled = true; playBtn.textContent = '…'; }
+      if (stopBtn) stopBtn.disabled = false;
+
+      highlightTranslatorToken(-1);
+
+      try {
+        cancelSpeech();
+        await speakFonoraPhrase(phrase, STATE.rules, {
+          engine: 'auto',
+          playbackRate,
+          wordGapMs,
+          shouldCancel: () => STATE.translatorCancel,
+          onWordStart: (index) => highlightTranslatorToken(unitTokenIndex[index]),
+          onWordEnd: () => highlightTranslatorToken(-1),
+        });
+      } catch {
+        speak(compoundSpeakable(result.tokens.flatMap(t => (t.resolved ? t.parts : []))));
+      } finally {
+        STATE.translatorPlaying = false;
+        STATE.translatorCancel = false;
+        highlightTranslatorToken(-1);
+        if (playBtn) { playBtn.disabled = false; playBtn.textContent = '▶ Listen'; }
+        if (stopBtn) stopBtn.disabled = true;
+      }
+    }
+
+    function stopTranslatorSpeech() {
+      if (!STATE.translatorPlaying) return;
+      STATE.translatorCancel = true;
+      cancelSpeech();
+    }
+
+    function translatorTokenHtml(token, index) {
+      const fonoran = token.resolved
+        ? escapeHtml(token.fonoran)
+        : `<span class="translator-unresolved-sample">${escapeHtml(token.english)}</span>`;
+      const gloss = token.gloss ? `<span class="translator-token__gloss">${escapeHtml(token.gloss)}</span>` : '';
+      const interp = token.interpreted
+        ? `<span class="translator-token__interp">${escapeHtml(token.interpreted_from ?? token.english)} → ${escapeHtml(token.concept_id ?? token.lookup ?? '')}${token.interpret_reason ? ` (${escapeHtml(token.interpret_reason)})` : ''}</span>`
+        : '';
+      return `<li class="translator-token${token.resolved ? '' : ' translator-token--unresolved'}" data-tr-word="${index}">
+        <span class="translator-token__role">${escapeHtml(token.role)}</span>
+        <span class="translator-token__english">${escapeHtml(token.english)}</span>
+        <span class="translator-token__arrow" aria-hidden="true">→</span>
+        <span class="translator-token__fonoran">${fonoran}</span>
+        ${gloss}
+        ${interp}
+      </li>`;
+    }
+
+    async function renderTranslatorOutput(result) {
+      const out = $('tr-output');
+      if (!out) return;
+      if (!result || result.mode === 'empty') {
+        out.innerHTML = '<p class="translator-output__empty sans">Type English above to see Fonoran script and pronunciation.</p>';
+        return;
+      }
+
+      await ensureRules();
+      const scriptParts = result.tokens.flatMap(t => (t.resolved ? t.parts : []));
+      const script = scriptParts.length && STATE.rules
+        ? result.tokens.map(t => {
+          if (!t.resolved || !t.parts?.length) return '';
+          return romanToFonoraScript(t.parts, STATE.rules).phrase;
+        }).filter(Boolean).join(' ')
+        : '';
+
+      const romanHtml = result.tokens.map(t => {
+        if (t.resolved) return escapeHtml(t.fonoran);
+        return `<span class="translator-unresolved-sample">${escapeHtml(t.english)}</span>`;
+      }).join(' ');
+
+      const slots = result.semantic?.slots;
+      const slotRow = (label, items) => {
+        if (!items?.length) return '';
+        const words = items.map(s => s.english).join(', ');
+        return `<span class="translator-slots__slot"><strong>${escapeHtml(label)}</strong> ${escapeHtml(words)}</span>`;
+      };
+      const slotsHtml = result.mode === 'sentence' && slots
+        ? `<div class="translator-slots">
+            <p class="translator-slots__label">Semantic slots · ${escapeHtml(result.semantic.skeleton)}</p>
+            <div class="translator-slots__row">
+              ${slotRow('Subject', slots.subject)}
+              ${slotRow('Time', slots.time)}
+              ${slotRow('Event', slots.event)}
+              ${slotRow('Path', slots.path)}
+              ${slotRow('Object', slots.object)}
+              ${slotRow('Modifiers', slots.modifiers)}
+            </div>
+          </div>`
+        : '';
+
+      const pron = result.surface?.pronunciation;
+      const hearParts = result.tokens.flatMap(t => (t.resolved ? t.parts : []));
+      const canHear = hearParts.length > 0;
+
+      out.innerHTML = `
+        ${script ? `<div class="translator-output__script fonora-script symbol-text">${escapeHtml(script)}</div>` : ''}
+        <p class="translator-output__roman">${romanHtml}</p>
+        ${pron?.sayLine ? `<p class="translator-output__pron">Say: <strong>${escapeHtml(pron.sayLine)}</strong>${pron.englishLine ? `<span class="word-preview__like">Sounds like ${escapeHtml(pron.englishLine)}</span>` : ''}</p>` : ''}
+        ${slotsHtml}
+        <ul class="translator-token-list">${result.tokens.map((t, i) => translatorTokenHtml(t, i)).join('')}</ul>
+        ${result.unresolved?.length ? `<p class="sans translator-output__note" style="font-size:0.84rem;color:var(--muted);margin:0.75rem 0 0">Unresolved concepts reveal where the language still needs to grow.</p>` : ''}
+        ${canHear ? `<div class="translator-output__actions">
+          <button type="button" class="btn" id="tr-hear">▶ Listen</button>
+          <button type="button" class="btn" id="tr-stop" disabled>■ Stop</button>
+        </div>` : ''}`;
+
+      $('tr-hear')?.addEventListener('click', () => speakTranslatorResult(result));
+      $('tr-stop')?.addEventListener('click', () => stopTranslatorSpeech());
+    }
+
+    async function runTranslator() {
+      const input = $('tr-input');
+      const text = (input?.value ?? STATE.translatorInput ?? '').trim();
+      STATE.translatorInput = input?.value ?? text;
+      const token = ++translatorToken;
+
+      if (!text) {
+        STATE.translatorResult = null;
+        renderTranslatorOutput(null);
+        return;
+      }
+
+      STATE.translatorBusy = true;
+      try {
+        const result = await api('/api/fonoran/translate', {
+          method: 'POST',
+          body: JSON.stringify({ text }),
+        });
+        if (token !== translatorToken) return;
+        STATE.translatorResult = result;
+        await renderTranslatorOutput(result);
+      } catch (e) {
+        if (token !== translatorToken) return;
+        const out = $('tr-output');
+        if (out) out.innerHTML = `<p class="translator-output__empty sans" style="color:var(--danger,#c0392b)">${escapeHtml(e.message)}</p>`;
+      } finally {
+        if (token === translatorToken) STATE.translatorBusy = false;
+      }
+    }
+
+    function renderTranslator() {
+      const input = $('tr-input');
+      if (input && input.value !== STATE.translatorInput) input.value = STATE.translatorInput;
+      const speedEl = $('tr-speed');
+      const savedSpeed = localStorage.getItem(TRANSLATOR_SPEED_KEY);
+      if (speedEl && savedSpeed) speedEl.value = savedSpeed;
+      const syllableEl = $('tr-syllable-by-syllable');
+      const savedSyllableMode = localStorage.getItem(TRANSLATOR_SYLLABLE_MODE_KEY)
+        ?? localStorage.getItem(TRANSLATOR_SYLLABLE_MODE_LEGACY_KEY);
+      if (syllableEl && savedSyllableMode != null) syllableEl.checked = savedSyllableMode !== '0';
+      syncTranslatorSpeedLabel();
+      if (STATE.translatorResult) void renderTranslatorOutput(STATE.translatorResult);
+      else void renderTranslatorOutput(null);
     }
 
     /* ---------- GRAMMAR SPEC ---------- */
@@ -2180,13 +3026,13 @@
       if (!canWrite()) { toast('Sign in required'); return; }
       const res = await api('/api/fonoran/lab/undo', { method: 'POST', body: '{}' });
       toast(res.reverted ? `Undid: ${res.label}` : 'Nothing to undo');
-      STATE.editing = false;
       await load();
     }
 
     async function renderHealth() {
       let h;
       try { h = await api('/api/fonoran/lab/health'); } catch { $('health-body').innerHTML = '<p class="empty">Could not load health.</p>'; return; }
+      try { await ensureRootCandidates(); } catch { /* candidates optional */ }
       const core = ['learnability', 'pronounceability', 'memorability', 'parseability'];
       const overall = Math.round(core.reduce((a, k) => a + h.scores[k], 0) / core.length);
       const label = healthOverallLabel(overall);
@@ -2216,6 +3062,7 @@
           <h3 class="section-h">Your progress</h3>
           <button type="button" class="health-undo-btn" id="undo-btn"${undoDisabled ? ' disabled' : ''} data-write>↶ Undo</button>
         </div>
+        ${buildReviewProgressHtml()}
         <div id="timeline"></div>`;
       $('health-toggle').addEventListener('click', () => { STATE.healthOpen = !STATE.healthOpen; renderHealth(); });
       $('undo-btn')?.addEventListener('click', () => { undoLastChange(); });
@@ -2243,8 +3090,8 @@
     }
 
     /* ---------- nav ---------- */
-    const MAIN_PAGES = new Set(['roots', 'create', 'matcher', 'review', 'dictionary']);
-    const ALL_PAGES = new Set(['home', 'roots', 'create', 'matcher', 'review', 'dictionary', 'grammar', 'health', 'advanced']);
+    const MAIN_PAGES = new Set(['roots', 'create', 'matcher', 'review', 'dictionary', 'translator']);
+    const ALL_PAGES = new Set(['home', 'root-review', 'roots', 'create', 'matcher', 'review', 'dictionary', 'grammar', 'translator', 'health', 'advanced', 'concepts']);
     function scrollPageTop() {
       window.scrollTo(0, 0);
       document.documentElement.scrollTop = 0;
@@ -2254,15 +3101,19 @@
       if (MAIN_PAGES.has(STATE.page)) STATE.toolReturnPage = STATE.page;
     }
     function switchPage(name) {
-      const enteringReview = name === 'review' && STATE.page !== 'review';
-      STATE.page = name; STATE.editing = false;
-      if (enteringReview) STATE.reviewFocusPending = true;
+      if (name === 'root-review') {
+        STATE.rootReviewFocusPending = true;
+        name = 'review';
+      } else if (name === 'review' && STATE.page !== 'review') {
+        STATE.reviewFocusPending = true;
+      }
+      STATE.page = name;
       setActiveTab(name);
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      $(`page-${name}`).classList.add('active');
+      activeSplitPageEl(name)?.classList.add('active');
       if (name === 'home') {
         if (window.location.hash) history.replaceState(null, '', window.location.pathname);
-      } else if (ALL_PAGES.has(name)) {
+      } else if (ALL_PAGES.has(name) || name === 'review') {
         const nextHash = `#${name}`;
         if (window.location.hash !== nextHash) {
           history.replaceState(null, '', nextHash);
@@ -2273,7 +3124,7 @@
       scrollPageTop();
       requestAnimationFrame(() => {
         scrollPageTop();
-        if (name === 'dictionary' || name === 'create' || name === 'roots' || name === 'grammar') {
+        if (name === 'dictionary' || name === 'create' || name === 'roots' || name === 'grammar' || name === 'concepts' || name === 'review') {
           syncSplitStickyOffsets();
           requestAnimationFrame(syncSplitStickyOffsets);
         }
@@ -2300,7 +3151,26 @@
     $('dict-filters').addEventListener('click', e => { const b = e.target.closest('[data-filter]'); if (!b) return; STATE.dictFilter = b.dataset.filter; $('dict-filters').querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c === b)); renderDictionary(); });
     $('adv-dictionary').addEventListener('click', () => { rememberMainPage(); switchPage('dictionary'); });
     $('adv-health').addEventListener('click', () => { rememberMainPage(); switchPage('health'); });
+    $('ce-filter')?.addEventListener('input', e => { STATE.conceptEditorFilter = e.target.value; renderConceptEditor(); });
+    $('ce-new')?.addEventListener('click', () => {
+      STATE.conceptEditorIsNew = true;
+      STATE.conceptEditorSelected = null;
+      STATE.conceptEditorDraft = conceptEditorEmptyDraft();
+      renderConceptEditor();
+    });
     $('wc-filter').addEventListener('input', e => { STATE.wordComposerFilter = e.target.value; renderWordComposer(); });
+    $('rv-filter')?.addEventListener('input', e => { STATE.reviewFilter = e.target.value; renderUnifiedReview(); });
+    $('rv-filters')?.addEventListener('click', e => {
+      const chip = e.target.closest('[data-rv-filter]');
+      if (!chip) return;
+      const key = chip.dataset.rvFilter;
+      if (key === 'candidates') STATE.reviewShowCandidates = !STATE.reviewShowCandidates;
+      else if (key === 'roots') STATE.reviewShowLabRoots = !STATE.reviewShowLabRoots;
+      else if (key === 'words') STATE.reviewShowLabWords = !STATE.reviewShowLabWords;
+      else if (key === 'generated') STATE.reviewShowGeneratedWords = !STATE.reviewShowGeneratedWords;
+      else if (key === 'needs-review') STATE.reviewNeedsReviewOnly = !STATE.reviewNeedsReviewOnly;
+      renderUnifiedReview();
+    });
     $('wc-meaning')?.addEventListener('input', () => renderWordComposer());
     $('wm-filter')?.addEventListener('input', e => { STATE.matcherFilter = e.target.value; renderWordMatcher(); });
     $('wm-english-filter')?.addEventListener('input', e => { STATE.matcherEnglishFilter = e.target.value; renderWordMatcher(); });
@@ -2325,23 +3195,31 @@
       else if (chip.dataset.wcFilter === 'unnamed') STATE.showUnnamed = !STATE.showUnnamed;
       renderWordComposer();
     });
-    $('wc-clear').addEventListener('click', () => { STATE.wordComposer = []; $('wc-meaning').value = ''; renderWordComposer(); });
+    $('wc-clear').addEventListener('click', () => {
+      STATE.wordComposer = [];
+      $('wc-meaning').value = '';
+      $('wc-aliases').value = '';
+      renderWordComposer();
+    });
     $('wc-save').addEventListener('click', async () => {
       const meaning = $('wc-meaning').value.trim();
       if (STATE.wordComposer.length < 2) { toast('Stack at least two components.'); return; }
       if (!meaning) { toast('Give the word a meaning.'); return; }
       const spelling = resolveComposerSpelling(STATE.wordComposer);
+      const aliases = ($('wc-aliases')?.value ?? '').trim();
       try {
         await api('/api/fonoran/lab/compounds', {
           method: 'POST',
           body: JSON.stringify({
             components: composerToApi(STATE.wordComposer),
             meaning,
+            aliases: aliases || undefined,
             allow_unapproved: STATE.showUnapprovedWords,
           }),
         });
         STATE.wordComposer = [];
         $('wc-meaning').value = '';
+        $('wc-aliases').value = '';
         toast(`Saved ${spelling} → ${meaning}`);
         await load({ skipRender: true });
         renderWordComposer();
@@ -2352,6 +3230,14 @@
       panel: $('sheet'),
       close: closeSheet,
       isOpen: () => $('sheet')?.classList.contains('open'),
+    });
+    $('adv-import-vocabulary').addEventListener('click', async () => {
+      if (!confirm('Load ~280 experimental roots and compounds from the primitive-roots generator? This replaces all current lab vocabulary.')) return;
+      const r = await api('/api/fonoran/lab/import-vocabulary', { method: 'POST', body: '{}' });
+      toast(`Imported ${r.sounds} roots and ${r.compounds} compounds`);
+      await load();
+      rememberMainPage();
+      switchPage('dictionary');
     });
     $('adv-reset-review').addEventListener('click', async () => {
       if (!confirm('Move every root and word back to needs review? Meanings stay; you re-approve from scratch.')) return;
@@ -2414,9 +3300,33 @@
       renderAdvanced();
     });
 
+    let translatorDebounce = null;
+    $('tr-input')?.addEventListener('input', (e) => {
+      STATE.translatorInput = e.target.value;
+      clearTimeout(translatorDebounce);
+      translatorDebounce = setTimeout(() => { void runTranslator(); }, 280);
+    });
+    $('tr-speed')?.addEventListener('input', () => {
+      syncTranslatorSpeedLabel();
+      localStorage.setItem(TRANSLATOR_SPEED_KEY, String(readTranslatorSpeed()));
+    });
+    $('tr-syllable-by-syllable')?.addEventListener('change', (e) => {
+      localStorage.setItem(TRANSLATOR_SYLLABLE_MODE_KEY, e.target.checked ? '1' : '0');
+    });
+    document.querySelectorAll('[data-tr-example]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const text = btn.dataset.trExample ?? '';
+        const input = $('tr-input');
+        if (input) input.value = text;
+        STATE.translatorInput = text;
+        void runTranslator();
+      });
+    });
+
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
-    const initialPage = document.documentElement.getAttribute('data-fonora-page') || 'home';
+    const initialPageRaw = document.documentElement.getAttribute('data-fonora-page') || 'home';
+    const initialPage = initialPageRaw === 'root-review' ? 'review' : initialPageRaw;
     initUniversalNav({ context: 'language', activeTab: initialPage });
     document.querySelectorAll('.page').forEach((p) => p.classList.remove('active'));
     $(`page-${initialPage}`)?.classList.add('active');
@@ -2424,12 +3334,17 @@
     async function boot() {
       STATE.page = initialPage;
       if (initialPage === 'review') STATE.reviewFocusPending = true;
+      if (initialPageRaw === 'root-review') STATE.rootReviewFocusPending = true;
       await refreshAuth();
       handleAuthUrlErrors();
       updateAuthGate();
       window.addEventListener('hashchange', () => {
         const hashPage = window.location.hash.replace(/^#/, '');
-        const page = hashPage && ALL_PAGES.has(hashPage) ? hashPage : 'home';
+        let page = hashPage && ALL_PAGES.has(hashPage) ? hashPage : 'home';
+        if (hashPage === 'root-review') {
+          STATE.rootReviewFocusPending = true;
+          page = 'review';
+        }
         if (page !== STATE.page) switchPage(page);
       });
       wireLander();

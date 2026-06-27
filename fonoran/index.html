@@ -29,9 +29,7 @@
       <nav class="main-nav" aria-label="Fonoran tools">
         <div class="main-nav-primary">
           <button type="button" class="tab-btn" data-fonoran-page="home">Home</button>
-          <button type="button" class="tab-btn" data-fonoran-page="roots">Root Creator</button>
-          <button type="button" class="tab-btn" data-fonoran-page="create">Word Creator</button>
-          <button type="button" class="tab-btn" data-fonoran-page="matcher">Word Matcher</button>
+          <button type="button" class="tab-btn" data-fonoran-page="translator">Translator</button>
           <button type="button" class="tab-btn" data-fonoran-page="dictionary">Dictionary</button>
           <button type="button" class="tab-btn" data-fonoran-page="grammar">Grammar</button>
         </div>
@@ -41,7 +39,14 @@
             <span class="nav-dropdown-chevron" aria-hidden="true">▾</span>
           </button>
           <div class="nav-dropdown-menu" id="fonoran-nav-more-menu" role="menu" hidden>
+            <p class="nav-dropdown-label" role="presentation">Vocabulary</p>
+            <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="roots" role="menuitem">Root Creator</button>
+            <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="create" role="menuitem">Word Creator</button>
+            <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="matcher" role="menuitem">Word Matcher</button>
+            <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="concepts" role="menuitem">Concept Editor</button>
+            <p class="nav-dropdown-label" role="presentation">Review</p>
             <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="review" role="menuitem">Review</button>
+            <p class="nav-dropdown-label" role="presentation">Tools</p>
             <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="health" role="menuitem">Health</button>
             <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="advanced" role="menuitem">Advanced</button>
           </div>
@@ -118,6 +123,14 @@
             <h2 id="tools-heading">Language Builder Tools</h2>
             <p class="section-lead">Create, review, and explore your Fonoran vocabulary. Your words live in a local lab bucket; they are never overwritten by reference data.</p>
             <div class="fonoran-tool-cards content-card-grid content-card-grid--2">
+              <button type="button" class="fonoran-tool-card" data-goto-page="review">
+                <strong>Review</strong>
+                <span>Search, approve, and edit roots, words, and candidates</span>
+              </button>
+              <button type="button" class="fonoran-tool-card" data-goto-page="translator">
+                <strong>Translator</strong>
+                <span>English → Fonoran with script &amp; pronunciation</span>
+              </button>
               <button type="button" class="fonoran-tool-card" data-goto-page="roots">
                 <strong>Root Creator</strong>
                 <span>Create primitive syllables</span>
@@ -155,10 +168,51 @@
         </div>
       </section>
 
+      <section id="page-translator" class="page">
+        <div class="translator-page content-page">
+          <header class="translator-toolbar">
+            <div class="translator-toolbar__text">
+              <p class="translator-toolbar__tag">Meaning compiler</p>
+              <h1 class="translator-toolbar__title">English → Fonoran</h1>
+              <p class="translator-toolbar__lead sans">Compiles English into Fonoran concepts — not word-for-word substitution. Unknown concepts appear in <span class="translator-unresolved-sample">red</span>.</p>
+            </div>
+            <a class="btn translator-toolbar__source" href="#grammar">Grammar rules</a>
+          </header>
+
+          <div class="translator-layout">
+            <div class="translator-input-panel content-card">
+              <label class="fld" for="tr-input">English</label>
+              <textarea id="tr-input" class="translator-input" rows="3" placeholder="e.g. Law&#10;I love my family&#10;The tribe is at war" autocomplete="off" spellcheck="true"></textarea>
+              <div class="translator-examples sans">
+                <span class="translator-examples__label">Try:</span>
+                <button type="button" class="chip" data-tr-example="Law">Law</button>
+                <button type="button" class="chip" data-tr-example="I love my family">I love my family</button>
+                <button type="button" class="chip" data-tr-example="The tribe is at war">The tribe is at war</button>
+              </div>
+              <div class="translator-playback-controls sans">
+                <label class="translator-playback-speed" for="tr-speed">
+                  <span class="translator-playback-speed__label">Speech speed</span>
+                  <input type="range" id="tr-speed" min="0.45" max="1" step="0.05" value="0.7" aria-valuemin="0.45" aria-valuemax="1" aria-valuenow="0.7">
+                  <span id="tr-speed-val" class="translator-playback-speed__val">70%</span>
+                </label>
+                <label class="translator-playback-mode">
+                  <input type="checkbox" id="tr-syllable-by-syllable" checked>
+                  Syllable by syllable
+                </label>
+              </div>
+            </div>
+
+            <div id="tr-output" class="translator-output content-card" aria-live="polite">
+              <p class="translator-output__empty sans">Type English above to see Fonoran script and pronunciation.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="page-create" class="page fonoran-split-page">
         <div class="fonoran-split-shell" data-split-shell>
           <div class="fonoran-split-chrome">
-            <p class="fonoran-split-chrome__intro sans">Stack primitive roots or approved words. Each piece adds meaning. Preview, name it, save for review.</p>
+            <p class="fonoran-split-chrome__intro sans">Stack roots and approved words, name the compound, and add English aliases for matching.</p>
             <input type="search" id="wc-filter" class="search-bar" placeholder="Search roots and words by spelling or meaning…" autocomplete="off">
             <div class="toolbar" id="wc-filters">
               <button type="button" class="chip active" data-wc-filter="roots">Root words</button>
@@ -180,21 +234,13 @@
             <div class="composer-hero">
               <div id="wc-preview"></div>
               <div id="wc-match"></div>
-              <div class="composer-hero__actions">
-                <button type="button" class="btn" id="wc-explore" disabled>Explore preview</button>
-              </div>
             </div>
             <div class="composer-form">
-              <label class="fld" for="wc-meaning">Meaning</label>
-              <div class="lex-pick sans">
-                <label class="lex-label" for="wc-lex-cat">Browse English words</label>
-                <div class="lex-row">
-                  <select id="wc-lex-cat" aria-label="Category"><option value="">All categories</option></select>
-                  <select id="wc-lex-word" aria-label="English word"><option value="">Pick a word…</option></select>
-                </div>
-              </div>
-              <input type="text" id="wc-meaning" placeholder="Type or pick from English list…" data-write-input>
-              <div class="actions" style="margin-top:0.7rem">
+              <label class="fld" for="wc-meaning">English meaning</label>
+              <input type="text" id="wc-meaning" placeholder="Primary gloss shown in the dictionary" data-write-input>
+              <label class="fld" for="wc-aliases">English word bank <span class="composer-form__hint-inline sans">— one phrase per line, optional</span></label>
+              <textarea id="wc-aliases" rows="2" placeholder="evil&#10;wicked&#10;malice" data-write-input></textarea>
+              <div class="actions composer-form__actions">
                 <button type="button" class="btn btn-primary" id="wc-save" disabled data-write>Save word</button>
                 <button type="button" class="btn" id="wc-clear" data-write>Clear</button>
               </div>
@@ -206,7 +252,7 @@
       <section id="page-matcher" class="page fonoran-split-page fonoran-match-page">
         <div class="fonoran-split-shell" data-split-shell>
           <div class="fonoran-split-chrome">
-            <p class="fonoran-split-chrome__intro sans">Match open Fonoran syllables to English root words and assign meanings to your lab.</p>
+            <p class="fonoran-split-chrome__intro sans">Match proposed Fonoran roots to concepts from the root inventory. Matched pairs are hidden.</p>
             <div class="fonoran-match-equation" id="wm-equation">
               <div class="fonoran-match-eq__term" id="wm-pick-fonoran">
                 <span class="fonoran-match-eq__value sans">…</span>
@@ -235,15 +281,71 @@
           </aside>
           <aside class="fonoran-match-column" aria-label="English roots">
             <div class="fonoran-match-column__head">
-              <h4 class="picker-h">English roots</h4>
-              <input type="search" id="wm-english-filter" class="search-bar fonoran-match-column__filter" placeholder="Search English words…" autocomplete="off" aria-label="Search English words">
+              <h4 class="picker-h">Concepts</h4>
+              <input type="search" id="wm-english-filter" class="search-bar fonoran-match-column__filter" placeholder="Filter by id or concept… e.g. person, collective" autocomplete="off" aria-label="Filter concepts by id or phrase">
             </div>
             <div class="fonoran-match-list" id="wm-english"></div>
           </aside>
         </div>
       </section>
 
-      <section id="page-review" class="page"><div id="word-review"></div></section>
+      <section id="page-concepts" class="page fonoran-split-page">
+        <div class="fonoran-split-shell" data-split-shell>
+          <div class="fonoran-split-chrome">
+            <p class="fonoran-split-chrome__intro sans">Edit primitive concepts, English word banks, and their Fonoran sounds in one place.</p>
+            <div class="concept-editor__toolbar">
+              <input type="search" id="ce-filter" class="search-bar" placeholder="Search concepts… id, gloss, domain, sound" autocomplete="off" aria-label="Filter concepts">
+              <button type="button" class="btn btn-primary" id="ce-new" data-write>New concept</button>
+            </div>
+          </div>
+        </div>
+        <div class="fonoran-split-grid">
+          <aside class="fonoran-split-picker" aria-label="Concept list">
+            <div class="fonoran-split-picker__body" id="concept-editor-list"></div>
+          </aside>
+          <div class="fonoran-split-workspace" id="concept-editor-detail" aria-live="polite">
+            <div class="fonoran-split-empty">
+              <p>Select a concept on the left, or create a new one.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-review" class="page fonoran-split-page">
+        <div class="fonoran-split-shell" data-split-shell>
+          <div class="fonoran-split-chrome">
+            <p class="fonoran-split-chrome__intro sans">Search roots and words to review. Approve or reject each item — edit concepts in the Concept Editor. Imported generator vocabulary appears under <strong>Generated</strong>.</p>
+            <input type="search" id="rv-filter" class="search-bar" placeholder="Search by spelling or meaning…" autocomplete="off">
+            <div class="toolbar" id="rv-filters">
+              <button type="button" class="chip active" data-rv-filter="candidates">Candidates</button>
+              <button type="button" class="chip active" data-rv-filter="roots">Roots</button>
+              <button type="button" class="chip active" data-rv-filter="words">Words</button>
+              <button type="button" class="chip active" data-rv-filter="generated">Generated</button>
+              <button type="button" class="chip" data-rv-filter="needs-review">Needs review</button>
+            </div>
+          </div>
+        </div>
+        <div class="fonoran-split-grid">
+          <aside class="fonoran-split-picker" aria-label="Items to review">
+            <p class="empty sans" id="rv-picker-empty" hidden style="margin:0.5rem 0">Turn on a category above to browse items.</p>
+            <h4 class="picker-h" id="rv-candidates-h">Root candidates</h4>
+            <div class="sound-grid" id="rv-candidates"></div>
+            <h4 class="picker-h" id="rv-roots-h">Roots</h4>
+            <div class="sound-grid" id="rv-roots"></div>
+            <h4 class="picker-h" id="rv-words-h">Words</h4>
+            <div class="sound-grid" id="rv-words"></div>
+            <h4 class="picker-h" id="rv-generated-h">Generated words</h4>
+            <div class="sound-grid" id="rv-generated"></div>
+          </aside>
+          <div class="fonoran-split-workspace" id="word-review" aria-live="polite">
+            <div class="fonoran-split-empty">
+              <p>Select a root or word on the left to review it.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-root-review" class="page" hidden aria-hidden="true"></section>
 
       <section id="page-roots" class="page fonoran-split-page">
         <div class="fonoran-split-shell" data-split-shell>
@@ -337,6 +439,7 @@
           <div class="actions">
             <button type="button" class="btn" id="adv-dictionary">Full dictionary</button>
             <button type="button" class="btn" id="adv-health">Language health</button>
+            <button type="button" class="btn" id="adv-import-vocabulary" data-write>Import generated vocabulary (~280 words)</button>
             <button type="button" class="btn" id="adv-reset-review" data-write>Reset all review states (keep meanings)</button>
             <button type="button" class="btn danger" id="adv-reseed" data-write>Reset lab (blank slate)</button>
           </div>

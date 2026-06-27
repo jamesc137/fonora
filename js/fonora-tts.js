@@ -88,12 +88,12 @@ export function cancelSpeech() {
   cancelEspeakAudio();
 }
 
-async function speakIpaWithEngine(ipa, { engine, piperVoice, espeakVoice, onPrepare, piperReady, espeakReady }) {
+async function speakIpaWithEngine(ipa, { engine, piperVoice, espeakVoice, onPrepare, piperReady, espeakReady, playbackRate }) {
   const tryPiper = (engine === 'piper' || engine === 'auto') && piperVoice && piperReady;
 
   if (tryPiper) {
     try {
-      await playPiperIpa(ipa, piperVoice, onPrepare);
+      await playPiperIpa(ipa, piperVoice, onPrepare, { playbackRate });
       return;
     } catch (err) {
       if (engine !== 'auto') throw err;
@@ -105,11 +105,15 @@ async function speakIpaWithEngine(ipa, { engine, piperVoice, espeakVoice, onPrep
     if (!samples?.length) {
       throw new Error('No audio generated from recovered IPA');
     }
-    await playEspeakSamples(samples);
+    await playEspeakSamples(samples, 22050, { playbackRate });
     return;
   }
 
   throw new Error('Speech synthesis unavailable for recovered IPA');
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -124,6 +128,8 @@ export async function speakFonoraPhrase(text, rules, options = {}) {
     engine = 'piper',
     piperVoice = 'en_US-lessac-medium',
     espeakVoice = 'en-us',
+    playbackRate = 1,
+    wordGapMs = 0,
     onWordStart,
     onWordEnd,
     shouldCancel = () => false,
@@ -186,6 +192,7 @@ export async function speakFonoraPhrase(text, rules, options = {}) {
         onPrepare,
         piperReady,
         espeakReady,
+        playbackRate,
       });
       spoken += 1;
       onWordEnd?.(i, word, null, speakTarget);
@@ -199,6 +206,13 @@ export async function speakFonoraPhrase(text, rules, options = {}) {
 
     if (shouldCancel()) {
       return { words, spoken, skipped, cancelled: true };
+    }
+
+    if (wordGapMs > 0 && i < words.length - 1) {
+      await sleep(wordGapMs);
+      if (shouldCancel()) {
+        return { words, spoken, skipped, cancelled: true };
+      }
     }
   }
 

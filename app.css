@@ -172,12 +172,14 @@ html[data-fonora-tab='open-problems'] [data-platform-tab='open-problems'].tab-bt
 html[data-fonora-tab='docs'] [data-tab='docs'].tab-btn,
 html[data-fonora-tab='docs'] [data-platform-tab='docs'].tab-btn,
 html[data-fonora-tab='home'] [data-fonoran-page='home'].tab-btn,
+html[data-fonora-tab='translator'] [data-fonoran-page='translator'].tab-btn,
+html[data-fonoran-tab='dictionary'] [data-fonoran-page='dictionary'].tab-btn,
+html[data-fonoran-tab='grammar'] [data-fonoran-page='grammar'].tab-btn,
 html[data-fonora-tab='roots'] [data-fonoran-page='roots'].tab-btn,
 html[data-fonora-tab='create'] [data-fonoran-page='create'].tab-btn,
 html[data-fonora-tab='matcher'] [data-fonoran-page='matcher'].tab-btn,
-html[data-fonora-tab='dictionary'] [data-fonoran-page='dictionary'].tab-btn,
-html[data-fonora-tab='grammar'] [data-fonoran-page='grammar'].tab-btn,
 html[data-fonora-tab='review'] [data-fonoran-page='review'].tab-btn,
+html[data-fonora-tab='concepts'] [data-fonoran-page='concepts'].tab-btn,
 html[data-fonora-tab='health'] [data-fonoran-page='health'].tab-btn,
 html[data-fonora-tab='advanced'] [data-fonoran-page='advanced'].tab-btn,
 .app-header .tab-btn--active {
@@ -190,11 +192,15 @@ html[data-fonora-page] .page {
 }
 
 html[data-fonora-page='home'] #page-home,
+html[data-fonora-page='root-review'] #page-review,
+html[data-fonora-page='review'] #page-review,
+html[data-fonora-page='translator'] #page-translator,
 html[data-fonora-page='roots'] #page-roots,
 html[data-fonora-page='create'] #page-create,
-html[data-fonora-page='review'] #page-review,
+html[data-fonora-page='matcher'] #page-matcher,
 html[data-fonora-page='dictionary'] #page-dictionary,
 html[data-fonora-page='grammar'] #page-grammar,
+html[data-fonora-page='concepts'] #page-concepts,
 html[data-fonora-page='health'] #page-health,
 html[data-fonora-page='advanced'] #page-advanced {
   display: block !important;

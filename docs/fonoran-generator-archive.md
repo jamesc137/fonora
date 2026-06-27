@@ -11,6 +11,7 @@ Fonoran went through several generations of **algorithmic vocabulary generation*
 | **Gen 1** | Hand-authored roots → grammar vowels → families & compounds | ~175 roots → thousands of inflected forms | Removed (English-adjacent inventory) |
 | **Gen 2** | Human primitives + articulation coordinates → roots + IE collision repair | ~40 primitives → full inventory JSON | Removed (superseded by Gen 3) |
 | **Gen 3 / 3.1** | DDA coordinates → grid-native roots & derivations | Full primitive grid + compounds | **Kept**: expert tools, health scoring, lexicon seeds |
+| **Primitive roots (2026)** | Ranked human primitives → Huffman-like syllable allocation | ~200 concept-first roots | **Superseded** — see [fonoran-semantic-foundation.md](fonoran-semantic-foundation.md) |
 | **Lab (current)** | User builds syllables and compounds one-by-one | Your `fonoran-sound-bucket.json` | **Production** |
 
 ---
@@ -136,6 +137,20 @@ Full design docs (still present):
 - [fonoran-gen3-1.md](fonoran-gen3-1.md)
 
 Gen 3 JSON is **reference data** for DDA inference and the English meaning picker, not the live dictionary. Audits and constitution exports go to `reports/` (gitignored). The lab bucket is authoritative for the language you are building.
+
+---
+
+## Primitive roots experiment (2026) — superseded
+
+> **Retired.** The algorithmic primitive-roots pipeline (`fonoran-primitive-roots.js`) assigned phonetics before semantic approval. The new semantic-first foundation is documented in [fonoran-semantic-foundation.md](fonoran-semantic-foundation.md).
+
+Legacy files remain for reference only:
+
+| File | Role |
+| --- | --- |
+| [`data/fonoran-primitive-roots-config.json`](../data/fonoran-primitive-roots-config.json) | Old concept list |
+| [`tools/fonoran-primitive-roots.js`](../tools/fonoran-primitive-roots.js) | Old generator (do not use for canonical work) |
+| [`data/fonoran-primitive-roots.json`](../data/fonoran-primitive-roots.json) | Old output |
 
 ---
 

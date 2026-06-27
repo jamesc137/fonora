@@ -1113,6 +1113,282 @@
       });
     }
 
+    function buildMermaidPanZoomHtml(mermaidSource) {
+      if (!mermaidSource) return '';
+      return `<div class="mermaid-pan-zoom">
+        <div class="mermaid-pan-zoom__toolbar sans" aria-label="Graph zoom controls">
+          <button type="button" class="btn mermaid-pan-zoom__btn" data-mermaid-zoom-out aria-label="Zoom out">−</button>
+          <button type="button" class="btn mermaid-pan-zoom__btn" data-mermaid-zoom-reset aria-label="Reset view">Fit</button>
+          <button type="button" class="btn mermaid-pan-zoom__btn" data-mermaid-zoom-in aria-label="Zoom in">+</button>
+        </div>
+        <div class="mermaid-pan-zoom__viewport">
+          <div class="mermaid-pan-zoom__stage">
+            <div class="mermaid-wrap"><div class="mermaid">${escapeHtml(mermaidSource)}</div></div>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function initMermaidPanZoom(panZoomEl) {
+      if (!panZoomEl || panZoomEl.dataset.panZoomReady === '1') return;
+      const viewport = panZoomEl.querySelector('.mermaid-pan-zoom__viewport');
+      const stage = panZoomEl.querySelector('.mermaid-pan-zoom__stage');
+      const svg = panZoomEl.querySelector('svg');
+      if (!viewport || !stage || !svg) return;
+
+      svg.style.maxWidth = 'none';
+      svg.style.display = 'block';
+
+      let scale = 1;
+      let panX = 0;
+      let panY = 0;
+      let fitAttempts = 0;
+      const minScale = 0.25;
+      const maxScale = 5;
+      const zoomStep = 1.2;
+      const loadZoomOutSteps = 2;
+
+      const apply = () => {
+        stage.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+      };
+
+      const boxSize = (box) => box && box.width > 0 && box.height > 0;
+
+      const contentBox = () => {
+        const vb = svg.viewBox?.baseVal;
+        if (vb?.width > 0 && vb?.height > 0) {
+          return { x: vb.x, y: vb.y, width: vb.width, height: vb.height };
+        }
+        const bb = svg.getBBox();
+        return bb;
+      };
+
+      const normalizeSvgSize = () => {
+        const box = contentBox();
+        if (!boxSize(box)) return false;
+        svg.removeAttribute('width');
+        svg.removeAttribute('height');
+        svg.style.width = `${box.width}px`;
+        svg.style.height = `${box.height}px`;
+        svg.style.maxWidth = 'none';
+        return true;
+      };
+
+      const unionBox = (a, b) => {
+        const x = Math.min(a.x, b.x);
+        const y = Math.min(a.y, b.y);
+        return {
+          x,
+          y,
+          width: Math.max(a.x + a.width, b.x + b.width) - x,
+          height: Math.max(a.y + a.height, b.y + b.height) - y,
+        };
+      };
+
+      const transformedBBox = (el) => {
+        const bb = el.getBBox();
+        const ctm = el.getCTM?.();
+        if (!ctm) return bb;
+        const corners = [
+          [bb.x, bb.y],
+          [bb.x + bb.width, bb.y],
+          [bb.x + bb.width, bb.y + bb.height],
+          [bb.x, bb.y + bb.height],
+        ];
+        let minX = Infinity;
+        let minY = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
+        for (const [x, y] of corners) {
+          const pt = svg.createSVGPoint();
+          pt.x = x;
+          pt.y = y;
+          const t = pt.matrixTransform(ctm);
+          minX = Math.min(minX, t.x);
+          minY = Math.min(minY, t.y);
+          maxX = Math.max(maxX, t.x);
+          maxY = Math.max(maxY, t.y);
+        }
+        return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+      };
+
+      const focusEl = () => svg.querySelector('g.node.focusNode')
+        ?? svg.querySelector('g.focusNode')
+        ?? svg.querySelector('g.node');
+
+      /** Focus word plus immediate neighbors (roots above, direct children). */
+      const focusClusterBox = () => {
+        const focus = focusEl();
+        if (!focus) return contentBox();
+        const focusRoot = transformedBBox(focus);
+        const fx = focusRoot.x + focusRoot.width / 2;
+        const fy = focusRoot.y + focusRoot.height / 2;
+        let cluster = { ...focusRoot };
+        const xReach = Math.max(focusRoot.width * 5, 200);
+        const yReach = Math.max(focusRoot.height * 6, 220);
+        svg.querySelectorAll('g.node').forEach((n) => {
+          if (n === focus) return;
+          const b = transformedBBox(n);
+          const cx = b.x + b.width / 2;
+          const cy = b.y + b.height / 2;
+          if (Math.abs(cx - fx) <= xReach && Math.abs(cy - fy) <= yReach) {
+            cluster = unionBox(cluster, b);
+          }
+        });
+        return cluster;
+      };
+
+      const centerOn = (box, s = scale) => {
+        const vp = viewport.getBoundingClientRect();
+        const cx = box.x + box.width / 2;
+        const cy = box.y + box.height / 2;
+        panX = vp.width / 2 - cx * s;
+        panY = vp.height / 2 - cy * s;
+      };
+
+      const reveal = () => {
+        panZoomEl.dataset.panZoomReady = '1';
+        panZoomEl.classList.remove('is-loading');
+        panZoomEl.classList.add('is-ready');
+      };
+
+      const fitAll = () => {
+        const vp = viewport.getBoundingClientRect();
+        if (!vp.width || !vp.height || !normalizeSvgSize()) return;
+        const box = contentBox();
+        if (!boxSize(box)) return;
+        scale = Math.min(
+          vp.width / (box.width * 1.14),
+          vp.height / (box.height * 1.14),
+          2,
+        );
+        scale = Math.max(scale, minScale);
+        centerOn(box, scale);
+        apply();
+      };
+
+      const fitReadable = () => {
+        const vp = viewport.getBoundingClientRect();
+        if (!vp.width || !vp.height) {
+          if (fitAttempts++ < 40) requestAnimationFrame(fitReadable);
+          else { scale = 1; panX = 16; panY = 16; apply(); reveal(); }
+          return;
+        }
+        if (!normalizeSvgSize()) {
+          if (fitAttempts++ < 40) requestAnimationFrame(fitReadable);
+          else { scale = 1; panX = 16; panY = 16; apply(); reveal(); }
+          return;
+        }
+        const box = contentBox();
+        if (!boxSize(box)) {
+          if (fitAttempts++ < 40) requestAnimationFrame(fitReadable);
+          else { scale = 1; panX = 16; panY = 16; apply(); reveal(); }
+          return;
+        }
+        fitAttempts = 0;
+        const cluster = focusClusterBox();
+        const focusRoot = focusEl() ? transformedBBox(focusEl()) : cluster;
+        const fullFitScale = Math.min(
+          vp.width / (box.width * 1.14),
+          vp.height / (box.height * 1.14),
+          2,
+        );
+        const clusterFitScale = Math.min(
+          vp.width / (cluster.width * 1.18),
+          vp.height / (cluster.height * 1.18),
+          2,
+        );
+        const maxLoadZoom = Math.min(vp.width / 140, vp.height / 100, 1.8);
+        const isLargeTree = fullFitScale < maxLoadZoom * 0.95;
+        scale = isLargeTree ? maxLoadZoom : clusterFitScale;
+        scale = Math.min(Math.max(scale, minScale), maxScale);
+        scale = Math.max(scale / zoomStep ** loadZoomOutSteps, minScale);
+        centerOn(focusRoot, scale);
+        apply();
+        reveal();
+      };
+
+      const scheduleFit = () => {
+        fitAttempts = 0;
+        panZoomEl.classList.remove('is-ready');
+        requestAnimationFrame(() => requestAnimationFrame(fitReadable));
+        if (panZoomEl.closest('.sheet')) {
+          setTimeout(fitReadable, 320);
+        }
+      };
+
+      const zoomBy = (factor, clientX, clientY) => {
+        const rect = viewport.getBoundingClientRect();
+        const mx = clientX != null ? clientX - rect.left : rect.width / 2;
+        const my = clientY != null ? clientY - rect.top : rect.height / 2;
+        const next = Math.min(maxScale, Math.max(minScale, scale * factor));
+        panX = mx - (mx - panX) * (next / scale);
+        panY = my - (my - panY) * (next / scale);
+        scale = next;
+        apply();
+      };
+
+      panZoomEl.querySelector('[data-mermaid-zoom-in]')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        zoomBy(1.2);
+      });
+      panZoomEl.querySelector('[data-mermaid-zoom-out]')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        zoomBy(1 / zoomStep);
+      });
+      panZoomEl.querySelector('[data-mermaid-zoom-reset]')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        fitAll();
+      });
+
+      viewport.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        zoomBy(e.deltaY > 0 ? 0.9 : 1.1, e.clientX, e.clientY);
+      }, { passive: false, capture: true });
+
+      let dragging = false;
+      let dragStartX = 0;
+      let dragStartY = 0;
+      let dragPanX = 0;
+      let dragPanY = 0;
+      let pointerId = null;
+
+      const onPointerDown = (e) => {
+        if (e.button != null && e.button !== 0) return;
+        if (e.target.closest('.graph-node-clickable')) return;
+        dragging = true;
+        pointerId = e.pointerId;
+        viewport.setPointerCapture(pointerId);
+        viewport.classList.add('is-dragging');
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        dragPanX = panX;
+        dragPanY = panY;
+        e.preventDefault();
+      };
+      const onPointerMove = (e) => {
+        if (!dragging || e.pointerId !== pointerId) return;
+        panX = dragPanX + (e.clientX - dragStartX);
+        panY = dragPanY + (e.clientY - dragStartY);
+        apply();
+        e.preventDefault();
+      };
+      const endDrag = (e) => {
+        if (!dragging || e.pointerId !== pointerId) return;
+        dragging = false;
+        pointerId = null;
+        viewport.classList.remove('is-dragging');
+        viewport.releasePointerCapture(e.pointerId);
+      };
+      viewport.addEventListener('pointerdown', onPointerDown, { capture: true });
+      viewport.addEventListener('pointermove', onPointerMove);
+      viewport.addEventListener('pointerup', endDrag);
+      viewport.addEventListener('pointercancel', endDrag);
+
+      scheduleFit();
+    }
+
     async function renderExplorerMermaidIn(rootEl, mermaidSource, graphNodes, onNavigate) {
       if (!window.mermaid || !mermaidSource || !rootEl) return;
       window.mermaid.initialize({
@@ -1127,9 +1403,20 @@
         securityLevel: 'loose',
       });
       await new Promise((resolve) => requestAnimationFrame(resolve));
-      await window.mermaid.run({ nodes: rootEl.querySelectorAll('.mermaid') });
-      const wrap = rootEl.querySelector('.mermaid-wrap');
-      bindMermaidGraphClicks(wrap?.querySelector('svg'), graphNodes, onNavigate);
+      const nodes = rootEl.querySelectorAll('.mermaid');
+      try {
+        await window.mermaid.run({ nodes });
+      } catch (err) {
+        console.error('Mermaid render failed:', err);
+        rootEl.querySelectorAll('.mermaid-wrap').forEach((wrap) => {
+          wrap.innerHTML = '<p class="graph-hint sans" style="padding:1rem;color:var(--muted)">Could not render word tree.</p>';
+        });
+        return;
+      }
+      rootEl.querySelectorAll('.mermaid-pan-zoom').forEach(initMermaidPanZoom);
+      rootEl.querySelectorAll('.mermaid-pan-zoom svg, .mermaid-wrap svg').forEach((svg) => {
+        bindMermaidGraphClicks(svg, graphNodes, onNavigate);
+      });
     }
 
     function labItemDda(type, ref) {
@@ -1334,18 +1621,21 @@
     function buildWordTreeSectionHtml(mermaid, { variant = 'default' } = {}) {
       if (!mermaid) return '';
       const klass = variant === 'showcase' ? 'explorer-section showcase-graph' : 'explorer-section';
+      const hint = 'Drag to pan · scroll or use +/− to zoom · tap a node to explore.';
       return `<div class="${klass}">
         <h4>Word Tree</h4>
-        <p class="sans graph-hint">Tap a node to explore that root or word.</p>
-        <div class="mermaid-wrap"><pre class="mermaid">${escapeHtml(mermaid)}</pre></div>
+        <p class="sans graph-hint">${hint}</p>
+        ${buildMermaidPanZoomHtml(mermaid)}
       </div>`;
     }
 
-    function buildExplorerActionsHtml({ graph = false, dda = true, hasMermaid = false } = {}) {
+    function buildExplorerActionsHtml({ graph = false, dda = true, hasMermaid = false, compact = false } = {}) {
       if (!graph && !dda) return '';
+      const ddaLabel = compact ? 'DDA' : 'Semantic coordinates (DDA)';
+      const ddaTitle = compact ? 'Semantic coordinates (DDA)' : '';
       return `<div class="explorer-actions">
         ${graph ? `<button type="button" class="btn" data-open-graph ${hasMermaid ? '' : 'disabled'}>Word Tree</button>` : ''}
-        ${dda ? `<button type="button" class="btn" data-open-dda>Semantic coordinates (DDA)</button>` : ''}
+        ${dda ? `<button type="button" class="btn" data-open-dda${ddaTitle ? ` title="${ddaTitle}"` : ''}>${ddaLabel}</button>` : ''}
       </div>`;
     }
 
@@ -1568,26 +1858,36 @@
       return conceptList().find(c => c.id === m || c.concept.toLowerCase() === m) ?? null;
     }
 
+    function reviewItemScriptParts(item, isSound) {
+      if (isSound) return [item.spelling];
+      if (item.parts?.length) return item.parts;
+      if (item.components?.length) return composerFlatSpellings(item.components);
+      return [item.spelling];
+    }
+
     function buildLabReviewCardHtml(item, { isSound = true } = {}) {
       const concept = conceptForLabItem(item);
       const conceptText = concept?.concept ?? item.meaning ?? '';
-      const domain = concept?.domain ?? (isSound ? 'root' : 'word');
-      const script = STATE.rules ? romanToFonoraScript(item.spelling, STATE.rules).phrase : '';
-      const ipa = concept?.ipa ?? romanToIpa(isSound ? item.spelling : (item.parts?.[0] ?? item.spelling));
+      const scriptParts = reviewItemScriptParts(item, isSound);
+      const pron = wordPreviewPron(scriptParts);
+      const script = pron.script;
+      const ipaLine = isSound
+        ? (concept?.ipa ?? romanToIpa(item.spelling))
+        : (pron.sayLine ? `Say: ${pron.sayLine}` : romanToIpa(item.spelling));
       return `<div class="root-review__card">
+        <div class="root-review__meta">
+          ${badge(item.state || 'draft')}
+          ${typeBadge(isSound ? 'root' : 'word')}
+          ${concept?.domain ? `<span class="root-review__domain">${escapeHtml(concept.domain)}</span>` : ''}
+        </div>
         <div class="root-review__hero">
           ${script ? `<div class="word-preview__script fonora-script symbol-text root-review__script">${escapeHtml(script)}</div>` : ''}
           <p class="root-review__spelling review-word">${escapeHtml(item.spelling)}</p>
-          <p class="root-review__ipa mono">${escapeHtml(ipa)}</p>
+          <p class="root-review__ipa mono">${escapeHtml(ipaLine)}</p>
           <p class="root-review__concept review-meaning${conceptText ? '' : ' unnamed'}">${escapeHtml(conceptText || 'not named yet')}</p>
         </div>
-        <div class="root-review__meta">
-          <span class="root-review__domain">${escapeHtml(domain)}</span>
-          ${badge(item.state || 'draft')}
-          ${typeBadge(isSound ? 'root' : 'word')}
-        </div>
         ${concept?.reason ? `<div class="root-review__reason sans">${escapeHtml(concept.reason)}</div>` : ''}
-        ${!isSound && item.generator_hint ? `<div class="root-review__reason sans">Generator: ${escapeHtml(item.generator_hint)}</div>` : ''}
+        ${!isSound && item.generator_hint ? `<div class="root-review__reason sans root-review__reason--hint">Generator: ${escapeHtml(item.generator_hint)}</div>` : ''}
       </div>`;
     }
 
@@ -1822,6 +2122,85 @@
       requestAnimationFrame(syncSplitStickyOffsets);
     }
 
+    function reviewExplorerNavigate(navKind, ref) {
+      STATE.reviewSelection = navKind === 'root'
+        ? { type: 'sound', ref }
+        : { type: 'compound', ref };
+      renderUnifiedReview();
+    }
+
+    function buildFamilyGraphSheetHtml(data) {
+      const f = data.focus;
+      return `
+        <div class="explorer-section showcase-graph word-tree-sheet">
+          <h4>Word Tree · <span class="mono" data-word-tree-spelling>${escapeHtml(f.spelling)}</span></h4>
+          <p class="sans graph-hint">Drag to pan · scroll or use +/− to zoom · tap a node to explore.</p>
+          ${buildMermaidPanZoomHtml(data.mermaid)}
+        </div>`;
+    }
+
+    async function mountFamilyGraphSheet(data, { onSideEffect = null, body = null, firstOpen = false } = {}) {
+      const host = body ?? $('sheet-body');
+      if (!data.mermaid) return;
+      if (firstOpen) {
+        host.innerHTML = buildFamilyGraphSheetHtml(data);
+        openSheet();
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+      } else {
+        host.querySelector('[data-word-tree-spelling]')?.replaceChildren(document.createTextNode(data.focus.spelling));
+        host.querySelector('.mermaid-pan-zoom')?.remove();
+        host.querySelector('.word-tree-sheet')?.insertAdjacentHTML('beforeend', buildMermaidPanZoomHtml(data.mermaid));
+      }
+
+      const navigateInTree = async (navKind, ref) => {
+        const panZoom = host.querySelector('.mermaid-pan-zoom');
+        panZoom?.classList.add('is-loading');
+        try {
+          const kind = navKind === 'root' ? 'root' : 'word';
+          const next = await fetchExplorerData(kind, ref);
+          if (!next.mermaid) {
+            toast('No word tree for this item.');
+            panZoom?.classList.remove('is-loading');
+            return;
+          }
+          await mountFamilyGraphSheet(next, { onSideEffect, body: host, firstOpen: false });
+          onSideEffect?.(navKind, ref);
+        } catch (e) {
+          panZoom?.classList.remove('is-loading');
+          toast(e.message);
+        }
+      };
+
+      const section = host.querySelector('.word-tree-sheet') ?? host;
+      await renderExplorerMermaidIn(section, data.mermaid, data.graph_nodes, navigateInTree);
+    }
+
+    async function openFamilyGraphSheet(data, onSideEffect = null) {
+      await mountFamilyGraphSheet(data, { onSideEffect, firstOpen: true });
+    }
+
+    function wireReviewExplorerButtons(c, isSound, rootEl) {
+      const kind = isSound ? 'root' : 'word';
+      const id = isSound ? c.spelling : c.id;
+      const dataPromise = fetchExplorerData(kind, id);
+      const graphBtn = rootEl.querySelector('[data-open-graph]');
+      dataPromise.then((data) => {
+        if (graphBtn && !data.mermaid) graphBtn.disabled = true;
+      }).catch(() => { if (graphBtn) graphBtn.disabled = true; });
+      graphBtn?.addEventListener('click', async () => {
+        try {
+          const data = await dataPromise;
+          if (data.mermaid) openFamilyGraphSheet(data, reviewExplorerNavigate);
+        } catch (e) { toast(e.message); }
+      });
+      rootEl.querySelector('[data-open-dda]')?.addEventListener('click', async () => {
+        try {
+          const data = await dataPromise;
+          openDdaSheet(data, kind, id);
+        } catch (e) { toast(e.message); }
+      });
+    }
+
     function renderLabReviewWorkspace(c) {
       const reviewEl = $('word-review');
       if (!reviewEl || !c) return;
@@ -1834,17 +2213,21 @@
       reviewEl.innerHTML = `
         <div class="review root-review word-review review-workspace">
           ${buildLabReviewCardHtml(c, { isSound })}
-          <button type="button" class="hear-min" id="hear">▶ Listen</button>
-          <button type="button" class="btn" id="explore-item" style="margin-top:0.5rem">Explore family tree</button>
+          <div class="review-toolbar">
+            <button type="button" class="hear-min" id="hear">▶ Listen</button>
+            ${buildExplorerActionsHtml({ graph: true, dda: true, hasMermaid: true, compact: true })}
+          </div>
           ${savedNote}
-          <p class="feel">${feelPrompt}</p>
-          <div class="feel-actions root-review__actions">
-            <button type="button" class="fa-approve" id="approve"${writeDisabledAttr(!c.meaning)} data-write>✓ Approve</button>
-            <button type="button" class="fa-reject" id="reject" data-write>✕ Reject</button>
+          <div class="review-decision">
+            <p class="feel">${feelPrompt}</p>
+            <div class="feel-actions root-review__actions">
+              <button type="button" class="fa-approve" id="approve"${writeDisabledAttr(!c.meaning)} data-write>✓ Approve</button>
+              <button type="button" class="fa-reject" id="reject" data-write>✕ Reject</button>
+            </div>
           </div>
         </div>`;
       wireLabReviewCommon(c);
-      $('explore-item')?.addEventListener('click', () => openExplorer(isSound ? 'root' : 'word', isSound ? c.spelling : c.id));
+      wireReviewExplorerButtons(c, isSound, reviewEl);
       wireFeel(c);
     }
 
@@ -1893,7 +2276,8 @@
         </div>`).join('')}</div>`;
     }
     function wireLabReviewCommon(item) {
-      const speakParts = item.reviewKind === 'sound' ? [item.spelling] : item.parts;
+      const isSound = item.reviewKind === 'sound';
+      const speakParts = reviewItemScriptParts(item, isSound);
       $('hear')?.addEventListener('click', () => speakNeural(speakParts));
     }
     function wireFeel(item) {
@@ -1987,11 +2371,15 @@
       el.innerHTML = `
         <div class="review root-review review-workspace">
           ${buildRootReviewCardHtml(c)}
-          <button type="button" class="hear-min" id="root-hear">▶ Listen</button>
-          <p class="feel">Does this root feel right?</p>
-          <div class="feel-actions root-review__actions">
-            <button type="button" class="fa-approve" id="root-approve" data-write ${c.status === 'approved' ? 'disabled' : ''}>✓ Approve</button>
-            <button type="button" class="fa-reject" id="root-reject" data-write ${c.status === 'rejected' ? 'disabled' : ''}>✕ Reject</button>
+          <div class="review-toolbar review-toolbar--solo">
+            <button type="button" class="hear-min" id="root-hear">▶ Listen</button>
+          </div>
+          <div class="review-decision">
+            <p class="feel">Does this root feel right?</p>
+            <div class="feel-actions root-review__actions">
+              <button type="button" class="fa-approve" id="root-approve" data-write ${c.status === 'approved' ? 'disabled' : ''}>✓ Approve</button>
+              <button type="button" class="fa-reject" id="root-reject" data-write ${c.status === 'rejected' ? 'disabled' : ''}>✕ Reject</button>
+            </div>
           </div>
         </div>`;
 
@@ -2146,31 +2534,13 @@
       }
       if (modalActions || layout === 'dictionary') {
         containerEl.querySelector('[data-open-graph]')?.addEventListener('click', () => {
-          openFamilyGraphSheet(data, onNavigate);
+          openFamilyGraphSheet(data, onNavigate ?? null);
         });
         containerEl.querySelector('[data-open-dda]')?.addEventListener('click', () => {
           openDdaSheet(data, explorerKind, id);
         });
       }
       return data;
-    }
-
-    async function openFamilyGraphSheet(data, onNavigate) {
-      const f = data.focus;
-      if (!data.mermaid) return;
-      const body = $('sheet-body');
-      openSheet();
-      body.innerHTML = `
-        <div class="explorer-section showcase-graph">
-          <h4>Word Tree · <span class="mono">${escapeHtml(f.spelling)}</span></h4>
-          <p class="sans graph-hint">Tap a node to explore that root or word.</p>
-          <div class="mermaid-wrap"><pre class="mermaid">${escapeHtml(data.mermaid)}</pre></div>
-        </div>`;
-      await renderExplorerMermaidIn(body, data.mermaid, data.graph_nodes, (navKind, ref) => {
-        closeSheet();
-        if (onNavigate) onNavigate(navKind, ref);
-        else openExplorer(navKind, ref);
-      });
     }
 
     function openDdaSheet(data, explorerKind, ref) {

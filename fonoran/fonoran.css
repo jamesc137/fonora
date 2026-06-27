@@ -358,8 +358,8 @@
       margin:0;
     }
     #page-review .fonoran-split-workspace .review-workspace {
-      max-width:none;
-      margin:0;
+      max-width:26rem;
+      margin:0 auto;
     }
     /* root creator: sticky preview panel while sound picker scrolls */
     #page-roots .fonoran-split-picker { position:static; }
@@ -762,7 +762,81 @@
     .concept-editor__chip--muted { color:var(--muted); font-style:italic; border-style:dashed; }
     .concept-editor__actions { display:flex; flex-wrap:wrap; gap:0.45rem; margin-top:0.25rem; }
     .review-pick__meta { font-family:var(--font-serif); font-size:0.68rem; color:var(--muted); margin-top:0.1rem; display:flex; flex-wrap:wrap; gap:0.25rem; align-items:center; }
-    .review-workspace { max-width:36rem; margin:0 auto; }
+    .review-workspace { max-width:26rem; margin:0 auto; }
+    .review-workspace .root-review__hero { margin:0.4rem 0 0.35rem; }
+    .review-workspace .root-review__script { font-size:2.15rem; margin-bottom:0.15rem; }
+    .review-workspace .root-review__spelling { font-size:1.75rem; }
+    .review-workspace .root-review__ipa { font-size:0.92rem; margin:0.2rem 0 0; }
+    .review-workspace .root-review__concept { font-size:1.08rem; line-height:1.35; margin:0.3rem 0 0; }
+    .review-workspace .root-review__meta {
+      display:flex;
+      flex-wrap:wrap;
+      gap:0.3rem;
+      justify-content:center;
+      align-items:center;
+      margin:0;
+    }
+    .review-workspace .root-review__domain { font-size:0.72rem; padding:0.15rem 0.45rem; }
+    .review-workspace .root-review__reason {
+      font-size:0.84rem;
+      line-height:1.45;
+      padding:0.55rem 0.65rem;
+      margin-top:0.6rem;
+      text-align:left;
+    }
+    .review-workspace .root-review__reason--hint { color:var(--muted); font-style:italic; }
+    .review-workspace .review-toolbar {
+      display:flex;
+      flex-direction:column;
+      gap:0.5rem;
+      margin-top:0.85rem;
+      padding-top:0.85rem;
+      border-top:1px solid var(--border);
+    }
+    .review-workspace .review-toolbar .hear-min {
+      margin:0;
+      width:100%;
+      justify-content:center;
+      border-radius:8px;
+      padding:0.5rem 0.85rem;
+    }
+    .review-workspace .review-toolbar .explorer-actions {
+      margin:0;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:0.45rem;
+      width:100%;
+    }
+    .review-workspace .review-toolbar .explorer-actions .btn {
+      width:100%;
+      margin:0;
+      font-size:0.82rem;
+      padding:0.45rem 0.55rem;
+      text-align:center;
+    }
+    .review-workspace .review-decision {
+      margin-top:0.85rem;
+      padding-top:0.85rem;
+      border-top:1px solid var(--border);
+    }
+    .review-workspace .review-decision .feel {
+      margin:0 0 0.6rem;
+      font-size:0.95rem;
+      font-weight:600;
+    }
+    .review-workspace .review-decision .feel-actions {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:0.45rem;
+    }
+    .review-workspace .review-decision .feel-actions button {
+      width:100%;
+      margin:0;
+      padding:0.55rem 0.75rem;
+      font-size:0.88rem;
+      border-radius:8px;
+    }
+    .review-workspace .saved-banner { margin-top:0.75rem; text-align:left; }
 
     /* advanced */
     .box { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.25rem; margin-bottom:1.25rem; font-family:var(--font-serif); font-size:0.92rem; }
@@ -945,6 +1019,59 @@
     .mermaid-wrap .graph-node-clickable { cursor:pointer; }
     .mermaid-wrap .graph-node-clickable:hover rect,
     .mermaid-wrap .graph-node-clickable:hover polygon { filter:brightness(0.97); stroke:var(--accent); stroke-width:2px; }
+    .mermaid-pan-zoom { margin:0.35rem 0 0.5rem; }
+    .mermaid-pan-zoom__toolbar {
+      display:flex;
+      justify-content:center;
+      gap:0.35rem;
+      margin-bottom:0.45rem;
+    }
+    .mermaid-pan-zoom__btn {
+      min-width:2.25rem;
+      padding:0.25rem 0.55rem;
+      font-size:0.95rem;
+      line-height:1.2;
+    }
+    .mermaid-pan-zoom__viewport {
+      position:relative;
+      overflow:hidden;
+      height:min(52vh,420px);
+      border:1px solid var(--border);
+      border-radius:8px;
+      background:var(--bg);
+      cursor:grab;
+      touch-action:none;
+      user-select:none;
+      opacity:0;
+      transition:opacity 0.12s ease;
+    }
+    .mermaid-pan-zoom.is-ready .mermaid-pan-zoom__viewport { opacity:1; }
+    .mermaid-pan-zoom.is-loading .mermaid-pan-zoom__viewport { opacity:0.35; pointer-events:none; }
+    .mermaid-pan-zoom__viewport.is-dragging { cursor:grabbing; }
+    .mermaid-pan-zoom__stage {
+      transform-origin:0 0;
+      will-change:transform;
+    }
+    .mermaid-pan-zoom__viewport .mermaid-wrap {
+      overflow:visible;
+      margin:0;
+    }
+    .mermaid-pan-zoom__viewport .mermaid-wrap svg {
+      display:block;
+      max-width:none !important;
+      width:auto;
+      height:auto;
+    }
+    .mermaid-pan-zoom .nodeLabel,
+    .mermaid-pan-zoom .nodeLabel span,
+    .mermaid-pan-zoom foreignObject div {
+      font-family:var(--font-mono);
+      font-size:0.78rem;
+      line-height:1.25;
+    }
+    .mermaid-pan-zoom .graph-node-clickable { cursor:pointer; }
+    .mermaid-pan-zoom .graph-node-clickable:hover rect,
+    .mermaid-pan-zoom .graph-node-clickable:hover polygon { filter:brightness(0.97); stroke:var(--accent); stroke-width:2px; }
     .sheet {
       position:fixed;
       top:50%;
@@ -1009,8 +1136,6 @@
     .fonoran-showcase__toolbar { display:flex; flex-wrap:wrap; gap:0.75rem; justify-content:center; align-items:center; max-width:var(--fonoran-word-card-max-width); margin:1.25rem auto 0; }
     .showcase-graph { text-align:center; }
     .showcase-graph .graph-hint { text-align:center; }
-    .showcase-graph .mermaid-wrap { display:flex; justify-content:center; margin-left:auto; margin-right:auto; }
-    .showcase-graph .mermaid-wrap svg { display:block; margin:0 auto; max-width:100%; height:auto; }
     .fonoran-showcase__loading,
     .fonoran-showcase__error { margin:0; font-size:0.9rem; color:var(--muted); text-align:center; }
     .word-compose { display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:flex-start; gap:0.4rem 0.5rem; margin:0; padding:0.5rem 0.6rem; background:var(--surface); border:1px solid var(--border); border-radius:6px; font-family:var(--font-serif); }

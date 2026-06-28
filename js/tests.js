@@ -263,47 +263,44 @@ const perroResult = await (async () => {
 })();
 
 const fonoranTranslatorResult = await (async () => {
+  const testName = 'Fonoran translator compiles root vocabulary sentences';
   try {
     resetTranslatorCache();
-    const law = await translateEnglish('Law');
-    assert(law.surface.roman === 'semtetkel', `law roman: ${law.surface.roman}`);
-    assert(law.tokens[0].parts.join('') === 'semtetkel', `law parts: ${law.tokens[0].parts.join('')}`);
+
+    const person = await translateEnglish('Person');
+    assert(person.surface.roman === 'ba', `person roman: ${person.surface.roman}`);
+    assert(person.tokens[0].parts.join('') === 'ba', `person parts: ${person.tokens[0].parts.join('')}`);
 
     const md = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'docs/language-rules.md'), 'utf8');
     const { rules } = loadLanguageRulesFromMarkdown(md);
-    const script = romanToFonoraScript(law.tokens[0].parts, rules).phrase;
-    assert(script.length > 0, 'law script empty');
+    const script = romanToFonoraScript(person.tokens[0].parts, rules).phrase;
+    assert(script.length > 0, 'person script empty');
 
-    const war = await translateEnglish('The tribe is at war');
-    assert(war.surface.roman === 'loba lobawi', `war roman: ${war.surface.roman}`);
-    assert(war.unresolved.length === 0, `war unresolved: ${war.unresolved.join(', ')}`);
-    assert(war.semantic?.slots?.time?.length === 0, 'present tense omits time slot');
+    const jumped = await translateEnglish('the man jumped');
+    assert(jumped.unresolved.length === 0, `jumped unresolved: ${jumped.unresolved.join(', ')}`);
+    assert(jumped.surface.roman === 'ba ta so', `jumped roman: ${jumped.surface.roman}`);
+    assert(jumped.interpretations.some(i => i.english === 'jumped' && i.concept_id === 'move'), `jumped move interp: ${JSON.stringify(jumped.interpretations)}`);
+    assert(jumped.semantic?.slots?.time?.length === 1, 'past tense adds time slot');
 
-    const moon = await translateEnglish('the man jumped over the moon');
-    assert(moon.unresolved.length === 0, `moon unresolved: ${moon.unresolved.join(', ')}`);
-    assert(moon.surface.roman === 'ba ta che nes namtelkek', `moon roman: ${moon.surface.roman}`);
-    assert(!moon.surface.roman.includes(' la '), `moon should not have present la: ${moon.surface.roman}`);
-    assert(moon.interpretations.some(i => i.english === 'jumped' && i.concept_id === 'move'), `moon move interp: ${JSON.stringify(moon.interpretations)}`);
-    assert(moon.interpretations.some(i => i.english === 'over' && i.concept_id === 'up'), `moon path interp: ${JSON.stringify(moon.interpretations)}`);
-    assert(moon.semantic?.slots?.path?.length === 1, 'moon path slot');
-
-    const future = await translateEnglish('the man is going to jump over the moon');
+    const future = await translateEnglish('the man is going to jump');
     assert(future.unresolved.length === 0, `future unresolved: ${future.unresolved.join(', ')}`);
-    assert(future.surface.roman.includes('na'), `future particle: ${future.surface.roman}`);
-    assert(future.surface.roman.includes('che'), `future move: ${future.surface.roman}`);
+    assert(future.surface.roman === 'ba na so', `future roman: ${future.surface.roman}`);
     assert(!future.surface.roman.includes(' la '), `future should not have la: ${future.surface.roman}`);
     assert(!future.surface.roman.includes(' fi '), `future should not use retired fi: ${future.surface.roman}`);
     assert(future.semantic?.slots?.time?.[0]?.english === 'future', 'future time slot');
 
     const ate = await translateEnglish('the man ate animal');
     assert(ate.unresolved.length === 0, `ate unresolved: ${ate.unresolved.join(', ')}`);
-    assert(ate.surface.roman.includes('ta'), `ate past particle: ${ate.surface.roman}`);
-    assert(ate.surface.roman.includes('kan'), `ate eat concept: ${ate.surface.roman}`);
+    assert(ate.surface.roman === 'ba ta she tem', `ate roman: ${ate.surface.roman}`);
     assert(ate.interpretations.some(i => i.english === 'ate' && i.reason === 'irregular past'), `ate interp: ${JSON.stringify(ate.interpretations)}`);
 
-    return { name: 'Fonoran translator compiles Law, war, moon, future, and irregular past', ok: true };
+    const futureEat = await translateEnglish('the man will eat animal');
+    assert(futureEat.unresolved.length === 0, `futureEat unresolved: ${futureEat.unresolved.join(', ')}`);
+    assert(futureEat.surface.roman === 'ba na she tem', `futureEat roman: ${futureEat.surface.roman}`);
+
+    return { name: testName, ok: true };
   } catch (e) {
-    return { name: 'Fonoran translator compiles Law and tribe-at-war sentences', ok: false, error: e.message };
+    return { name: testName, ok: false, error: e.message };
   }
 })();
 

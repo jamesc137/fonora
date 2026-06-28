@@ -573,54 +573,94 @@
       font-weight:700;
       color:var(--word);
     }
-    .concept-editor__ipa { font-size:0.82rem; color:var(--muted); }
     .concept-editor__status { font-family:var(--font-serif); font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; padding:0.18rem 0.5rem; border-radius:999px; }
     .concept-editor__status--approved { color:var(--accent); background:var(--accent-soft); }
     .concept-editor__status--pending { color:var(--muted); background:var(--bg); border:1px solid var(--border); }
     .concept-editor__status--rejected { color:var(--reject); background:#fff5f5; border:1px solid #f0c0c0; }
     .concept-editor__domain-custom { margin-top:0.35rem; width:100%; }
-    .concept-editor__sound-section { margin:0; }
-    .concept-editor__sound-section > .fld { margin-top:0.55rem; }
+    .concept-editor__sound-section { margin:0 0 0.35rem; }
+    .concept-editor__sound-section > .fld { margin-top:0.35rem; }
     .concept-editor__sound-line {
-      display:grid;
-      grid-template-columns:minmax(0,1fr) minmax(6.5rem,8.25rem);
-      gap:0.6rem;
+      display:flex;
       align-items:stretch;
       margin:0.25rem 0 0;
+      border:1px solid var(--border);
+      border-radius:10px;
+      background:var(--bg);
+      overflow:hidden;
     }
     .concept-editor__sound-controls {
       display:flex;
+      flex-direction:row;
+      align-items:center;
+      gap:0.45rem;
+      flex:0 0 auto;
+      padding:0.55rem 0.75rem;
+      border-left:1px solid var(--border);
+      background:var(--surface);
+    }
+    .concept-editor__sound-controls input {
+      width:4.5rem;
+      min-width:0;
+      margin:0;
+      padding:0.38rem 0.5rem;
+      font-size:1.05rem;
+      font-weight:600;
+      text-align:center;
+      color:var(--word);
+      border:1px solid var(--border);
+      border-radius:7px;
+      background:var(--surface);
+    }
+    .concept-editor__sound-controls input:focus {
+      border-color:var(--accent);
+      outline:2px solid var(--accent-soft);
+      outline-offset:0;
+    }
+    .concept-editor__sound-controls .btn {
+      flex-shrink:0;
+      justify-content:center;
+      padding:0.4rem 0.7rem;
+      font-size:0.82rem;
+      white-space:nowrap;
+    }
+    .concept-editor__pron-shell {
+      display:flex;
       flex-direction:column;
       justify-content:center;
-      gap:0.35rem;
+      gap:0.15rem;
+      flex:1 1 auto;
       min-width:0;
-    }
-    .concept-editor__sound-controls input { width:100%; min-width:0; }
-    .concept-editor__sound-controls .btn { width:100%; justify-content:center; padding:0.38rem 0.55rem; font-size:0.82rem; }
-    .concept-editor__pron-shell {
-      display:grid;
-      grid-template-rows:2.85rem 1.15rem 1.15rem 1.05rem;
-      row-gap:0.05rem;
       margin:0;
-      padding:0.65rem 0.75rem;
-      background:var(--bg);
-      border:1px solid var(--border);
-      border-radius:8px;
-      min-height:6.5rem;
+      padding:0.6rem 0.85rem;
+      border:none;
+      border-radius:0;
+      background:transparent;
+      overflow:hidden;
+    }
+    .concept-editor__pron-head {
+      display:flex;
+      align-items:baseline;
+      gap:0.5rem;
+      min-width:0;
+      flex-wrap:wrap;
     }
     .concept-editor__script {
       display:flex;
       align-items:center;
-      min-height:0;
-      font-size:2.15rem;
-      line-height:1.15;
+      flex-shrink:0;
+      font-size:1.75rem;
+      line-height:1.1;
       margin:0;
       color:var(--text);
-      overflow:hidden;
-      overflow-wrap:break-word;
     }
-    .concept-editor__pron-text {
-      display:contents;
+    .concept-editor__pron-divider {
+      flex-shrink:0;
+      color:#c8c2ba;
+      font-family:var(--font-serif);
+      font-size:0.88rem;
+      line-height:1;
+      user-select:none;
     }
     .concept-editor__script.is-placeholder { color:#d4cfc8; }
     .concept-editor__pron-shell.is-empty .concept-editor__script,
@@ -631,11 +671,16 @@
       font-family:var(--font-serif);
       font-size:0.8rem;
       color:var(--muted);
-      overflow:hidden;
-      text-overflow:ellipsis;
+      min-width:0;
+    }
+    .concept-editor__say {
+      flex:1 1 auto;
+      min-width:5rem;
       white-space:nowrap;
     }
-    .concept-editor__ipa { margin:0; min-height:0; align-self:center; }
+    .concept-editor__say strong { color:var(--text); font-weight:700; }
+    .concept-editor__like { white-space:nowrap; }
+    .concept-editor__ipa { margin:0; font-size:0.82rem; color:var(--muted); }
     .concept-editor__invalid { margin:0.35rem 0 0.65rem; font-size:0.8rem; padding:0.4rem 0.6rem; }
     .concept-editor__pron-shell.is-empty #ce-pron-say,
     .concept-editor__pron-shell.is-empty #ce-pron-like,

@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 /**
+ * DEPRECATED — use npm run fonoran:build (converged pipeline).
+ * See tools/legacy/README.md and docs/fonoran.md.
+ *
  * Fonoran primitive root generator (experimental).
  * Assigns phonetically simple syllables to ranked semantic primitives.
  * Follows docs/fonoran-grammar.md — invariant concepts, reserved particles.

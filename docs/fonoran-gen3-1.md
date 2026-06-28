@@ -1,5 +1,7 @@
 # Fonoran Gen 3.1: Phonetic Distinctiveness Layer
 
+> **Archive.** Experimental generator, not the active workflow. See [fonoran.md](fonoran.md).
+
 > **Status:** experimental, extends Gen 3 without changing semantic coordinate theory  
 > **Previous:** [`fonoran-gen3.md`](fonoran-gen3.md) (frozen for comparison)
 

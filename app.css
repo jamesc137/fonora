@@ -714,8 +714,7 @@ code {
 .home-page,
 .platform-home,
 .samples-page,
-.open-problems-page,
-.doc-viewer-page {
+.open-problems-page {
   margin-bottom: 2rem;
 }
 
@@ -3873,7 +3872,9 @@ body.app-body--fonoran .btn-primary:hover {
 
 /* Docs viewer */
 .doc-viewer-page {
+  margin-bottom: 2rem;
   scroll-margin-top: var(--app-header-offset, 7rem);
+  margin-top: calc(-1 * var(--layout-main-pt, 1.75rem));
 }
 
 .doc-viewer-layout {
@@ -3886,11 +3887,31 @@ body.app-body--fonoran .btn-primary:hover {
 .doc-viewer-sidebar {
   position: sticky;
   top: var(--app-header-offset, 7rem);
+  z-index: 4;
+  isolation: isolate;
+  align-self: start;
+  padding-top: var(--layout-main-pt, 1.75rem);
+}
+
+/* Seal the header gap for the sidebar column while stuck. */
+.doc-viewer-sidebar::before {
+  content: '';
+  position: absolute;
+  top: calc(-1 * var(--app-header-offset, 7rem));
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: -1;
+  background: var(--layout-page-bg);
+  pointer-events: none;
+}
+
+.doc-viewer-sidebar-panel {
   background: var(--layout-surface);
   border: 1px solid var(--layout-border);
   border-radius: var(--layout-card-radius);
   padding: 1rem;
-  max-height: calc(100svh - var(--app-header-offset, 7rem) - 1rem);
+  max-height: calc(100svh - var(--app-header-offset, 7rem) - var(--layout-main-pt, 1.75rem) - 1rem);
   overflow: auto;
 }
 
@@ -3915,6 +3936,15 @@ body.app-body--fonoran .btn-primary:hover {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: #9ca3af;
+}
+
+.doc-viewer-nav-group--archive .doc-viewer-nav-group-title {
+  color: #b0b5bd;
+}
+
+.doc-viewer-nav-group--archive .doc-viewer-nav-link {
+  color: #6b7280;
+  font-size: 0.88rem;
 }
 
 .doc-viewer-nav-list {
@@ -3950,32 +3980,76 @@ body.app-body--fonoran .btn-primary:hover {
   position: sticky;
   top: var(--app-header-offset, 7rem);
   z-index: 5;
+  isolation: isolate;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 1rem 1.25rem;
   margin-bottom: 1.25rem;
-  padding-top: 0.75rem;
-  padding-bottom: 1rem;
+  padding-top: calc(var(--layout-main-pt, 1.75rem) + 0.5rem);
+  padding-bottom: 1.1rem;
   border-bottom: 1px solid var(--layout-border);
   background: var(--layout-page-bg);
-  box-shadow: 0 -1px 0 var(--layout-page-bg);
+}
+
+/* Column-local backdrop: seal the header gap without covering the sidebar. */
+.doc-viewer-toolbar::before {
+  content: '';
+  position: absolute;
+  top: calc(-1 * var(--app-header-offset, 7rem));
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 0;
+  background: var(--layout-page-bg);
+  pointer-events: none;
+}
+
+.doc-viewer-toolbar > * {
+  position: relative;
+  z-index: 1;
+}
+
+.doc-viewer-toolbar-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.doc-viewer-toolbar-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b7280;
 }
 
 .doc-viewer-toolbar h2 {
-  margin: 0 0 0.2rem;
-  font-size: 1.5rem;
-  font-weight: 700;
+  margin: 0 0 0.35rem;
+  font-family: var(--font-serif);
+  font-size: clamp(1.45rem, 2.5vw, 1.75rem);
+  font-weight: 600;
   letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--text-heading, #1a1a1a);
 }
 
 .doc-viewer-path {
   margin: 0;
-  font-size: 0.85rem;
-  color: #6b7280;
+  font-size: 0.8rem;
+  color: #9ca3af;
   font-family: var(--font-mono);
+  letter-spacing: 0.01em;
   word-break: break-all;
+}
+
+.doc-viewer-github-btn {
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 1.15rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
 }
 
 .doc-viewer-content {
@@ -3992,7 +4066,7 @@ body.app-body--fonoran .btn-primary:hover {
 .doc-viewer-content h3,
 .doc-viewer-content h4 {
   margin: 1.5rem 0 0.65rem;
-  scroll-margin-top: calc(var(--app-header-offset, 7rem) + 1.25rem);
+  scroll-margin-top: calc(var(--app-header-offset, 7rem) + var(--doc-viewer-toolbar-offset, 4.5rem));
   line-height: 1.3;
   letter-spacing: -0.01em;
 }
@@ -4061,6 +4135,71 @@ body.app-body--fonoran .btn-primary:hover {
   overflow-x: auto;
 }
 
+.doc-viewer-content .mermaid-pan-zoom {
+  margin: 0.75rem 0 1rem;
+}
+
+.doc-viewer-content .mermaid-pan-zoom__hint {
+  margin: 0 0 0.45rem;
+  text-align: center;
+  font-size: 0.82rem;
+  color: #9ca3af;
+}
+
+.doc-viewer-content .mermaid-pan-zoom__viewport {
+  position: relative;
+  overflow: hidden;
+  height: min(68vh, 560px);
+  border: 1px solid #e8e2da;
+  border-radius: 8px;
+  background: #faf8f5;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.doc-viewer-content .mermaid-pan-zoom.is-ready .mermaid-pan-zoom__viewport {
+  opacity: 1;
+}
+
+.doc-viewer-content .mermaid-pan-zoom.is-loading .mermaid-pan-zoom__viewport {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.doc-viewer-content .mermaid-pan-zoom__viewport.is-dragging {
+  cursor: grabbing;
+}
+
+.doc-viewer-content .mermaid-pan-zoom__stage {
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.doc-viewer-content .mermaid-pan-zoom__viewport .mermaid-wrap {
+  overflow: visible;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+
+.doc-viewer-content .mermaid-pan-zoom__viewport .mermaid-wrap svg {
+  display: block;
+  max-width: none !important;
+  width: auto;
+  height: auto;
+}
+
+.doc-viewer-content .mermaid-pan-zoom .nodeLabel,
+.doc-viewer-content .mermaid-pan-zoom .nodeLabel span,
+.doc-viewer-content .mermaid-pan-zoom foreignObject div {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
 .doc-viewer-loading,
 .doc-viewer-error {
   color: #6b7280;
@@ -4097,6 +4236,21 @@ body.app-body--fonoran .btn-primary:hover {
 
   .doc-viewer-sidebar {
     position: static;
+    padding-top: 0;
+  }
+
+  .doc-viewer-sidebar::before {
+    display: none;
+  }
+
+  .doc-viewer-sidebar-panel {
     max-height: none;
+    overflow: visible;
+  }
+
+  .doc-viewer-github-btn {
+    margin-top: 0;
+    width: 100%;
+    text-align: center;
   }
 }

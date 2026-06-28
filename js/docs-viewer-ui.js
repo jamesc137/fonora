@@ -1,4 +1,4 @@
-import { escapeHtml } from './utils.js';
+import { escapeHtml, errorMessage } from './utils.js';
 import {
   DEFAULT_DOC_PATH,
   DOC_CATALOG,
@@ -11,8 +11,28 @@ import {
   splitDocRef,
 } from './doc-urls.js';
 import { extractMarkdownTitle, renderMarkdown } from './markdown-render.js';
+import { renderMermaidIn } from './mermaid-render.js';
 
 let currentPath = null;
+let loadToken = 0;
+let docViewerToolbarObserver = null;
+
+function syncDocViewerToolbarOffset() {
+  const toolbar = document.querySelector('#tab-docs .doc-viewer-toolbar');
+  if (!toolbar) return;
+  document.documentElement.style.setProperty('--doc-viewer-toolbar-offset', `${toolbar.offsetHeight}px`);
+}
+
+function ensureDocViewerToolbarObserver() {
+  const toolbar = document.querySelector('#tab-docs .doc-viewer-toolbar');
+  if (!toolbar) return;
+
+  syncDocViewerToolbarOffset();
+  if (docViewerToolbarObserver) return;
+
+  docViewerToolbarObserver = new ResizeObserver(() => syncDocViewerToolbarOffset());
+  docViewerToolbarObserver.observe(toolbar);
+}
 
 function renderSidebar(activePath) {
   const sidebar = document.getElementById('docs-viewer-sidebar');
@@ -22,7 +42,7 @@ function renderSidebar(activePath) {
     const entries = DOC_CATALOG.filter((e) => e.layer === layer.id);
     if (!entries.length) return '';
     return `
-      <section class="doc-viewer-nav-group">
+      <section class="doc-viewer-nav-group${layer.id === 'archive' ? ' doc-viewer-nav-group--archive' : ''}">
         <h4 class="doc-viewer-nav-group-title">${escapeHtml(layer.label)}</h4>
         <ul class="doc-viewer-nav-list">
           ${entries
@@ -42,10 +62,12 @@ function renderSidebar(activePath) {
   }).join('');
 
   sidebar.innerHTML = `
-    <h3 class="doc-viewer-sidebar-title">Docs</h3>
-    <nav class="doc-viewer-nav" aria-label="Documentation">
-      ${sections}
-    </nav>
+    <div class="doc-viewer-sidebar-panel">
+      <h3 class="doc-viewer-sidebar-title">Docs</h3>
+      <nav class="doc-viewer-nav" aria-label="Documentation">
+        ${sections}
+      </nav>
+    </div>
   `;
 }
 
@@ -65,11 +87,13 @@ function setViewerState({ title, path, error = null }) {
     contentEl.innerHTML = `<p class="doc-viewer-error">${escapeHtml(error)}</p>`;
   }
   renderSidebar(path);
+  syncDocViewerToolbarOffset();
 }
 
 export async function loadDocViewer(repoPath) {
   const { path, anchor: refAnchor } = splitDocRef(repoPath);
   const anchor = refAnchor || '';
+  const token = ++loadToken;
 
   const contentEl = document.getElementById('docs-viewer-content');
   if (!contentEl) return;
@@ -88,22 +112,31 @@ export async function loadDocViewer(repoPath) {
     const res = await fetch(path.startsWith('/') ? path : `/${path}`);
     if (!res.ok) throw new Error(`Could not load ${path} (HTTP ${res.status})`);
     const markdown = await res.text();
+    if (token !== loadToken) return;
+
     const title = extractMarkdownTitle(markdown);
-    contentEl.innerHTML = renderMarkdown(markdown, { docPath: path });
+    contentEl.innerHTML = renderMarkdown(markdown, { docPath: path, skipTitle: true });
+    if (token !== loadToken) return;
+
+    await renderMermaidIn(contentEl);
+    if (token !== loadToken) return;
+
     setViewerState({ title, path });
     if (anchor) {
       requestAnimationFrame(() => {
+        if (token !== loadToken) return;
         const target = document.getElementById(anchor);
         if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     }
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    setViewerState({ title: 'Error', path, error: message });
+    if (token !== loadToken) return;
+    setViewerState({ title: 'Error', path, error: errorMessage(err) });
   }
 }
 
 export function onDocsTabActivated() {
+  ensureDocViewerToolbarObserver();
   const parsed = parseDocFromLocation();
   if (parsed) {
     if (new URLSearchParams(window.location.search).has('path')) {
@@ -131,7 +164,6 @@ function handleDocClick(event) {
   const path = link.getAttribute('data-doc-path');
   if (!path) return;
   openDocViewer(path);
-  loadDocViewer(path).catch(() => {});
 }
 
 export function setupDocsViewer() {
@@ -145,9 +177,6 @@ export function setupDocsViewer() {
     }
   });
 
+  ensureDocViewerToolbarObserver();
   renderSidebar(null);
-
-  if (isDocsRoute()) {
-    onDocsTabActivated();
-  }
 }

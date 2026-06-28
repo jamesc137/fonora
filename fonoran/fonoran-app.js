@@ -227,6 +227,7 @@
       reviewShowLabWords: true,
       reviewShowGeneratedWords: true,
       reviewNeedsReviewOnly: false,
+      candidateEditing: false,
       reviewSelection: null,
       reviewEditing: false,
       conceptEditorFilter: '',
@@ -1860,16 +1861,27 @@
 
     function reviewPickableCandidates() {
       const q = (STATE.reviewFilter ?? '').trim().toLowerCase();
-      let list = rootReviewList();
+      let list = rootReviewList().filter(c => c.status === 'pending' || c.status === 'rejected');
       if (STATE.reviewNeedsReviewOnly) list = list.filter(c => c.status === 'pending');
       if (!q) return list;
       return list.filter(c => `${c.id} ${c.spelling} ${c.concept} ${c.domain}`.toLowerCase().includes(q));
     }
 
+    function queuedCandidateConceptIds() {
+      return new Set(
+        rootReviewList()
+          .filter(c => c.status === 'pending' || c.status === 'rejected')
+          .map(c => c.id),
+      );
+    }
+
     function reviewPickableLabSounds() {
       if (!STATE.lab) return [];
       const q = (STATE.reviewFilter ?? '').trim().toLowerCase();
-      let list = userSounds().map(s => ({ ...s, reviewKind: 'sound' }));
+      const queued = queuedCandidateConceptIds();
+      let list = userSounds()
+        .filter(s => !s.concept_id || !queued.has(s.concept_id))
+        .map(s => ({ ...s, reviewKind: 'sound' }));
       if (STATE.reviewNeedsReviewOnly) list = list.filter(s => isOpen(s.state));
       if (!q) return list;
       return list.filter(s => `${s.spelling} ${s.meaning ?? ''} ${s.legacy_label ?? ''}`.toLowerCase().includes(q));
@@ -1961,6 +1973,7 @@
           STATE.reviewSelection = { type: btn.dataset.reviewType, ref: btn.dataset.reviewRef };
           STATE.justSaved = null;
           STATE.reviewEditing = false;
+          STATE.candidateEditing = false;
           renderUnifiedReview();
         });
       });
@@ -2248,13 +2261,13 @@
           note: open ? `${open} need review` : '',
         });
       }
-      const roots = rootReviewList();
+      const roots = rootReviewList().filter(c => c.status === 'pending' || c.status === 'rejected');
       if (roots.length) {
         const done = roots.filter(x => x.status === 'approved' || x.status === 'rejected').length;
         const pct = Math.round((done / roots.length) * 100);
         const pending = roots.filter(x => x.status === 'pending').length;
         tracks.push({
-          label: 'Root candidates decided',
+          label: 'Root queue decided',
           done,
           total: roots.length,
           pct,
@@ -2369,8 +2382,15 @@
     }
 
     function renderCandidateReviewWorkspace(c) {
+      if (STATE.candidateEditing) {
+        renderCandidateReviewEditWorkspace(c);
+        return;
+      }
       const el = $('word-review');
       if (!el || !c) return;
+
+      const canRegenerate = c.status !== 'approved';
+      const canReopen = c.status === 'rejected';
 
       el.innerHTML = `
         <div class="review root-review review-workspace">
@@ -2382,6 +2402,9 @@
             <p class="feel">Does this root feel right?</p>
             <div class="feel-actions root-review__actions">
               <button type="button" class="fa-approve" id="root-approve" data-write ${c.status === 'approved' ? 'disabled' : ''}>✓ Approve</button>
+              ${canWrite() ? '<button type="button" class="fa-edit" id="root-edit" data-write>✎ Edit</button>' : ''}
+              ${canRegenerate && canWrite() ? '<button type="button" class="btn" id="root-regenerate" data-write>↻ Regenerate</button>' : ''}
+              ${canReopen && canWrite() ? '<button type="button" class="btn" id="root-reopen" data-write>Reopen</button>' : ''}
               <button type="button" class="fa-reject" id="root-reject" data-write ${c.status === 'rejected' ? 'disabled' : ''}>✕ Reject</button>
             </div>
           </div>
@@ -2391,7 +2414,79 @@
       wireRootActions(c);
     }
 
+    function renderCandidateReviewEditWorkspace(c) {
+      const el = $('word-review');
+      if (!el || !c) return;
+      el.innerHTML = `
+        <div class="review root-review review-workspace review-workspace--edit">
+          ${buildRootReviewCardHtml(c)}
+          <div class="edit-panel">
+            <label class="fld" for="cand-spelling">Fonoran spelling</label>
+            <input type="text" id="cand-spelling" class="mono" value="${escapeHtml(c.spelling)}" data-write-input autocomplete="off" spellcheck="false">
+            <label class="fld" for="cand-concept">Concept phrase</label>
+            <input type="text" id="cand-concept" value="${escapeHtml(c.concept)}" data-write-input autocomplete="off">
+            <div class="edit-actions">
+              <button type="button" class="btn btn-primary" id="cand-save" data-write>Save</button>
+              <button type="button" class="btn" id="cand-cancel">Cancel</button>
+            </div>
+          </div>
+        </div>`;
+
+      $('cand-cancel')?.addEventListener('click', () => {
+        STATE.candidateEditing = false;
+        renderUnifiedReview();
+      });
+      $('cand-save')?.addEventListener('click', async () => {
+        const spelling = $('cand-spelling')?.value.trim().toLowerCase();
+        const concept = $('cand-concept')?.value.trim();
+        if (!spelling) { toast('Spelling required.'); return; }
+        try {
+          await api(`/api/fonoran/roots/candidates/${encodeURIComponent(c.id)}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ action: 'edit', spelling, concept }),
+          });
+          STATE.rootCandidates = null;
+          STATE.lexicon = null;
+          STATE.candidateEditing = false;
+          toast(`Updated ${c.id}`);
+          await load({ skipRender: true });
+          renderUnifiedReview();
+        } catch (err) { toast(err.message); }
+      });
+    }
+
     function wireRootActions(c) {
+      $('root-edit')?.addEventListener('click', () => {
+        if (!canWrite()) { toast('Sign in required'); return; }
+        STATE.candidateEditing = true;
+        renderUnifiedReview();
+      });
+      $('root-regenerate')?.addEventListener('click', async () => {
+        if (!canWrite()) { toast('Sign in required'); return; }
+        try {
+          await api(`/api/fonoran/roots/candidates/${encodeURIComponent(c.id)}/regenerate`, { method: 'POST', body: '{}' });
+          STATE.rootCandidates = null;
+          STATE.lexicon = null;
+          STATE.candidateEditing = false;
+          toast(`Regenerated spelling for ${c.id}`);
+          await load({ skipRender: true });
+          renderUnifiedReview();
+        } catch (err) { toast(err.message); }
+      });
+      $('root-reopen')?.addEventListener('click', async () => {
+        if (!canWrite()) { toast('Sign in required'); return; }
+        try {
+          await api(`/api/fonoran/roots/candidates/${encodeURIComponent(c.id)}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ action: 'reopen' }),
+          });
+          STATE.rootCandidates = null;
+          STATE.lexicon = null;
+          toast(`Reopened ${c.id}`);
+          await load({ skipRender: true });
+          renderUnifiedReview();
+        } catch (err) { toast(err.message); }
+      });
       $('root-approve')?.addEventListener('click', async () => {
         try {
           await api(`/api/fonoran/roots/candidates/${encodeURIComponent(c.id)}`, {
@@ -2400,6 +2495,7 @@
           });
           STATE.rootCandidates = null;
           STATE.lexicon = null;
+          STATE.candidateEditing = false;
           await advanceRoot();
           toast(`Approved ${c.spelling} → ${c.id}`);
         } catch (err) { toast(err.message); }
@@ -2412,6 +2508,7 @@
           });
           STATE.rootCandidates = null;
           STATE.lexicon = null;
+          STATE.candidateEditing = false;
           await advanceRoot();
           toast(`Rejected ${c.id}`);
         } catch (err) { toast(err.message); }
@@ -3534,6 +3631,7 @@
       }
       host.innerHTML = comps.map((c, i) => `
         <span class="wg-chip" title="${escapeHtml(c.gloss ?? '')}">
+          <span class="wg-chip__type">${c.type === 'word' ? 'word' : 'root'}</span>
           <span class="wg-chip__id">${escapeHtml(c.id)}</span>
           <span class="wg-chip__root">${escapeHtml(c.root)}</span>
           <button type="button" class="wg-chip__x" data-wg-remove="${i}" aria-label="Remove ${escapeHtml(c.id)}">×</button>
@@ -3558,13 +3656,23 @@
       try {
         const body = { text };
         if (useComponents && (STATE.wgComponents ?? []).length) {
-          body.components = STATE.wgComponents.map(c => c.id);
+          body.components = STATE.wgComponents.map(c => ({
+            type: c.type ?? 'root',
+            id: c.id,
+            ref: c.type === 'word' ? (c.compoundId ?? c.ref) : undefined,
+          }));
         }
         const result = await api('/api/fonoran/word-generator', { method: 'POST', body: JSON.stringify(body) });
         if (token !== wgToken) return;
         STATE.wgResult = result;
         if (!useComponents) {
-          STATE.wgComponents = (result.components ?? []).map(c => ({ id: c.id, root: c.root, gloss: c.gloss }));
+          STATE.wgComponents = (result.components ?? []).map(c => ({
+            id: c.id,
+            type: c.type ?? 'root',
+            compoundId: c.compoundId ?? null,
+            root: c.root,
+            gloss: c.gloss,
+          }));
         }
         const opts = result.options ?? [];
         const prev = STATE.wgSelected;
@@ -3602,7 +3710,7 @@
       if (!c) { toast(`Unknown concept: ${id}`); return; }
       STATE.wgComponents = STATE.wgComponents ?? [];
       if (STATE.wgComponents.some(x => x.id === c.id)) { toast(`${c.id} already added`); return; }
-      STATE.wgComponents.push({ id: c.id, root: c.spelling, gloss: c.concept });
+      STATE.wgComponents.push({ id: c.id, type: 'root', root: c.spelling, gloss: c.concept });
       renderWgComponents();
       wgRecompose();
     }
@@ -3611,11 +3719,24 @@
       const o = STATE.wgResult?.options?.[i];
       if (!o) return;
       const meaning = (STATE.wgInput ?? '').trim() || o.breakdown;
+      const generatorHint = `word-gen: ${o.breakdown}`;
       try {
-        const components = o.components.map(c => ({ type: 'root', ref: c.root }));
+        const components = o.api_components ?? o.components.map(c =>
+          c.type === 'word'
+            ? { type: 'word', ref: c.compoundId }
+            : { type: 'root', ref: c.root },
+        );
         await api('/api/fonoran/lab/compounds', {
           method: 'POST',
-          body: JSON.stringify({ components, meaning, state: 'needs_review', allow_unapproved: true }),
+          body: JSON.stringify({
+            components,
+            meaning,
+            state: 'needs_review',
+            allow_unapproved: true,
+            generator_hint: generatorHint,
+            composition_readable: o.breakdown,
+            created_by: 'generator',
+          }),
         });
         toast(`Added "${o.spelling}" — ${meaning} (needs review)`);
         await load();
@@ -3643,6 +3764,8 @@
       });
       await new Promise((resolve) => requestAnimationFrame(resolve));
       await window.mermaid.run({ nodes: rootEl.querySelectorAll('.mermaid') });
+      const { initMermaidPanZoomIn } = await import('../js/mermaid-pan-zoom.js');
+      initMermaidPanZoomIn(rootEl, { fitMode: 'diagram' });
     }
 
     async function renderGrammar() {
@@ -3931,9 +4054,10 @@
       isOpen: () => $('sheet')?.classList.contains('open'),
     });
     $('adv-import-vocabulary').addEventListener('click', async () => {
-      if (!confirm('Generate the converged vocabulary (roots + curated compounds), locking any approved spellings? This replaces all current lab vocabulary; everything new comes in as needs-review.')) return;
+      if (!confirm('Generate the converged vocabulary (roots + curated compounds), locking any approved spellings? Lab vocabulary is rebuilt; user-added roots and words you created are preserved.')) return;
       const r = await api('/api/fonoran/lab/build', { method: 'POST', body: '{}' });
-      toast(`Generated ${r.roots} roots and ${r.compounds} words`);
+      const preserved = (r.preserved_compounds ?? 0) + (r.preserved_sounds ?? 0);
+      toast(`Generated ${r.roots} roots and ${r.compounds} words${preserved ? ` (${preserved} user items kept)` : ''}`);
       await load();
       rememberMainPage();
       switchPage('dictionary');

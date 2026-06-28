@@ -6,6 +6,21 @@ export function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+/** @param {unknown} err */
+export function errorMessage(err) {
+  if (err instanceof Error) return err.message;
+  if (err && typeof err === 'object') {
+    if (typeof err.message === 'string') return err.message;
+    if (typeof err.str === 'string') return err.str;
+    try {
+      return JSON.stringify(err);
+    } catch {
+      return 'Unknown error';
+    }
+  }
+  return String(err);
+}
+
 export function insertAtCursor(textarea, text) {
   const start = textarea.selectionStart;
   const end = textarea.selectionEnd;

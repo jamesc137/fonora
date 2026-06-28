@@ -20,6 +20,7 @@ import { expandWord } from './fonoran-semantic-lookup.js';
 import { getLab } from './fonoran-sound-bucket.js';
 import { loadInterpretationRules, interpretToConcept } from './fonoran-interpretation.js';
 import { segmentCompound, pronounceabilityScore, checkCompoundBoundary } from './fonoran-gen3-readability.js';
+import { REUSABLE_WORD_STATES } from './fonoran-derivation.js';
 
 const SKIP = new Set([
   'a', 'an', 'the', 'of', 'to', 'in', 'on', 'at', 'for', 'and', 'or', 'with', 'by', 'from',
@@ -71,7 +72,27 @@ async function buildContext(lab) {
     .filter(s => s.state !== 'rejected' && s.spelling)
     .map(s => ({ root: s.spelling, id: s.concept_id ?? s.spelling }));
 
-  return { inventory, aliasIndex, rootById, rootInventory, rules };
+  const compoundByConceptId = new Map();
+  const parseInventory = [...rootInventory];
+  for (const c of liveLab.compounds ?? []) {
+    if (!REUSABLE_WORD_STATES.includes(c.state) || !c.concept_id || !c.spelling) continue;
+    compoundByConceptId.set(c.concept_id, {
+      id: c.id,
+      spelling: c.spelling,
+      gloss: c.meaning ?? c.gloss ?? c.concept_id,
+    });
+    parseInventory.push({ root: c.spelling, id: c.concept_id });
+  }
+
+  return {
+    inventory,
+    aliasIndex,
+    rootById,
+    rootInventory,
+    parseInventory,
+    compoundByConceptId,
+    rules,
+  };
 }
 
 function resolveToken(token, ctx) {
@@ -80,13 +101,11 @@ function resolveToken(token, ctx) {
     const hit = ctx.aliasIndex.get(key);
     if (hit?.concept_id) return { concept_id: hit.concept_id, agentive: false };
   }
-  // Interpretation rules (e.g. spatial / class mappings).
   const interp = interpretToConcept(token, 'concept', ctx.rules)
     ?? interpretToConcept(lemmatize(token), 'concept', ctx.rules);
   if (interp?.concept_id && ctx.rootById.has(interp.concept_id)) {
     return { concept_id: interp.concept_id, agentive: false };
   }
-  // Agentive: traveler → move + person.
   const bases = agentiveBase(token);
   if (bases) {
     for (const base of bases) {
@@ -97,10 +116,44 @@ function resolveToken(token, ctx) {
   return null;
 }
 
+/** Build a component spec — prefer an approved compound word when available. */
+export function componentSpecForConcept(id, ctx, { preferWord = true } = {}) {
+  if (preferWord && ctx.compoundByConceptId.has(id)) {
+    const w = ctx.compoundByConceptId.get(id);
+    return {
+      type: 'word',
+      id,
+      compoundId: w.id,
+      root: w.spelling,
+      gloss: w.gloss,
+    };
+  }
+  const r = ctx.rootById.get(id);
+  if (!r) return null;
+  return { type: 'root', id, root: r.root, gloss: r.gloss };
+}
+
+function normalizeInputComponent(raw, ctx) {
+  if (typeof raw === 'string') {
+    const id = raw.trim().toLowerCase();
+    return componentSpecForConcept(id, ctx, { preferWord: true });
+  }
+  if (raw?.type === 'word' && raw.ref) {
+    const w = [...ctx.compoundByConceptId.values()].find(x => x.id === raw.ref)
+      ?? (raw.id && ctx.compoundByConceptId.get(raw.id));
+    if (w) {
+      const id = raw.id ?? [...ctx.compoundByConceptId.entries()].find(([, v]) => v.id === raw.ref)?.[0];
+      return { type: 'word', id: id ?? raw.ref, compoundId: w.id, root: w.spelling, gloss: w.gloss };
+    }
+  }
+  const id = String(raw?.id ?? raw?.ref ?? '').trim().toLowerCase();
+  if (!id) return null;
+  const preferWord = raw?.type === 'word' || raw?.preferWord !== false;
+  return componentSpecForConcept(id, ctx, { preferWord });
+}
+
 /**
  * Suggest an ordered component list from the English phrase.
- * Async: runs a fast sync pass first, then falls back to WordNet for any
- * tokens that still don't resolve.
  */
 export async function suggestComponents(text, ctx) {
   const tokens = tokenize(text).filter(t => !SKIP.has(t));
@@ -112,11 +165,12 @@ export async function suggestComponents(text, ctx) {
   const push = (id, fromToken, via = null) => {
     if (!ctx.rootById.has(id) || seen.has(id)) return false;
     seen.add(id);
-    components.push({ id, root: ctx.rootById.get(id).root, gloss: ctx.rootById.get(id).gloss, from_token: fromToken, via });
+    const spec = componentSpecForConcept(id, ctx, { preferWord: true });
+    if (!spec) return false;
+    components.push({ ...spec, from_token: fromToken, via });
     return true;
   };
 
-  // Pass 1: fast sync resolution (alias index + lemmatize + agentive).
   for (const token of tokens) {
     const res = resolveToken(token, ctx);
     if (res) {
@@ -128,13 +182,10 @@ export async function suggestComponents(text, ctx) {
     }
   }
 
-  // Pass 2: WordNet fallback for still-unresolved tokens.
   for (const entry of tokenMap) {
     if (entry.resolved) continue;
     const { synonyms, hypernym_concepts } = await expandWord(entry.token);
 
-    // 2a. Hypernym bridge first — more reliable for concrete nouns like "mountain",
-    //     whose synonym sets span multiple unrelated word senses.
     if (hypernym_concepts.length) {
       for (const cid of hypernym_concepts) {
         if (push(cid, entry.token, `hypernym:${cid}`)) {
@@ -146,7 +197,6 @@ export async function suggestComponents(text, ctx) {
     }
     if (entry.resolved) continue;
 
-    // 2b. Synonym expansion as fallback — catches abstract / action words.
     for (const syn of synonyms) {
       const key = syn.replace(/\s+/g, '_');
       const hit = ctx.aliasIndex.get(syn) ?? ctx.aliasIndex.get(key) ?? ctx.aliasIndex.get(lemmatize(syn));
@@ -159,7 +209,6 @@ export async function suggestComponents(text, ctx) {
     }
   }
 
-  // Agentive phrases imply a "person/agent" head if one isn't already present.
   if (sawAgentive && !seen.has('person') && !seen.has('agent')) {
     if (ctx.rootById.has('person')) push('person', '(agent)');
     else if (ctx.rootById.has('agent')) push('agent', '(agent)');
@@ -168,9 +217,11 @@ export async function suggestComponents(text, ctx) {
   return { tokens: tokenMap, components };
 }
 
-function scoreOption(ids, ctx) {
-  const roots = ids.map(id => ctx.rootById.get(id)?.root).filter(Boolean);
-  if (roots.length !== ids.length) return null;
+function scoreOptionFromSpecs(specs, ctx) {
+  if (specs.length < 1) return null;
+  const roots = specs.map(s => s.root).filter(Boolean);
+  if (roots.length !== specs.length) return null;
+
   const boundary = checkCompoundBoundary(roots);
   if (!boundary.valid) {
     if (ctx.debug) {
@@ -178,24 +229,37 @@ function scoreOption(ids, ctx) {
     }
     return null;
   }
+
   const spelling = roots.join('');
-  const segs = segmentCompound(spelling, ctx.rootInventory);
+  const segs = segmentCompound(spelling, ctx.parseInventory);
   const unique = segs.length === 1;
   const pron = pronounceabilityScore(spelling).score;
+  const wordCount = specs.filter(s => s.type === 'word').length;
 
-  // Reward unique segmentation and economy; penalise length and root-count creep.
   const score = (unique ? 1000 : 0)
-    - ids.length * 60
+    - specs.length * 60
     - spelling.length * 4
+    + wordCount * 40
     + pron * 0.5;
 
   return {
     spelling,
     roots,
-    components: ids.map(id => ({ id, root: ctx.rootById.get(id).root, gloss: ctx.rootById.get(id).gloss })),
-    breakdown: ids.join(' + '),
+    components: specs.map(s => ({
+      type: s.type,
+      id: s.id,
+      compoundId: s.compoundId ?? null,
+      root: s.root,
+      gloss: s.gloss,
+    })),
+    api_components: specs.map(s =>
+      s.type === 'word'
+        ? { type: 'word', ref: s.compoundId }
+        : { type: 'root', ref: s.root },
+    ),
+    breakdown: specs.map(s => (s.type === 'word' ? `${s.id}(word)` : s.id)).join(' + '),
     roots_breakdown: roots.join(' + '),
-    root_count: ids.length,
+    root_count: specs.length,
     length: spelling.length,
     pronounceability: pron,
     unique,
@@ -206,29 +270,38 @@ function scoreOption(ids, ctx) {
 
 /**
  * Compose ranked word options from an ordered component list.
- * Produces a precision ladder: the full set plus progressively simpler forms
- * (dropping from each end, since head may lead or trail), all ranked.
  */
-export function composeOptions(componentIds, ctx, { limit = 5 } = {}) {
-  const ids = componentIds.filter(id => ctx.rootById.has(id));
-  if (ids.length < 2) {
-    const single = ids.length === 1 ? scoreOption(ids, ctx) : null;
-    return single ? [single] : [];
+export function composeOptions(componentIds, ctx, { limit = 5, specs = null } = {}) {
+  const variantSpecs = [];
+
+  if (specs?.length) {
+    variantSpecs.push(specs);
+  } else {
+    const ids = componentIds.filter(id => ctx.rootById.has(id));
+    if (ids.length < 2) {
+      const single = ids.length === 1 ? scoreOptionFromSpecs([componentSpecForConcept(ids[0], ctx, { preferWord: false })].filter(Boolean), ctx) : null;
+      return single ? [single] : [];
+    }
+    variantSpecs.push(ids.map(id => componentSpecForConcept(id, ctx, { preferWord: true })).filter(Boolean));
+    variantSpecs.push(ids.map(id => componentSpecForConcept(id, ctx, { preferWord: false })).filter(Boolean));
   }
 
   const candidates = new Map();
   const add = list => {
     if (list.length < 2) return;
-    const key = list.join('+');
+    const key = list.map(s => `${s.type}:${s.id}`).join('+');
     if (candidates.has(key)) return;
-    const opt = scoreOption(list, ctx);
+    const opt = scoreOptionFromSpecs(list, ctx);
     if (opt) candidates.set(key, opt);
   };
 
-  add(ids);                              // full, precise
-  for (let n = ids.length - 1; n >= 2; n--) {
-    add(ids.slice(0, n));                // drop from end (head leads)
-    add(ids.slice(ids.length - n));      // drop from front (head trails)
+  for (const base of variantSpecs) {
+    add(base);
+    const ids = base.map(s => s.id);
+    for (let n = ids.length - 1; n >= 2; n--) {
+      add(base.slice(0, n));
+      add(base.slice(ids.length - n));
+    }
   }
 
   return [...candidates.values()]
@@ -244,9 +317,8 @@ export async function generateWords(text, { components = null, lab = null, limit
 
   if (Array.isArray(components) && components.length) {
     chosen = components
-      .map(id => String(id).trim().toLowerCase())
-      .filter(id => ctx.rootById.has(id))
-      .map(id => ({ id, root: ctx.rootById.get(id).root, gloss: ctx.rootById.get(id).gloss, from_token: null }));
+      .map(c => normalizeInputComponent(c, ctx))
+      .filter(Boolean);
   } else {
     const sugg = await suggestComponents(text, ctx);
     chosen = sugg.components;
@@ -254,7 +326,11 @@ export async function generateWords(text, { components = null, lab = null, limit
     unresolved = sugg.tokens.filter(t => !t.resolved).map(t => t.token);
   }
 
-  const options = composeOptions(chosen.map(c => c.id), ctx, { limit });
+  const options = composeOptions(
+    chosen.map(c => c.id),
+    ctx,
+    { limit, specs: chosen.length ? chosen : null },
+  );
 
   return {
     input: String(text ?? '').trim(),
@@ -269,11 +345,11 @@ async function main() {
   const text = process.argv.slice(2).join(' ') || 'time traveler';
   const r = await generateWords(text);
   console.log(`Input: "${r.input}"`);
-  console.log(`Suggested components: ${r.components.map(c => `${c.id}(${c.root})`).join(' + ') || '(none)'}`);
+  console.log(`Suggested components: ${r.components.map(c => `${c.id}(${c.type === 'word' ? c.root : c.root})`).join(' + ') || '(none)'}`);
   if (r.unresolved.length) console.log(`Unresolved tokens: ${r.unresolved.join(', ')}`);
   console.log('Options (ranked):');
   for (const o of r.options) {
-    console.log(`  ${o.spelling.padEnd(14)} ${o.breakdown}  [roots ${o.root_count}, len ${o.length}, pron ${o.pronounceability}, ${o.unique ? 'unique' : `${o.segmentations.length}x ambiguous`}]`);
+    console.log(`  ${o.spelling.padEnd(14)} ${o.breakdown}  [parts ${o.root_count}, len ${o.length}, pron ${o.pronounceability}, ${o.unique ? 'unique' : `${o.segmentations.length}x ambiguous`}]`);
   }
 }
 

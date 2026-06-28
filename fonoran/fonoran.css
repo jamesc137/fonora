@@ -1347,6 +1347,54 @@
       color:var(--word);
       white-space:nowrap;
     }
+    .grammar-content .mermaid-pan-zoom {
+      margin:0.75rem 0 1rem;
+    }
+    .grammar-content .mermaid-pan-zoom__hint {
+      margin:0 0 0.45rem;
+      text-align:center;
+      font-size:0.82rem;
+      color:var(--muted);
+    }
+    .grammar-content .mermaid-pan-zoom__viewport {
+      position:relative;
+      overflow:hidden;
+      height:min(68vh,560px);
+      border:1px solid var(--border);
+      border-radius:8px;
+      background:var(--bg);
+      cursor:grab;
+      touch-action:none;
+      user-select:none;
+      opacity:0;
+      transition:opacity 0.12s ease;
+    }
+    .grammar-content .mermaid-pan-zoom.is-ready .mermaid-pan-zoom__viewport { opacity:1; }
+    .grammar-content .mermaid-pan-zoom.is-loading .mermaid-pan-zoom__viewport { opacity:0.35; pointer-events:none; }
+    .grammar-content .mermaid-pan-zoom__viewport.is-dragging { cursor:grabbing; }
+    .grammar-content .mermaid-pan-zoom__stage {
+      transform-origin:0 0;
+      will-change:transform;
+    }
+    .grammar-content .mermaid-pan-zoom__viewport .mermaid-wrap {
+      overflow:visible;
+      margin:0;
+      padding:0;
+      background:none;
+      border:none;
+    }
+    .grammar-content .mermaid-pan-zoom__viewport .mermaid-wrap svg {
+      display:block;
+      max-width:none !important;
+      width:auto;
+      height:auto;
+    }
+    .grammar-content .mermaid-pan-zoom .nodeLabel,
+    .grammar-content .mermaid-pan-zoom .nodeLabel span,
+    .grammar-content .mermaid-pan-zoom foreignObject div {
+      font-family:var(--font-mono);
+      font-size:0.85rem;
+    }
     .grammar-content .mermaid-wrap {
       display:flex;
       justify-content:center;
@@ -1712,6 +1760,11 @@
       background:var(--surface); font-size:0.85rem;
     }
     .wg-chip__id { font-weight:600; }
+    .wg-chip__type {
+      font-size:0.65rem; text-transform:uppercase; letter-spacing:0.04em;
+      color:var(--muted); padding:0.1rem 0.35rem; border-radius:4px;
+      background:var(--bg); border:1px solid var(--border);
+    }
     .wg-chip__root { color:var(--accent); font-family:var(--font-mono); }
     .wg-chip__x {
       border:none; background:transparent; cursor:pointer; line-height:1;

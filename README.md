@@ -36,24 +36,26 @@ Docs: [language-rules.md](docs/language-rules.md) · [multilingual-support.md](d
 
 | Language asset | Purpose |
 | --- | --- |
+| [Language builder](/fonoran/) | Create, review, and explore vocabulary |
 | [Dictionary](/fonoran/#dictionary) | Browse roots and compounds |
-| [fonoran.md](docs/fonoran.md) | Vocabulary model and API |
-| [fonoran-gen3.md](docs/fonoran-gen3.md) | DDA semantics reference |
+| [fonoran.md](docs/fonoran.md) | **Start here** — guide, pipeline, API |
 | Live data | `data/fonoran-sound-bucket.json` (your vocabulary) |
 
 ### 3. Language Builder Tools
 
-The **Language Builder Tools** at [`/fonoran/`](fonoran/) are the suite used to **create, review, test, and explore** languages written in Fonora.
+The **Language Builder Tools** at [`/fonoran/`](fonoran/) are the suite used to **create, review, test, and explore** Fonoran.
 
 | Builder tool | Purpose |
 | --- | --- |
-| [Root Creator](fonoran/) | Create primitive syllables (CV / CVC) |
-| [Word Creator](fonoran/) | Stack roots and approved words |
-| [Review](fonoran/) | Approve, reject, or revise pending items |
-| [Language Explorer](fonoran/) | Derivation trees and family graphs |
-| [Semantic Analysis](fonoran/) | Health scores + Run DDA (Advanced) |
+| [Review](fonoran/#review) | Approve roots and words (Root queue · Roots · Words · Generated) |
+| [Word Generator](fonoran/#wordgen) | English phrase → compound suggestions (beta) |
+| [Word Creator](fonoran/#create) | Stack roots and approved words |
+| [Root Creator](fonoran/#roots) | Create primitive syllables (CV / CVC) |
+| [Concept Editor](fonoran/#concepts) | Edit concepts, aliases, spellings |
+| [Dictionary](fonoran/#dictionary) | Derivation trees and family graphs |
+| [Health / Advanced](fonoran/#health) | Scores, Run DDA, import build |
 
-CLI generators and audits: `npm run fonoran:gen3`, `fonoran:canonical:init`, `fonoran:stress-test`, etc.
+CLI: `npm run fonoran:build`, `fonoran:root-candidates`, `fonoran:reset`. See [docs/fonoran.md](docs/fonoran.md#pipeline).
 
 ## Live site
 
@@ -115,7 +117,13 @@ Contributions welcome, see [CONTRIBUTING.md](CONTRIBUTING.md). Fonoran vocabular
 
 [MIT](LICENSE), Copyright (c) 2026 James Calhoun.
 
-eSpeak NG is GPL-licensed; see [docs/espeak-integration.md](docs/espeak-integration.md).
+| Component | License |
+| --- | --- |
+| Fonora (this repo) | [MIT](LICENSE) |
+| eSpeak NG (IPA WASM) | GPL-3.0-or-later — [details](docs/espeak-integration.md) |
+| WordNet, Piper, Mermaid, etc. | [third-party.md](docs/third-party.md) |
+
+Full attribution list: **[docs/third-party.md](docs/third-party.md)**.
 
 ## Links
 

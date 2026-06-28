@@ -177,6 +177,11 @@ export async function patchRootCandidate(id, body) {
       rejected_at: new Date().toISOString(),
       note: body.note?.trim() || null,
     };
+    try {
+      await patchSound(candidate.spelling, { state: 'rejected' });
+    } catch {
+      /* lab sound may not exist yet */
+    }
     await writeCanonicalFromApproved(store);
   } else if (action === 'edit') {
     if (body.spelling != null) candidate.spelling = validateSpelling(body.spelling);
@@ -200,4 +205,38 @@ export async function patchRootCandidate(id, body) {
 
 export async function runRootCandidateGeneration() {
   return generateRootCandidates({ preserveReview: true });
+}
+
+/**
+ * Keep the file-backed candidate queue aligned when lab roots are approved/rejected.
+ * Called from the lab API after sound state changes.
+ */
+export async function syncCandidateFromLab({ concept_id, spelling, state }) {
+  if (!concept_id?.trim()) return null;
+  const store = await readJson(CANDIDATES_PATH);
+  if (!store?.candidates?.length) return null;
+
+  const candidate = store.candidates.find(c => c.id === concept_id.trim());
+  if (!candidate) return null;
+
+  const now = new Date().toISOString();
+  if (state === 'approved' || state === 'revised') {
+    if (spelling?.trim()) {
+      candidate.spelling = validateSpelling(spelling);
+      candidate.ipa = romanToIpa(candidate.spelling);
+    }
+    if (candidate.status !== 'approved') {
+      candidate.status = 'approved';
+      candidate.review = { ...candidate.review, approved_at: now };
+    }
+    await writeCanonicalFromApproved(store);
+  } else if (state === 'rejected') {
+    candidate.status = 'rejected';
+    candidate.review = { ...candidate.review, rejected_at: now };
+    await writeCanonicalFromApproved(store);
+  }
+
+  refreshSummary(store);
+  await writeJson(CANDIDATES_PATH, store);
+  return candidate;
 }

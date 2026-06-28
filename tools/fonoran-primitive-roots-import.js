@@ -1,4 +1,7 @@
 /**
+ * DEPRECATED — use npm run fonoran:build (converged pipeline).
+ * See tools/legacy/README.md and docs/fonoran.md.
+ *
  * Import experimental primitive-roots vocabulary into the Fonoran lab bucket.
  * Populates Dictionary with roots + compounds mapped to English meanings.
  *

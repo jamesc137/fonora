@@ -12,7 +12,7 @@
       required: false,
       authenticated: true,
       email: null,
-      loginUrl: '/auth/google?returnTo=/fonoran/',
+      loginUrl: '/auth/google?returnTo=/language',
     };
     const WRITE_PAGES = new Set(['roots', 'create', 'review', 'root-review', 'concepts', 'advanced']);
     const SPLIT_WRITE_PAGES = new Set(['roots', 'create']);
@@ -98,7 +98,8 @@
     }
 
     function authReturnPath() {
-      return `/fonoran/${window.location.hash || ''}`;
+      const hash = window.location.hash || '';
+      return `/language${hash}`;
     }
 
     async function refreshAuth() {
@@ -109,7 +110,7 @@
         AUTH.required = Boolean(data.authRequired);
         AUTH.authenticated = Boolean(data.authenticated);
         AUTH.email = data.email ?? null;
-        AUTH.loginUrl = data.loginUrl ?? '/auth/google?returnTo=/fonoran/';
+        AUTH.loginUrl = data.loginUrl ?? '/auth/google?returnTo=/language';
       } catch {
         AUTH.required = false;
         AUTH.authenticated = true;
@@ -206,8 +207,9 @@
       showDebugDda: false,
       rootDraft: { onset: '', vowel: '', coda: '' },
       lexicon: null,
+      health: null,
+      healthKey: null,
       toolReturnPage: 'roots',
-      healthOpen: false,
       translatorInput: '',
       translatorResult: null,
       translatorBusy: false,
@@ -455,12 +457,31 @@
         : '<p class="empty" style="grid-column:1/-1">No words match.</p>';
     }
 
+    async function fetchHealth({ force = false } = {}) {
+      const key = STATE.lab?.updated_at ?? null;
+      if (!force && STATE.health && key && STATE.healthKey === key) return STATE.health;
+      const h = await api('/api/fonoran/lab/health');
+      STATE.health = h;
+      STATE.healthKey = key ?? h.bucket_updated_at ?? null;
+      return h;
+    }
+
     async function load(opts = {}) {
       try {
         await ensureRules();
         STATE.lexicon = null;
-        await ensureLexicon();
-        STATE.lab = await api('/api/fonoran/lab');
+        STATE.health = null;
+        STATE.healthKey = null;
+        const [, lab, health] = await Promise.all([
+          ensureLexicon(),
+          api('/api/fonoran/lab'),
+          api('/api/fonoran/lab/health').catch(() => null),
+        ]);
+        STATE.lab = lab;
+        if (health) {
+          STATE.health = health;
+          STATE.healthKey = lab.updated_at ?? health.bucket_updated_at ?? null;
+        }
         $('load-error').hidden = true;
         setFonoranUndoDisabled(!STATE.lab.can_undo || !canWrite());
         if (!opts.skipRender) renderActivePage();
@@ -484,6 +505,7 @@
       else if (STATE.page === 'translator') renderTranslator();
       else if (STATE.page === 'wordgen') renderWordGen();
       else if (STATE.page === 'health') renderHealth();
+      else if (STATE.page === 'progress') renderProgress();
       else if (STATE.page === 'advanced') renderAdvanced();
       applyWriteAccessUI();
     }
@@ -529,12 +551,12 @@
       return HEALTH_SECONDARY_METRICS.find(m => m.key === key)?.title ?? key;
     }
 
-    function buildHealthMetricsHtml(metrics) {
+    function buildHealthMetricsHtml(metrics, { compact = false } = {}) {
       return (metrics ?? []).map(m => `
         <div class="lander-health__metric">
           <span class="lander-health__metric-val">${escapeHtml(String(m.value))}${m.suffix ?? ''}</span>
           <span class="lander-health__metric-label">${escapeHtml(healthMetricTitle(m.key))}</span>
-          <p class="lander-health__metric-note">${escapeHtml(m.explain ?? '')}</p>
+          ${compact ? '' : `<p class="lander-health__metric-note">${escapeHtml(m.explain ?? '')}</p>`}
         </div>`).join('');
     }
 
@@ -1772,7 +1794,7 @@
         </div>`;
     }
 
-    function buildLanderHealthHtml(h) {
+    function buildLanderHealthHtml(h, { showFullReportButton = false, compact = false } = {}) {
       const core = ['learnability', 'pronounceability', 'memorability', 'parseability'];
       const overall = Math.round(core.reduce((a, k) => a + h.scores[k], 0) / core.length);
       const color = healthScoreColor;
@@ -1782,23 +1804,29 @@
           <div class="bar"><span style="width:${d.score}%;background:${color(d.score)}"></span></div>
           <p class="explain">${escapeHtml(d.explain)}</p>
         </div>`).join('');
-      const metrics = buildHealthMetricsHtml(h.metrics);
-      const warnNote = h.warning_summary.total
-        ? `${h.warning_summary.total} ambiguity warning${h.warning_summary.total === 1 ? '' : 's'} flagged (${h.warning_summary.high} serious)`
-        : 'No ambiguity warnings in the current vocabulary';
+      const metrics = buildHealthMetricsHtml(h.metrics, { compact });
+      const warnNote = compact
+        ? ''
+        : h.warning_summary.total
+          ? `${h.warning_summary.total} ambiguity warning${h.warning_summary.total === 1 ? '' : 's'} flagged (${h.warning_summary.high} serious)`
+          : 'No ambiguity warnings in the current vocabulary';
+
+      const buttonHtml = showFullReportButton
+        ? `<div class="lander-health__actions lander-health__actions--in-panel">
+          <button type="button" class="btn btn-primary" id="lander-health-open">View full health report</button>
+        </div>`
+        : '';
 
       return `
-        <div class="lander-health__summary">
+        <div class="lander-health__summary${compact ? ' lander-health__summary--compact' : ''}">
           <div class="lander-health__overall">
             <div class="lander-health__score-big" style="color:${color(overall)}">${overall}<span class="lander-health__score-of"> / 100</span></div>
             <p class="lander-health__label">${healthOverallLabel(overall)}</p>
-            <p class="lander-health__warn-note">${escapeHtml(warnNote)}</p>
+            ${warnNote ? `<p class="lander-health__warn-note">${escapeHtml(warnNote)}</p>` : ''}
             <div class="lander-health__metrics lander-health__metrics--summary">${metrics}</div>
+            ${buttonHtml}
           </div>
           <div class="lander-health__scores">${scoreCards}</div>
-        </div>
-        <div class="lander-health__actions">
-          <button type="button" class="btn btn-primary" id="lander-health-open">View full health report</button>
         </div>`;
     }
 
@@ -1807,9 +1835,9 @@
       if (!el || STATE.page !== 'home' || !STATE.lab) return;
       const token = ++landerHealthToken;
       try {
-        const h = await api('/api/fonoran/lab/health');
+        const h = await fetchHealth();
         if (token !== landerHealthToken) return;
-        el.innerHTML = buildLanderHealthHtml(h);
+        el.innerHTML = buildLanderHealthHtml(h, { showFullReportButton: true, compact: true });
         $('lander-health-open')?.addEventListener('click', () => switchPage('health'));
       } catch {
         if (token !== landerHealthToken) return;
@@ -3825,44 +3853,41 @@
 
     async function renderHealth() {
       let h;
-      try { h = await api('/api/fonoran/lab/health'); } catch { $('health-body').innerHTML = '<p class="empty">Could not load health.</p>'; return; }
-      try { await ensureRootCandidates(); } catch { /* candidates optional */ }
-      const core = ['learnability', 'pronounceability', 'memorability', 'parseability'];
-      const overall = Math.round(core.reduce((a, k) => a + h.scores[k], 0) / core.length);
-      const label = healthOverallLabel(overall);
-      const color = healthScoreColor;
-      const dupes = duplicateMeanings();
-      const order = { high: 0, medium: 1, low: 2 };
-      const warns = [...h.warnings].sort((a, b) => (order[a.severity] ?? 3) - (order[b.severity] ?? 3));
-      const undoDisabled = !STATE.lab?.can_undo || !canWrite();
+      try { h = await fetchHealth(); } catch { $('health-body').innerHTML = '<p class="empty">Could not load health.</p>'; return; }
       $('health-body').innerHTML = `
-        <div class="health-hero">
-          <div class="health-score" style="color:${color(overall)}">${overall}<span class="health-of"> / 100</span></div>
-          <p class="health-label">${label}</p>
-          <div class="lander-health__metrics health-hero__metrics">${buildHealthMetricsHtml(h.metrics)}</div>
-          <button type="button" class="btn health-toggle" id="health-toggle">${STATE.healthOpen ? 'Hide details' : 'View details →'}</button>
-        </div>
-        <div id="health-details" ${STATE.healthOpen ? '' : 'hidden'}>
-          ${h.dimensions.map(d => `<div class="score">
-            <div class="top"><span class="name">${escapeHtml(d.label)}</span><span class="val" style="color:${color(d.score)}">${d.score}<span style="font-size:0.7rem;color:var(--muted)">/100</span></span></div>
-            <div class="bar"><span style="width:${d.score}%;background:${color(d.score)}"></span></div>
-            <p class="explain">${escapeHtml(d.explain)}</p></div>`).join('')}
-          <h3 class="section-h">Compound &amp; generation metrics</h3>
-          <div class="lander-health__metrics">${buildHealthMetricsHtml(h.metrics)}</div>
-          <div class="lander-health__method-grid lander-health__method-grid--secondary health-metric-methods">${buildHealthMetricMethodHtml(h.metrics, h.scores, color)}</div>
-          <h3 class="section-h">Duplicate meanings</h3>
-          ${dupes.length ? dupes.map(d => `<div class="warn-row sev-medium"><span class="wlabel">${d.words.length}×</span><strong>${escapeHtml(d.label)}</strong>: ${d.words.map(w => `<span class="mono">${escapeHtml(w)}</span>`).join(', ')}</div>`).join('') : '<p class="empty" style="padding:0.75rem">Every meaning is used once.</p>'}
-          <h3 class="section-h">Ambiguity &amp; repair warnings (${h.warning_summary.total}, ${h.warning_summary.high} serious)</h3>
-          ${warns.length ? warns.slice(0, 30).map(w => `<div class="warn-row sev-${w.severity}"><span class="wlabel">${escapeHtml(w.label)}</span>${escapeHtml(w.message)}</div>`).join('') : '<p class="empty">No warnings.</p>'}
-          ${h.dda ? `<p class="sans" style="font-size:0.84rem;color:var(--muted);margin-top:0.75rem">DDA: ${h.dda.pending} pending · ${h.dda.stale} stale · ${h.dda.confirmed} confirmed</p>` : ''}
-        </div>
-        <div class="health-progress-header">
-          <h3 class="section-h">Your progress</h3>
-          <button type="button" class="health-undo-btn" id="undo-btn"${undoDisabled ? ' disabled' : ''} data-write>↶ Undo</button>
-        </div>
-        ${buildReviewProgressHtml()}
-        <div id="timeline"></div>`;
-      $('health-toggle').addEventListener('click', () => { STATE.healthOpen = !STATE.healthOpen; renderHealth(); });
+        <div class="content-page">
+          <section class="content-section">
+            <h2 class="section-h">Language health</h2>
+            <p class="section-lead">A live readability audit of vocabulary by four dimensions that measure internal consistency, morphological transparency, and learner ergonomics. Designed for conlang pedagogy, not English familiarity.</p>
+            <div class="lander-health">
+              ${buildLanderHealthHtml(h, { compact: true })}
+            </div>
+            <div class="health-details">
+              <h3 class="section-h">How scores are calculated</h3>
+              ${buildHealthMethodHtml(h)}
+            </div>
+          </section>
+        </div>`;
+    }
+
+    async function renderProgress() {
+      try { await ensureRootCandidates(); } catch { /* candidates optional */ }
+      const undoDisabled = !STATE.lab?.can_undo || !canWrite();
+      $('progress-body').innerHTML = `
+        <div class="content-page progress-page">
+          <section class="content-section content-section--intro">
+            <header class="home-intro-header">
+              <h1>Lab progress</h1>
+              <p class="home-subtitle">Review activity, vocabulary growth, and recent changes in your lab.</p>
+            </header>
+            <div class="health-progress-header">
+              <h2 class="section-h">Your progress</h2>
+              <button type="button" class="health-undo-btn" id="undo-btn"${undoDisabled ? ' disabled' : ''} data-write>↶ Undo</button>
+            </div>
+            ${buildReviewProgressHtml()}
+            <div id="timeline"></div>
+          </section>
+        </div>`;
       $('undo-btn')?.addEventListener('click', () => { undoLastChange(); });
       renderTimeline();
     }
@@ -3889,7 +3914,21 @@
 
     /* ---------- nav ---------- */
     const MAIN_PAGES = new Set(['roots', 'create', 'review', 'dictionary', 'translator', 'wordgen']);
-    const ALL_PAGES = new Set(['home', 'root-review', 'roots', 'create', 'review', 'dictionary', 'grammar', 'translator', 'wordgen', 'health', 'advanced', 'concepts']);
+    const ALL_PAGES = new Set(['home', 'root-review', 'roots', 'create', 'review', 'dictionary', 'grammar', 'translator', 'wordgen', 'health', 'progress', 'advanced', 'concepts']);
+
+    function confirmDangerAction({ title, message, typeToConfirm }) {
+      if (!confirm(`${title}\n\n${message}\n\nAre you sure you want to continue?`)) return false;
+      if (typeToConfirm) {
+        const typed = prompt(`Type "${typeToConfirm}" to confirm. This action cannot be undone.`);
+        if (typed !== typeToConfirm) {
+          toast('Confirmation failed — action cancelled.');
+          return false;
+        }
+      } else if (!confirm('This is your last chance to cancel. Proceed?')) {
+        return false;
+      }
+      return true;
+    }
     function scrollPageTop() {
       window.scrollTo(0, 0);
       document.documentElement.scrollTop = 0;
@@ -3948,8 +3987,6 @@
     $('dict-search').addEventListener('input', e => { STATE.dictQuery = e.target.value; renderDictionary(); });
     $('roots-filter')?.addEventListener('input', e => { STATE.rootsFilter = e.target.value; updateRootsSoundFilter(); });
     $('dict-filters').addEventListener('click', e => { const b = e.target.closest('[data-filter]'); if (!b) return; STATE.dictFilter = b.dataset.filter; $('dict-filters').querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c === b)); renderDictionary(); });
-    $('adv-dictionary').addEventListener('click', () => { rememberMainPage(); switchPage('dictionary'); });
-    $('adv-health').addEventListener('click', () => { rememberMainPage(); switchPage('health'); });
     $('ce-filter')?.addEventListener('input', e => { STATE.conceptEditorFilter = e.target.value; renderConceptEditor(); });
     $('ce-new')?.addEventListener('click', () => {
       STATE.conceptEditorIsNew = true;
@@ -4054,7 +4091,10 @@
       isOpen: () => $('sheet')?.classList.contains('open'),
     });
     $('adv-import-vocabulary').addEventListener('click', async () => {
-      if (!confirm('Generate the converged vocabulary (roots + curated compounds), locking any approved spellings? Lab vocabulary is rebuilt; user-added roots and words you created are preserved.')) return;
+      if (!confirmDangerAction({
+        title: 'Run converged build',
+        message: 'Generate the converged vocabulary (roots + curated compounds), locking any approved spellings? Lab vocabulary is rebuilt; user-added roots and words you created are preserved.',
+      })) return;
       const r = await api('/api/fonoran/lab/build', { method: 'POST', body: '{}' });
       const preserved = (r.preserved_compounds ?? 0) + (r.preserved_sounds ?? 0);
       toast(`Generated ${r.roots} roots and ${r.compounds} words${preserved ? ` (${preserved} user items kept)` : ''}`);
@@ -4063,13 +4103,20 @@
       switchPage('dictionary');
     });
     $('adv-reset-review').addEventListener('click', async () => {
-      if (!confirm('Move every root and word back to needs review? Meanings stay; you re-approve from scratch.')) return;
+      if (!confirmDangerAction({
+        title: 'Reset all review states',
+        message: 'Move every root and word back to needs review? Meanings stay; you re-approve from scratch.',
+      })) return;
       const r = await api('/api/fonoran/lab/reset-review', { method: 'POST', body: '{}' });
       toast(`Reset ${r.sounds_reset} roots and ${r.compounds_reset} words`);
       await load();
     });
     $('adv-reseed').addEventListener('click', async () => {
-      if (!confirm('Clear the lab vocabulary, review queue, and all assigned Fonoran sounds? English concept definitions stay — run `npm run fonoran:build` or `npm run fonoran:build:approved` to start fresh. Cannot be undone.')) return;
+      if (!confirmDangerAction({
+        title: 'Reset lab',
+        message: 'Clear the lab vocabulary, review queue, and all assigned Fonoran sounds? English concept definitions stay — run `npm run fonoran:build` or `npm run fonoran:build:approved` to start fresh.',
+        typeToConfirm: 'RESET',
+      })) return;
       await api('/api/fonoran/lab/seed', { method: 'POST', body: '{}' });
       STATE.lexicon = null;
       STATE.rootCandidates = null;
@@ -4080,10 +4127,8 @@
 
     async function renderAdvanced() {
       try {
-        const h = await api('/api/fonoran/lab/health');
+        const h = await fetchHealth();
         const d = h.dda ?? {};
-        const methodEl = $('adv-health-method');
-        if (methodEl) methodEl.innerHTML = buildHealthMethodHtml(h);
         $('adv-dda-status').textContent = `DDA: ${d.pending ?? 0} pending · ${d.stale ?? 0} stale · ${d.inferred ?? 0} inferred · ${d.confirmed ?? 0} confirmed`;
         if (STATE.showDebugDda && STATE.lab) {
           const debug = {
@@ -4097,8 +4142,6 @@
         }
       } catch {
         $('adv-dda-status').textContent = '';
-        const methodEl = $('adv-health-method');
-        if (methodEl) methodEl.innerHTML = '<p class="lander-health__error">Could not load health metrics.</p>';
       }
     }
 
@@ -4108,21 +4151,6 @@
         toast(`DDA: ${r.processed} processed (${r.confirmed} confirmed, ${r.inferred} inferred)`);
         await load({ skipRender: true });
         renderAdvanced();
-      } catch (e) { toast(e.message); }
-    });
-    $('adv-parse-btn').addEventListener('click', async () => {
-      const q = $('adv-parse-input').value.trim();
-      if (!q) return;
-      try {
-        const r = await api(`/api/fonoran/lab/parse/${encodeURIComponent(q)}`);
-        const el = $('adv-parse-out');
-        if (!r.segmentations?.length) {
-          el.innerHTML = `<p class="warn-row">Could not segment “${escapeHtml(q)}” into known roots.</p>`;
-          return;
-        }
-        el.innerHTML = r.ambiguous
-          ? `<p class="warn-row">Ambiguous: ${r.count} valid parses:</p><ul>${r.segmentations.map(s => `<li>${escapeHtml(s.join(' + '))}</li>`).join('')}</ul>`
-          : `<p><span class="badge badge-approved">Unique</span> ${escapeHtml(r.segmentations[0].join(' + '))}</p>`;
       } catch (e) { toast(e.message); }
     });
     $('adv-debug-dda')?.addEventListener('change', e => {

@@ -42,6 +42,7 @@ const FONORAN_MORE_MENU = [
   { id: 'review', label: 'Review' },
   { type: 'label', text: 'Tools' },
   { id: 'health', label: 'Health' },
+  { id: 'progress', label: 'Lab progress' },
   { id: 'advanced', label: 'Advanced' },
 ];
 
@@ -74,6 +75,7 @@ const FONORAN_TITLES = {
   dictionary: 'Dictionary',
   grammar: 'Grammar',
   health: 'Health',
+  progress: 'Lab progress',
   advanced: 'Advanced',
 };
 
@@ -120,11 +122,10 @@ function docHref(context, path) {
   return `${prefix}${docViewerHref(path)}`;
 }
 
-function platformTabHref(context, tabId) {
-  const root = rootPath(context);
-  if (tabId === 'platform') return `${root}/#about`;
-  if (tabId === 'script') return `${root}/#home`;
-  return context === 'language' ? './' : 'fonoran/';
+function platformTabHref(_context, tabId) {
+  if (tabId === 'platform') return '/';
+  if (tabId === 'script') return '/script';
+  return '/language';
 }
 
 function renderGlobalAuthTools() {
@@ -503,11 +504,13 @@ export function wireUniversalNav() {
 export function initUniversalNav(options = {}) {
   state.context =
     options.context ??
-    (window.location.pathname.includes('/fonoran')
+    (window.location.pathname.includes('/language')
       ? 'language'
-      : !window.location.hash && !isDocsRoute()
-        ? 'platform'
-        : 'script');
+      : window.location.pathname.replace(/\/$/, '') === '/script'
+        ? 'script'
+        : !window.location.hash && !isDocsRoute()
+          ? 'platform'
+          : 'script');
   state.activeTab =
     options.activeTab ??
     (state.context === 'platform' ? 'platform' : 'home');
@@ -553,7 +556,7 @@ export function setFonoranAuth(auth) {
     required: Boolean(auth.required),
     authenticated: Boolean(auth.authenticated),
     email: auth.email ?? null,
-    loginUrl: auth.loginUrl ?? '/auth/google?returnTo=/fonoran/',
+    loginUrl: auth.loginUrl ?? '/auth/google?returnTo=/language',
   };
   const root = document.getElementById(state.mountId);
   if (root?.dataset.navShell === 'static') {

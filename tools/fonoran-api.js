@@ -7,7 +7,6 @@ import {
   getHealth,
   getLabGraph,
   getLabGraphPreview,
-  parseCompoundLive,
   runDda,
   patchSound,
   assignCompoundMeaning,
@@ -126,10 +125,6 @@ export async function handleFonoranApi(req, res, pathname, method) {
       const kind = graphMatch[1];
       const ref = decodeURIComponent(graphMatch[2]);
       return done(200, await getLabGraph(kind, ref));
-    }
-    const parseMatch = pathname.match(/^\/api\/fonoran\/lab\/parse\/([^/]+)$/);
-    if (parseMatch && method === 'GET') {
-      return done(200, await parseCompoundLive(decodeURIComponent(parseMatch[1])));
     }
     if (pathname === '/api/fonoran/lab/undo' && method === 'POST') {
       return done(200, await undoLast());

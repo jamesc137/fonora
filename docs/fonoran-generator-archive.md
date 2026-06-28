@@ -131,7 +131,7 @@ Gen 3 rebased entirely on **DDA coordinates** (Depth, Mode/Dynamics, Aspect). Hu
 - **Gen 3:** `tools/fonoran-gen3.js` → `data/fonoran-gen3-roots.json`
 - **Gen 3.1:** readability repairs, distinctiveness, `tools/fonoran-gen3-1.js` → `data/fonoran-gen3-1-roots.json`
 - **Canonical stabilization:** human-approved roots → `data/fonoran-canonical-registry.json`
-- **Expert UIs (retired):** Gen 3 review and canonical review HTML pages were removed; use live tooling at `/fonoran/` (Language Explorer, Advanced → Run DDA, compound parser).
+- **Expert UIs (retired):** Gen 3 review and canonical review HTML pages were removed; use live tooling at `/fonoran/` (Language Explorer, Health, Advanced → Run DDA).
 
 Full design docs (still present):
 

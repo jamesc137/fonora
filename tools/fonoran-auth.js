@@ -160,11 +160,18 @@ function redirect(res, location, req) {
 }
 
 function sanitizeReturnTo(raw) {
-  if (!raw || typeof raw !== 'string') return '/fonoran/';
+  if (!raw || typeof raw !== 'string') return '/language';
   let path = raw.trim();
-  if (!path.startsWith('/')) return '/fonoran/';
-  if (path.startsWith('//')) return '/fonoran/';
-  if (path.includes('\\')) return '/fonoran/';
+  if (!path.startsWith('/')) return '/language';
+  if (path.startsWith('//')) return '/language';
+  if (path.includes('\\')) return '/language';
+  if (path === '/fonoran' || path.startsWith('/fonoran/')) {
+    let rest = path.slice('/fonoran'.length);
+    if (!rest || rest === '/') rest = '';
+    return `/language${rest}`;
+  }
+  if (path === '/language/') return '/language';
+  if (path === '/script/') return '/script';
   return path;
 }
 
@@ -257,7 +264,7 @@ export async function handleAuthRoutes(req, res, url, method) {
 
   if (pathname === '/auth/session' && method === 'GET') {
     const user = getSessionUser(req);
-    const returnTo = sanitizeReturnTo(url.searchParams.get('returnTo') ?? '/fonoran/');
+    const returnTo = sanitizeReturnTo(url.searchParams.get('returnTo') ?? '/language');
     jsonResponse(res, 200, {
       authRequired: isAuthEnabled(),
       authenticated: Boolean(user),
@@ -273,7 +280,7 @@ export async function handleAuthRoutes(req, res, url, method) {
     if (method === 'POST') {
       jsonResponse(res, 200, { ok: true });
     } else {
-      redirect(res, sanitizeReturnTo(url.searchParams.get('returnTo') ?? '/fonoran/'), req);
+      redirect(res, sanitizeReturnTo(url.searchParams.get('returnTo') ?? '/language'), req);
     }
     return true;
   }
@@ -283,7 +290,7 @@ export async function handleAuthRoutes(req, res, url, method) {
       jsonResponse(res, 503, { error: 'Google OAuth is not configured on this server' });
       return true;
     }
-    const returnTo = sanitizeReturnTo(url.searchParams.get('returnTo') ?? '/fonoran/');
+    const returnTo = sanitizeReturnTo(url.searchParams.get('returnTo') ?? '/language');
     const state = randomBytes(24).toString('base64url');
 
     const stateToken = signPayload({
@@ -312,7 +319,7 @@ export async function handleAuthRoutes(req, res, url, method) {
   if (pathname === '/auth/callback' && method === 'GET') {
     const err = url.searchParams.get('error');
     if (err) {
-      redirect(res, `/fonoran/?auth_error=${encodeURIComponent(err)}`, req);
+      redirect(res, `/language?auth_error=${encodeURIComponent(err)}`, req);
       return true;
     }
 
@@ -323,22 +330,22 @@ export async function handleAuthRoutes(req, res, url, method) {
     clearCookie(res, OAUTH_STATE_COOKIE, req);
 
     if (!code || !state || !statePayload?.state || statePayload.state !== state) {
-      redirect(res, '/fonoran/?auth_error=invalid_state', req);
+      redirect(res, '/language?auth_error=invalid_state', req);
       return true;
     }
 
-    const returnTo = sanitizeReturnTo(statePayload.returnTo ?? '/fonoran/');
+    const returnTo = sanitizeReturnTo(statePayload.returnTo ?? '/language');
 
     try {
       const tokens = await exchangeCode(code, req);
       const profile = await fetchGoogleUser(tokens.access_token);
       const email = profile.email?.trim().toLowerCase();
       if (!email || profile.email_verified === false) {
-        redirect(res, '/fonoran/?auth_error=email_unverified', req);
+        redirect(res, '/language?auth_error=email_unverified', req);
         return true;
       }
       if (!emailAllowed(email)) {
-        redirect(res, `/fonoran/?auth_error=domain&email=${encodeURIComponent(email)}`, req);
+        redirect(res, `/language?auth_error=domain&email=${encodeURIComponent(email)}`, req);
         return true;
       }
 
@@ -354,7 +361,7 @@ export async function handleAuthRoutes(req, res, url, method) {
       redirect(res, returnTo, req);
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'auth_failed';
-      redirect(res, `/fonoran/?auth_error=${encodeURIComponent(msg)}`, req);
+      redirect(res, `/language?auth_error=${encodeURIComponent(msg)}`, req);
     }
     return true;
   }

@@ -206,7 +206,7 @@
     .health-of { font-size:1.1rem; color:var(--muted); }
     .health-label { font-family:var(--font-serif); font-size:1.1rem; font-weight:600; margin:0.4rem 0 0; }
     .health-toggle { margin:1rem auto 0; }
-    #health-details { margin-top:0.6rem; }
+    #health-details { margin-top:1rem; }
     .score { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:0.85rem 1rem; margin-bottom:0.6rem; }
     .score .top { display:flex; justify-content:space-between; align-items:baseline; }
     .score .name { font-family:var(--font-serif); font-weight:600; text-transform:capitalize; }
@@ -499,6 +499,8 @@
     .stats strong { display:block; color:var(--text); font-size:1.1rem; margin-bottom:0.1rem; }
     .section-h { font-family:var(--font-serif); font-size:1.05rem; font-weight:600; margin:1.75rem 0 0.65rem; }
     .health-progress-header { display:flex; align-items:baseline; justify-content:space-between; gap:1rem; margin:1.75rem 0 0.65rem; }
+    .progress-page .health-progress-header { margin:1.25rem 0 0.65rem; }
+    .progress-page #timeline { margin-top:1.25rem; }
     .health-progress-header .section-h { margin:0; }
     .health-review-stats { display:grid; gap:1rem; margin-bottom:1.25rem; }
     @media (min-width:640px) { .health-review-stats { grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); } }
@@ -751,6 +753,11 @@
     .adv-links { display:flex; flex-direction:column; gap:0.4rem; }
     .adv-links a { color:var(--accent); font-size:0.9rem; }
     .danger { color:var(--reject); }
+    .adv-danger-zone { margin-top:1.5rem; padding:1rem 1.1rem; border:1px solid color-mix(in srgb, var(--reject) 35%, var(--border)); border-radius:10px; background:color-mix(in srgb, var(--reject) 6%, var(--surface)); }
+    .adv-danger-zone h3 { margin:0 0 0.35rem; color:var(--reject); }
+    .adv-danger-zone__lead { margin:0 0 0.85rem; font-size:0.86rem; color:#5c2b2b; line-height:1.45; }
+    .adv-danger-zone__actions { flex-direction:column; align-items:flex-start; }
+    .adv-danger-zone__hint { margin:0; font-size:0.82rem; color:var(--muted); line-height:1.4; }
     .actions { display:flex; flex-wrap:wrap; gap:0.5rem; }
     .back-link { font-family:var(--font-serif); font-size:0.85rem; color:var(--accent); background:none; border:none; cursor:pointer; padding:0; margin-bottom:0.85rem; }
 
@@ -1094,8 +1101,15 @@
     .showcase-used-more { font-family:var(--font-serif); font-size:0.78rem; color:var(--muted); padding:0.25rem 0.35rem; }
     .lander-health__loading,
     .lander-health__error { margin:0; font-size:0.9rem; color:var(--muted); text-align:center; padding:1rem; }
-    .lander-health__summary { display:grid; gap:1rem; margin-bottom:1.25rem; }
-    @media (min-width:720px){ .lander-health__summary { grid-template-columns:minmax(10rem,14rem) 1fr; align-items:start; } }
+    .health-details { margin-top:2rem; padding-top:2rem; border-top:1px solid var(--border); }
+    .health-details .section-h { margin-top:0; }
+    .lander-health__summary { display:grid; gap:1rem; margin-bottom:0; }
+    @media (min-width:720px){ .lander-health__summary { grid-template-columns:minmax(11rem,14rem) 1fr; align-items:start; } }
+    .lander-health__summary--compact .lander-health__overall {
+      display:flex;
+      flex-direction:column;
+      align-items:stretch;
+    }
     .lander-health__overall { background:var(--surface); border:1px solid var(--border); border-radius:var(--layout-card-radius); padding:1.25rem 1rem; text-align:center; }
     .lander-health__score-big { font-family:var(--font-mono); font-size:2.75rem; font-weight:700; line-height:1; }
     .lander-health__score-of { font-size:1rem; color:var(--muted); font-weight:500; }
@@ -1116,7 +1130,8 @@
     .lander-health__method-card p + p { margin-top:0.45rem; }
     .lander-health__formula { font-family:var(--font-mono); font-size:0.72rem; color:var(--muted); background:var(--bg); border-radius:4px; padding:0.35rem 0.45rem; }
     .lander-health__metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(9rem,1fr)); gap:0.65rem; margin-bottom:0.85rem; }
-    .lander-health__metrics--summary { margin:0.85rem 0 0; }
+    .lander-health__metrics--summary { margin:0.85rem 0 0; grid-template-columns:1fr; }
+    .lander-health__summary--compact .lander-health__metric { padding:0.55rem 0.65rem; }
     .lander-health__method-subhead { margin:0.5rem 0 0.65rem; font-family:var(--font-serif); font-size:0.88rem; font-weight:600; color:var(--text); }
     .lander-health__method-grid--secondary { margin-bottom:0.85rem; }
     .lander-health__metric { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:0.65rem 0.75rem; text-align:center; }
@@ -1125,6 +1140,8 @@
     .lander-health__metric-note { margin:0.35rem 0 0; font-family:var(--font-serif); font-size:0.74rem; color:var(--muted); line-height:1.35; text-align:left; }
     .lander-health__footnote { margin:0; font-family:var(--font-serif); font-size:0.8rem; color:var(--muted); line-height:1.45; }
     .lander-health__actions { display:flex; justify-content:center; margin-top:1rem; }
+    .lander-health__actions--in-panel { margin-top:1rem; width:100%; }
+    .lander-health__actions--in-panel .btn { width:100%; }
     .fonoran-compare-card { display:flex; flex-direction:column; gap:0.5rem; }
     .fonoran-compare-card--script { border-top:3px solid #2563eb; }
     .fonoran-compare-card--language { border-top:3px solid var(--accent); }

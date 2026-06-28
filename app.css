@@ -182,6 +182,7 @@ html[data-fonora-tab='create'] [data-fonoran-page='create'].tab-btn,
 html[data-fonora-tab='review'] [data-fonoran-page='review'].tab-btn,
 html[data-fonora-tab='concepts'] [data-fonoran-page='concepts'].tab-btn,
 html[data-fonora-tab='health'] [data-fonoran-page='health'].tab-btn,
+html[data-fonora-tab='progress'] [data-fonoran-page='progress'].tab-btn,
 html[data-fonora-tab='advanced'] [data-fonoran-page='advanced'].tab-btn,
 .app-header .tab-btn--active {
   color: #2d6a4f;
@@ -203,6 +204,7 @@ html[data-fonora-page='dictionary'] #page-dictionary,
 html[data-fonora-page='grammar'] #page-grammar,
 html[data-fonora-page='concepts'] #page-concepts,
 html[data-fonora-page='health'] #page-health,
+html[data-fonora-page='progress'] #page-progress,
 html[data-fonora-page='advanced'] #page-advanced {
   display: block !important;
 }
@@ -860,10 +862,17 @@ code {
 }
 
 /* Home page (script lander sections) */
-.home-section p {
+.home-section p:not(.home-subtitle) {
   margin: 0 0 0.9rem;
   font-size: 1rem;
   line-height: 1.65;
+  color: var(--text-body);
+}
+
+.home-section .home-prose p {
+  margin: 0 0 0.85rem;
+  font-size: 1.0625rem;
+  line-height: 1.55;
   color: var(--text-body);
 }
 
@@ -3677,7 +3686,7 @@ body.app-body--fonoran .btn-primary:hover {
 
 .op-card-meta-label,
 .op-lang-contrib-label {
-  margin: 0 0 0.25rem;
+  margin: 0;
   font-size: 0.72rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -3749,12 +3758,15 @@ body.app-body--fonoran .btn-primary:hover {
 }
 
 .op-lang-card {
-  background: #fafafa;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 1rem 1.1rem;
+  background: var(--layout-surface);
+  border: 1px solid var(--layout-border);
+  border-radius: var(--layout-card-radius);
+  padding: var(--layout-card-padding);
   min-width: 0;
   overflow-wrap: break-word;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
 }
 
 .op-lang-card-header {
@@ -3763,7 +3775,6 @@ body.app-body--fonoran .btn-primary:hover {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  margin-bottom: 0.65rem;
 }
 
 .op-lang-card-title {
@@ -3773,7 +3784,7 @@ body.app-body--fonoran .btn-primary:hover {
 }
 
 .op-lang-topics {
-  margin: 0 0 0.75rem;
+  margin: 0;
   padding-left: 1.15rem;
   font-size: 0.875rem;
   line-height: 1.55;

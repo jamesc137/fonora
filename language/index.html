@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fonoran: Experimental Language</title>
   <meta name="description" content="Fonoran is an open-source experiment in language creation built on the Fonora phonetic writing system: primitive concepts, compound words, semantic relationships, and language-building tools.">
-  <script src="../js/nav-boot.js"></script>
-  <link rel="stylesheet" href="../app.css">
-  <link rel="stylesheet" href="fonoran.css">
-  <link rel="prefetch" href="../">
-  <link rel="prefetch" href="../#home">
+  <script src="/js/nav-boot.js"></script>
+  <link rel="stylesheet" href="/app.css">
+  <link rel="stylesheet" href="/language/fonoran.css">
+  <link rel="prefetch" href="/">
+  <link rel="prefetch" href="/script">
 </head>
 <body class="app-body--fonoran">
   <header id="app-header-root" class="app-header" data-nav-shell="static">
@@ -17,9 +17,9 @@
       <div class="app-header__row app-header__row--platform">
         <div class="app-header__start">
           <nav class="platform-tabs" role="tablist" aria-label="Fonora sections">
-            <a href="../#about" class="platform-tab" data-nav-tab="platform">Fonora</a>
-            <a href="../#home" class="platform-tab" data-nav-tab="script">Script</a>
-            <a href="./" class="platform-tab" data-nav-tab="language">Language</a>
+            <a href="/" class="platform-tab" data-nav-tab="platform">Fonora</a>
+            <a href="/script" class="platform-tab" data-nav-tab="script">Script</a>
+            <a href="/language" class="platform-tab" data-nav-tab="language">Language</a>
           </nav>
         </div>
         <nav class="app-header__global" aria-label="Account" data-nav-auth></nav>
@@ -48,6 +48,7 @@
             <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="review" role="menuitem">Review</button>
             <p class="nav-dropdown-label" role="presentation">Tools</p>
             <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="health" role="menuitem">Health</button>
+            <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="progress" role="menuitem">Lab progress</button>
             <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="advanced" role="menuitem">Advanced</button>
           </div>
         </div>
@@ -57,7 +58,7 @@
   <div class="app">
     <main>
       <div id="load-error" class="error" hidden>
-        Could not load language data. Run <code>npm start</code>, then open <code>/fonoran/</code>.
+        Could not load language data. Run <code>npm start</code>, then open <code>/language</code>.
       </div>
 
       <section id="page-home" class="page">
@@ -101,7 +102,7 @@
                 <ul>
                   <li>A universal phonetic script.</li>
                 </ul>
-                <a class="btn fonoran-compare-card__btn" href="../#grid">Explore the script</a>
+                <a class="btn fonoran-compare-card__btn" href="/script#grid">Explore the script</a>
               </article>
               <article class="fonoran-compare-card content-card fonoran-compare-card--language">
                 <p class="home-layer-card__tag">Fonoran</p>
@@ -168,7 +169,7 @@
             <div class="translator-toolbar__text">
               <p class="translator-toolbar__tag">Meaning compiler</p>
               <h1 class="translator-toolbar__title">English → Fonoran</h1>
-              <p class="translator-toolbar__lead sans">Compiles English into Fonoran concepts — not word-for-word substitution. Unknown concepts appear in <span class="translator-unresolved-sample">red</span>.</p>
+              <p class="translator-toolbar__lead sans">Compiles English into Fonoran concepts,not word-for-word substitution. Unknown concepts appear in <span class="translator-unresolved-sample">red</span>.</p>
             </div>
             <a class="btn translator-toolbar__source" href="#grammar">Grammar rules</a>
           </header>
@@ -424,6 +425,10 @@
         <div id="health-body"></div>
       </section>
 
+      <section id="page-progress" class="page">
+        <div id="progress-body"></div>
+      </section>
+
       <section id="page-advanced" class="page">
         <div class="box">
           <h2>Advanced</h2>
@@ -434,25 +439,16 @@
             <button type="button" class="btn btn-primary" id="adv-run-dda" data-write>Run DDA</button>
           </div>
           <p id="adv-dda-status" class="sans" style="font-size:0.84rem;color:var(--muted);margin:0.5rem 0 0"></p>
-          <h3>Compound parser</h3>
-          <div class="actions" style="margin-bottom:0.5rem">
-            <input type="text" id="adv-parse-input" placeholder="Type a word to segment…" style="flex:1;min-width:10rem">
-            <button type="button" class="btn" id="adv-parse-btn">Parse</button>
-          </div>
-          <div id="adv-parse-out" class="sans" style="font-size:0.88rem"></div>
-          <h3>How scores are calculated</h3>
-          <div id="adv-health-method" class="lander-health" aria-live="polite">
-            <p class="lander-health__loading">Loading…</p>
-          </div>
-          <h3>Data actions</h3>
-          <div class="actions">
-            <button type="button" class="btn" id="adv-dictionary">Full dictionary</button>
-            <button type="button" class="btn" id="adv-health">Language health</button>
-            <button type="button" class="btn" id="adv-import-vocabulary" data-write>Run converged build (roots + words, for review)</button>
-            <p class="sans" style="font-size:0.82rem;color:var(--muted);margin:0.35rem 0 0">CLI: <code>npm run fonoran:reset && npm run fonoran:build</code> (review) or <code>npm run fonoran:reset && npm run fonoran:build:approved</code> (pre-approved).</p>
-            <button type="button" class="btn" id="adv-reset-review" data-write>Reset all review states (keep meanings)</button>
-            <button type="button" class="btn danger" id="adv-reseed" data-write>Reset lab (blank slate)</button>
-            <p class="sans" style="font-size:0.82rem;color:var(--muted);margin:0.35rem 0 0">Clears Dictionary, Review queue, and assigned sounds. Concept Editor keeps English definitions only.</p>
+          <div class="adv-danger-zone">
+            <h3>Danger zone</h3>
+            <p class="adv-danger-zone__lead sans">These actions have irreversible effects on your lab data. Proceed with caution.</p>
+            <div class="actions adv-danger-zone__actions">
+              <button type="button" class="btn danger" id="adv-import-vocabulary" data-write>Run converged build (roots + words, for review)</button>
+              <p class="sans adv-danger-zone__hint">CLI: <code>npm run fonoran:reset && npm run fonoran:build</code> (review) or <code>npm run fonoran:reset && npm run fonoran:build:approved</code> (pre-approved).</p>
+              <button type="button" class="btn danger" id="adv-reset-review" data-write>Reset all review states (keep meanings)</button>
+              <button type="button" class="btn danger" id="adv-reseed" data-write>Reset lab (blank slate)</button>
+              <p class="sans adv-danger-zone__hint">Clears Dictionary, Review queue, and assigned sounds. Concept Editor keeps English definitions only.</p>
+            </div>
           </div>
           <label class="sans wc-toggle" style="display:block;margin-top:1rem"><input type="checkbox" id="adv-debug-dda" data-write-input> Show debug DDA fields</label>
           <pre id="adv-debug-panel" class="debug-panel" hidden></pre>
@@ -469,9 +465,9 @@
         Released under the <a href="https://github.com/jamesc137/fonora/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>.
       </p>
       <p class="site-footer-links">
-        <a href="../#home">Script</a>
+        <a href="/script">Script</a>
         <span class="site-footer-sep" aria-hidden="true">·</span>
-        <a href="https://fonora.org/fonoran/">fonora.org</a>
+        <a href="https://fonora.org/language">fonora.org</a>
         <span class="site-footer-sep" aria-hidden="true">·</span>
         <a href="https://github.com/jamesc137/fonora" target="_blank" rel="noopener noreferrer">GitHub</a>
       </p>
@@ -487,6 +483,6 @@
   </div>
   <div id="toast" class="toast"></div>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-  <script type="module" src="fonoran-app.js"></script>
+  <script type="module" src="/language/fonoran-app.js"></script>
 </body>
 </html>

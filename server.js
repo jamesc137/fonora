@@ -81,8 +81,32 @@ function isDocsViewerRoute(pathname) {
   return path === '/docs' || path.startsWith('/docs/');
 }
 
+function isScriptAppRoute(pathname) {
+  const path = pathname.replace(/\/$/, '') || '/';
+  return path === '/script';
+}
+
+function legacyLanguageRedirect(pathname, search, hash) {
+  if (pathname === '/fonoran' || pathname.startsWith('/fonoran/')) {
+    let rest = pathname.slice('/fonoran'.length);
+    if (!rest || rest === '/') rest = '';
+    return `/language${rest}${search}${hash}`;
+  }
+  return null;
+}
+
+/** Canonical section URLs omit trailing slashes (/script, /language). */
+function sectionCanonicalRedirect(pathname, search, hash) {
+  if (pathname === '/script/' || pathname === '/language/') {
+    return `${pathname.slice(0, -1)}${search}${hash}`;
+  }
+  return null;
+}
+
 function normalizePathname(pathname) {
   let path = decodeURIComponent(pathname);
+  if (path === '/script' || path === '/script/') path = '/index.html';
+  if (path === '/language' || path === '/language/') path = '/language/index.html';
   if (path.endsWith('/')) path += 'index.html';
   if (path === '/') path = '/index.html';
   return path;
@@ -110,7 +134,9 @@ function findOnnxWasmPath() {
 }
 
 function cacheControl(pathname) {
-  if (pathname === '/index.html' || pathname === '/') return 'no-cache';
+  if (pathname === '/index.html' || pathname === '/' || pathname === '/script' || pathname === '/language') {
+    return 'no-cache';
+  }
   if (/\.(wasm|data|js|mjs|css)$/.test(pathname)) return 'public, max-age=31536000, immutable';
   return 'public, max-age=3600';
 }
@@ -145,6 +171,32 @@ createServer(async (req, res) => {
       if (handled) return;
       res.writeHead(404, { 'Content-Type': 'application/json', ...SECURITY_HEADERS });
       res.end(JSON.stringify({ error: 'Not found' }));
+      return;
+    }
+
+    const legacyRedirect = legacyLanguageRedirect(url.pathname, url.search, url.hash);
+    if (legacyRedirect) {
+      res.writeHead(301, { Location: legacyRedirect, ...SECURITY_HEADERS });
+      res.end();
+      return;
+    }
+
+    const canonicalRedirect = sectionCanonicalRedirect(url.pathname, url.search, url.hash);
+    if (canonicalRedirect) {
+      res.writeHead(301, { Location: canonicalRedirect, ...SECURITY_HEADERS });
+      res.end();
+      return;
+    }
+
+    if (isScriptAppRoute(url.pathname)) {
+      const indexPath = join(root, 'index.html');
+      const body = await readFile(indexPath);
+      res.writeHead(200, {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-cache',
+        ...SECURITY_HEADERS,
+      });
+      res.end(body);
       return;
     }
 

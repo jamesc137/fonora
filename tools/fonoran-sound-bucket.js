@@ -5,7 +5,7 @@
 import { readBucketRaw, writeBucketRaw } from './fonoran-store.js';
 import { sayAs, sayAsBold, describeParts, compoundSayAs, parseSyllable } from './fonoran-pronunciation.js';
 import { writeEnglishLexicon } from './fonoran-english-lexicon.js';
-import { analyzeAmbiguity, auditScores, segmentCompound, checkCompoundBoundary } from './fonoran-gen3-readability.js';
+import { analyzeAmbiguity, auditScores, checkCompoundBoundary, segmentCompound } from './fonoran-gen3-readability.js';
 import {
   normalizeComponents,
   normalizeCompoundRecord,
@@ -739,9 +739,10 @@ const WARNING_LABELS = {
   algorithmic_repair: 'Machine-adjusted spelling',
 };
 
-export async function getHealth() {
-  const bucket = await loadBucket();
+/** In-memory cache keyed by bucket `updated_at` (invalidates on every lab write). */
+let healthCache = null;
 
+function buildHealthInventory(bucket) {
   const inventory = bucket.sounds
     .filter(s => effectiveState(s) !== 'rejected')
     .map(s => ({
@@ -764,8 +765,23 @@ export async function getHealth() {
         : (c.parts ?? []),
     }));
 
-  const warnings = analyzeAmbiguity(inventory, derivations);
-  const scores = auditScores(inventory, derivations, warnings);
+  return { inventory, derivations };
+}
+
+function buildSegmentationMap(inventory, derivations) {
+  const segByCompound = new Map();
+  for (const d of derivations) {
+    if (!d.compound || segByCompound.has(d.compound)) continue;
+    segByCompound.set(d.compound, segmentCompound(d.compound, inventory));
+  }
+  return segByCompound;
+}
+
+function computeHealth(bucket) {
+  const { inventory, derivations } = buildHealthInventory(bucket);
+  const segByCompound = buildSegmentationMap(inventory, derivations);
+  const warnings = analyzeAmbiguity(inventory, derivations, segByCompound);
+  const scores = auditScores(inventory, derivations, warnings, segByCompound);
 
   const dimensions = [
     'learnability', 'pronounceability', 'memorability', 'parseability',
@@ -773,6 +789,7 @@ export async function getHealth() {
 
   return {
     generated_at: new Date().toISOString(),
+    bucket_updated_at: bucket.updated_at ?? null,
     scores,
     dimensions,
     metrics: [
@@ -789,6 +806,15 @@ export async function getHealth() {
     },
     dda: ddaSummary(bucket),
   };
+}
+
+export async function getHealth() {
+  const bucket = await loadBucket();
+  const key = bucket.updated_at ?? '';
+  if (healthCache?.key === key) return healthCache.value;
+  const value = computeHealth(bucket);
+  healthCache = { key, value };
+  return value;
 }
 
 export async function getLabGraph(kind, ref) {
@@ -828,39 +854,6 @@ export async function getLabGraphPreview(input) {
     related: [],
     mermaid: graph.source,
     graph_nodes: graph.nodes,
-  };
-}
-
-export async function parseCompoundLive(spelling) {
-  const bucket = await loadBucket();
-  const inventory = [];
-
-  for (const s of bucket.sounds.filter(x => effectiveState(x) !== 'rejected')) {
-    inventory.push({
-      root: s.spelling,
-      id: s.spelling,
-      gloss: s.meaning ?? s.spelling,
-      coordinates: s.dda?.coordinates ?? {},
-    });
-  }
-
-  for (const c of bucket.compounds.filter(x => effectiveState(x) !== 'rejected')) {
-    inventory.push({
-      root: c.spelling,
-      id: c.id,
-      gloss: c.meaning ?? c.spelling,
-      coordinates: c.dda?.coordinates ?? {},
-    });
-  }
-
-  inventory.sort((a, b) => b.root.length - a.root.length);
-
-  const segs = segmentCompound(spelling.trim(), inventory);
-  return {
-    spelling: spelling.trim(),
-    segmentations: segs,
-    count: segs.length,
-    ambiguous: segs.length > 1,
   };
 }
 

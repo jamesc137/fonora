@@ -613,16 +613,39 @@ function updateQuizStats() {
   document.getElementById('quiz-stats').textContent = `Attempts: ${quizStats.attempts} · Correct: ${quizStats.correct} · Accuracy: ${acc}%`;
 }
 
-function getTabFromHash() {
-  if (isDocsRoute()) return 'docs';
-  const id = window.location.hash.replace(/^#/, '');
-  if (id === 'about') return 'platform';
-  if (id === 'home') return 'home';
-  if (id === 'reader') return 'translator';
-  if (id) {
-    const panel = document.querySelector(`[data-tab-panel="${id}"]`);
-    if (panel) return id;
+function migrateLegacyUrl() {
+  const path = window.location.pathname.replace(/\/$/, '') || '/';
+  const hash = window.location.hash.replace(/^#/, '');
+  if (path === '/' && hash === 'about') {
+    history.replaceState(null, '', `${path}${window.location.search}`);
+    return;
   }
+  if (path === '/' && (hash === 'home' || (hash && hash !== 'about' && hash !== 'open-problems' && hash !== 'docs' && document.querySelector(`[data-tab-panel="${hash}"]`)))) {
+    const nextHash = hash === 'home' ? '' : `#${hash}`;
+    history.replaceState(null, '', `/script${nextHash}${window.location.search}`);
+  }
+}
+
+function isScriptAppPath() {
+  const path = window.location.pathname.replace(/\/$/, '') || '/';
+  return path === '/script';
+}
+
+function getTabFromHash() {
+  migrateLegacyUrl();
+  if (isDocsRoute()) return 'docs';
+  if (isScriptAppPath()) {
+    const id = window.location.hash.replace(/^#/, '');
+    if (id === 'reader') return 'translator';
+    if (id) {
+      const panel = document.querySelector(`[data-tab-panel="${id}"]`);
+      if (panel) return id;
+    }
+    return 'home';
+  }
+  const id = window.location.hash.replace(/^#/, '');
+  if (id === 'open-problems') return 'open-problems';
+  if (id === 'about') return 'platform';
   return 'platform';
 }
 
@@ -631,25 +654,37 @@ function isPlatformTab(tabId) {
 }
 
 function setHashForTab(tabId) {
-  const base = window.location.pathname;
-  if (tabId === 'platform') {
-    const next = `${base}#about`;
-    if (`${window.location.pathname}${window.location.search}${window.location.hash}` !== next) {
-      history.replaceState(null, '', next);
+  if (isPlatformTab(tabId)) {
+    if (tabId === 'platform') {
+      const next = `/${window.location.search}`;
+      if (`${window.location.pathname}${window.location.search}${window.location.hash}` !== next) {
+        history.replaceState(null, '', next);
+      }
+      return;
+    }
+    if (tabId === 'open-problems') {
+      const next = `/#open-problems`;
+      if (`${window.location.pathname}${window.location.search}${window.location.hash}` !== next) {
+        history.replaceState(null, '', next);
+      }
+      return;
+    }
+    if (tabId === 'docs') {
+      if (isDocsRoute()) return;
+      const next = docViewerHref(DEFAULT_DOC_PATH);
+      if (`${window.location.pathname}${window.location.search}${window.location.hash}` !== next) {
+        history.replaceState(null, '', next);
+      }
+      return;
     }
     return;
   }
-  const hash = tabId === 'home' ? '#home' : `#${tabId}`;
-  if (tabId === 'docs') {
-    if (isDocsRoute()) return;
-    const next = docViewerHref(DEFAULT_DOC_PATH);
-    if (`${window.location.pathname}${window.location.search}${window.location.hash}` !== next) {
-      history.replaceState(null, '', next);
-    }
-    return;
-  }
-  if (`${window.location.pathname}${window.location.search}${window.location.hash}` !== `${base}${hash}`) {
-    history.replaceState(null, '', `${base}${hash}`);
+
+  const base = '/script';
+  const hash = tabId === 'home' ? '' : `#${tabId}`;
+  const next = `${base}${hash}`;
+  if (`${window.location.pathname}${window.location.search}${window.location.hash}` !== next) {
+    history.replaceState(null, '', next);
   }
 }
 

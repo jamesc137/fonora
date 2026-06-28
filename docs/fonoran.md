@@ -149,7 +149,6 @@ Reserved particles (never roots): `mi`, `na`, `ta`.
 | `/api/fonoran/lab` | GET | Public |
 | `/api/fonoran/lab/health` | GET | Public |
 | `/api/fonoran/lab/graph/:kind/:ref` | GET | Public |
-| `/api/fonoran/lab/parse/:spelling` | GET | Public |
 | `/api/fonoran/lab/compounds` | POST | Sign-in |
 | `/api/fonoran/lab/run-dda` | POST | Sign-in |
 | `/api/fonoran/lab/build` | POST | Sign-in |

@@ -31,6 +31,7 @@
     'dictionary',
     'grammar',
     'health',
+    'progress',
     'advanced',
   ]);
 
@@ -40,12 +41,19 @@
   const hasDocPath = new URLSearchParams(window.location.search).has('path');
   const isDocsRoute = path === '/docs' || path.startsWith('/docs/') || hasDocPath || hash === 'docs';
 
-  if (path.includes('/fonoran')) {
+  if (path === '/language' || path.startsWith('/language/')) {
     const page = hash && FONORAN_PAGES.has(hash) ? hash : 'home';
     const tab = page === 'root-review' ? 'review' : page;
     html.setAttribute('data-fonora-nav', 'language');
     html.setAttribute('data-fonora-tab', tab);
     html.setAttribute('data-fonora-page', page);
+    return;
+  }
+
+  if (path === '/script' || path.startsWith('/script/')) {
+    const tab = hash === 'reader' ? 'translator' : hash && SCRIPT_TABS.has(hash) ? hash : 'home';
+    html.setAttribute('data-fonora-nav', 'script');
+    html.setAttribute('data-fonora-tab', tab);
     return;
   }
 
@@ -69,13 +77,7 @@
 
   if (hash === 'home' || (hash && SCRIPT_TABS.has(hash))) {
     html.setAttribute('data-fonora-nav', 'script');
-    html.setAttribute('data-fonora-tab', hash || 'home');
-    return;
-  }
-
-  if (hash === 'reader') {
-    html.setAttribute('data-fonora-nav', 'script');
-    html.setAttribute('data-fonora-tab', 'translator');
+    html.setAttribute('data-fonora-tab', hash === 'home' ? 'home' : hash);
     return;
   }
 

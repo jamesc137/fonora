@@ -198,8 +198,10 @@ export function pronounceabilityScore(text) {
   return { score: Math.max(0, score), issues };
 }
 
-export function analyzeAmbiguity(inventory, derivations = []) {
+export function analyzeAmbiguity(inventory, derivations = [], segByCompound = null) {
   const warnings = [];
+  const segmentations = (compound) =>
+    segByCompound?.get(compound) ?? segmentCompound(compound, inventory);
 
   for (let i = 0; i < inventory.length; i++) {
     for (let j = i + 1; j < inventory.length; j++) {
@@ -254,7 +256,7 @@ export function analyzeAmbiguity(inventory, derivations = []) {
         message: `"${d.compound}" (${d.concept}) length ${d.compound.length}`,
       });
     }
-    const segs = segmentCompound(d.compound, inventory);
+    const segs = segmentations(d.compound);
     if (segs.length > 1) {
       warnings.push({
         type: 'segmentation_ambiguity',
@@ -285,11 +287,14 @@ export function analyzeAmbiguity(inventory, derivations = []) {
   return warnings;
 }
 
-export function auditScores(inventory, derivations, warnings) {
+export function auditScores(inventory, derivations, warnings, segByCompound = null) {
   const pronScores = inventory.map(i => pronounceabilityScore(i.root).score);
   const avgPron = pronScores.reduce((a, b) => a + b, 0) / pronScores.length;
   const highWarnings = warnings.filter(w => w.severity === 'high').length;
-  const parseable = derivations.filter(d => segmentCompound(d.compound, inventory).length === 1).length;
+  const parseable = derivations.filter(d => {
+    const segs = segByCompound?.get(d.compound) ?? segmentCompound(d.compound, inventory);
+    return segs.length === 1;
+  }).length;
 
   return {
     learnability: Math.round(Math.max(0, 100 - highWarnings * 8 - warnings.filter(w => w.type === 'similar_roots').length * 3)),

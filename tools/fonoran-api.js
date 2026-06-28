@@ -30,8 +30,9 @@ import {
   patchRootCandidate,
   regenerateRootCandidate,
   runRootCandidateGeneration,
+  reconcileInventoryFromLab,
 } from './fonoran-root-store.js';
-import { loadConceptInventory } from './fonoran-concepts.js';
+import { loadConceptInventory, loadRuntimeConceptInventory } from './fonoran-concepts.js';
 import {
   createConcept,
   deleteConcept,
@@ -76,10 +77,12 @@ export async function handleFonoranApi(req, res, pathname, method) {
       return done(200, await getLab());
     }
     if (pathname === '/api/fonoran/lexicon' && method === 'GET') {
-      return done(200, await loadEnglishLexicon());
+      const lab = await getLab();
+      return done(200, await loadEnglishLexicon(lab));
     }
     if (pathname === '/api/fonoran/concepts' && method === 'GET') {
-      return done(200, await loadConceptInventory());
+      const lab = await getLab();
+      return done(200, await loadRuntimeConceptInventory({ lab }));
     }
     if (pathname === '/api/fonoran/concepts/domains' && method === 'GET') {
       return done(200, { domains: await listConceptDomains() });
@@ -138,6 +141,9 @@ export async function handleFonoranApi(req, res, pathname, method) {
     }
     if (pathname === '/api/fonoran/lab/reset-review' && method === 'POST') {
       return done(200, await resetReviewStates());
+    }
+    if (pathname === '/api/fonoran/lab/reconcile-inventory' && method === 'POST') {
+      return done(200, await reconcileInventoryFromLab());
     }
     const impactMatch = pathname.match(/^\/api\/fonoran\/lab\/impact\/sounds\/([^/]+)$/);
     if (impactMatch && method === 'GET') {

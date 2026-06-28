@@ -6,14 +6,16 @@
 import { writeFile } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { loadConceptInventory } from './fonoran-concepts.js';
+import { loadConceptInventory, loadRuntimeConceptInventory } from './fonoran-concepts.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 export const LEXICON_PATH = join(ROOT, 'data/fonoran-english-lexicon.json');
 
 /** @returns {Promise<{ version: string, concepts: object[], words: object[], categories: string[] }>} */
-export async function buildEnglishLexicon() {
-  const inventory = await loadConceptInventory();
+export async function buildEnglishLexicon(lab = null) {
+  const inventory = lab
+    ? await loadRuntimeConceptInventory({ lab })
+    : await loadConceptInventory();
   const words = [];
   const seen = new Set();
 
@@ -65,7 +67,7 @@ export async function writeEnglishLexicon() {
   return lexicon;
 }
 
-export async function loadEnglishLexicon() {
-  const lexicon = await buildEnglishLexicon();
+export async function loadEnglishLexicon(lab = null) {
+  const lexicon = await buildEnglishLexicon(lab);
   return lexicon;
 }

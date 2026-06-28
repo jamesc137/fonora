@@ -446,6 +446,8 @@
               <button type="button" class="btn danger" id="adv-import-vocabulary" data-write>Run converged build (roots + words, for review)</button>
               <p class="sans adv-danger-zone__hint">CLI: <code>npm run fonoran:reset && npm run fonoran:build</code> (review) or <code>npm run fonoran:reset && npm run fonoran:build:approved</code> (pre-approved).</p>
               <button type="button" class="btn danger" id="adv-reset-review" data-write>Reset all review states (keep meanings)</button>
+              <button type="button" class="btn" id="adv-reconcile-inventory" data-write>Reconcile inventory from lab</button>
+              <p class="sans adv-danger-zone__hint">Syncs root-candidates and approved-roots exports from live lab spellings (fixes drift after Review approvals).</p>
               <button type="button" class="btn danger" id="adv-reseed" data-write>Reset lab (blank slate)</button>
               <p class="sans adv-danger-zone__hint">Clears Dictionary, Review queue, and assigned sounds. Concept Editor keeps English definitions only.</p>
             </div>

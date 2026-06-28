@@ -15,7 +15,7 @@
  */
 
 import { fileURLToPath } from 'node:url';
-import { loadConceptInventory, buildConceptAliasIndex } from './fonoran-concepts.js';
+import { buildConceptAliasIndex, loadRuntimeConceptInventory, buildRootById } from './fonoran-concepts.js';
 import { expandWord } from './fonoran-semantic-lookup.js';
 import { getLab } from './fonoran-sound-bucket.js';
 import { loadInterpretationRules, interpretToConcept } from './fonoran-interpretation.js';
@@ -54,19 +54,11 @@ function agentiveBase(word) {
 }
 
 async function buildContext(lab) {
-  const inventory = await loadConceptInventory();
   const liveLab = lab ?? await getLab();
+  const inventory = await loadRuntimeConceptInventory({ lab: liveLab });
   const rules = await loadInterpretationRules().catch(() => null);
-  const aliasIndex = buildConceptAliasIndex(inventory.concepts, liveLab);
-
-  const rootById = new Map();
-  for (const c of inventory.concepts) {
-    if (c.spelling) rootById.set(c.id, { root: c.spelling, gloss: c.concept, state: c.status });
-  }
-  for (const s of liveLab.sounds ?? []) {
-    if (s.state === 'rejected' || !s.concept_id || !s.spelling) continue;
-    rootById.set(s.concept_id, { root: s.spelling, gloss: s.gloss ?? s.meaning, state: s.state });
-  }
+  const aliasIndex = buildConceptAliasIndex(inventory.concepts, liveLab, {}, { labFirst: true });
+  const rootById = buildRootById(inventory.concepts, liveLab);
 
   const rootInventory = (liveLab.sounds ?? [])
     .filter(s => s.state !== 'rejected' && s.spelling)

@@ -247,6 +247,90 @@ function markRootImpactDdaStale(spelling, bucket) {
   }
 }
 
+/**
+ * One concept_id → one lab root spelling. Migrates compounds off duplicate spellings, then rejects them.
+ */
+export async function consolidateConceptSound(conceptId, canonicalSpelling, { meaning, state } = {}) {
+  const bucket = await loadBucket();
+  const canonical = canonicalSpelling?.trim().toLowerCase();
+  const cid = conceptId?.trim();
+  if (!cid || !canonical) return { consolidated: [], canonical };
+
+  const snapshots = [];
+  const consolidated = [];
+  const duplicates = bucket.sounds.filter(
+    s => s.concept_id === cid && s.spelling !== canonical && effectiveState(s) !== 'rejected',
+  );
+
+  for (const dup of duplicates) {
+    const old = dup.spelling;
+    for (const c of compoundsUsingSound(bucket, old)) {
+      const comps = c.components ?? partsToComponents(c.parts);
+      if (!comps.some(comp => comp.type === 'root' && comp.ref === old)) continue;
+      snapshots.push(snapshotCompound(c));
+      c.components = comps.map(comp =>
+        comp.type === 'root' && comp.ref === old ? { ...comp, ref: canonical } : comp,
+      );
+      c.parts = resolvePartSpellings(c.components, bucket, { flatOnly: true });
+      const newCompoundSpelling = resolveSpelling(c.components, bucket);
+      const newId = `cmp-${newCompoundSpelling}`;
+      if (bucket.compounds.some(x => x !== c && x.spelling === newCompoundSpelling)) {
+        throw new Error(
+          `Consolidating "${old}" → "${canonical}" for ${cid} would collide with word: ${newCompoundSpelling}`,
+        );
+      }
+      c.spelling = newCompoundSpelling;
+      c.id = newId;
+      c.derivation = buildDerivationTree(c.components, bucket);
+      markDdaStale(c);
+    }
+    snapshots.push(snapshotSound(dup));
+    dup.state = 'rejected';
+    pushEvent(bucket, 'rejected', 'sound', old, `duplicate of ${canonical} (${cid})`);
+    consolidated.push(old);
+  }
+
+  let keeper = bucket.sounds.find(s => s.spelling === canonical);
+  if (!keeper && meaning !== undefined) {
+    bucket.sounds.push({
+      id: `snd-custom-${canonical}`,
+      spelling: canonical,
+      meaning: meaning?.trim() || null,
+      concept_id: cid,
+      state: state ?? 'needs_review',
+      generator_hint: null,
+      created_by: 'user',
+      named_at: meaning?.trim() ? new Date().toISOString() : null,
+      dda: emptyDda(),
+    });
+    normalizeSoundRecord(bucket.sounds.at(-1));
+    keeper = bucket.sounds.at(-1);
+    snapshots.push({ kind: 'sound', spelling: canonical, removed: true });
+    pushEvent(bucket, 'created', 'sound', canonical, keeper.meaning);
+    bucket.sounds.sort((a, b) => a.spelling.localeCompare(b.spelling));
+  } else if (keeper) {
+    const before = snapshotSound(keeper);
+    keeper.concept_id = cid;
+    if (meaning !== undefined) {
+      keeper.meaning = meaning?.trim() || null;
+      keeper.named_at = meaning?.trim() ? new Date().toISOString() : null;
+      markDdaStale(keeper);
+    }
+    if (state) keeper.state = state;
+    const after = snapshotSound(keeper);
+    if (duplicates.length || JSON.stringify(before) !== JSON.stringify(after)) {
+      snapshots.push(before);
+    }
+  }
+
+  if (snapshots.length) {
+    pushHistory(bucket, `consolidate ${cid} → ${canonical}`, snapshots);
+    await saveBucket(bucket);
+  }
+
+  return { consolidated, canonical };
+}
+
 /** Snapshot mutated rows so a single change can be reverted later. */
 function pushHistory(bucket, label, snapshots) {
   if (!Array.isArray(bucket.history)) bucket.history = [];
@@ -405,7 +489,7 @@ export async function patchSound(spelling, { new_spelling, meaning, state, conce
       concept_id: s.concept_id,
       spelling: s.spelling,
       state: nextState,
-    }).catch(() => {});
+    });
   }
 
   return {

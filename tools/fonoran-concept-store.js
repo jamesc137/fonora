@@ -8,8 +8,15 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { romanToIpa, parseSyllable } from './fonoran-pronunciation.js';
-import { loadConceptInventory, clearLocalizationCache } from './fonoran-concepts.js';
-import { addSound, patchSound } from './fonoran-sound-bucket.js';
+import { loadConceptInventory, clearLocalizationCache, loadRuntimeConceptInventory } from './fonoran-concepts.js';
+import {
+  addSound,
+  patchSound,
+  getLab,
+  loadBucket,
+  effectiveState,
+  consolidateConceptSound,
+} from './fonoran-sound-bucket.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SEMANTIC_PATH = join(ROOT, 'data/fonoran-concept-inventory.json');
@@ -92,6 +99,7 @@ async function syncApprovedToLab(candidate) {
     if (!String(err.message).includes('already exists')) throw err;
   }
   await patchSound(candidate.spelling, { meaning, state: 'approved', concept_id: candidate.id });
+  await consolidateConceptSound(candidate.id, candidate.spelling, { meaning, state: 'approved' });
 }
 
 /** Write updated aliases for a concept id into the English locale file. */
@@ -132,23 +140,33 @@ function bodyDescription(body) {
 
 async function renameLabSound(oldSpelling, newSpelling, candidate) {
   const meaning = candidate.concept?.trim() || candidate.id;
+  const bucket = await loadBucket();
+  const labMatch = bucket.sounds.find(
+    s => s.concept_id === candidate.id && effectiveState(s) !== 'rejected',
+  );
+  const old = labMatch?.spelling ?? oldSpelling;
   try {
-    await patchSound(oldSpelling, {
+    await patchSound(old, {
       new_spelling: newSpelling,
       meaning,
       concept_id: candidate.id,
       state: candidate.status === 'approved' ? 'approved' : undefined,
     });
   } catch (err) {
-    if (String(err.message).includes('Unknown sound')) {
-      await addSound({ spelling: newSpelling, meaning, concept_id: candidate.id });
-      if (candidate.status === 'approved') {
-        await patchSound(newSpelling, { meaning, state: 'approved', concept_id: candidate.id });
-      }
+    const msg = String(err.message);
+    if (msg.includes('Unknown sound') || msg.includes('already exists')) {
+      await consolidateConceptSound(candidate.id, newSpelling, {
+        meaning,
+        state: candidate.status === 'approved' ? 'approved' : undefined,
+      });
       return;
     }
     throw err;
   }
+  await consolidateConceptSound(candidate.id, newSpelling, {
+    meaning,
+    state: candidate.status === 'approved' ? 'approved' : undefined,
+  });
 }
 
 export async function listConceptDomains() {
@@ -158,7 +176,8 @@ export async function listConceptDomains() {
 
 export async function getConceptForEditor(id) {
   const key = validateId(id);
-  const inventory = await loadConceptInventory();
+  const lab = await getLab();
+  const inventory = await loadRuntimeConceptInventory({ lab });
   const concept = inventory.concepts.find(c => c.id === key);
   if (!concept) throw new Error(`Unknown concept: ${key}`);
   return concept;

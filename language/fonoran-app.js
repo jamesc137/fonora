@@ -2999,24 +2999,17 @@
       panel.innerHTML = `
         <form class="concept-editor__form" id="concept-editor-form">
           <div class="concept-editor__form-head">${headHtml}</div>
-          <label class="fld" for="ce-concept">Concept phrase</label>
-          <input type="text" id="ce-concept" value="${escapeHtml(d.concept)}" data-write-input autocomplete="off">
-          <label class="fld" for="ce-domain">Domain</label>
-          <select id="ce-domain" data-write-input>
-            ${domainOpts}
-            <option value="_custom"${isKnownDomain ? '' : ' selected'}>Custom domain…</option>
-          </select>
-          <input type="text" id="ce-domain-custom" class="concept-editor__domain-custom" placeholder="new domain" value="${isKnownDomain ? '' : escapeHtml(d.domain)}"${isKnownDomain ? ' hidden' : ''} data-write-input>
           <div class="concept-editor__sound-section">
             <label class="fld" for="ce-spelling">Fonoran sound</label>
             <div class="concept-editor__sound-line">
               <div class="concept-editor__pron-shell is-empty" aria-live="polite">
-                <div class="concept-editor__script fonora-script symbol-text" id="ce-pron-script" aria-hidden="true">&nbsp;</div>
-                <div class="concept-editor__pron-text">
+                <div class="concept-editor__pron-head">
+                  <div class="concept-editor__script fonora-script symbol-text" id="ce-pron-script" aria-hidden="true">&nbsp;</div>
+                  <span class="concept-editor__pron-divider" aria-hidden="true">|</span>
                   <div class="concept-editor__say pron-line">Say: <strong id="ce-pron-say">-</strong></div>
-                  <div class="concept-editor__like pron-english">Sounds like: <span id="ce-pron-like">-</span></div>
-                  <p class="concept-editor__ipa mono" id="ce-ipa-display">-</p>
                 </div>
+                <div class="concept-editor__like pron-english">Sounds like: <span id="ce-pron-like">-</span></div>
+                <p class="concept-editor__ipa mono" id="ce-ipa-display">-</p>
               </div>
               <div class="concept-editor__sound-controls">
                 <input type="text" id="ce-spelling" class="mono" value="${escapeHtml(d.spelling)}" data-write-input autocomplete="off" spellcheck="false">
@@ -3025,8 +3018,16 @@
             </div>
           </div>
           <p class="concept-editor__invalid syl-invalid" id="ce-pron-invalid" hidden></p>
+          <label class="fld" for="ce-concept">Concept phrase</label>
+          <input type="text" id="ce-concept" value="${escapeHtml(d.concept)}" data-write-input autocomplete="off">
+          <label class="fld" for="ce-domain">Domain</label>
+          <select id="ce-domain" data-write-input>
+            ${domainOpts}
+            <option value="_custom"${isKnownDomain ? '' : ' selected'}>Custom domain…</option>
+          </select>
+          <input type="text" id="ce-domain-custom" class="concept-editor__domain-custom" placeholder="new domain" value="${isKnownDomain ? '' : escapeHtml(d.domain)}"${isKnownDomain ? ' hidden' : ''} data-write-input>
           <label class="fld" for="ce-aliases">English word bank</label>
-          <p class="concept-editor__hint sans">One word or phrase per line. Saved to the English localization layer — used by the translator for fuzzy matching.</p>
+          <p class="concept-editor__hint sans">One word or phrase per line. Saved to the English localization layer and used by the translator for fuzzy matching.</p>
           <textarea id="ce-aliases" rows="3" data-write-input>${escapeHtml(d.aliases)}</textarea>
           <div class="concept-editor__preview" hidden>
             <span class="concept-editor__preview-label sans">Effective matches after save</span>

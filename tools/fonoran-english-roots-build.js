@@ -1,5 +1,5 @@
 /**
- * Build curated English root words for the Word Matcher and lexicon.
+ * Build curated English root words for the lexicon.
  * Run: npm run fonoran:roots
  */
 

@@ -1,4 +1,4 @@
-    import { toSpeakable, compoundSpeakable, phoneticKeyBold, compoundPhoneticKey, englishGuide, compoundEnglishGuide, parseSyllable, buildSyllable, isValidSyllable, pieceHint, ONSET_GROUPS, VOWEL_DISPLAY, CODA_DISPLAY, enumerateOpenSyllables, romanToIpa } from '../tools/fonoran-pronunciation.js';
+    import { toSpeakable, compoundSpeakable, phoneticKeyBold, compoundPhoneticKey, englishGuide, compoundEnglishGuide, parseSyllable, buildSyllable, isValidSyllable, pieceHint, ONSET_GROUPS, VOWEL_DISPLAY, CODA_DISPLAY, romanToIpa } from '../tools/fonoran-pronunciation.js';
     import { checkCompoundBoundary } from '../tools/fonoran-gen3-readability.js';
     import { romanToFonoraScript, pieceToFonoraSymbols } from '../tools/fonoran-fonora-bridge.js';
     import { loadLanguageRules } from '../js/load-language-rules.js';
@@ -14,9 +14,8 @@
       email: null,
       loginUrl: '/auth/google?returnTo=/fonoran/',
     };
-    const WRITE_PAGES = new Set(['roots', 'create', 'matcher', 'review', 'root-review', 'concepts', 'advanced']);
-    const SPLIT_WRITE_PAGES = new Set(['roots', 'create', 'matcher']);
-    const MATCHER_DISMISSED_KEY = 'fonoran:matcher:dismissed';
+    const WRITE_PAGES = new Set(['roots', 'create', 'review', 'root-review', 'concepts', 'advanced']);
+    const SPLIT_WRITE_PAGES = new Set(['roots', 'create']);
 
     function canWrite() {
       return !AUTH.required || AUTH.authenticated;
@@ -58,9 +57,22 @@
     function syncWordComposerControls() {
       const picks = STATE.wordComposer;
       const spelling = picks.length ? resolveComposerSpelling(picks) : '';
-      const match = renderSpellingMatch('wc-match', spelling, { compact: true });
+      const match = renderSpellingMatch('wc-match', spelling, {
+        compact: true,
+        editingId: STATE.wordComposerEditingId,
+      });
       const boundaryBlocked = renderBoundaryViolation('wc-boundary', picks);
-      setWriteButton($('wc-save'), picks.length < 2 || spellingBlocksSave(match) || boundaryBlocked);
+      setWriteButton($('wc-save'), picks.length < 2 || spellingBlocksSave(match, STATE.wordComposerEditingId) || boundaryBlocked);
+      const saveBtn = $('wc-save');
+      if (saveBtn) saveBtn.textContent = STATE.wordComposerEditingId ? 'Save changes' : 'Save word';
+      const cancelBtn = $('wc-cancel');
+      if (cancelBtn) cancelBtn.hidden = !STATE.wordComposerReturnPage;
+      const intro = $('wc-intro');
+      if (intro) {
+        intro.textContent = STATE.wordComposerEditingId
+          ? 'Editing an existing word — adjust the recipe, meaning, or aliases, then save.'
+          : 'Stack roots and approved words on the left, build the recipe, and name the compound.';
+      }
     }
 
     function applyWriteAccessUI() {
@@ -184,6 +196,9 @@
       justSaved: null,
       dictFilter: 'all', dictQuery: '', dictSelection: null,
       wordComposer: [], wordComposerFilter: '',
+      wordComposerEditingId: null,
+      wordComposerReturnPage: null,
+      wordComposerPendingFields: null,
       wordComposerShowRoots: true,
       wordComposerShowWords: true,
       showUnapprovedWords: false,
@@ -191,13 +206,6 @@
       showDebugDda: false,
       rootDraft: { onset: '', vowel: '', coda: '' },
       lexicon: null,
-      matcherFilter: '',
-      matcherEnglishFilter: '',
-      matcherShowDismissed: false,
-      matcherDismissed: new Set(),
-      matcherSelectedFonoran: null,
-      matcherSelectedEnglish: null,
-      matcherCatalog: null,
       toolReturnPage: 'roots',
       healthOpen: false,
       translatorInput: '',
@@ -220,6 +228,7 @@
       reviewShowGeneratedWords: true,
       reviewNeedsReviewOnly: false,
       reviewSelection: null,
+      reviewEditing: false,
       conceptEditorFilter: '',
       conceptEditorSelected: null,
       conceptEditorIsNew: false,
@@ -305,6 +314,19 @@
           ${englishLine ? `<div class="pron-english">Sounds like: ${escapeHtml(englishLine)}</div>` : ''}
         </div>`;
     }
+
+    function editPronPreviewHtml(spelling, parts) {
+      const { script, sayLine, englishLine } = wordPreviewPron(parts);
+      if (!script && !spelling && !sayLine) {
+        return '<p class="sans" style="color:var(--muted);font-size:0.84rem">Add components to preview script and pronunciation.</p>';
+      }
+      return `${script ? `<div class="fonora-script symbol-text">${escapeHtml(script)}</div>` : ''}
+        ${spelling ? `<p class="review-word edit-preview__spelling">${escapeHtml(spelling)}</p>` : ''}
+        ${sayLine ? `<div class="pron-block">
+          <div class="pron-line">Say: <strong>${escapeHtml(sayLine)}</strong></div>
+          ${englishLine ? `<div class="pron-english">Sounds like: ${escapeHtml(englishLine)}</div>` : ''}
+        </div>` : ''}`;
+    }
     function neighborStrip(list, cursor) {
       const prev = cursor > 0 ? list[cursor - 1] : null;
       const next = cursor < list.length - 1 ? list[cursor + 1] : null;
@@ -333,12 +355,20 @@
     function composerComponentParts(c) {
       if (c.type === 'word') {
         const w = STATE.lab?.compounds?.find(x => x.id === c.ref);
+        if (w?.components?.length) return composerFlatSpellings(w.components);
         if (w?.parts?.length) return w.parts;
       }
       return [c.spelling || (c.type === 'root' ? c.ref : c.ref.replace(/^cmp-/, ''))];
     }
     function composerFlatSpellings(composer) {
       return (composer ?? []).flatMap(composerComponentParts);
+    }
+    /** Phonetic syllable parts for script/TTS — expands nested word components, not flat compound parts. */
+    function compoundSpeakParts(item) {
+      if (!item) return [];
+      if (item.components?.length) return composerFlatSpellings(item.components);
+      if (item.parts?.length) return item.parts;
+      return item.spelling ? [item.spelling] : [];
     }
     function composerCanListen(composer) {
       const picks = composer ?? [];
@@ -406,7 +436,8 @@
         .sort((a, b) => (a.meaning || a.spelling).localeCompare(b.meaning || b.spelling));
     }
     function wordCellBodyHtml(c) {
-      const glyphs = STATE.rules ? romanToFonoraScript(c.parts ?? [c.spelling], STATE.rules).phrase : '';
+      const speakParts = c.components?.length ? composerFlatSpellings(c.components) : (c.parts ?? [c.spelling]);
+      const glyphs = STATE.rules ? romanToFonoraScript(speakParts, STATE.rules).phrase : '';
       return `${typeBadge('word')}
           <span class="sp">${escapeHtml(c.spelling)}</span>
           ${glyphs ? `<span class="root-glyphs symbol-text">${escapeHtml(glyphs)}</span>` : ''}
@@ -444,7 +475,6 @@
         renderLanderHealth();
       }
       else if (STATE.page === 'create') renderWordComposer();
-      else if (STATE.page === 'matcher') void renderWordMatcher();
       else if (STATE.page === 'review') renderUnifiedReview();
       else if (STATE.page === 'concepts') renderConceptEditor();
       else if (STATE.page === 'roots') renderRoots();
@@ -540,20 +570,6 @@
 
     function conceptList() {
       return STATE.lexicon?.concepts ?? [];
-    }
-
-    function conceptMatchedInLab(concept) {
-      if (!concept || !STATE.lab) return concept?.status === 'approved';
-      if (concept.status === 'approved') return true;
-      const gloss = concept.concept?.trim().toLowerCase();
-      const id = concept.id?.toLowerCase();
-      return STATE.lab.sounds.some(s => {
-        if (s.state === 'rejected' || !s.meaning?.trim()) return false;
-        if (s.concept_id === concept.id) return true;
-        if (s.spelling === concept.spelling) return true;
-        const m = s.meaning.trim().toLowerCase();
-        return m === gloss || m === id;
-      });
     }
 
     function populateLexCategories(selectEl) {
@@ -857,55 +873,89 @@
       requestAnimationFrame(syncSplitStickyOffsets);
     }
 
+    function composerFromCompound(c) {
+      return (c.components ?? (c.parts ?? []).map(p => ({ type: 'root', ref: p, spelling: p }))).map((comp) => {
+        if (comp.type === 'word') {
+          const w = STATE.lab?.compounds?.find(x => x.id === comp.ref);
+          return {
+            ...comp,
+            spelling: w?.spelling ?? comp.spelling ?? comp.ref.replace(/^cmp-/, ''),
+            meaning: w?.meaning ?? comp.meaning,
+          };
+        }
+        return { ...comp, spelling: comp.spelling || comp.ref };
+      });
+    }
+
+    function openWordInCreator(c, { returnPage = null } = {}) {
+      STATE.wordComposerEditingId = c.id;
+      STATE.wordComposerReturnPage = returnPage;
+      STATE.wordComposer = composerFromCompound(c);
+      STATE.wordComposerPendingFields = {
+        meaning: c.meaning ?? '',
+        aliases: (c.aliases ?? []).join('\n'),
+      };
+      switchPage('create');
+    }
+
+    function clearWordComposer({ keepReturnPage = false } = {}) {
+      STATE.wordComposer = [];
+      if (!keepReturnPage) STATE.wordComposerReturnPage = null;
+      STATE.wordComposerEditingId = null;
+      STATE.wordComposerPendingFields = null;
+      if ($('wc-meaning')) $('wc-meaning').value = '';
+      if ($('wc-aliases')) $('wc-aliases').value = '';
+      renderWordComposer();
+    }
+
+    function renderWordEditorRecipe(prefix, editingId, recipe) {
+      const spelling = resolveComposerSpelling(recipe);
+      const speakParts = composerFlatSpellings(recipe);
+      const pickEl = $(`${prefix}-recipe-pick`);
+      if (pickEl) {
+        pickEl.innerHTML = recipe.length
+          ? recipe.map((comp, i) => `<span class="tok" data-idx="${i}" data-write>${typeBadge(comp.type)} <span class="mono">${escapeHtml(comp.spelling || comp.ref)}</span> = ${escapeHtml(compDisplayLabel(comp))} ×</span>`).join('')
+          : '<span class="sans" style="color:var(--muted);font-size:0.84rem">Add at least 2 components from the picker…</span>';
+        pickEl.querySelectorAll('.tok').forEach(t => t.addEventListener('click', () => {
+          recipe.splice(Number(t.dataset.idx), 1);
+          renderWordEditorRecipe(prefix, editingId, recipe);
+          if (prefix === 'wc') syncWordComposerControls();
+        }));
+      }
+      const live = $(`${prefix}-live-pron`);
+      if (live) {
+        live.innerHTML = recipe.length
+          ? editPronPreviewHtml(spelling, speakParts)
+          : '<p class="sans" style="color:var(--muted);font-size:0.84rem">Tap roots or approved words on the left to start building.</p>';
+      }
+      const hearBtn = $(`${prefix}-hear`);
+      if (hearBtn) {
+        const canListen = composerCanListen(recipe);
+        hearBtn.disabled = !canListen;
+        hearBtn.onclick = () => speakNeural(speakParts);
+        hearBtn.closest('.word-editor__hear-row')?.toggleAttribute('hidden', !canListen);
+      }
+      if (prefix === 'wc') syncWordComposerControls();
+    }
+
     /* ---------- WORD COMPOSER + REVIEW ---------- */
     function renderWordComposer() {
       if (!STATE.lab) return;
       ensureSplitStickyObserver();
-      const picks = STATE.wordComposer;
+      const recipe = STATE.wordComposer;
+      const editingId = STATE.wordComposerEditingId;
+
+      if (STATE.wordComposerPendingFields) {
+        if ($('wc-meaning')) $('wc-meaning').value = STATE.wordComposerPendingFields.meaning;
+        if ($('wc-aliases')) $('wc-aliases').value = STATE.wordComposerPendingFields.aliases;
+        STATE.wordComposerPendingFields = null;
+      }
+
+      renderWordEditorRecipe('wc', editingId, recipe);
+
       const meaning = $('wc-meaning')?.value.trim() || '';
-      const previewEl = $('wc-preview');
-      if (previewEl) {
-        if (!picks.length) {
-          previewEl.innerHTML = '<div class="word-preview word-preview--empty"><p class="sans">Tap roots or approved words on the left…</p></div>';
-        } else {
-          const focus = focusFromComposer(picks, meaning);
-          previewEl.innerHTML = buildWordPreviewHtml(focus, {
-            kind: 'word',
-            speakParts: composerCanListen(picks) ? composerFlatSpellings(picks) : [],
-            showBadges: false,
-            builtFromRemovable: true,
-            builtFromHideBadges: true,
-            hearId: 'wc-hear',
-            showHear: composerCanListen(picks),
-            hearRowExtra: '<button type="button" class="btn" id="wc-explore" disabled>Explore preview</button>',
-          });
-          previewEl.querySelectorAll('[data-remove-idx]').forEach((piece) => {
-            piece.addEventListener('click', () => {
-              STATE.wordComposer.splice(Number(piece.dataset.removeIdx), 1);
-              renderWordComposer();
-            });
-          });
-        }
-      }
-      const spelling = picks.length ? resolveComposerSpelling(picks) : '';
-      if (picks.length >= 2 && !meaning) {
-        const sug = picks.map(compDisplayLabel).join(' + ');
-        $('wc-meaning').placeholder = `e.g. ${sug}`;
-      } else if ($('wc-meaning')) {
-        $('wc-meaning').placeholder = 'Primary gloss shown in the dictionary';
-      }
-      const hearBtn = $('wc-hear');
-      if (hearBtn) {
-        const flat = composerFlatSpellings(picks);
-        hearBtn.disabled = !composerCanListen(picks);
-        hearBtn.onclick = () => speakNeural(flat);
-      }
-      const exploreBtn = $('wc-explore');
-      if (exploreBtn) {
-        exploreBtn.disabled = picks.length < 2;
-        exploreBtn.onclick = () => openExplorerPreview(picks, spelling);
-      }
-      syncWordComposerControls();
+      renderEditDupe('compound', editingId ?? '', meaning, 'wc');
+
       $('wc-filters')?.querySelectorAll('[data-wc-filter]').forEach(chip => {
         const key = chip.dataset.wcFilter;
         const on = key === 'roots' ? STATE.wordComposerShowRoots
@@ -922,7 +972,7 @@
       $('wc-words')?.toggleAttribute('hidden', !showWords);
       $('wc-picker-empty')?.toggleAttribute('hidden', showRoots || showWords);
       const pickerOpts = { showUnnamed: STATE.showUnnamed };
-      const omitIds = picks.filter(c => c.type === 'word').map(c => c.ref);
+      const omitIds = [...recipe.filter(c => c.type === 'word').map(c => c.ref), editingId].filter(Boolean);
       if (showRoots) {
         $('wc-roots').innerHTML = rootPickerWithBadge(pickableRoots(STATE.wordComposerFilter, pickerOpts));
         $('wc-roots').querySelectorAll('[data-add-root]').forEach(b => b.addEventListener('click', () => {
@@ -944,241 +994,6 @@
         $('wc-words').innerHTML = '';
       }
       requestAnimationFrame(syncSplitStickyOffsets);
-    }
-
-    /* ---------- WORD MATCHER ---------- */
-    function loadMatcherDismissed() {
-      try {
-        const raw = localStorage.getItem(MATCHER_DISMISSED_KEY);
-        const list = raw ? JSON.parse(raw) : [];
-        STATE.matcherDismissed = new Set(Array.isArray(list) ? list : []);
-      } catch {
-        STATE.matcherDismissed = new Set();
-      }
-    }
-
-    function saveMatcherDismissed() {
-      localStorage.setItem(MATCHER_DISMISSED_KEY, JSON.stringify([...STATE.matcherDismissed]));
-    }
-
-    function ensureMatcherCatalog() {
-      if (!STATE.matcherCatalog) STATE.matcherCatalog = enumerateOpenSyllables();
-      return STATE.matcherCatalog;
-    }
-
-    function labSoundForSpelling(spelling) {
-      return STATE.lab?.sounds?.find(s => s.spelling === spelling && s.state !== 'rejected');
-    }
-
-    function matcherFonoranMatchesFilter(entry, query) {
-      const q = (query ?? '').trim().toLowerCase();
-      if (!q) return true;
-      if (entry.spelling.includes(q)) return true;
-      if (soundPieceMatches('onset', entry.onset, q)) return true;
-      if (soundPieceMatches('vowel', entry.vowel, q)) return true;
-      return false;
-    }
-
-    function matcherConcepts() {
-      const concepts = conceptList().filter(c => !conceptMatchedInLab(c));
-      const q = (STATE.matcherEnglishFilter ?? '').trim().toLowerCase();
-      if (!q) return concepts;
-      const tokens = q.split(/[\s-]+/).filter(Boolean);
-      return concepts.filter(c => {
-        const hay = `${c.id} ${c.concept}`.toLowerCase();
-        return hay.includes(q) || tokens.every(t => hay.includes(t));
-      });
-    }
-
-    function matcherFonoranEntries() {
-      ensureMatcherCatalog();
-      const catalog = STATE.matcherCatalog;
-      const seen = new Set();
-      const out = [];
-
-      for (const c of conceptList()) {
-        const sp = c.spelling?.trim();
-        if (!sp) continue;
-        if (seen.has(sp)) continue;
-        if (labSoundForSpelling(sp)?.meaning?.trim()) continue;
-        seen.add(sp);
-        out.push({ spelling: sp, onset: '', vowel: '', coda: '', proposed: true });
-      }
-
-      for (const entry of catalog) {
-        if (seen.has(entry.spelling)) continue;
-        if (labSoundForSpelling(entry.spelling)?.meaning?.trim()) continue;
-        if (STATE.matcherDismissed.has(entry.spelling) && !STATE.matcherShowDismissed) continue;
-        seen.add(entry.spelling);
-        out.push({ ...entry, proposed: false });
-      }
-
-      return out.filter(entry => matcherFonoranMatchesFilter(entry, STATE.matcherFilter));
-    }
-
-    function matcherCellBodyHtml(spelling, meaning) {
-      const glyphs = rootScriptPhrase(spelling);
-      return `
-          <span class="sp">${escapeHtml(spelling)}</span>
-          ${glyphs ? `<span class="root-glyphs symbol-text">${escapeHtml(glyphs)}</span>` : ''}
-          <span class="mn ${meaning ? '' : 'unnamed'}">${escapeHtml(meaning || 'unnamed')}</span>`;
-    }
-
-    function syncMatcherMatchBar() {
-      const fonPick = $('wm-pick-fonoran');
-      const engPick = $('wm-pick-english');
-      const meaningInp = $('wm-meaning');
-      const assignBtn = $('wm-assign');
-
-      if (fonPick) {
-        const sp = STATE.matcherSelectedFonoran;
-        const valEl = fonPick.querySelector('.fonoran-match-eq__value');
-        fonPick.classList.toggle('is-filled', Boolean(sp));
-        if (valEl) {
-          valEl.innerHTML = sp
-            ? `<span class="mono">${escapeHtml(sp)}</span>`
-            : '<span class="fonoran-match-eq__placeholder">Fonora sound</span>';
-        }
-      }
-      if (engPick) {
-        const eng = STATE.matcherSelectedEnglish;
-        const valEl = engPick.querySelector('.fonoran-match-eq__value');
-        engPick.classList.toggle('is-filled', Boolean(eng));
-        if (valEl) {
-          valEl.innerHTML = eng
-            ? `<span class="matcher-concept-label mono">${escapeHtml(eng.id)}</span>`
-            : '<span class="fonoran-match-eq__placeholder">Concept</span>';
-        }
-      }
-      if (meaningInp && document.activeElement !== meaningInp) {
-        if (STATE.matcherSelectedEnglish && !meaningInp.dataset.userEdited) {
-          const lab = STATE.matcherSelectedFonoran ? labSoundForSpelling(STATE.matcherSelectedFonoran) : null;
-          meaningInp.value = lab?.meaning?.trim() || STATE.matcherSelectedEnglish.concept || STATE.matcherSelectedEnglish.id;
-        } else if (!STATE.matcherSelectedEnglish && !STATE.matcherSelectedFonoran) {
-          meaningInp.value = '';
-          delete meaningInp.dataset.userEdited;
-        }
-      }
-      const hearBtn = $('wm-hear');
-      if (hearBtn) hearBtn.disabled = !STATE.matcherSelectedFonoran;
-      const meaning = meaningInp?.value.trim() ?? '';
-      setWriteButton(assignBtn, !STATE.matcherSelectedFonoran || !STATE.matcherSelectedEnglish || !meaning);    }
-
-    function dismissMatcherSyllable(spelling) {
-      const lab = labSoundForSpelling(spelling);
-      if (lab?.meaning?.trim()) {
-        if (!confirm(`"${spelling}" is named in your lab (${lab.meaning}). Dismiss from matcher only?`)) return;
-      }
-      STATE.matcherDismissed.add(spelling);
-      saveMatcherDismissed();
-      if (STATE.matcherSelectedFonoran === spelling) STATE.matcherSelectedFonoran = null;
-      renderWordMatcher();
-    }
-
-    function restoreMatcherSyllable(spelling) {
-      STATE.matcherDismissed.delete(spelling);
-      saveMatcherDismissed();
-      renderWordMatcher();
-    }
-
-    async function assignMatcherPair() {
-      const spelling = STATE.matcherSelectedFonoran;
-      const concept = STATE.matcherSelectedEnglish;
-      const meaning = $('wm-meaning')?.value.trim();
-      if (!spelling || !concept || !meaning) return;
-      try {
-        const exists = labSoundForSpelling(spelling);
-        const body = { meaning, concept_id: concept.id };
-        if (exists) {
-          await api(`/api/fonoran/lab/sounds/${encodeURIComponent(spelling)}`, {
-            method: 'PATCH',
-            body: JSON.stringify(body),
-          });
-        } else {
-          await api('/api/fonoran/lab/sounds', {
-            method: 'POST',
-            body: JSON.stringify({ spelling, ...body }),
-          });
-        }
-        toast(`Assigned ${spelling} → ${concept.id}`);
-        const meaningInp = $('wm-meaning');
-        if (meaningInp) delete meaningInp.dataset.userEdited;
-        await load({ skipRender: true });
-        renderWordMatcher();
-      } catch (e) { toast(e.message); }
-    }
-
-    async function renderWordMatcher() {
-      if (!STATE.lab || !$('wm-fonoran')) return;
-      await ensureLexicon();
-      loadMatcherDismissed();
-      const fonEl = $('wm-fonoran');
-      const engEl = $('wm-english');
-      if (!fonEl || !engEl) return;
-
-      const visibleFon = matcherFonoranEntries();
-
-      fonEl.innerHTML = visibleFon.length
-        ? visibleFon.map(entry => {
-          const lab = labSoundForSpelling(entry.spelling);
-          const meaning = lab?.meaning ?? null;
-          const dismissed = STATE.matcherDismissed.has(entry.spelling);
-          const selected = STATE.matcherSelectedFonoran === entry.spelling;
-          return `<button type="button" class="root-cell${selected ? ' is-selected' : ''}${meaning ? ' is-named' : ''}${dismissed ? ' is-dismissed' : ''}" data-wm-fonoran="${escapeHtml(entry.spelling)}">${matcherCellBodyHtml(entry.spelling, meaning)}</button>`;
-        }).join('')
-        : '<p class="empty sans" style="margin:0">No unmatched Fonora sounds.</p>';
-
-      const concepts = matcherConcepts();
-      engEl.innerHTML = concepts.length
-        ? concepts.map(c => {
-          const selected = STATE.matcherSelectedEnglish?.id === c.id;
-          return `<button type="button" class="root-cell eng-cell concept-cell${selected ? ' is-selected' : ''}" data-wm-concept="${escapeHtml(c.id)}">
-            <span class="sp">${escapeHtml(c.id)}</span>
-            <span class="mn gloss">${escapeHtml(c.concept.split(';')[0])}</span>
-            <span class="matcher-cat">${escapeHtml(c.domain || '')}</span>
-          </button>`;
-        }).join('')
-        : '<p class="empty sans" style="margin:0">All concepts are matched in your lab.</p>';
-
-      const namedCount = (STATE.lab.sounds ?? []).filter(s => s.meaning?.trim() && s.state !== 'rejected').length;
-      const statsEl = $('wm-stats');
-      if (statsEl) {
-        statsEl.textContent = `${visibleFon.length} sounds · ${concepts.length} concepts · ${namedCount} named in lab`;
-      }
-
-      fonEl.querySelectorAll('[data-wm-fonoran]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          STATE.matcherSelectedFonoran = btn.dataset.wmFonoran;
-          speakNeural(STATE.matcherSelectedFonoran);
-          const lab = labSoundForSpelling(STATE.matcherSelectedFonoran);
-          const meaningInp = $('wm-meaning');
-          if (meaningInp) {
-            delete meaningInp.dataset.userEdited;
-            if (STATE.matcherSelectedEnglish) {
-              meaningInp.value = lab?.meaning?.trim() || STATE.matcherSelectedEnglish.concept;
-            } else if (lab?.meaning) {
-              meaningInp.value = lab.meaning;
-            }
-          }
-          renderWordMatcher();
-        });
-      });
-      engEl.querySelectorAll('[data-wm-concept]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const id = btn.dataset.wmConcept;
-          const entry = conceptList().find(c => c.id === id);
-          STATE.matcherSelectedEnglish = entry ?? null;
-          const meaningInp = $('wm-meaning');
-          if (meaningInp && document.activeElement !== meaningInp) {
-            delete meaningInp.dataset.userEdited;
-            const lab = STATE.matcherSelectedFonoran ? labSoundForSpelling(STATE.matcherSelectedFonoran) : null;
-            meaningInp.value = lab?.meaning?.trim() || entry?.concept || '';
-          }
-          renderWordMatcher();
-        });
-      });
-
-      syncMatcherMatchBar();
     }
 
     function openExplorerPreview(composer, spelling) {
@@ -2014,9 +1829,7 @@
 
     function reviewItemScriptParts(item, isSound) {
       if (isSound) return [item.spelling];
-      if (item.parts?.length) return item.parts;
-      if (item.components?.length) return composerFlatSpellings(item.components);
-      return [item.spelling];
+      return compoundSpeakParts(item);
     }
 
     function buildLabReviewCardHtml(item, { isSound = true } = {}) {
@@ -2147,6 +1960,7 @@
         btn.addEventListener('click', () => {
           STATE.reviewSelection = { type: btn.dataset.reviewType, ref: btn.dataset.reviewRef };
           STATE.justSaved = null;
+          STATE.reviewEditing = false;
           renderUnifiedReview();
         });
       });
@@ -2277,6 +2091,7 @@
     }
 
     function reviewExplorerNavigate(navKind, ref) {
+      STATE.reviewEditing = false;
       STATE.reviewSelection = navKind === 'root'
         ? { type: 'sound', ref }
         : { type: 'compound', ref };
@@ -2356,6 +2171,10 @@
     }
 
     function renderLabReviewWorkspace(c) {
+      if (STATE.reviewEditing && c.reviewKind === 'sound') {
+        renderLabReviewEditWorkspace(c);
+        return;
+      }
       const reviewEl = $('word-review');
       if (!reviewEl || !c) return;
       const isSound = c.reviewKind === 'sound';
@@ -2376,6 +2195,7 @@
             <p class="feel">${feelPrompt}</p>
             <div class="feel-actions root-review__actions">
               <button type="button" class="fa-approve" id="approve"${writeDisabledAttr(!c.meaning)} data-write>✓ Approve</button>
+              ${canWrite() ? '<button type="button" class="fa-edit" id="edit" data-write>✎ Edit</button>' : ''}
               <button type="button" class="fa-reject" id="reject" data-write>✕ Reject</button>
             </div>
           </div>
@@ -2383,6 +2203,26 @@
       wireLabReviewCommon(c);
       wireReviewExplorerButtons(c, isSound, reviewEl);
       wireFeel(c);
+    }
+
+    function renderLabReviewEditWorkspace(c) {
+      const reviewEl = $('word-review');
+      if (!reviewEl || !c) return;
+      reviewEl.innerHTML = `
+        <div class="review root-review word-review review-workspace review-workspace--edit">
+          ${renderSoundEditPanel(c)}
+        </div>`;
+      const onSaved = async () => {
+        STATE.reviewEditing = false;
+        STATE.justSaved = c.spelling;
+        await load({ skipRender: true });
+        renderUnifiedReview();
+      };
+      const onCancel = () => {
+        STATE.reviewEditing = false;
+        renderUnifiedReview();
+      };
+      wireSoundEditPanel(c, { onSaved, onCancel });
     }
 
     /* ---------- shared review wiring ---------- */
@@ -2436,6 +2276,15 @@
     }
     function wireFeel(item) {
       const isSound = item.reviewKind === 'sound';
+      $('edit')?.addEventListener('click', () => {
+        if (!canWrite()) { toast('Sign in required'); return; }
+        if (isSound) {
+          STATE.reviewEditing = true;
+          renderUnifiedReview();
+        } else {
+          openWordInCreator(item, { returnPage: 'review' });
+        }
+      });
       $('approve')?.addEventListener('click', async () => {
         if (isSound) {
           await api(`/api/fonoran/lab/sounds/${encodeURIComponent(item.spelling)}`, { method: 'PATCH', body: JSON.stringify({ state: 'approved' }) });
@@ -2452,6 +2301,7 @@
       });
     }
     async function advanceReviewItem(current) {
+      STATE.reviewEditing = false;
       await load({ skipRender: true });
       const pool = [
         ...reviewPickableLabSounds().map(s => ({ type: 'sound', ref: s.spelling, open: isOpen(s.state) })),
@@ -2588,6 +2438,75 @@
       renderUnifiedReview();
     }
 
+    /* ---------- review item edit ---------- */
+    function meaningMatches(meaning, selfKind, selfId) {
+      const m = (meaning ?? '').trim().toLowerCase();
+      if (!m) return [];
+      const hits = [];
+      for (const s of STATE.lab.sounds) {
+        if (s.state === 'rejected') continue;
+        if (selfKind === 'sound' && s.spelling === selfId) continue;
+        if ((s.meaning ?? '').trim().toLowerCase() === m) hits.push(`${s.spelling} (root)`);
+      }
+      for (const c of STATE.lab.compounds) {
+        if (c.state === 'rejected') continue;
+        if (selfKind === 'compound' && c.id === selfId) continue;
+        if ((c.meaning ?? '').trim().toLowerCase() === m) hits.push(`${c.spelling} (word)`);
+      }
+      return hits;
+    }
+
+    function renderEditDupe(kind, id, editMeaning, prefix = 'ed') {
+      const box = $(`${prefix}-dupe`);
+      if (!box) return;
+      const hits = meaningMatches(editMeaning, kind, id);
+      box.innerHTML = hits.length
+        ? `<div class="dupe"><strong>Already in use:</strong> “${escapeHtml(editMeaning.trim())}” also means <span class="mono">${hits.join('</span>, <span class="mono">')}</span>.</div>`
+        : '';
+    }
+
+    function renderSoundEditPanel(s) {
+      return `
+        <div class="edit-panel">
+          <div id="ed-live-pron">${pronBlock(s.spelling)}</div>
+          <button type="button" class="hear-min" id="ed-hear" style="margin:0.5rem 0 0" aria-label="Listen to this syllable">▶ Listen</button>
+          <label class="fld" for="ed-meaning">Meaning: name this root</label>
+          ${meaningPickerHtml('ed')}
+          <input type="text" id="ed-meaning" value="${escapeHtml(s.meaning ?? '')}" placeholder="e.g. water, motion…" data-write-input>
+          <div id="ed-dupe"></div>
+          <div class="edit-actions">
+            <button type="button" class="btn btn-primary" id="ed-save" data-write>Save</button>
+            <button type="button" class="btn" id="ed-cancel">Cancel</button>
+          </div>
+        </div>`;
+    }
+
+    function wireSoundEditPanel(s, { onSaved, onCancel }) {
+      let editMeaning = s.meaning ?? '';
+      const inp = $('ed-meaning');
+      inp?.addEventListener('input', () => {
+        editMeaning = inp.value;
+        renderEditDupe('sound', s.spelling, editMeaning);
+      });
+      ensureLexicon().then(() => wireMeaningPicker('ed', 'ed-meaning'));
+      renderEditDupe('sound', s.spelling, editMeaning);
+      $('ed-cancel')?.addEventListener('click', () => onCancel?.());
+      $('ed-hear')?.addEventListener('click', () => speakNeural(s.spelling));
+      $('ed-save')?.addEventListener('click', async () => {
+        const meaning = editMeaning.trim();
+        if (!meaning) { toast('Type a meaning first.'); return; }
+        try {
+          const changed = meaning !== (s.meaning ?? '');
+          await api(`/api/fonoran/lab/sounds/${encodeURIComponent(s.spelling)}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ meaning, state: changed && s.meaning ? 'revised' : undefined }),
+          });
+          toast(`Saved ${s.spelling}`);
+          await onSaved?.();
+        } catch (e) { toast(e.message); }
+      });
+    }
+
     /* ---------- spelling lookup (word creator) ---------- */
     function lookupSpelling(spelling) {
       if (!spelling || !STATE.lab) return null;
@@ -2598,8 +2517,9 @@
       return null;
     }
 
-    function spellingBlocksSave(match) {
+    function spellingBlocksSave(match, editingId = null) {
       if (!match) return false;
+      if (editingId && match.kind === 'compound' && match.item.id === editingId) return false;
       if (match.kind === 'sound') return Boolean(match.item.meaning?.trim());
       return !match.item.generator_hint;
     }
@@ -2641,11 +2561,12 @@
         </div>`;
     }
 
-    function renderSpellingMatch(boxId, spelling, { compact = false } = {}) {
+    function renderSpellingMatch(boxId, spelling, { compact = false, editingId = null } = {}) {
       const box = $(boxId);
       if (!box) return null;
       const match = spelling ? lookupSpelling(spelling) : null;
-      box.innerHTML = match ? spellingMatchHtml(match, { compact }) : '';
+      const blocks = match && spellingBlocksSave(match, editingId);
+      box.innerHTML = match && blocks ? spellingMatchHtml(match, { compact }) : '';
       box.querySelector('[data-view-match]')?.addEventListener('click', e => {
         const btn = e.currentTarget;
         openChain(btn.dataset.viewMatch, btn.dataset.matchId);
@@ -2904,7 +2825,7 @@
           </div>
           <p class="concept-editor__invalid syl-invalid" id="ce-pron-invalid" hidden></p>
           <label class="fld" for="ce-aliases">English word bank</label>
-          <p class="concept-editor__hint sans">One word or phrase per line. Saved to the English localization layer — used by the matcher and translator for fuzzy matching.</p>
+          <p class="concept-editor__hint sans">One word or phrase per line. Saved to the English localization layer — used by the translator for fuzzy matching.</p>
           <textarea id="ce-aliases" rows="3" data-write-input>${escapeHtml(d.aliases)}</textarea>
           <div class="concept-editor__preview" hidden>
             <span class="concept-editor__preview-label sans">Effective matches after save</span>
@@ -3146,7 +3067,7 @@
       if (!STATE.rules) return '';
       if (entry.kind === 'sound') return romanToFonoraScript([entry.word], STATE.rules).phrase;
       const compound = STATE.lab.compounds.find(c => c.id === entry.id);
-      const parts = compound?.parts ?? [entry.word];
+      const parts = compound ? compoundSpeakParts(compound) : [entry.word];
       return romanToFonoraScript(parts, STATE.rules).phrase;
     }
 
@@ -3844,8 +3765,8 @@
     }
 
     /* ---------- nav ---------- */
-    const MAIN_PAGES = new Set(['roots', 'create', 'matcher', 'review', 'dictionary', 'translator', 'wordgen']);
-    const ALL_PAGES = new Set(['home', 'root-review', 'roots', 'create', 'matcher', 'review', 'dictionary', 'grammar', 'translator', 'wordgen', 'health', 'advanced', 'concepts']);
+    const MAIN_PAGES = new Set(['roots', 'create', 'review', 'dictionary', 'translator', 'wordgen']);
+    const ALL_PAGES = new Set(['home', 'root-review', 'roots', 'create', 'review', 'dictionary', 'grammar', 'translator', 'wordgen', 'health', 'advanced', 'concepts']);
     function scrollPageTop() {
       window.scrollTo(0, 0);
       document.documentElement.scrollTop = 0;
@@ -3861,7 +3782,7 @@
       } else if (name === 'review' && STATE.page !== 'review') {
         STATE.reviewFocusPending = true;
       }
-      if (name === 'matcher') STATE.lexicon = null;
+      if (name !== 'review') STATE.reviewEditing = false;
       STATE.page = name;
       setActiveTab(name);
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -3926,20 +3847,9 @@
       else if (key === 'needs-review') STATE.reviewNeedsReviewOnly = !STATE.reviewNeedsReviewOnly;
       renderUnifiedReview();
     });
-    $('wc-meaning')?.addEventListener('input', () => renderWordComposer());
-    $('wm-filter')?.addEventListener('input', e => { STATE.matcherFilter = e.target.value; renderWordMatcher(); });
-    $('wm-english-filter')?.addEventListener('input', e => { STATE.matcherEnglishFilter = e.target.value; renderWordMatcher(); });
-    $('wm-meaning')?.addEventListener('input', () => {
-      $('wm-meaning').dataset.userEdited = '1';
-      syncMatcherMatchBar();
-    });
-    $('wm-assign')?.addEventListener('click', () => assignMatcherPair());
-    $('wm-clear-sel')?.addEventListener('click', () => {
-      STATE.matcherSelectedFonoran = null;
-      STATE.matcherSelectedEnglish = null;
-      const meaningInp = $('wm-meaning');
-      if (meaningInp) { meaningInp.value = ''; delete meaningInp.dataset.userEdited; }
-      renderWordMatcher();
+    $('wc-meaning')?.addEventListener('input', () => {
+      renderEditDupe('compound', STATE.wordComposerEditingId ?? '', $('wc-meaning').value, 'wc');
+      syncWordComposerControls();
     });
     $('wc-filters')?.addEventListener('click', e => {
       const chip = e.target.closest('[data-wc-filter]');
@@ -3950,11 +3860,11 @@
       else if (chip.dataset.wcFilter === 'unnamed') STATE.showUnnamed = !STATE.showUnnamed;
       renderWordComposer();
     });
-    $('wc-clear').addEventListener('click', () => {
-      STATE.wordComposer = [];
-      $('wc-meaning').value = '';
-      $('wc-aliases').value = '';
-      renderWordComposer();
+    $('wc-clear').addEventListener('click', () => clearWordComposer());
+    $('wc-cancel')?.addEventListener('click', () => {
+      const returnPage = STATE.wordComposerReturnPage;
+      clearWordComposer();
+      if (returnPage === 'review') switchPage('review');
     });
     $('wc-save').addEventListener('click', async () => {
       const meaning = $('wc-meaning').value.trim();
@@ -3962,22 +3872,56 @@
       if (!meaning) { toast('Give the word a meaning.'); return; }
       const spelling = resolveComposerSpelling(STATE.wordComposer);
       const aliases = ($('wc-aliases')?.value ?? '').trim();
+      const editingId = STATE.wordComposerEditingId;
+      const returnPage = STATE.wordComposerReturnPage;
       try {
-        await api('/api/fonoran/lab/compounds', {
-          method: 'POST',
-          body: JSON.stringify({
-            components: composerToApi(STATE.wordComposer),
-            meaning,
-            aliases: aliases || undefined,
-            allow_unapproved: STATE.showUnapprovedWords,
-          }),
-        });
-        STATE.wordComposer = [];
-        $('wc-meaning').value = '';
-        $('wc-aliases').value = '';
-        toast(`Saved ${spelling} → ${meaning}`);
+        if (editingId) {
+          const existing = STATE.lab.compounds.find(c => c.id === editingId);
+          const recipeChanged = spelling !== existing?.spelling;
+          if (recipeChanged) {
+            const res = await api(`/api/fonoran/lab/compounds/${encodeURIComponent(editingId)}`, {
+              method: 'PATCH',
+              body: JSON.stringify({
+                components: composerToApi(STATE.wordComposer),
+                meaning,
+                allow_unapproved: STATE.showUnapprovedWords,
+              }),
+            });
+            toast(`Saved ${res.spelling ?? spelling}`);
+            if (returnPage === 'review') {
+              STATE.reviewSelection = { type: 'compound', ref: res.id ?? editingId };
+            }
+          } else {
+            const changed = meaning !== (existing?.meaning ?? '');
+            await api(`/api/fonoran/lab/compounds/${encodeURIComponent(editingId)}`, {
+              method: 'PATCH',
+              body: JSON.stringify({
+                meaning,
+                aliases: aliases || undefined,
+                state: changed && existing?.meaning ? 'revised' : undefined,
+              }),
+            });
+            toast(`Saved ${spelling}`);
+          }
+        } else {
+          await api('/api/fonoran/lab/compounds', {
+            method: 'POST',
+            body: JSON.stringify({
+              components: composerToApi(STATE.wordComposer),
+              meaning,
+              aliases: aliases || undefined,
+              allow_unapproved: STATE.showUnapprovedWords,
+            }),
+          });
+          toast(`Saved ${spelling} → ${meaning}`);
+        }
+        clearWordComposer();
         await load({ skipRender: true });
-        renderWordComposer();
+        if (returnPage === 'review') {
+          switchPage('review');
+        } else {
+          renderWordComposer();
+        }
       } catch (e) { toast(e.message); }
     });
     bindModalDismiss({

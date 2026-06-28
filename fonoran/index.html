@@ -43,7 +43,6 @@
             <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="wordgen" role="menuitem">Word Generator</button>
             <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="roots" role="menuitem">Root Creator</button>
             <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="create" role="menuitem">Word Creator</button>
-            <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="matcher" role="menuitem">Word Matcher</button>
             <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="concepts" role="menuitem">Concept Editor</button>
             <p class="nav-dropdown-label" role="presentation">Review</p>
             <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="review" role="menuitem">Review</button>
@@ -135,10 +134,6 @@
               <button type="button" class="fonoran-tool-card" data-goto-page="create">
                 <strong>Word Creator</strong>
                 <span>Stack roots into words</span>
-              </button>
-              <button type="button" class="fonoran-tool-card" data-goto-page="matcher">
-                <strong>Word Matcher</strong>
-                <span>Pair Fonoran syllables to English roots</span>
               </button>
               <button type="button" class="fonoran-tool-card" data-goto-page="dictionary">
                 <strong>Dictionary</strong>
@@ -253,7 +248,7 @@
       <section id="page-create" class="page fonoran-split-page">
         <div class="fonoran-split-shell" data-split-shell>
           <div class="fonoran-split-chrome">
-            <p class="fonoran-split-chrome__intro sans">Stack roots and approved words, name the compound, and add English aliases for matching.</p>
+            <p class="fonoran-split-chrome__intro sans" id="wc-intro">Stack roots and approved words on the left, build the recipe, and name the compound.</p>
             <input type="search" id="wc-filter" class="search-bar" placeholder="Search by spelling, meaning, alias, or concept…" autocomplete="off">
             <div class="toolbar" id="wc-filters">
               <button type="button" class="chip active" data-wc-filter="roots">Root words</button>
@@ -271,63 +266,29 @@
             <h4 class="picker-h" id="wc-words-h">Words</h4>
             <div class="sound-grid" id="wc-words"></div>
           </aside>
-          <div class="fonoran-split-workspace" id="word-create">
-            <div class="composer-hero">
-              <div id="wc-preview"></div>
+          <div class="fonoran-split-workspace word-editor" id="word-create">
+            <div class="edit-panel word-editor__panel">
+              <div class="word-editor__hero">
+                <div id="wc-live-pron"></div>
+                <div class="word-editor__hear-row">
+                  <button type="button" class="hear-min" id="wc-hear" disabled aria-label="Listen to this recipe">▶ Listen</button>
+                </div>
+              </div>
+              <input type="text" id="wc-meaning" placeholder="Meaning, e.g. river, friend…" data-write-input aria-label="Meaning">
+              <div id="wc-dupe"></div>
+              <label class="fld">Recipe: which sounds build it (tap to remove)</label>
+              <div class="pick" id="wc-recipe-pick"></div>
               <div id="wc-match"></div>
               <div id="wc-boundary"></div>
-            </div>
-            <div class="composer-form">
-              <label class="fld" for="wc-meaning">English meaning</label>
-              <input type="text" id="wc-meaning" placeholder="Primary gloss shown in the dictionary" data-write-input>
-              <label class="fld" for="wc-aliases">English word bank <span class="composer-form__hint-inline sans">— one phrase per line, optional</span></label>
+              <label class="fld" for="wc-aliases">English word bank <span class="word-editor__hint sans">— one phrase per line, optional</span></label>
               <textarea id="wc-aliases" rows="2" placeholder="evil&#10;wicked&#10;malice" data-write-input></textarea>
-              <div class="actions composer-form__actions">
+              <div class="edit-actions word-editor__actions">
                 <button type="button" class="btn btn-primary" id="wc-save" disabled data-write>Save word</button>
                 <button type="button" class="btn" id="wc-clear" data-write>Clear</button>
+                <button type="button" class="btn" id="wc-cancel" hidden data-write>Cancel</button>
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section id="page-matcher" class="page fonoran-split-page fonoran-match-page">
-        <div class="fonoran-split-shell" data-split-shell>
-          <div class="fonoran-split-chrome">
-            <p class="fonoran-split-chrome__intro sans">Match Fonora sounds to concepts from the concept inventory. Matched pairs are hidden.</p>
-            <div class="fonoran-match-equation" id="wm-equation">
-              <div class="fonoran-match-eq__term" id="wm-pick-fonoran">
-                <span class="fonoran-match-eq__value sans">…</span>
-              </div>
-              <span class="fonoran-match-eq__op" aria-hidden="true">+</span>
-              <div class="fonoran-match-eq__term" id="wm-pick-english">
-                <span class="fonoran-match-eq__value sans">…</span>
-              </div>
-              <span class="fonoran-match-eq__op" aria-hidden="true">=</span>
-              <input type="text" id="wm-meaning" class="fonoran-match-eq__meaning" placeholder="meaning" data-write-input autocomplete="off" aria-label="Meaning">
-              <div class="fonoran-match-eq__actions">
-                <button type="button" class="btn btn-primary" id="wm-assign" disabled data-write>Accept</button>
-                <button type="button" class="btn" id="wm-clear-sel" data-write>Clear</button>
-              </div>
-            </div>
-            <p id="wm-stats" class="sans fonoran-match-stats"></p>
-          </div>
-        </div>
-        <div class="fonoran-match-grid">
-          <aside class="fonoran-match-column" aria-label="Fonora sounds">
-            <div class="fonoran-match-column__head">
-              <h4 class="picker-h">Fonora Sounds</h4>
-              <input type="search" id="wm-filter" class="search-bar fonoran-match-column__filter" placeholder="Filter sounds… e.g. b, sh, ee" autocomplete="off" aria-label="Filter Fonora sounds">
-            </div>
-            <div class="fonoran-match-list" id="wm-fonoran"></div>
-          </aside>
-          <aside class="fonoran-match-column" aria-label="English roots">
-            <div class="fonoran-match-column__head">
-              <h4 class="picker-h">Concepts</h4>
-              <input type="search" id="wm-english-filter" class="search-bar fonoran-match-column__filter" placeholder="Filter by id or concept… e.g. person, collective" autocomplete="off" aria-label="Filter concepts by id or phrase">
-            </div>
-            <div class="fonoran-match-list" id="wm-english"></div>
-          </aside>
         </div>
       </section>
 

@@ -27,7 +27,6 @@
     'wordgen',
     'roots',
     'create',
-    'matcher',
     'review',
     'dictionary',
     'grammar',

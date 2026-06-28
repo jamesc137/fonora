@@ -13,7 +13,7 @@ import {
   englishGuide,
   compoundEnglishGuide,
 } from './fonoran-pronunciation.js';
-import { loadConceptInventory, buildConceptAliasIndex } from './fonoran-concepts.js';
+import { buildConceptAliasIndex, loadRuntimeConceptInventory } from './fonoran-concepts.js';
 import {
   loadInterpretationRules,
   interpretToConcept,
@@ -146,52 +146,9 @@ function pronunciationForParts(parts) {
 }
 
 async function loadTranslationIndex(lab) {
-  // Converged source of truth: the concept inventory (root-candidates) + the live lab.
-  // The retired data/fonoran-primitive-roots.json is intentionally NOT consulted, so the
-  // Translator can only produce words that actually exist in the Dictionary / Concept Editor.
-  const index = new Map();
-  const inventory = await loadConceptInventory();
-  const conceptIndex = buildConceptAliasIndex(inventory.concepts, null);
-  for (const [key, entry] of conceptIndex) {
-    index.set(key, entry);
-  }
-  for (const sound of lab?.sounds ?? []) {
-    const meaning = String(sound.meaning ?? sound.legacy_label ?? '').trim().toLowerCase();
-    if (!meaning || !sound.spelling) continue;
-    const entry = {
-      english: sound.concept_id ?? meaning,
-      concept_id: sound.concept_id ?? null,
-      gloss: sound.meaning ?? sound.legacy_label ?? '',
-      fonoran: sound.spelling,
-      kind: 'primitive',
-      parts: [sound.spelling],
-      source: 'lab',
-      state: sound.state,
-    };
-    index.set(meaning, entry);
-    for (const alias of sound.aliases ?? []) {
-      const key = String(alias).trim().toLowerCase();
-      if (!key || index.has(key)) continue;
-      index.set(key, { ...entry, matched_alias: key });
-    }
-    if (sound.concept_id) {
-      const hit = inventory.concepts.find(c => c.id === sound.concept_id);
-      for (const alias of hit?.aliases ?? [sound.concept_id]) {
-        if (!index.has(alias)) {
-          index.set(alias, {
-            english: sound.concept_id,
-            concept_id: sound.concept_id,
-            gloss: sound.meaning,
-            fonoran: sound.spelling,
-            kind: 'primitive',
-            parts: [sound.spelling],
-            source: 'lab',
-            state: sound.state,
-          });
-        }
-      }
-    }
-  }
+  const inventory = await loadRuntimeConceptInventory({ lab });
+  const index = buildConceptAliasIndex(inventory.concepts, lab, {}, { labFirst: true });
+
   for (const compound of lab?.compounds ?? []) {
     const meaning = String(compound.meaning ?? '').trim().toLowerCase();
     if (!meaning || !compound.spelling) continue;

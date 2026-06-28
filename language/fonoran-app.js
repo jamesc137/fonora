@@ -15,7 +15,7 @@
       loginUrl: '/auth/google?returnTo=/language',
     };
     const WRITE_PAGES = new Set(['roots', 'create', 'review', 'root-review', 'concepts', 'advanced']);
-    const SPLIT_WRITE_PAGES = new Set(['roots', 'create']);
+    const SPLIT_WRITE_PAGES = new Set(['roots', 'create', 'review', 'concepts']);
 
     function canWrite() {
       return !AUTH.required || AUTH.authenticated;
@@ -469,15 +469,15 @@
     async function load(opts = {}) {
       try {
         await ensureRules();
-        STATE.lexicon = null;
         STATE.health = null;
         STATE.healthKey = null;
-        const [, lab, health] = await Promise.all([
-          ensureLexicon(),
+        STATE.lexicon = null;
+        const [lab, health] = await Promise.all([
           api('/api/fonoran/lab'),
           api('/api/fonoran/lab/health').catch(() => null),
         ]);
         STATE.lab = lab;
+        await ensureLexicon();
         if (health) {
           STATE.health = health;
           STATE.healthKey = lab.updated_at ?? health.bucket_updated_at ?? null;
@@ -1741,6 +1741,80 @@
       }
     }
 
+    function buildHealthWarningLi(w) {
+      const sevClass = w.severity === 'high' ? 'lander-health__conflict-item--high' : 'lander-health__conflict-item--medium';
+      const segDetail = w.segmentations?.length
+        ? `<span class="lander-health__conflict-detail">Parses: ${w.segmentations.map(s => escapeHtml(s)).join(' · ')}</span>`
+        : '';
+      return `<li class="lander-health__conflict-item ${sevClass}">
+        <span class="lander-health__conflict-type">${escapeHtml(w.label ?? w.type)}</span>
+        <span class="lander-health__conflict-msg">${escapeHtml(w.message)}</span>
+        ${segDetail}
+      </li>`;
+    }
+
+    function buildHealthConflictGroup(label, items, { penaltyTotal = null } = {}) {
+      if (!items.length) return '';
+      const penalty = penaltyTotal != null ? ` (−${penaltyTotal})` : '';
+      return `<div class="lander-health__conflict-group">
+        <p class="lander-health__conflict-head">${escapeHtml(label)}${penalty}</p>
+        <ul class="lander-health__conflict-list">${items.map(buildHealthWarningLi).join('')}</ul>
+      </div>`;
+    }
+
+    function buildDimensionConflictsHtml(key, h) {
+      const warnings = h.warnings ?? [];
+      if (key === 'learnability') {
+        const high = warnings.filter(w => w.severity === 'high');
+        const lookalikes = warnings.filter(w => w.type === 'similar_roots');
+        if (!high.length && !lookalikes.length) {
+          return '<p class="lander-health__conflicts-none">No conflicts affecting this score.</p>';
+        }
+        return `<div class="lander-health__conflicts">${[
+          buildHealthConflictGroup(
+            `${high.length} high-severity warning${high.length === 1 ? '' : 's'}`,
+            high,
+            { penaltyTotal: high.length * 8 },
+          ),
+          buildHealthConflictGroup(
+            `${lookalikes.length} look-alike root pair${lookalikes.length === 1 ? '' : 's'}`,
+            lookalikes,
+            { penaltyTotal: lookalikes.length * 3 },
+          ),
+        ].join('')}</div>`;
+      }
+      if (key === 'memorability') {
+        const rhyming = warnings.filter(w => w.type === 'phonetic_cluster');
+        const lookalikes = warnings.filter(w => w.type === 'similar_roots');
+        if (!rhyming.length && !lookalikes.length) {
+          return '<p class="lander-health__conflicts-none">No conflicts affecting this score.</p>';
+        }
+        return `<div class="lander-health__conflicts">${[
+          buildHealthConflictGroup(
+            `${rhyming.length} rhyming cluster${rhyming.length === 1 ? '' : 's'}`,
+            rhyming,
+            { penaltyTotal: rhyming.length * 15 },
+          ),
+          buildHealthConflictGroup(
+            `${lookalikes.length} similar root pair${lookalikes.length === 1 ? '' : 's'}`,
+            lookalikes,
+            { penaltyTotal: lookalikes.length * 5 },
+          ),
+        ].join('')}</div>`;
+      }
+      if (key === 'parseability') {
+        const ambiguous = warnings.filter(w => w.type === 'segmentation_ambiguity');
+        if (!ambiguous.length) {
+          return '<p class="lander-health__conflicts-none">All compounds segment uniquely.</p>';
+        }
+        return `<div class="lander-health__conflicts">${buildHealthConflictGroup(
+          `${ambiguous.length} ambiguous compound${ambiguous.length === 1 ? '' : 's'}`,
+          ambiguous,
+        )}</div>`;
+      }
+      return '';
+    }
+
     const HEALTH_METHOD = [
       {
         key: 'learnability',
@@ -1772,6 +1846,7 @@
       const color = healthScoreColor;
       const methodCards = HEALTH_METHOD.map(m => {
         const live = h.scores[m.key];
+        const conflicts = buildDimensionConflictsHtml(m.key, h);
         return `<article class="lander-health__method-card">
           <div class="lander-health__method-head">
             <h4>${escapeHtml(m.title)}</h4>
@@ -1779,6 +1854,7 @@
           </div>
           <p>${escapeHtml(m.prose)}</p>
           <p class="lander-health__formula">${escapeHtml(m.formula)}</p>
+          ${conflicts ? `<div class="lander-health__conflicts-wrap">${conflicts}</div>` : ''}
         </article>`;
       }).join('');
       const metrics = buildHealthMetricsHtml(h.metrics);
@@ -3046,7 +3122,7 @@
         }
         STATE.lexicon = null;
         STATE.rootCandidates = null;
-        await ensureLexicon();
+        await load();
         const c = conceptList().find(x => x.id === id);
         STATE.conceptEditorDraft = c ? conceptEditorDraftFrom(c) : conceptEditorEmptyDraft();
         renderConceptEditor();
@@ -3127,6 +3203,7 @@
       const f = STATE.dictFilter;
       if (f === 'base' || f === 'compound') list = list.filter(e => e.type === f);
       else if (['needs_review', 'approved', 'rejected'].includes(f)) list = list.filter(e => e.state === f);
+      else list = list.filter(e => e.state !== 'rejected');
       const q = STATE.dictQuery.trim().toLowerCase();
       if (q) list = list.filter(e => `${e.word} ${e.english} ${e.gloss} ${e.aliases} ${e.hint}`.toLowerCase().includes(q));
       return list.sort((a, b) => a.word.localeCompare(b.word));
@@ -3863,7 +3940,7 @@
               ${buildLanderHealthHtml(h, { compact: true })}
             </div>
             <div class="health-details">
-              <h3 class="section-h">How scores are calculated</h3>
+              <h3 class="section-h">Score breakdown &amp; conflicts</h3>
               ${buildHealthMethodHtml(h)}
             </div>
           </section>
@@ -4110,6 +4187,14 @@
       const r = await api('/api/fonoran/lab/reset-review', { method: 'POST', body: '{}' });
       toast(`Reset ${r.sounds_reset} roots and ${r.compounds_reset} words`);
       await load();
+    });
+    $('adv-reconcile-inventory')?.addEventListener('click', async () => {
+      try {
+        const r = await api('/api/fonoran/lab/reconcile-inventory', { method: 'POST', body: '{}' });
+        STATE.lexicon = null;
+        toast(`Reconciled ${r.reconciled} concept${r.reconciled === 1 ? '' : 's'} from lab`);
+        await load();
+      } catch (e) { toast(e.message); }
     });
     $('adv-reseed').addEventListener('click', async () => {
       if (!confirmDangerAction({

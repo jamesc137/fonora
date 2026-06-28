@@ -1139,6 +1139,17 @@
     .lander-health__metric-label { display:block; font-family:var(--font-serif); font-size:0.72rem; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color:var(--muted); margin-top:0.15rem; }
     .lander-health__metric-note { margin:0.35rem 0 0; font-family:var(--font-serif); font-size:0.74rem; color:var(--muted); line-height:1.35; text-align:left; }
     .lander-health__footnote { margin:0; font-family:var(--font-serif); font-size:0.8rem; color:var(--muted); line-height:1.45; }
+    .lander-health__conflicts-wrap { margin-top:0.65rem; padding-top:0.65rem; border-top:1px solid var(--border); }
+    .lander-health__conflicts-none { margin:0; font-family:var(--font-serif); font-size:0.78rem; color:var(--muted); line-height:1.4; }
+    .lander-health__conflict-group + .lander-health__conflict-group { margin-top:0.55rem; }
+    .lander-health__conflict-head { margin:0 0 0.35rem; font-family:var(--font-mono); font-size:0.7rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.03em; }
+    .lander-health__conflict-list { margin:0; padding:0; list-style:none; display:grid; gap:0.35rem; }
+    .lander-health__conflict-item { font-family:var(--font-serif); font-size:0.78rem; line-height:1.4; padding:0.4rem 0.5rem; border-radius:5px; background:var(--bg); border-left:3px solid var(--border); }
+    .lander-health__conflict-item--high { border-left-color:var(--reject); }
+    .lander-health__conflict-item--medium { border-left-color:var(--review); }
+    .lander-health__conflict-type { display:block; font-size:0.68rem; font-weight:600; text-transform:uppercase; letter-spacing:0.03em; color:var(--muted); margin-bottom:0.15rem; }
+    .lander-health__conflict-msg { display:block; color:var(--text); }
+    .lander-health__conflict-detail { display:block; margin-top:0.2rem; font-family:var(--font-mono); font-size:0.68rem; color:var(--muted); }
     .lander-health__actions { display:flex; justify-content:center; margin-top:1rem; }
     .lander-health__actions--in-panel { margin-top:1rem; width:100%; }
     .lander-health__actions--in-panel .btn { width:100%; }

@@ -13,7 +13,8 @@ import {
   regenerateRoot,
   usefulnessLabel,
 } from './fonoran-root-sound-assign.js';
-import { addSound, patchSound } from './fonoran-sound-bucket.js';
+import { addSound, patchSound, loadBucket, consolidateConceptSound } from './fonoran-sound-bucket.js';
+import { labSoundsByConceptId, labSoundState } from './fonoran-concepts.js';
 import { generateRootCandidates } from './fonoran-root-candidates.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -71,6 +72,7 @@ async function syncToLab(candidate) {
     if (!String(err.message).includes('already exists')) throw err;
   }
   await patchSound(candidate.spelling, { meaning, state: 'approved', concept_id: candidate.id });
+  await consolidateConceptSound(candidate.id, candidate.spelling, { meaning, state: 'approved' });
 }
 
 async function writeCanonicalFromApproved(store) {
@@ -184,6 +186,7 @@ export async function patchRootCandidate(id, body) {
     }
     await writeCanonicalFromApproved(store);
   } else if (action === 'edit') {
+    const prevSpelling = candidate.spelling;
     if (body.spelling != null) candidate.spelling = validateSpelling(body.spelling);
     if (body.ipa?.trim()) candidate.ipa = body.ipa.trim();
     else if (body.spelling != null) candidate.ipa = romanToIpa(candidate.spelling);
@@ -191,6 +194,30 @@ export async function patchRootCandidate(id, body) {
     if (body.reason?.trim()) candidate.reason = body.reason.trim();
     candidate.review = { ...candidate.review, edited_at: new Date().toISOString(), note: body.note?.trim() || null };
     if (candidate.status === 'rejected') candidate.status = 'pending';
+    if (candidate.status === 'approved') {
+      const spellingChanged = candidate.spelling !== prevSpelling;
+      const meaning = candidate.concept?.trim() || candidate.id;
+      if (spellingChanged) {
+        try {
+          await patchSound(prevSpelling, {
+            new_spelling: candidate.spelling,
+            meaning,
+            state: 'approved',
+            concept_id: candidate.id,
+          });
+        } catch (err) {
+          if (String(err.message).includes('Unknown sound')) {
+            await addSound({ spelling: candidate.spelling, meaning, concept_id: candidate.id });
+            await patchSound(candidate.spelling, { meaning, state: 'approved', concept_id: candidate.id });
+          } else {
+            throw err;
+          }
+        }
+      } else {
+        await syncToLab(candidate);
+      }
+      await writeCanonicalFromApproved(store);
+    }
   } else if (action === 'reopen') {
     candidate.status = 'pending';
     candidate.review = { ...candidate.review, rejected_at: null };
@@ -234,9 +261,32 @@ export async function syncCandidateFromLab({ concept_id, spelling, state }) {
     candidate.status = 'rejected';
     candidate.review = { ...candidate.review, rejected_at: now };
     await writeCanonicalFromApproved(store);
+  } else if (spelling?.trim()) {
+    candidate.spelling = validateSpelling(spelling);
+    candidate.ipa = romanToIpa(candidate.spelling);
+    candidate.review = { ...candidate.review, edited_at: now };
   }
 
   refreshSummary(store);
   await writeJson(CANDIDATES_PATH, store);
   return candidate;
+}
+
+/** Push all lab sounds with concept_id back into root-candidates + approved-roots exports. */
+export async function reconcileInventoryFromLab() {
+  const bucket = await loadBucket();
+  const items = [];
+  for (const [conceptId, s] of labSoundsByConceptId(bucket)) {
+    const state = labSoundState(s);
+    if (state === 'rejected') continue;
+    const synced = await syncCandidateFromLab({
+      concept_id: conceptId,
+      spelling: s.spelling,
+      state,
+    });
+    if (synced) {
+      items.push({ concept_id: conceptId, spelling: s.spelling, state });
+    }
+  }
+  return { reconciled: items.length, items };
 }

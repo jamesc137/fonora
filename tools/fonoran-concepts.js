@@ -167,13 +167,130 @@ export async function loadConceptInventory(locale = 'en') {
   };
 }
 
+export function labSoundState(sound) {
+  if (sound?.state) return sound.state;
+  return sound?.meaning?.trim() ? 'needs_review' : 'draft';
+}
+
+function labSoundPriority(sound) {
+  const state = labSoundState(sound);
+  let score = 0;
+  if (state === 'approved' || state === 'revised') score += 100;
+  else if (state === 'needs_review') score += 50;
+  if (sound.created_by === 'user') score += 10;
+  const namedAt = sound.named_at ? Date.parse(sound.named_at) : 0;
+  return score * 1e15 + namedAt;
+}
+
+export function labSoundsByConceptId(lab) {
+  const map = new Map();
+  for (const s of lab?.sounds ?? []) {
+    if (!s.concept_id || labSoundState(s) === 'rejected') continue;
+    const existing = map.get(s.concept_id);
+    if (!existing || labSoundPriority(s) > labSoundPriority(existing)) {
+      map.set(s.concept_id, s);
+    }
+  }
+  return map;
+}
+
+function statusFromLabState(state) {
+  if (state === 'approved' || state === 'revised') return 'approved';
+  if (state === 'rejected') return 'rejected';
+  return 'pending';
+}
+
+/** Overlay live lab spellings and review state onto static concept inventory records. */
+export function mergeLabIntoConcepts(concepts, lab, locData = {}) {
+  if (!lab?.sounds?.length) return concepts;
+
+  const labByConceptId = labSoundsByConceptId(lab);
+
+  const conceptIds = new Set(concepts.map(c => c.id));
+  const merged = concepts.map(c => {
+    const ls = labByConceptId.get(c.id);
+    if (!ls) return c;
+
+    const staticSpelling = c.spelling;
+    const spelling = ls.spelling;
+    const gloss = ls.meaning?.trim() || c.concept;
+    const storedAliases = ls.aliases?.length ? ls.aliases : c.stored_aliases;
+
+    return {
+      ...c,
+      concept: gloss,
+      spelling,
+      ipa: romanToIpa(spelling),
+      status: statusFromLabState(labSoundState(ls)),
+      stored_aliases: storedAliases,
+      aliases: aliasesForConcept({ id: c.id, concept: gloss, aliases: storedAliases }, locData),
+      lab_linked: true,
+      lab_spelling: spelling,
+      inventory_spelling: staticSpelling && staticSpelling !== spelling ? staticSpelling : undefined,
+    };
+  });
+
+  for (const s of lab.sounds) {
+    if (!s.concept_id || labSoundState(s) === 'rejected' || conceptIds.has(s.concept_id)) continue;
+    if (!s.spelling || !s.meaning?.trim()) continue;
+    merged.push({
+      id: s.concept_id,
+      concept: s.meaning.trim(),
+      domain: 'being',
+      spelling: s.spelling,
+      ipa: romanToIpa(s.spelling),
+      aliases: aliasesForConcept({
+        id: s.concept_id,
+        concept: s.meaning.trim(),
+        aliases: s.aliases ?? null,
+      }, locData),
+      stored_aliases: s.aliases ?? null,
+      status: statusFromLabState(labSoundState(s)),
+      lab_linked: true,
+      lab_only: true,
+    });
+  }
+
+  return merged;
+}
+
+/** Runtime inventory: static semantics + live lab spellings and review state. */
+export async function loadRuntimeConceptInventory({ lab = null, locale = 'en' } = {}) {
+  const base = await loadConceptInventory(locale);
+  if (!lab) return base;
+  const locData = await loadLocalization(locale);
+  const concepts = mergeLabIntoConcepts(base.concepts, lab, locData);
+  return {
+    ...base,
+    concepts,
+    concept_count: concepts.length,
+    runtime_source: 'lab-merged',
+  };
+}
+
+/** concept_id → { root, gloss, state } for composition tools. Lab wins on conflict. */
+export function buildRootById(concepts, lab = null) {
+  const rootById = new Map();
+  for (const c of concepts) {
+    if (c.spelling) rootById.set(c.id, { root: c.spelling, gloss: c.concept, state: c.status });
+  }
+  for (const [conceptId, s] of labSoundsByConceptId(lab)) {
+    rootById.set(conceptId, {
+      root: s.spelling,
+      gloss: s.gloss ?? s.meaning ?? rootById.get(conceptId)?.gloss,
+      state: s.state,
+    });
+  }
+  return rootById;
+}
+
 /** Build translator lookup: alias → concept entry with fonoran spelling. */
-export function buildConceptAliasIndex(concepts, lab = null, locData = {}) {
+export function buildConceptAliasIndex(concepts, lab = null, locData = {}, { labFirst = false } = {}) {
   const index = new Map();
 
-  const register = (alias, entry) => {
+  const register = (alias, entry, { force = false } = {}) => {
     const key = String(alias ?? '').trim().toLowerCase();
-    if (!key || index.has(key)) return;
+    if (!key || (index.has(key) && !force)) return;
     index.set(key, entry);
   };
 
@@ -206,6 +323,41 @@ export function buildConceptAliasIndex(concepts, lab = null, locData = {}) {
     return [lead, ...glossTokens(c.concept)];
   };
 
+  const registerLabSound = (sound, { force = false } = {}) => {
+    const meaning = String(sound.meaning ?? '').trim().toLowerCase();
+    if (!meaning || !sound.spelling) return;
+    const hit = concepts.find(c => c.id === sound.concept_id)
+      || concepts.find(c => c.concept.toLowerCase() === meaning)
+      || concepts.find(c => c.id === meaning);
+    const entry = {
+      english: hit?.id ?? sound.concept_id ?? meaning,
+      concept_id: sound.concept_id ?? hit?.id ?? null,
+      gloss: sound.meaning,
+      fonoran: sound.spelling,
+      kind: 'primitive',
+      parts: [sound.spelling],
+      source: 'lab',
+      state: sound.state,
+    };
+    register(meaning, entry, { force });
+    if (sound.concept_id) {
+      for (const alias of hit?.aliases ?? [sound.concept_id]) {
+        register(alias, { ...entry, matched_alias: alias }, { force });
+      }
+    }
+    for (const alias of sound.aliases ?? []) {
+      register(alias, { ...entry, matched_alias: alias }, { force });
+    }
+  };
+
+  const canonicalLabSounds = [...labSoundsByConceptId(lab).values()].filter(
+    s => s.state === 'approved' || s.state === 'revised',
+  );
+
+  if (labFirst) {
+    for (const sound of canonicalLabSounds) registerLabSound(sound, { force: true });
+  }
+
   for (const c of concepts) {
     const base = baseFor(c);
     for (const alias of strongAliases(c)) register(alias, { ...base, matched_alias: alias });
@@ -215,36 +367,11 @@ export function buildConceptAliasIndex(concepts, lab = null, locData = {}) {
     for (const alias of weakAliases(c)) register(alias, { ...base, matched_alias: alias });
   }
 
+  const bestByConcept = labSoundsByConceptId(lab);
   for (const sound of lab?.sounds ?? []) {
-    const meaning = String(sound.meaning ?? '').trim().toLowerCase();
-    if (!meaning || !sound.spelling) continue;
-    const hit = concepts.find(c => c.id === sound.concept_id)
-      || concepts.find(c => c.concept.toLowerCase() === meaning)
-      || concepts.find(c => c.id === meaning);
-    register(meaning, {
-      english: hit?.id ?? meaning,
-      concept_id: sound.concept_id ?? hit?.id ?? null,
-      gloss: sound.meaning,
-      fonoran: sound.spelling,
-      kind: 'primitive',
-      parts: [sound.spelling],
-      source: 'lab',
-      state: sound.state,
-    });
-    if (sound.concept_id) {
-      for (const alias of hit?.aliases ?? [sound.concept_id]) {
-        register(alias, {
-          english: sound.concept_id,
-          concept_id: sound.concept_id,
-          gloss: sound.meaning,
-          fonoran: sound.spelling,
-          kind: 'primitive',
-          parts: [sound.spelling],
-          source: 'lab',
-          state: sound.state,
-        });
-      }
-    }
+    if (labFirst && (sound.state === 'approved' || sound.state === 'revised')) continue;
+    if (sound.concept_id && bestByConcept.get(sound.concept_id) !== sound) continue;
+    registerLabSound(sound);
   }
 
   return index;

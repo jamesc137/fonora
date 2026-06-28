@@ -19,10 +19,10 @@ const SLUG_TO_ROOT_DOC = Object.fromEntries(
 
 /** Display order for grouped docs sidebar. */
 export const DOC_LAYER_ORDER = [
-  { id: 'platform', label: 'Platform' },
-  { id: 'script', label: 'Script Layer' },
-  { id: 'language', label: 'Language Layer' },
-  { id: 'ops', label: 'Operations' },
+  { id: 'essential', label: 'Essential' },
+  { id: 'script', label: 'Script layer' },
+  { id: 'language', label: 'Language layer' },
+  { id: 'archive', label: 'Archive' },
 ];
 
 /**
@@ -30,30 +30,35 @@ export const DOC_LAYER_ORDER = [
  * @type {Array<{ path: string, label: string, layer: string }>}
  */
 export const DOC_CATALOG = [
-  { path: 'docs/platform-overview.md', label: 'Platform overview', layer: 'platform' },
-  { path: 'docs/README.md', label: 'Documentation index', layer: 'platform' },
-  { path: 'README.md', label: 'Project README', layer: 'platform' },
+  { path: 'docs/platform-overview.md', label: 'Platform overview', layer: 'essential' },
+  { path: 'docs/README.md', label: 'Documentation index', layer: 'essential' },
+  { path: 'README.md', label: 'Project README', layer: 'essential' },
+  { path: 'docs/third-party.md', label: 'Third-party licenses', layer: 'essential' },
+  { path: 'docs/deploy.md', label: 'Deploy & PostgreSQL', layer: 'essential' },
+  { path: 'docs/open-problems.md', label: 'Open problems', layer: 'essential' },
+  { path: 'CONTRIBUTING.md', label: 'Contributing', layer: 'essential' },
 
   { path: 'docs/language-rules.md', label: 'Encoding rules', layer: 'script' },
-  { path: 'docs/IPA-PIPELINE-REPORT.md', label: 'IPA pipeline report', layer: 'script' },
-  { path: 'docs/ipa-normalize.md', label: 'IPA normalization', layer: 'script' },
   { path: 'docs/multilingual-support.md', label: 'Multilingual support', layer: 'script' },
+  { path: 'docs/IPA-PIPELINE-REPORT.md', label: 'IPA pipeline report', layer: 'script' },
   { path: 'docs/espeak-integration.md', label: 'eSpeak integration', layer: 'script' },
   { path: 'docs/pronunciation-validation.md', label: 'Pronunciation validation', layer: 'script' },
-  { path: 'docs/FONORA_COLLISION_AUDIT.md', label: 'Collision audit', layer: 'script' },
-  { path: 'docs/IPA_VOWEL_NORMALIZATION_AUDIT.md', label: 'Vowel normalization audit', layer: 'script' },
-  { path: 'docs/FONORA_VOWEL_DECISION_REPORT.md', label: 'Vowel decision report (v2)', layer: 'script' },
+  { path: 'docs/ipa-normalize.md', label: 'IPA normalization', layer: 'script' },
 
+  { path: 'docs/fonoran.md', label: 'Fonoran guide', layer: 'language' },
   { path: 'docs/fonoran-grammar.md', label: 'Fonoran grammar', layer: 'language' },
-  { path: 'docs/fonoran.md', label: 'Fonoran language', layer: 'language' },
-  { path: 'docs/fonoran-gen3.md', label: 'DDA semantics (Gen 3)', layer: 'language' },
-  { path: 'docs/fonoran-gen3-1.md', label: 'DDA phonetic layer (Gen 3.1)', layer: 'language' },
-  { path: 'docs/fonoran-generator-archive.md', label: 'Generator archive', layer: 'language' },
+  { path: 'docs/fonoran-interpretive-translator.md', label: 'Interpretive translator', layer: 'language' },
 
-  { path: 'docs/open-problems.md', label: 'Open problems', layer: 'ops' },
-  { path: 'docs/deploy.md', label: 'Deploy', layer: 'ops' },
-  { path: 'docs/FONORA_CLEANUP_AUDIT.md', label: 'Cleanup audit', layer: 'ops' },
-  { path: 'CONTRIBUTING.md', label: 'Contributing', layer: 'ops' },
+  { path: 'docs/fonoran-gen3.md', label: 'DDA Gen 3 (archive)', layer: 'archive' },
+  { path: 'docs/fonoran-gen3-1.md', label: 'Gen 3.1 phonetic layer', layer: 'archive' },
+  { path: 'docs/fonoran-generator-archive.md', label: 'Generator archive', layer: 'archive' },
+  { path: 'docs/fonoran-semantic-foundation.md', label: 'Semantic foundation', layer: 'archive' },
+  { path: 'docs/fonoran-primitive-roots-report.md', label: 'Primitive roots report', layer: 'archive' },
+  { path: 'docs/fonoran-root-workflow.md', label: 'Root workflow (redirect)', layer: 'archive' },
+  { path: 'docs/FONORA_CLEANUP_AUDIT.md', label: 'Cleanup audit (2026)', layer: 'archive' },
+  { path: 'docs/FONORA_COLLISION_AUDIT.md', label: 'Collision audit', layer: 'archive' },
+  { path: 'docs/IPA_VOWEL_NORMALIZATION_AUDIT.md', label: 'Vowel normalization audit', layer: 'archive' },
+  { path: 'docs/FONORA_VOWEL_DECISION_REPORT.md', label: 'Vowel decision report (v2)', layer: 'archive' },
 ];
 
 /**

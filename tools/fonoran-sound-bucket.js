@@ -398,6 +398,16 @@ export async function patchSound(spelling, { new_spelling, meaning, state, conce
   else if (spellingChanged) pushEvent(bucket, 'renamed', 'sound', evtWord, `${old} → ${s.spelling}`);
 
   await saveBucket(bucket);
+
+  if (nextState && s.concept_id) {
+    const { syncCandidateFromLab } = await import('./fonoran-root-store.js');
+    await syncCandidateFromLab({
+      concept_id: s.concept_id,
+      spelling: s.spelling,
+      state: nextState,
+    }).catch(() => {});
+  }
+
   return {
     sound: enrichSound(s, bucket),
     spelling_changed: spellingChanged,
@@ -679,8 +689,9 @@ export async function addCompound(input) {
       return list.length ? list : undefined;
     })(),
     state: normalizeState(input.state) ?? (input.meaning?.trim() ? 'needs_review' : 'draft'),
-    generator_hint: null,
-    created_by: 'user',
+    generator_hint: input.generator_hint?.trim() || null,
+    composition_readable: input.composition_readable?.trim() || undefined,
+    created_by: input.created_by === 'generator' ? 'generator' : 'user',
     named_at: input.meaning?.trim() ? new Date().toISOString() : null,
     dda: emptyDda(),
   };

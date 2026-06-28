@@ -28,7 +28,7 @@ Fonoran vocabulary is curated, not open PRs against the live dictionary. To prop
 2. Include your name, contact email, university, `.edu` email, and why you want to contribute
 3. Approved proposals are entered by the project maintainer in the language builder
 
-You can always **browse** the public dictionary and read the docs ([fonoran.md](docs/fonoran.md), [fonoran-gen3.md](docs/fonoran-gen3.md)) without applying.
+You can always **browse** the public dictionary and read the docs ([fonoran.md](docs/fonoran.md), [fonoran-grammar.md](docs/fonoran-grammar.md)) without applying.
 
 ## Development setup
 
@@ -57,6 +57,8 @@ npm test
 | Multilingual behavior | [docs/multilingual-support.md](docs/multilingual-support.md) |
 | WASM assets (generated) | `vendor/` via `npm install` |
 | Research docs | `docs/` |
+| Fonoran language guide | [docs/fonoran.md](docs/fonoran.md) |
+| Fonoran build CLI | `npm run fonoran:build` (see [fonoran.md#pipeline](docs/fonoran.md#pipeline)) |
 
 ## Changing language rules
 

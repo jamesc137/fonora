@@ -1,5 +1,6 @@
 import { escapeHtml } from './utils.js';
 import { resolveMarkdownHref, repoPathFromViewerHref } from './doc-urls.js';
+import { buildMermaidPanZoomHtml } from './mermaid-pan-zoom.js';
 
 function slugifyHeading(text) {
   return text
@@ -112,7 +113,7 @@ function parseTableRow(line) {
 
 /**
  * @param {string} source
- * @param {{ docPath?: string }} [options]
+ * @param {{ docPath?: string, skipTitle?: boolean }} [options]
  */
 export function renderMarkdown(source, options = {}) {
   const docPath = options.docPath ?? 'docs/README.md';
@@ -120,6 +121,7 @@ export function renderMarkdown(source, options = {}) {
   const lines = String(source).replace(/\r\n/g, '\n').split('\n');
   const blocks = [];
   let i = 0;
+  let skippedTitle = false;
 
   while (i < lines.length) {
     const line = lines[i];
@@ -135,7 +137,7 @@ export function renderMarkdown(source, options = {}) {
       }
       if (i < lines.length) i += 1;
       if (lang === 'mermaid') {
-        blocks.push(`<div class="mermaid-wrap"><pre class="mermaid">${escapeHtml(codeLines.join('\n'))}</pre></div>`);
+        blocks.push(buildMermaidPanZoomHtml(codeLines.join('\n'), { variant: 'diagram' }));
       } else if (options.grammar && lang === 'example') {
         blocks.push(renderGrammarExampleBlock(codeLines.join('\n')));
       } else if (options.grammar && lang === 'pipeline') {
@@ -168,6 +170,11 @@ export function renderMarkdown(source, options = {}) {
     const heading = line.match(/^(#{1,6})\s+(.+)$/);
     if (heading) {
       const level = heading[1].length;
+      if (options.skipTitle && level === 1 && !skippedTitle) {
+        skippedTitle = true;
+        i += 1;
+        continue;
+      }
       const plainTitle = heading[2].replace(/\*\*/g, '').replace(/`/g, '');
       const id = slugifyHeading(plainTitle);
       const idAttr = id ? ` id="${escapeHtml(id)}"` : '';

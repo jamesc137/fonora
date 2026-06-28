@@ -25,6 +25,10 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const config       = JSON.parse(await readFile(join(ROOT, 'data/fonoran-primitive-roots-config.json'), 'utf8'));
 const candidates   = JSON.parse(await readFile(join(ROOT, 'data/fonoran-root-candidates.json'), 'utf8'));
 const conceptInv   = JSON.parse(await readFile(join(ROOT, 'data/fonoran-concept-inventory.json'), 'utf8'));
+let stressConcepts = null;
+try {
+  stressConcepts = JSON.parse(await readFile(join(ROOT, 'data/fonoran-stress-test-concepts.json'), 'utf8'));
+} catch { /* optional */ }
 
 // Currently assigned (non-rejected) spellings
 const assignedSpellings = new Set(
@@ -244,7 +248,7 @@ for (const tier of TIERS) {
 // ── Concept demand targets ─────────────────────────────────────────────────────
 
 const DEMAND_ACTIVE = conceptInv.primitives?.length ?? 118; // live generator inventory
-const DEMAND_STRESS = config.concepts.length;                // stress-test target (251)
+const DEMAND_STRESS = stressConcepts?.concepts?.length ?? DEMAND_ACTIVE; // stress-test target
 
 // ── Print helpers ──────────────────────────────────────────────────────────────
 

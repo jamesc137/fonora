@@ -1,6 +1,6 @@
 # Fonoran semantic foundation
 
-> **Status:** proposal v1.2 · **Superseded for phonetics** by [fonoran-root-workflow.md](fonoran-root-workflow.md) · Semantic inventory remains reference for compounds
+> **Status:** proposal v1.2 · **Superseded for phonetics** by [fonoran.md](fonoran.md) · Semantic inventory remains reference for compounds
 
 This document supersedes the algorithmic primitive-roots experiment (`fonoran-primitive-roots.js`). That tooling assigned phonetic forms before semantic approval. **This foundation starts from concepts only.**
 

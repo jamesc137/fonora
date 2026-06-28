@@ -209,5 +209,15 @@
     "hypernym_concepts": [
       "do"
     ]
+  },
+  "climber": {
+    "synonyms": [
+      "social climber",
+      "mounter",
+      "crampon",
+      "crampoon",
+      "climbing iron"
+    ],
+    "hypernym_concepts": []
   }
 }

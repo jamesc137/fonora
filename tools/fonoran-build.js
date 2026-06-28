@@ -19,7 +19,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { generateRootCandidates } from './fonoran-root-candidates.js';
-import { writeBucketRaw } from './fonoran-store.js';
+import { writeBucketRaw, readBucketRaw } from './fonoran-store.js';
 import { emptyDda, migrateBucket, normalizeCompoundRecord, normalizeSoundRecord } from './fonoran-derivation.js';
 import { analyzeAmbiguity, auditScores, segmentCompound, checkCompoundBoundary } from './fonoran-gen3-readability.js';
 import { aliasesForConcept, loadLocalization } from './fonoran-concepts.js';
@@ -230,6 +230,7 @@ export async function buildFonoran({ preserveReview = true, approveAll = false }
         aliases: aliasesForConcept({ id: def.concept, concept: def.gloss ?? def.concept }, locData),
         state: approveAll ? 'approved' : 'needs_review',
         composition_readable: `${def.concept} = ${def.composition.join(' + ')}`,
+        generator_hint: `curated: ${def.concept} = ${def.composition.join(' + ')}`,
         created_by: 'generator',
         named_at: now,
         dda: emptyDda(),
@@ -246,7 +247,26 @@ export async function buildFonoran({ preserveReview = true, approveAll = false }
     })
     .sort((a, b) => a.spelling.localeCompare(b.spelling));
 
-  const bucket = buildBucket(sounds, compounds, now);
+  let preservedCompounds = [];
+  let preservedSounds = [];
+  try {
+    const existing = await readBucketRaw();
+    const builtCompoundSpellings = new Set(compounds.map(c => c.spelling));
+    const builtSoundSpellings = new Set(sounds.map(s => s.spelling));
+    preservedCompounds = (existing?.compounds ?? []).filter(c =>
+      c.created_by === 'user' && !builtCompoundSpellings.has(c.spelling),
+    );
+    preservedSounds = (existing?.sounds ?? []).filter(s =>
+      s.created_by === 'user' && !builtSoundSpellings.has(s.spelling),
+    );
+  } catch {
+    /* first build or empty bucket */
+  }
+
+  const mergedSounds = [...sounds, ...preservedSounds].sort((a, b) => a.spelling.localeCompare(b.spelling));
+  const mergedCompounds = [...compounds, ...preservedCompounds].sort((a, b) => a.spelling.localeCompare(b.spelling));
+
+  const bucket = buildBucket(mergedSounds, mergedCompounds, now);
   await writeBucketRaw(bucket);
 
   // When pre-approving for testing, keep the review layer + canonical export in sync
@@ -256,10 +276,12 @@ export async function buildFonoran({ preserveReview = true, approveAll = false }
   const health = computeHealth(bucket);
 
   return {
-    roots: sounds.length,
+    roots: mergedSounds.length,
     approved: approveAll ? sounds.length : candidates.filter(c => c.status === 'approved').length,
     approveAll,
-    compounds: compounds.length,
+    compounds: mergedCompounds.length,
+    preserved_compounds: preservedCompounds.length,
+    preserved_sounds: preservedSounds.length,
     dropped,
     health,
   };
@@ -274,6 +296,9 @@ async function main() {
   if (r.approveAll) console.log('  Mode:      APPROVE-ALL (everything imported pre-approved, for testing)');
   console.log(`  Roots:     ${r.roots} (${r.approved} approved${r.approveAll ? '' : '/locked'})`);
   console.log(`  Compounds: ${r.compounds} built${r.approveAll ? ' (all approved)' : ''}, ${r.dropped.length} dropped`);
+  if (r.preserved_compounds || r.preserved_sounds) {
+    console.log(`  Preserved: ${r.preserved_sounds ?? 0} user roots, ${r.preserved_compounds ?? 0} user words`);
+  }
   if (r.dropped.length) {
     for (const d of r.dropped) console.log(`    - dropped ${d.concept}: ${d.reason}`);
   }

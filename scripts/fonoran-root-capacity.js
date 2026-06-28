@@ -122,9 +122,7 @@ const genPool = new Set([...genCvForms, ...genCvcForms]);
 // ── 7: How many primitive concepts need roots? ────────────────────────────────
 
 // The active generator reads fonoran-concept-inventory.json (118 primitives).
-// fonoran-primitive-roots-config.json's embedded "concepts" array (251 entries)
-// is from the deprecated bulk pipeline and is not used by the current build.
-const conceptCount = conceptInventory.primitives?.length ?? config.concepts.length;
+const conceptCount = conceptInventory.primitives?.length ?? conceptInventory.concepts?.length ?? 118;
 const conceptCountNote = `(${conceptInventory.primitive_count ?? '?'} core + ${conceptInventory.extended_count ?? '?'} extended, from fonoran-concept-inventory.json)`;
 
 // ── 8–11: Current assignment status ──────────────────────────────────────────
@@ -306,7 +304,7 @@ console.log(`
                 CV-CV forms are reserved for compounds and derived words.
 
   Concept demand:    ${conceptCount} primitives ${conceptCountNote}
-  Deprecated list:   ${config.concepts.length} entries in primitive-roots-config.json (not used by generator)
+  Concept inventory: ${conceptCount} primitives ${conceptCountNote}
 
   ┌─ Pool vs. demand (these are different numbers — do not confuse them)
   │

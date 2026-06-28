@@ -1,78 +1,184 @@
-# Fonoran language lab
+# Fonoran language guide
 
-> **Status:** production feature at `/fonoran/`, a hand-held creative language builder.
+> **Start here** for the experimental Fonoran language and its builder at [`/fonoran/`](../fonoran/).
 
-**Fonoran** is an experimental constructed language written in the [Fonora phonetic script](platform-overview.md). This doc covers the **Language Layer** (vocabulary model) and **Language Builder Tools** (tabs and API). For the script itself, see [language-rules.md](language-rules.md) and [multilingual-support.md](multilingual-support.md).
+**Fonoran** is a constructed language written in the [Fonora phonetic script](platform-overview.md). You assign CV/CVC sounds to semantic concepts, compose roots into compound words, and approve what enters the live vocabulary. Human review is canonical: generators propose, you decide.
 
-Build a language word-by-word: create primitive roots, compose them into words, approve your choices, and explore how the vocabulary grows as a family tree.
+## Architecture
+
+```mermaid
+flowchart TD
+  subgraph semantics [Semantic layer]
+    Inventory["concept-inventory.json\n118 concepts"]
+  end
+
+  subgraph phonetics [Phonetic assignment]
+    Config["primitive-roots-config.json\nonsets / vowels / codas"]
+    Assign["root-sound-assign.js\nCV/CVC scoring"]
+    Candidates["root-candidates.json\nreview queue"]
+    Approved["approved-roots.json\ncanonical export"]
+  end
+
+  subgraph composition [Composition]
+    CompoundsJson["compounds.json\n46 curated recipes"]
+    Build["fonoran-build.js\nunique-parse check"]
+    Lab["sound-bucket.json\nruntime lab"]
+  end
+
+  subgraph ui [Builder UI]
+    Review["Review"]
+    Creator["Word Creator"]
+    Generator["Word Generator"]
+    Dict["Dictionary"]
+  end
+
+  Inventory --> Assign
+  Config --> Assign
+  Assign --> Candidates
+  Candidates -->|"approve"| Approved
+  Candidates --> Build
+  Approved --> Build
+  CompoundsJson --> Build
+  Build --> Lab
+  Lab --> Review
+  Lab --> Creator
+  Lab --> Generator
+  Lab --> Dict
+```
 
 ## Quick start
 
 ```bash
+npm install
 npm start
-# Open http://localhost:8000/fonoran/: lander page; add #roots to jump into the builder
+# http://localhost:8000/fonoran/
+
+npm run fonoran:build    # assign roots + build curated compounds → lab
 ```
+
+## App tools
+
+| Tab | Auth | Purpose |
+| --- | --- | --- |
+| **Dictionary** | Public | Browse roots and words; word trees and family graphs |
+| **Grammar** | Public | Language specification ([fonoran-grammar.md](fonoran-grammar.md)) |
+| **Translator** | Public | English → Fonoran sentences (beta) |
+| **Word Generator** | Sign-in | English phrase → ranked compound suggestions (beta; uses [WordNet](third-party.md)) |
+| **Root Creator** | Sign-in | Manual CV/CVC syllables |
+| **Word Creator** | Sign-in | Stack roots and approved words → save compound |
+| **Concept Editor** | Sign-in | Edit concept gloss, aliases, and spelling |
+| **Review** | Sign-in | **Root queue** (pending spellings) · **Roots** · **Words** · **Generated** |
+| **Health** | Public | Readability scores and warnings |
+| **Advanced** | Sign-in | Import build, Run DDA, lab reset |
+
+**Language Explorer** (from Dictionary): derivation trees, “used in” lists, Mermaid family graphs. Read-only graph API, no sign-in.
 
 ## Language model
 
 | Rule | Detail |
 | --- | --- |
-| **Primitive roots** | Atomic syllables you create (CV / CVC). Stored in `bucket.sounds`. |
-| **Words** | Built by stacking roots and/or approved words. Stored in `bucket.compounds`. |
-| **Recursive composition** | Once `kaso = ka + so` is **approved**, you can build `lakaso = la + kaso`. |
-| **Derivation tree** | Every word stores its full component tree, visible in Language Explorer. |
-| **Circular derivations** | Invalid. Word A cannot depend on word B if B already depends on A. |
-| **Review workflow** | `draft → needs_review → approved \| rejected \| revised` for roots and words. |
-| **DDA (semantic layer)** | System-maintained, invisible during creation. Run **Run DDA** in Advanced when you've added new material. |
+| **Primitive roots** | One syllable, CV or CVC. Stored in `bucket.sounds`. |
+| **Words** | Stack roots and/or approved words. Stored in `bucket.compounds`. |
+| **Nesting** | Approved word `kaso` can combine with root `la` → `lakaso`. |
+| **Review states** | `draft` → `needs_review` → `approved` \| `rejected` \| `revised` |
+| **Live vocabulary** | `data/fonoran-sound-bucket.json` (or PostgreSQL when `DATABASE_URL` is set) |
 
-Your living language lives in **`data/fonoran-sound-bucket.json`** (gitignored locally) when using JSON storage, or in **PostgreSQL** when `DATABASE_URL` is set. The JSON file is imported on first boot, never deleted. Reference generator data (gen3.1 glosses for the English picker) is separate, it does not overwrite your words.
+Legacy `parts: ["ka","so"]` is accepted; stored as typed `{ type, ref }` components.
 
-See [platform-overview.md](platform-overview.md) for storage details and [deploy.md](deploy.md) for PostgreSQL setup.
+```json
+{ "type": "root", "ref": "ba" }
+{ "type": "word", "ref": "cmp-..." }
+```
 
-## UI tabs (Language Builder Tools)
+Spelling = concatenation of component phonetic forms, left to right.
 
-| Tab | Builder tool | Access | Purpose |
-| --- | --- | --- | --- |
-| **Home** | Lander | Public | Overview, live showcase, health summary |
-| **Dictionary** | Dictionary + Language Explorer | **Public (read-only)** | Browse vocabulary; click any item for derivation trees and family graphs |
-| **Grammar** | Grammar specification | **Public (read-only)** | Living language constitution with readable examples, planned particles, and translator architecture |
-| **Root Creator** (Roots) | Root Creator | Sign-in required | Create primitive syllables |
-| **Word Creator** | Word Creator | Sign-in required | Stack **roots** + **approved words** → preview → name → save |
-| **Review** | Review Tools | Sign-in required | Approve, reject, or edit pending items |
-| **Health** | Semantic Analysis | Public (read-only) | Readability scores and warnings |
-| **Advanced** | DDA / lab tools | Sign-in required | Run DDA, reset lab, destructive ops |
+## Build pipeline {#pipeline}
 
-**Language Explorer** (from Dictionary) shows: Built from · Derivation tree · Used in · Related words · Mermaid family graph. Explorer uses read-only API routes, no sign-in needed.
+One converged pipeline. **`npm run fonoran:build`** regenerates root spellings (locking approved ones), resolves curated compounds, validates unique segmentation, and imports into the lab.
 
-**Grammar** (`/fonoran/#grammar`) is the evolving specification for Fonoran syntax and the future translator. Source: [fonoran-grammar.md](fonoran-grammar.md).
+```text
+concept-inventory → root-candidates → review → fonoran:build → lab
+```
 
-**Advanced:** Run DDA, compound parser, health metrics, optional debug DDA fields, lab reset. Parser (`GET /parse`) is read-only; DDA and resets require sign-in.
+| Step | What happens |
+| --- | --- |
+| 1. Build | `npm run fonoran:build` assigns CV/CVC spellings, builds compounds, imports lab |
+| 2. Review | Open **Review** at `/fonoran/#review` — approve, reject, edit, or regenerate roots |
+| 3. Rebuild | Re-run build; approved spellings stay locked; **user-created lab items are preserved** |
+
+### Data files
+
+| File | Role |
+| --- | --- |
+| `data/fonoran-concept-inventory.json` | 118 semantic concepts (no phonetics) |
+| `data/fonoran-root-candidates.json` | Proposed spellings + review status |
+| `data/fonoran-approved-roots.json` | Canonical approved roots |
+| `data/fonoran-compounds.json` | 46 curated compound recipes |
+| `data/fonoran-primitive-roots-config.json` | Phonetics rules only (onsets, vowels, codas) |
+| `data/fonoran-sound-bucket.json` | Runtime lab: sounds, compounds, history |
+
+### Commands
+
+```bash
+npm run fonoran:reset              # blank lab + review queue + canonical roots
+npm run fonoran:build              # full pipeline → lab (needs review)
+npm run fonoran:build:approved     # same, everything pre-approved (testing)
+npm run fonoran:root-candidates    # refresh candidates only (no lab import)
+```
+
+Typical loop:
+
+```bash
+npm run fonoran:reset && npm run fonoran:build
+# → Review at /fonoran/#review
+# → npm run fonoran:build again after approving roots
+```
+
+### CV/CVC rule
+
+Every primitive root is exactly **one syllable**: **CV** (`ba`, `te`) or **CVC** (`bel`, `dam`). Multi-syllable forms are compounds, not roots. Enforced at generation and at build time.
+
+Reserved particles (never roots): `mi`, `na`, `ta`.
 
 ## API
+
+### Lab (vocabulary)
 
 | Endpoint | Method | Auth |
 | --- | --- | --- |
 | `/api/fonoran/lab` | GET | Public |
 | `/api/fonoran/lab/health` | GET | Public |
-| `/api/fonoran/lab/graph/:kind/:ref` | GET, `kind` = `root` or `word` | Public |
-| `/api/fonoran/lab/graph/preview` | POST, draft explorer graph (no save) | Public |
+| `/api/fonoran/lab/graph/:kind/:ref` | GET | Public |
 | `/api/fonoran/lab/parse/:spelling` | GET | Public |
-| `/api/fonoran/lab/compounds` | POST `{ components: [{type, ref}], meaning }` | Sign-in |
-| `/api/fonoran/lab/run-dda` | POST `{ scope: "pending" \| "stale" \| "all" }` | Sign-in |
+| `/api/fonoran/lab/compounds` | POST | Sign-in |
+| `/api/fonoran/lab/run-dda` | POST | Sign-in |
+| `/api/fonoran/lab/build` | POST | Sign-in |
 
-Legacy `parts: ["ka","so"]` is still accepted; stored as typed components internally.
+### Root review (file-backed)
 
-## Component reference
+| Endpoint | Method | Purpose |
+| --- | --- | --- |
+| `/api/fonoran/roots/candidates` | GET | List candidates (`?status=pending`) |
+| `/api/fonoran/roots/candidates/:id` | PATCH | `{ action: approve\|reject\|edit\|reopen, … }` |
+| `/api/fonoran/roots/candidates/:id/regenerate` | POST | New spelling for one concept |
+| `/api/fonoran/roots/canonical` | GET | Approved root export |
 
-```json
-{ "type": "root", "ref": "ka" }
-{ "type": "word", "ref": "cmp-kaso" }
-```
+### Other
 
-Spelling = concatenation of component phonetic forms left-to-right.
+| Endpoint | Method | Purpose |
+| --- | --- | --- |
+| `/api/fonoran/word-generator` | POST | English phrase → ranked compounds |
+| `/api/fonoran/translate` | POST | English sentence → Fonoran |
+| `/api/fonoran/concepts` | GET | Concept inventory + spellings |
 
-## Historical generators
+## Credits
 
-Bulk Gen 1/Gen 2 generators were removed. How they worked: [fonoran-generator-archive.md](fonoran-generator-archive.md).
+Word Generator semantic lookup uses **WordNet** (via **wordpos**). See [third-party.md](third-party.md) for full attribution and licenses.
 
-Gen 3 reference data remains for DDA inference and the English meaning picker only. Generator audit reports (`npm run fonoran:gen3:audit`, etc.) write to **`reports/`** (gitignored). Your live scores are always **Health** in the app.
+## Related
+
+- [fonoran-grammar.md](fonoran-grammar.md) — syntax and composition rules
+- [fonoran-interpretive-translator.md](fonoran-interpretive-translator.md) — translator design
+- [platform-overview.md](platform-overview.md) — three platform layers
+- [deploy.md](deploy.md) — PostgreSQL and production hosting
+- Legacy generators: [fonoran-generator-archive.md](fonoran-generator-archive.md)

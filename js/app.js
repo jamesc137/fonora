@@ -31,7 +31,7 @@ import { setupTranslatePlayback, setTranslateSymbols } from './fonora-tts-ui.js'
 import { setupBreakdown, prefillBreakdownFromWordSources } from './breakdown-ui.js';
 import { setupSamples, setupHomeSample, ensureSamplesLoaded } from './samples.js';
 import { setupOpenProblems } from './open-problems-ui.js';
-import { setupDocsViewer, onDocsTabActivated, loadDocViewer } from './docs-viewer-ui.js';
+import { setupDocsViewer, onDocsTabActivated } from './docs-viewer-ui.js';
 import { openDocViewer, DEFAULT_DOC_PATH, docViewerHref, isDocsRoute } from './doc-urls.js';
 import { initUniversalNav, setActiveTab, setNavContext, setFonoranAuth, closeNavDropdown, MORE_TAB_IDS } from './universal-nav.js';
 import { setReaderWordSources } from './fonora-tts.js';
@@ -722,7 +722,7 @@ function setupTabs() {
       const docPath = el.getAttribute('data-doc-path');
       if (docPath && el.dataset.tab === 'docs') {
         openDocViewer(docPath);
-        loadDocViewer(docPath).catch(() => {});
+        return;
       }
       showTab(el.dataset.tab);
     });
@@ -733,7 +733,7 @@ function setupTabs() {
     const { tab } = event.detail;
     if (tab === 'docs') {
       openDocViewer('docs/platform-overview.md');
-      loadDocViewer('docs/platform-overview.md').catch(() => {});
+      return;
     }
     showTab(tab);
   });
@@ -742,7 +742,7 @@ function setupTabs() {
     const { tab } = event.detail;
     if (tab === 'docs') {
       openDocViewer('docs/platform-overview.md');
-      loadDocViewer('docs/platform-overview.md').catch(() => {});
+      return;
     }
     showTab(tab);
   });

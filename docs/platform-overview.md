@@ -1,36 +1,29 @@
 # Fonora platform overview
 
-Fonora is more than a single app, it is a **platform** with three conceptual layers that work together:
+Fonora is a **platform** with three layers:
 
 | Layer | What it is | Start here |
 | --- | --- | --- |
-| **Script Layer** | The Fonora phonetic writing system, symbols, encoding rules, transliteration | [language-rules.md](language-rules.md) · [Sound Grid](../#grid) |
-| **Language Layer** | **Fonoran**: an experimental constructed language written in Fonora | [fonoran.md](fonoran.md) · [Dictionary](../fonoran/#dictionary) |
-| **Language Builder Tools** | Suite for creating, reviewing, testing, and exploring Fonoran | [fonoran.md](fonoran.md) · [Root Creator](../fonoran/) |
+| **Script Layer** | Fonora phonetic writing system | [language-rules.md](language-rules.md) · [Sound Grid](../#grid) |
+| **Language Layer** | **Fonoran** experimental conlang | [fonoran.md](fonoran.md) · [Dictionary](../fonoran/#dictionary) |
+| **Language Builder Tools** | Create, review, explore Fonoran | [fonoran.md](fonoran.md) · [`/fonoran/`](../fonoran/) |
 
 ```mermaid
 flowchart TB
   subgraph platform [Fonora Platform]
     subgraph script [Script Layer]
       SG[Sound Grid]
-      SYM[Symbols]
-      ER[Encoding Rules]
-      TR[Transliteration]
+      TR[Translator]
     end
     subgraph language [Language Layer]
-      FL[Fonoran Language]
-      RW[Root Words]
-      CP[Compounds]
-      DDA[DDA Semantics]
-      DICT[Dictionary]
+      FL[Fonoran]
+      Lab[sound-bucket.json]
     end
-    subgraph builder [Language Builder Tools]
-      RC[Root Creator]
+    subgraph builder [Builder Tools]
+      Review[Review]
       WC[Word Creator]
-      RT[Review Tools]
-      SM[Story Mode]
-      LE[Language Explorer]
-      SA[Semantic Analysis]
+      WG[Word Generator]
+      Dict[Dictionary]
     end
   end
   script -->|"writes in"| language
@@ -38,108 +31,63 @@ flowchart TB
   language -->|"displayed via"| script
 ```
 
-## Definitions
+For the full Fonoran data pipeline (concepts → roots → compounds → lab), see the diagram in **[fonoran.md](fonoran.md)**.
 
-### Fonora (the script)
+## Start here
 
-**Fonora** is an open-source **phonetic writing system** built from nine core symbols that represent where and how speech sounds are produced. Any language can be *transliterated* into Fonora using the IPA pipeline:
+### Learn the script
 
-```
-Text → eSpeak NG → IPA → ipa-normalize.js → encodeSounds() → Fonora symbols
-```
+1. [Sound Grid](../#grid) and [Alphabet](../#alphabet)
+2. [Translator](../#translator) and [Reader](../#reader)
+3. [language-rules.md](language-rules.md)
 
-Rules version: **v3** ([language-rules.md](language-rules.md), vowel grammar `⚬X`, diphthong `⚬XᵔY`).
+### Explore Fonoran
 
-### Fonoran (the language)
+1. [fonoran.md](fonoran.md)
+2. [Dictionary](../fonoran/#dictionary)
+3. [fonoran-grammar.md](fonoran-grammar.md)
 
-**Fonoran** is an **experimental constructed language** built *using* Fonora. It has its own vocabulary, primitive root syllables, compound words, meanings, and a semantic coordinate system (DDA). Fonoran roman spellings are displayed in Fonora script via the Fonora bridge.
+### Build the language
 
-### Language Builder Tools
+1. `npm start` → [`/fonoran/`](../fonoran/)
+2. `npm run fonoran:build` — assign roots, build curated compounds, import lab
+3. **Review** — approve roots and words
+4. **Word Creator** / **Word Generator** — add compounds
+5. **Health** / **Advanced** — scores and Run DDA
 
-The **Language Builder Tools** are the interactive suite at [`/fonoran/`](../fonoran/) (plus related CLI commands) used to create roots, compose words, run review workflows, explore derivation trees, and analyze semantic health.
-
----
-
-## Start here: three audiences
-
-### I want to learn the script
-
-1. [Sound Grid](../#grid), place × manner reference
-2. [Alphabet](../#alphabet), primary symbols and phoneme inventory
-3. [Translator](../#translator) and [Reader](../#reader), transliterate and listen
-4. [language-rules.md](language-rules.md), authoritative encoding rules
-5. [Quiz](../#quiz), practice decode and construct modes
-
-### I want to explore Fonoran
-
-1. [fonoran.md](fonoran.md), language model and vocabulary rules
-2. [Dictionary](../fonoran/#dictionary), browse roots and compounds
-3. [fonoran-gen3.md](fonoran-gen3.md), DDA semantic reference (Depth, Mode, Aspect)
-4. [fonoran-gen3-1.md](fonoran-gen3-1.md), phonetic distinctiveness layer
-
-### I want to build the language
-
-1. Open [`/fonoran/`](../fonoran/) after `npm start`
-2. **Root Creator**: create primitive syllables (CV / CVC)
-3. **Word Creator**: stack roots and approved words
-4. **Review**: approve, reject, or revise pending items
-5. **Language Explorer**: derivation trees and family graphs (from Dictionary or Roots)
-6. **Semantic Analysis**: Health overlay and **Run DDA** in Advanced
-
----
-
-## Platform map
-
-| Layer | Live tools | Key docs |
-| --- | --- | --- |
-| **Script** | Sound Grid, Alphabet, Translator, Reader, Breakdown, Samples, Quiz, Keyboard, Reverse Lookup, Pronunciation Testing/Validation | [language-rules.md](language-rules.md), [IPA-PIPELINE-REPORT.md](IPA-PIPELINE-REPORT.md), [multilingual-support.md](multilingual-support.md) |
-| **Language** | Dictionary (`/fonoran/`), DDA reference data | [fonoran.md](fonoran.md), [fonoran-gen3.md](fonoran-gen3.md), [fonoran-gen3-1.md](fonoran-gen3-1.md) |
-| **Builder** | Root Creator, Word Creator, Review, Language Explorer, Health, Advanced | [fonoran.md](fonoran.md), [fonoran-generator-archive.md](fonoran-generator-archive.md) |
-| **Platform** | Home, Open Problems, Docs viewer | [open-problems.md](open-problems.md), [deploy.md](deploy.md) |
-
-**Story Mode** (passage reading with vocabulary feedback) was an earlier experiment, removed during cleanup. See [fonoran-generator-archive.md](fonoran-generator-archive.md) for recovery notes. A nav slot is reserved for a future restoration.
+Details: [fonoran.md#pipeline](fonoran.md#pipeline).
 
 ---
 
 ## Data architecture
 
-### Live language (your vocabulary)
+### Live vocabulary
 
-Your working Fonoran vocabulary is stored in **`data/fonoran-sound-bucket.json`** (gitignored locally):
+**`data/fonoran-sound-bucket.json`** (gitignored locally) is authoritative for your language:
 
-- `sounds[]`, primitive roots
-- `compounds[]`, composed words with derivation trees, meanings, review state, DDA metadata
-- `history[]`, undo stack
+- `sounds[]` — primitive roots
+- `compounds[]` — words, derivation trees, review state, DDA metadata
+- `history[]` — undo stack
 
-This file is **authoritative for your language**. Reference generator data never overwrites it.
+**`npm run fonoran:build`** rebuilds the lab from the concept inventory and curated compounds. User-created roots and words (`created_by: user`) are **preserved** across rebuilds.
 
-### Reference semantics (read-only seeds)
+### Concept and build files (committed)
 
-Committed JSON under `data/` provides DDA coordinates, Gen 3/3.1 inventories, and canonical primitive registry, used for:
+| File | Role |
+| --- | --- |
+| `fonoran-concept-inventory.json` | Semantic concepts |
+| `fonoran-root-candidates.json` | Root spellings + review queue |
+| `fonoran-approved-roots.json` | Canonical approved roots |
+| `fonoran-compounds.json` | Curated compound recipes |
 
-- English meaning picker suggestions
-- DDA inference (`Run DDA`)
-- Health scoring algorithms
-- Offline generator audits (`npm run fonoran:gen3:*`)
+### PostgreSQL
 
-### Storage migration (PostgreSQL)
-
-The platform is moving live lab data to **PostgreSQL** when `DATABASE_URL` is set:
-
-- Local JSON is **imported, not deleted**: on first boot with an empty database, the server imports `fonoran-sound-bucket.json` if present
-- JSON remains the portable **backup/export** format (`npm run fonoran:export`)
-- Without `DATABASE_URL`, the app falls back to JSON file storage (`FONORAN_STORAGE=json`)
-
-See [deploy.md](deploy.md) for PostgreSQL setup.
-
-### Fonora script rules
-
-[`language-rules.md`](language-rules.md) is loaded at runtime by both the main Fonora app and the Fonoran TTS bridge. Edit this file to change symbols, the sound grid, and vowel mappings.
+When `DATABASE_URL` is set, the lab can live in PostgreSQL. JSON is imported on first boot and remains the export format (`npm run fonoran:export`). See [deploy.md](deploy.md).
 
 ---
 
-## Related documentation
+## Related
 
-- Full index: [docs/README.md](README.md)
-- Project README: [../README.md](../README.md)
+- Doc index: [README.md](README.md)
+- Third-party licenses: [third-party.md](third-party.md)
 - Contributing: [../CONTRIBUTING.md](../CONTRIBUTING.md)

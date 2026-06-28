@@ -587,11 +587,28 @@ export function runTests(options) {
     assert(html.includes('<td>1</td>'));
   });
 
+  t('markdown renderer can skip the first h1 title', () => {
+    const html = renderMarkdown('# Title\n\nBody text', {
+      docPath: 'docs/README.md',
+      skipTitle: true,
+    });
+    assert(!html.includes('<h1'));
+    assert(html.includes('<p>Body text</p>'));
+  });
+
   t('markdown renderer handles bold and italic', () => {
     const html = renderMarkdown('**bold** and *italic*', { docPath: 'docs/README.md' });
     assert(html.includes('<strong>bold</strong>'));
     assert(html.includes('<em>italic</em>'));
     assert(!html.includes('*italic*'));
+  });
+
+  t('markdown renderer emits mermaid containers', () => {
+    const html = renderMarkdown('```mermaid\nflowchart TD\n  A --> B\n```', { docPath: 'docs/README.md' });
+    assert(html.includes('class="mermaid-pan-zoom'));
+    assert(html.includes('class="mermaid"'));
+    assert(html.includes('flowchart TD'));
+    assert(!html.includes('language-mermaid'));
   });
 
   const passed = results.filter((r) => r.ok).length;

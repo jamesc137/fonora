@@ -1,5 +1,7 @@
 # Fonoran Gen 3: Grid-Native Language Architecture
 
+> **Archive.** Experimental generator, not the active workflow. See [fonoran.md](fonoran.md).
+
 > **Status:** experimental rebase, all prior Fonoran work (Gen 1 inventory, Gen 2 primitives, English-adjacent roots) is **disposable**  
 > **Branch:** `feature/fonoran-language-experiment`  
 > **Does not modify:** Fonora translator, phoneme pipeline, IPA mapping, sound grid, quiz, reader, or `language-rules.md`

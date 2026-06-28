@@ -1,6 +1,8 @@
 # Fonoran generator archive (historical)
 
-> **Status:** archival reference only, code and data for Gen 1 and Gen 2 were removed during the lab-first cleanup. Gen 3+ tooling remains in the repo for expert review and English lexicon seeding. This document preserves how the earlier bulk generators worked so they can be re-explored later.
+> **Archive.** Retired bulk generators. Active workflow: [fonoran.md](fonoran.md).
+
+> **Status:** archival reference only, code and data for Gen 1 and Gen 2 were removed during the lab-first cleanup.
 
 ## Overview
 

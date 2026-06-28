@@ -158,7 +158,7 @@ async function loadTranslationIndex(lab) {
   for (const sound of lab?.sounds ?? []) {
     const meaning = String(sound.meaning ?? sound.legacy_label ?? '').trim().toLowerCase();
     if (!meaning || !sound.spelling) continue;
-    index.set(meaning, {
+    const entry = {
       english: sound.concept_id ?? meaning,
       concept_id: sound.concept_id ?? null,
       gloss: sound.meaning ?? sound.legacy_label ?? '',
@@ -167,7 +167,13 @@ async function loadTranslationIndex(lab) {
       parts: [sound.spelling],
       source: 'lab',
       state: sound.state,
-    });
+    };
+    index.set(meaning, entry);
+    for (const alias of sound.aliases ?? []) {
+      const key = String(alias).trim().toLowerCase();
+      if (!key || index.has(key)) continue;
+      index.set(key, { ...entry, matched_alias: key });
+    }
     if (sound.concept_id) {
       const hit = inventory.concepts.find(c => c.id === sound.concept_id);
       for (const alias of hit?.aliases ?? [sound.concept_id]) {
@@ -189,7 +195,7 @@ async function loadTranslationIndex(lab) {
   for (const compound of lab?.compounds ?? []) {
     const meaning = String(compound.meaning ?? '').trim().toLowerCase();
     if (!meaning || !compound.spelling) continue;
-    index.set(meaning, {
+    const entry = {
       english: meaning,
       gloss: compound.meaning ?? '',
       fonoran: compound.spelling,
@@ -199,7 +205,13 @@ async function loadTranslationIndex(lab) {
       parts: compound.parts ?? [compound.spelling],
       source: 'lab',
       state: compound.state,
-    });
+    };
+    index.set(meaning, entry);
+    for (const alias of compound.aliases ?? []) {
+      const key = String(alias).trim().toLowerCase();
+      if (!key || index.has(key)) continue;
+      index.set(key, { ...entry, matched_alias: key });
+    }
   }
   return index;
 }

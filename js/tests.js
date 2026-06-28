@@ -298,6 +298,20 @@ const fonoranTranslatorResult = await (async () => {
     assert(futureEat.unresolved.length === 0, `futureEat unresolved: ${futureEat.unresolved.join(', ')}`);
     assert(futureEat.surface.roman === 'ba na she tem', `futureEat roman: ${futureEat.surface.roman}`);
 
+    const morningLab = {
+      sounds: [],
+      compounds: [{
+        spelling: 'kembemkat',
+        meaning: 'sunrise',
+        aliases: ['morning', 'dawn'],
+        parts: ['kembem', 'kat'],
+        state: 'approved',
+      }],
+    };
+    const everyMorning = await translateEnglish('Every morning', { lab: morningLab });
+    assert(everyMorning.unresolved.length === 0, `every morning unresolved: ${everyMorning.unresolved.join(', ')}`);
+    assert(everyMorning.tokens.some(t => t.english === 'morning' && t.fonoran === 'kembemkat'), `morning alias: ${JSON.stringify(everyMorning.tokens)}`);
+
     return { name: testName, ok: true };
   } catch (e) {
     return { name: testName, ok: false, error: e.message };

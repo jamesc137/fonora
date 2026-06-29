@@ -908,6 +908,32 @@
     .concept-editor__like { white-space:nowrap; }
     .concept-editor__ipa { margin:0; font-size:0.82rem; color:var(--muted); }
     .concept-editor__invalid { margin:0.35rem 0 0.65rem; font-size:0.8rem; padding:0.4rem 0.6rem; }
+    .concept-editor__alerts { margin:0 0 0.65rem; display:grid; gap:0.5rem; }
+    .concept-editor__alerts-panel {
+      background:var(--bg);
+      border:1px solid var(--border);
+      border-radius:8px;
+      padding:0.65rem 0.75rem;
+    }
+    .concept-editor__alert-head { margin:0 0 0.45rem; font-size:0.84rem; line-height:1.4; color:var(--text); }
+    .concept-editor__alert-foot { margin:0.5rem 0 0; font-size:0.78rem; color:var(--muted); line-height:1.4; }
+    .concept-editor__alert-more { margin:0.35rem 0 0; font-size:0.76rem; color:var(--muted); }
+    .concept-editor__alert-list { margin:0; }
+    .concept-editor__risk-badge {
+      display:inline-block;
+      font-family:var(--font-serif);
+      font-size:0.68rem;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:0.04em;
+      padding:0.2rem 0.5rem;
+      border-radius:999px;
+      background:var(--surface);
+      border:1px solid var(--border);
+      color:var(--muted);
+    }
+    .concept-editor__risk-badge--some { color:var(--review); background:#fff8ef; border-color:#e8d4b8; }
+    .concept-editor__risk-badge--high { color:var(--reject); background:#fff5f5; border-color:#f0c0c0; }
     .concept-editor__pron-shell.is-empty #ce-pron-say,
     .concept-editor__pron-shell.is-empty #ce-pron-like,
     .concept-editor__pron-shell.is-empty #ce-ipa-display,

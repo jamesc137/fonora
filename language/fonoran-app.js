@@ -1,5 +1,5 @@
     import { toSpeakable, compoundSpeakable, phoneticKeyBold, compoundPhoneticKey, englishGuide, compoundEnglishGuide, parseSyllable, buildSyllable, isValidSyllable, pieceHint, ONSET_GROUPS, VOWEL_DISPLAY, CODA_DISPLAY, romanToIpa } from '../tools/fonoran-pronunciation.js';
-    import { checkCompoundBoundary, segmentCompound, pronounceabilityScore } from '../tools/fonoran-gen3-readability.js';
+    import { checkCompoundBoundary, segmentCompound, pronounceabilityScore, rootSimilarity } from '../tools/fonoran-gen3-readability.js';
     import { romanToFonoraScript, pieceToFonoraSymbols } from '../tools/fonoran-fonora-bridge.js';
     import { loadLanguageRules } from '../js/load-language-rules.js';
     import { speakFonoraPhrase, cancelSpeech } from '../js/fonora-tts.js';
@@ -3201,6 +3201,143 @@
       return sp ? romanToIpa(sp) : '';
     }
 
+    function conceptEditorCurrentId() {
+      if (STATE.conceptEditorIsNew) {
+        return ($('ce-id')?.value ?? STATE.conceptEditorDraft?.id ?? '').trim().toLowerCase();
+      }
+      return STATE.conceptEditorSelected ?? '';
+    }
+
+    function conceptEditorComparableRoots(conceptId) {
+      const excludeId = (conceptId ?? '').trim().toLowerCase();
+      return conceptList().filter(c =>
+        c.status !== 'rejected' &&
+        c.spelling?.trim() &&
+        c.id !== excludeId,
+      );
+    }
+
+    function conceptEditorSpellingConflicts(spelling, conceptId) {
+      const sp = (spelling ?? '').trim().toLowerCase();
+      if (!sp || !isValidSyllable(sp)) return null;
+      const other = conceptEditorComparableRoots(conceptId).find(
+        c => c.spelling.trim().toLowerCase() === sp,
+      );
+      return other ? { concept: other } : null;
+    }
+
+    function conceptEditorSoundRiskPreview(spelling, conceptId) {
+      const sp = (spelling ?? '').trim().toLowerCase();
+      if (!sp || !isValidSyllable(sp)) return null;
+      const prefixOverlaps = [];
+      const lookAlikes = [];
+      for (const c of conceptEditorComparableRoots(conceptId)) {
+        const other = c.spelling.trim().toLowerCase();
+        if (sp !== other && (sp.startsWith(other) || other.startsWith(sp))) {
+          prefixOverlaps.push({ proposed: sp, other, concept: c });
+        }
+        const sim = rootSimilarity(sp, other);
+        if (sp !== other && sim >= 0.67) {
+          lookAlikes.push({ other, sim, concept: c });
+        }
+      }
+      let riskLevel = 'clean';
+      if (prefixOverlaps.length >= 3) riskLevel = 'high';
+      else if (prefixOverlaps.length >= 1) riskLevel = 'some';
+      return { prefixOverlaps, lookAlikes, riskLevel };
+    }
+
+    function updateConceptEditorSoundChecks(spelling) {
+      const alertsEl = $('ce-spelling-alerts');
+      const submitBtn = $('concept-editor-form')?.querySelector('[type="submit"]');
+      if (!alertsEl) return;
+
+      const sp = (spelling ?? '').trim();
+      const normalized = sp.toLowerCase();
+      const valid = isValidSyllable(sp);
+      const savedSp = (STATE.conceptEditorDraft?.spelling ?? '').trim().toLowerCase();
+      const conceptId = conceptEditorCurrentId();
+      const duplicate = valid ? conceptEditorSpellingConflicts(sp, conceptId) : null;
+      const unchanged = normalized === savedSp;
+
+      setWriteButton(submitBtn, !valid || Boolean(duplicate));
+
+      if (!sp || !valid) {
+        alertsEl.innerHTML = '';
+        return;
+      }
+
+      if (!duplicate && unchanged) {
+        alertsEl.innerHTML = '';
+        return;
+      }
+
+      const parts = [];
+
+      if (duplicate) {
+        const other = duplicate.concept;
+        const gloss = pickerMeaningShort(other.concept);
+        parts.push(`<div class="dupe">Already in use: <strong class="mono">${escapeHtml(sp)}</strong> is assigned to <strong class="mono">${escapeHtml(other.id)}</strong> (${escapeHtml(gloss)}).
+          <button type="button" class="linkish" data-open-concept="${escapeHtml(other.id)}">Open concept</button></div>`);
+      } else {
+        const preview = conceptEditorSoundRiskPreview(sp, conceptId);
+        const { prefixOverlaps, lookAlikes, riskLevel } = preview;
+        if (prefixOverlaps.length || lookAlikes.length) {
+          const badgeClass = riskLevel === 'high' ? 'concept-editor__risk-badge--high'
+            : riskLevel === 'some' ? 'concept-editor__risk-badge--some' : '';
+          const badgeLabel = riskLevel === 'high' ? 'High risk'
+            : riskLevel === 'some' ? 'Some overlap' : 'Looks clean';
+          const MAX_SHOW = 8;
+          const listItems = [];
+          let shown = 0;
+          const total = prefixOverlaps.length + lookAlikes.length;
+
+          for (const o of prefixOverlaps) {
+            if (shown >= MAX_SHOW) break;
+            const shorter = sp.length < o.other.length ? sp : o.other;
+            const longer = sp.length >= o.other.length ? sp : o.other;
+            listItems.push(`<li class="lander-health__conflict-item lander-health__conflict-item--high">
+              <span class="lander-health__conflict-msg">"${escapeHtml(shorter)}" prefixes "${escapeHtml(longer)}" (${escapeHtml(o.concept.id)})</span>
+            </li>`);
+            shown += 1;
+          }
+          for (const o of lookAlikes) {
+            if (shown >= MAX_SHOW) break;
+            const sev = o.sim >= 0.85 ? 'high' : 'medium';
+            listItems.push(`<li class="lander-health__conflict-item lander-health__conflict-item--${sev}">
+              <span class="lander-health__conflict-msg">"${escapeHtml(sp)}" sounds similar to "${escapeHtml(o.other)}" (${escapeHtml(o.concept.id)}, ${o.sim.toFixed(2)})</span>
+            </li>`);
+            shown += 1;
+          }
+
+          const remaining = total - shown;
+          const moreLine = remaining > 0
+            ? `<p class="concept-editor__alert-more sans">…and ${remaining} more</p>`
+            : '';
+          const header = riskLevel === 'high' && prefixOverlaps.length > 0
+            ? `<p class="concept-editor__alert-head sans"><strong>High risk spelling</strong> — ${prefixOverlaps.length} prefix overlap${prefixOverlaps.length === 1 ? '' : 's'} detected</p>`
+            : `<p class="concept-editor__alert-head sans"><span class="concept-editor__risk-badge ${badgeClass}">${badgeLabel}</span></p>`;
+          const footer = prefixOverlaps.length > 0
+            ? '<p class="concept-editor__alert-foot sans">Short roots like this often cause segmentation problems and hurt language health.</p>'
+            : '';
+
+          parts.push(`<div class="concept-editor__alerts-panel">
+            ${header}
+            <ul class="concept-editor__alert-list lander-health__conflict-list">${listItems.join('')}</ul>
+            ${moreLine}
+            ${footer}
+          </div>`);
+        }
+      }
+
+      alertsEl.innerHTML = parts.join('');
+      alertsEl.querySelectorAll('[data-open-concept]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          openConceptInEditor(btn.dataset.openConcept);
+        });
+      });
+    }
+
     function updateConceptEditorPron(spelling) {
       const sp = (spelling ?? '').trim();
       const shell = document.querySelector('.concept-editor__pron-shell');
@@ -3301,6 +3438,7 @@
             <button type="button" class="btn" id="ce-hear">▶ Hear</button>
           </div>
           <p class="concept-editor__invalid syl-invalid" id="ce-pron-invalid" hidden></p>
+          <div id="ce-spelling-alerts" class="concept-editor__alerts" aria-live="polite"></div>
           <label class="fld" for="ce-domain">Domain</label>
           <select id="ce-domain" data-write-input>
             ${domainOpts}
@@ -3332,9 +3470,11 @@
 
       $('ce-spelling')?.addEventListener('input', (e) => {
         updateConceptEditorPron(e.target.value);
+        updateConceptEditorSoundChecks(e.target.value);
       });
 
       updateConceptEditorPron(d.spelling);
+      updateConceptEditorSoundChecks(d.spelling);
 
       $('ce-hear')?.addEventListener('click', () => {
         const sp = $('ce-spelling')?.value.trim();

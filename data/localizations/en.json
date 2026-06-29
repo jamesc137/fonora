@@ -843,6 +843,16 @@
         "wars"
       ]
     },
+    "addressee": {
+      "label": "addressee",
+      "aliases": [
+        "you",
+        "yourself",
+        "ye",
+        "thou",
+        "thee"
+      ]
+    },
     "container": {
       "label": "container",
       "aliases": [

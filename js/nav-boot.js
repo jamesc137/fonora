@@ -24,7 +24,6 @@
     'root-review',
     'concepts',
     'translator',
-    'wordgen',
     'roots',
     'create',
     'review',

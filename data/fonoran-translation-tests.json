@@ -1,161 +1,486 @@
 {
-  "version": "1.0",
-  "description": "English phrase corpus for exercising the Fonoran translator and surfacing gaps in roots/compounds. Re-runnable via scripts/fonoran-translation-gaps.js.",
+  "version": "2.0",
+  "description": "Golden English->Fonoran regression corpus. Each phrase has an expected `fon` (roman) output the project commits to; the strict runner (scripts/fonoran-translation-gaps.js --assert) fails on any drift or hard gap. Regenerate intentional changes with --update-golden. `note` records known gaps / design decisions (e.g. second-person `you` has no root yet).",
   "levels": [
     {
       "level": 1,
       "name": "Basic statements",
       "phrases": [
-        "I eat.",
-        "You sleep.",
-        "The child runs.",
-        "The dog drinks water.",
-        "The bird flies.",
-        "The sun rises.",
-        "The sun sets.",
-        "Fire is hot.",
-        "Water is cold.",
-        "The tree is tall."
+        {
+          "en": "I eat.",
+          "fon": "mi nel"
+        },
+        {
+          "en": "You sleep.",
+          "fon": "ti tem"
+        },
+        {
+          "en": "The child runs.",
+          "fon": "namba gi"
+        },
+        {
+          "en": "The dog drinks water.",
+          "fon": "tet ye ye"
+        },
+        {
+          "en": "The bird flies.",
+          "fon": "tet gi"
+        },
+        {
+          "en": "The sun rises.",
+          "fon": "datbel dal"
+        },
+        {
+          "en": "The sun sets.",
+          "fon": "datbel nat"
+        },
+        {
+          "en": "Fire is hot.",
+          "fon": "nan fen"
+        },
+        {
+          "en": "Water is cold.",
+          "fon": "ye kam"
+        },
+        {
+          "en": "The tree is tall.",
+          "fon": "sas je"
+        }
       ]
     },
     {
       "level": 2,
       "name": "Objects",
       "phrases": [
-        "I eat bread.",
-        "You drink water.",
-        "We build a house.",
-        "The child sees the dog.",
-        "The woman carries the baby.",
-        "The man opens the door.",
-        "The cat chases the bird.",
-        "The teacher speaks.",
-        "The student listens.",
-        "The wind moves the leaves."
+        {
+          "en": "I eat bread.",
+          "fon": "mi nel nelto"
+        },
+        {
+          "en": "You drink water.",
+          "fon": "ti ye ye"
+        },
+        {
+          "en": "We build a house.",
+          "fon": "ben kel ja",
+          "note": "review: house→ja(semantic)"
+        },
+        {
+          "en": "The child sees the dog.",
+          "fon": "namba wi tet"
+        },
+        {
+          "en": "The woman carries the baby.",
+          "fon": "ba fes ba",
+          "note": "review: baby→ba(semantic)"
+        },
+        {
+          "en": "The man opens the door.",
+          "fon": "ba kelkal kalmek"
+        },
+        {
+          "en": "The cat chases the bird.",
+          "fon": "tet gi tet"
+        },
+        {
+          "en": "The teacher speaks.",
+          "fon": "kelhuba se"
+        },
+        {
+          "en": "The student listens.",
+          "fon": "lahuba gem"
+        },
+        {
+          "en": "The wind moves the leaves.",
+          "fon": "bek gi sas"
+        }
       ]
     },
     {
       "level": 3,
       "name": "Descriptions",
       "phrases": [
-        "The large dog runs fast.",
-        "The small child is happy.",
-        "The old tree is strong.",
-        "The new house is beautiful.",
-        "The red flower grows.",
-        "The river is wide.",
-        "The mountain is high.",
-        "The food tastes good.",
-        "The night is quiet.",
-        "The morning is bright."
+        {
+          "en": "The large dog runs fast.",
+          "fon": "je tet gi mal"
+        },
+        {
+          "en": "The small child is happy.",
+          "fon": "namba gumet"
+        },
+        {
+          "en": "The old tree is strong.",
+          "fon": "sas mel"
+        },
+        {
+          "en": "The new house is beautiful.",
+          "fon": "ja guwi"
+        },
+        {
+          "en": "The red flower grows.",
+          "fon": "nanles pa jecha",
+          "note": "review: flower→pa(semantic)"
+        },
+        {
+          "en": "The river is wide.",
+          "fon": "pakal taktes",
+          "note": "review: wide→taktes(semantic)"
+        },
+        {
+          "en": "The mountain is high.",
+          "fon": "redal mal",
+          "note": "review: high→mal(alias_weak)"
+        },
+        {
+          "en": "The food tastes good.",
+          "fon": "nelto nel gu"
+        },
+        {
+          "en": "The night is quiet.",
+          "fon": "gespu kan"
+        },
+        {
+          "en": "The morning is bright.",
+          "fon": "datdi dat"
+        }
       ]
     },
     {
       "level": 4,
       "name": "Time",
       "phrases": [
-        "I ate yesterday.",
-        "I will eat tomorrow.",
-        "We built a house.",
-        "We will build a bridge.",
-        "She came home.",
-        "He will return.",
-        "The rain stopped.",
-        "Winter will come.",
-        "They finished the work.",
-        "The child will learn."
+        {
+          "en": "I ate yesterday.",
+          "fon": "mi ta nel di"
+        },
+        {
+          "en": "I will eat tomorrow.",
+          "fon": "mi sa nel shu"
+        },
+        {
+          "en": "We built a house.",
+          "fon": "ben ta kel ja",
+          "note": "review: house→ja(semantic)"
+        },
+        {
+          "en": "We will build a bridge.",
+          "fon": "ben sa kel kalye"
+        },
+        {
+          "en": "She came home.",
+          "fon": "ba gi lelja"
+        },
+        {
+          "en": "He will return.",
+          "fon": "ba sa gi"
+        },
+        {
+          "en": "The rain stopped.",
+          "fon": "natye ta kan"
+        },
+        {
+          "en": "Winter will come.",
+          "fon": "kampu sa gi"
+        },
+        {
+          "en": "They finished the work.",
+          "fon": "ben ta mek mo",
+          "note": "review: work→mo(semantic)"
+        },
+        {
+          "en": "The child will learn.",
+          "fon": "namba sa lahu"
+        }
       ]
     },
     {
       "level": 5,
       "name": "Questions",
       "phrases": [
-        "Where are you?",
-        "Who are you?",
-        "What is this?",
-        "Why are you here?",
-        "When will you return?",
-        "How do you know?",
-        "Is the food ready?",
-        "Can you help me?",
-        "Did you see it?",
-        "Will it rain?"
+        {
+          "en": "Where are you?",
+          "fon": "wo zis ti"
+        },
+        {
+          "en": "Who are you?",
+          "fon": "wo zas ti"
+        },
+        {
+          "en": "What is this?",
+          "fon": "wo vus to"
+        },
+        {
+          "en": "Why are you here?",
+          "fon": "wo zos kek"
+        },
+        {
+          "en": "When will you return?",
+          "fon": "wo zes sa ti gi"
+        },
+        {
+          "en": "How do you know?",
+          "fon": "wo zus ti hu"
+        },
+        {
+          "en": "Is the food ready?",
+          "fon": "nelto kel",
+          "note": "review: ready→kel(semantic)"
+        },
+        {
+          "en": "Can you help me?",
+          "fon": "ti kat mi"
+        },
+        {
+          "en": "Did you see it?",
+          "fon": "ti ta wi to"
+        },
+        {
+          "en": "Will it rain?",
+          "fon": "to sa natye"
+        }
       ]
     },
     {
       "level": 6,
       "name": "Relationships",
       "phrases": [
-        "I love my family.",
-        "Friends help each other.",
-        "The teacher teaches the student.",
-        "Parents protect children.",
-        "The king trusts the guard.",
-        "The hunter follows the animal.",
-        "The doctor helps sick people.",
-        "The farmer grows food.",
-        "The traveler finds a river.",
-        "The group builds together."
+        {
+          "en": "I love my family.",
+          "fon": "mi bem tatba"
+        },
+        {
+          "en": "Friends help each other.",
+          "fon": "kat cha"
+        },
+        {
+          "en": "The teacher teaches the student.",
+          "fon": "kelhuba kelhuba lahuba"
+        },
+        {
+          "en": "Parents protect children.",
+          "fon": "ba fes namba"
+        },
+        {
+          "en": "The king trusts the guard.",
+          "fon": "mel tat mo",
+          "note": "review: king→mel(semantic), guard→mo(semantic)"
+        },
+        {
+          "en": "The hunter follows the animal.",
+          "fon": "balatet gi tet"
+        },
+        {
+          "en": "The doctor helps sick people.",
+          "fon": "bakat katba gat yiba"
+        },
+        {
+          "en": "The farmer grows food.",
+          "fon": "basas jecha nelto"
+        },
+        {
+          "en": "The traveler finds a river.",
+          "fon": "ba wi pakal",
+          "note": "review: traveler→ba(semantic)"
+        },
+        {
+          "en": "The group builds together.",
+          "fon": "ben kel ben"
+        }
       ]
     },
     {
       "level": 7,
       "name": "Compound-word stress tests",
       "phrases": [
-        "The sunrise is beautiful.",
-        "The sunset is peaceful.",
-        "The moonlight shines on the river.",
-        "The campfire keeps us warm.",
-        "The fisherman crossed the river.",
-        "The blacksmith made a knife.",
-        "The grandmother tells stories.",
-        "The doorway is open.",
-        "The raindrops fall quietly.",
-        "The birdsong wakes everyone."
+        {
+          "en": "The sunrise is beautiful.",
+          "fon": "datbeldal guwi"
+        },
+        {
+          "en": "The sunset is peaceful.",
+          "fon": "datbelnat kan"
+        },
+        {
+          "en": "The moonlight shines on the river.",
+          "fon": "datkamdat dat pakal"
+        },
+        {
+          "en": "The campfire keeps us warm.",
+          "fon": "nanja fes ben fen"
+        },
+        {
+          "en": "The fisherman crossed the river.",
+          "fon": "baye ta gi pakal"
+        },
+        {
+          "en": "The blacksmith made a knife.",
+          "fon": "bakelmak ta sak makmek",
+          "note": "review: made→sak(alias_weak)"
+        },
+        {
+          "en": "The grandmother tells stories.",
+          "fon": "badi se se"
+        },
+        {
+          "en": "The doorway is open.",
+          "fon": "kalmek kelkal"
+        },
+        {
+          "en": "The raindrops fall quietly.",
+          "fon": "yenat nat kan"
+        },
+        {
+          "en": "The birdsong wakes everyone.",
+          "fon": "tetse cha ben ba"
+        }
       ]
     },
     {
       "level": 8,
       "name": "Multi-clause sentences",
       "phrases": [
-        "I ate because I was hungry.",
-        "We stayed inside because it rained.",
-        "The child laughed after the dog ran away.",
-        "When the sun rose, we began walking.",
-        "Although it was cold, they continued.",
-        "I know that you are here.",
-        "She said she would return tomorrow.",
-        "The man who built the house is my friend.",
-        "If you help me, we will finish today.",
-        "We rested before continuing our journey."
+        {
+          "en": "I ate because I was hungry.",
+          "fon": "mi ta san"
+        },
+        {
+          "en": "We stayed inside because it rained.",
+          "fon": "ben ta kan lel natye"
+        },
+        {
+          "en": "The child laughed after the dog ran away.",
+          "fon": "namba ta gumet shu tet gi nes"
+        },
+        {
+          "en": "When the sun rose, we began walking.",
+          "fon": "wo zes datbel dal ben bel gi"
+        },
+        {
+          "en": "Although it was cold, they continued.",
+          "fon": "to ta gi"
+        },
+        {
+          "en": "I know that you are here.",
+          "fon": "mi kek"
+        },
+        {
+          "en": "She said she would return tomorrow.",
+          "fon": "ba se ba gi shu"
+        },
+        {
+          "en": "The man who built the house is my friend.",
+          "fon": "ja tatde"
+        },
+        {
+          "en": "If you help me, we will finish today.",
+          "fon": "von sa ti kat mi ben mek che"
+        },
+        {
+          "en": "We rested before continuing our journey.",
+          "fon": "ben ta kan di gi gikal"
+        }
       ]
     },
     {
       "level": 9,
       "name": "Story paragraph",
       "phrases": [
-        "Yesterday we walked to the river. The water was cold, but the morning was beautiful. We built a small fire and cooked food. After we ate, we watched the sunrise over the mountains. Then we returned home together."
+        {
+          "en": "Yesterday we walked to the river. The water was cold, but the morning was beautiful. We built a small fire and cooked food. After we ate, we watched the sunrise over the mountains. Then we returned home together.",
+          "fon": "di ta ben gi pakal ye ta guwi ben ta kel nam nan kel nelto shu ta ben nel ben wi datbeldal dal re shu ta ben gi lelja ben"
+        }
       ]
     },
     {
       "level": 10,
       "name": "Translator torture tests",
       "phrases": [
-        "I only saw the red bird.",
-        "Only I saw the red bird.",
-        "I almost fell.",
-        "I never said that.",
-        "Everyone knows something.",
-        "Nobody knows everything.",
-        "The door opened.",
-        "I opened the door.",
-        "The child made the toy.",
-        "The toy was made by the child.",
-        "I think he knows that she left.",
-        "The old man's young son.",
-        "They can fish.",
-        "Time flies.",
-        "Light travels fast."
+        {
+          "en": "I only saw the red bird.",
+          "fon": "mi ta vat wi nanles tet"
+        },
+        {
+          "en": "Only I saw the red bird.",
+          "fon": "vat ta mi wi nanles tet"
+        },
+        {
+          "en": "I almost fell.",
+          "fon": "mi yones nat"
+        },
+        {
+          "en": "I never said that.",
+          "fon": "mi no se"
+        },
+        {
+          "en": "Everyone knows something.",
+          "fon": "tak ba hu mek"
+        },
+        {
+          "en": "Nobody knows everything.",
+          "fon": "no ba hu tak to"
+        },
+        {
+          "en": "The door opened.",
+          "fon": "kalmek ta kelkal"
+        },
+        {
+          "en": "I opened the door.",
+          "fon": "mi ta kelkal kalmek"
+        },
+        {
+          "en": "The child made the toy.",
+          "fon": "namba ta sak kel",
+          "note": "review: made→sak(alias_weak), toy→kel(semantic)"
+        },
+        {
+          "en": "The toy was made by the child.",
+          "fon": "kel ta sak namba",
+          "note": "review: toy→kel(semantic), made→sak(alias_weak)"
+        },
+        {
+          "en": "I think he knows that she left.",
+          "fon": "mi ta mas ba hu ba gi"
+        },
+        {
+          "en": "The old man's young son.",
+          "fon": "di ba gi nense",
+          "note": "review: young→gi(semantic), son→nense(semantic)"
+        },
+        {
+          "en": "They can fish.",
+          "fon": "ben nel",
+          "note": "review: fish→nel(semantic)"
+        },
+        {
+          "en": "Time flies.",
+          "fon": "pu gi"
+        },
+        {
+          "en": "Light travels fast.",
+          "fon": "dat gi mal"
+        }
+      ]
+    },
+    {
+      "level": 11,
+      "name": "Super-hard",
+      "phrases": [
+        {
+          "en": "If you had not helped us, we would not have finished the bridge.",
+          "fon": "von no ti kat ben ben mek kalye"
+        },
+        {
+          "en": "The woman who taught me said that the river had changed.",
+          "fon": "wo ba ta zas kelhu mi se pakal cha"
+        },
+        {
+          "en": "Why did the old hunter give the child his knife?",
+          "fon": "wo zos ta di balatet ku namba makmek"
+        },
+        {
+          "en": "Time heals all wounds, but memory keeps the pain alive.",
+          "fon": "pu kelgu tak gatdam hudito fes gat fo"
+        }
       ]
     }
   ]

@@ -22,7 +22,6 @@ flowchart TB
     subgraph builder [Builder Tools]
       Review[Review]
       WC[Word Creator]
-      WG[Word Generator]
       Dict[Dictionary]
     end
   end
@@ -52,7 +51,7 @@ For the full Fonoran data pipeline (concepts → roots → compounds → lab), s
 1. `npm start` → [`/fonoran/`](../fonoran/)
 2. `npm run fonoran:build` — assign roots, build curated compounds, import lab
 3. **Review** — approve roots and words
-4. **Word Creator** / **Word Generator** — add compounds
+4. **Word Creator** — stack roots and approved words into compounds
 5. **Health** / **Advanced** — scores and Run DDA
 
 Details: [fonoran.md#pipeline](fonoran.md#pipeline).

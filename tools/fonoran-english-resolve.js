@@ -14,7 +14,6 @@ import { expandWord } from './fonoran-semantic-lookup.js';
 import { getLab } from './fonoran-sound-bucket.js';
 import {
   loadInterpretationRules,
-  interpretToConcept,
   interpretToConceptRelaxed,
   irregularPastLemma,
   landmarkPhrase,
@@ -55,8 +54,6 @@ export const IRREGULAR = {
   wars: 'conflict',
 };
 
-const GUESS_SCORE_THRESHOLD = 800;
-
 /** Block WordNet/hypernym guessing on function words. */
 const SEMANTIC_BLOCK = new Set([
   'something', 'anything', 'nothing', 'everything', 'another', 'else', 'someone', 'anyone',
@@ -66,6 +63,9 @@ const SEMANTIC_BLOCK = new Set([
 /** Force nearest concept before WordNet (honest bridges). */
 const SEMANTIC_BRIDGE = new Map([
   ['reason', 'think'],
+  // `from` carries origin meaning; bridge it to the existing `source` root
+  // instead of silently dropping it as a function word.
+  ['from', 'source'],
 ]);
 
 /** Synonyms to reject during semantic tier. */
@@ -334,53 +334,19 @@ export function resolveEnglishPhrase(phrase, ctx, { skip = null } = {}) {
   for (const candidate of fullCandidates) {
     const hit = lookupByKeys(ctx, [candidate]);
     if (hit.resolved) {
+      const weakAlias = hit.alias_strength === 'weak';
       return enrichToken(hit, {
-        resolution_kind: 'direct',
-        confidence: 'high',
+        resolution_kind: weakAlias ? 'alias_weak' : 'direct',
+        confidence: weakAlias ? 'low' : 'high',
         concept_id: hit.concept_id ?? hit.english,
+        interpreted: weakAlias,
+        interpreted_from: weakAlias ? raw : null,
+        interpret_reason: weakAlias ? `weak alias:${hit.matched_alias ?? candidate}` : null,
         lookup: candidate,
       });
     }
   }
   return unknownHit(raw);
-}
-
-/**
- * Resolve a concept id only (Word Generator component suggest).
- */
-export function resolveConceptId(token, ctx) {
-  const tries = buildTryKeys(String(token ?? '').toLowerCase(), ctx.rules);
-  const direct = lookupAliasEntry(ctx.aliasIndex, tries);
-  if (direct?.hit?.concept_id) return { concept_id: direct.hit.concept_id, agentive: false, via: 'alias' };
-
-  const interp = interpretToConceptRelaxed(token, 'concept', ctx.rules)
-    ?? interpretToConceptRelaxed(lemmatizeEnglish(token, ctx.rules), 'concept', ctx.rules);
-  if (interp?.concept_id && ctx.rootById.has(interp.concept_id)) {
-    return { concept_id: interp.concept_id, agentive: false, via: interp.reason };
-  }
-
-  const bases = agentiveBase(token);
-  if (bases) {
-    for (const base of bases) {
-      const hit = lookupAliasEntry(ctx.aliasIndex, buildTryKeys(base, ctx.rules));
-      if (hit?.hit?.concept_id) return { concept_id: hit.hit.concept_id, agentive: true, via: 'agentive' };
-    }
-  }
-  return null;
-}
-
-async function tryGuessSpelling(conceptIds, ctx) {
-  if (!conceptIds?.length || conceptIds.length < 2) return null;
-  const { composeOptions, componentSpecForConcept } = await import('./fonoran-word-generator.js');
-  const specs = conceptIds
-    .map(id => componentSpecForConcept(id, ctx, { preferWord: true }))
-    .filter(Boolean);
-  if (specs.length < 2) return null;
-  const options = composeOptions(conceptIds, ctx, { limit: 3, specs });
-  const top = options[0];
-  if (!top) return null;
-  if (!top.unique && top.score < GUESS_SCORE_THRESHOLD) return null;
-  return top;
 }
 
 /**
@@ -426,9 +392,13 @@ export async function resolveEnglishToken(english, ctx, {
   if (lookupWord.includes(' ')) {
     const phraseHit = resolveEnglishPhrase(lookupWord, ctx);
     if (phraseHit.resolved) {
+      const weakAlias = phraseHit.resolution_kind === 'alias_weak';
       return enrichToken({ ...phraseHit, role, english: surface }, {
-        resolution_kind: 'direct',
-        confidence: 'high',
+        resolution_kind: weakAlias ? 'alias_weak' : 'direct',
+        confidence: weakAlias ? 'low' : 'high',
+        interpreted: phraseHit.interpreted ?? false,
+        interpreted_from: phraseHit.interpreted_from ?? null,
+        interpret_reason: phraseHit.interpret_reason ?? null,
       });
     }
 
@@ -469,13 +439,16 @@ export async function resolveEnglishToken(english, ctx, {
   if (hit.resolved) {
     const pastLemma = irregularPastLemma(surface, ctx.rules);
     const interpretedPast = Boolean(pastLemma && hit.past_lemma);
+    // A weak (description/gloss-derived) alias is a low-confidence match — flag
+    // it so the quality gate can treat it as a review item, not a clean hit.
+    const weakAlias = hit.alias_strength === 'weak';
     return enrichToken({ ...hit, role, english: surface }, {
-      resolution_kind: 'direct',
-      confidence: 'high',
+      resolution_kind: weakAlias ? 'alias_weak' : 'direct',
+      confidence: weakAlias ? 'low' : 'high',
       concept_id: hit.concept_id ?? hit.english,
       interpreted: interpretedPast,
       interpreted_from: interpretedPast ? surface : null,
-      interpret_reason: interpretedPast ? 'irregular past' : null,
+      interpret_reason: interpretedPast ? 'irregular past' : (weakAlias ? `weak alias:${hit.matched_alias ?? lookupWord}` : null),
     });
   }
 
@@ -565,58 +538,29 @@ export async function resolveEnglishToken(english, ctx, {
 
   conceptIds = [...new Set(conceptIds.filter(id => ctx.rootById.has(id)))];
 
+  // Honest single-concept fallback: map to the nearest existing root if one
+  // exists. We never fabricate a new multi-root compound — an unmatched word
+  // surfaces as a gap so the language can be grown deliberately.
   if (allowGuess && conceptIds.length >= 1) {
-    const guessIds = conceptIds.length >= 2 ? conceptIds : conceptIds;
-    let guess = null;
-    if (guessIds.length >= 2) {
-      guess = await tryGuessSpelling(guessIds, ctx);
-    } else if (guessIds.length === 1) {
-      const single = lookupByConceptId(ctx, guessIds[0]);
-      if (single.resolved) {
-        return enrichToken({ ...single, role, english: surface }, {
-          resolution_kind: single.fonoran ? 'interpreted' : 'semantic',
-          confidence: 'medium',
-          interpreted: true,
-          interpreted_from: surface,
-          interpret_reason: interp?.reason ?? 'nearest concept',
-        });
-      }
-    }
-    if (guess) {
-      return enrichToken({
-        english: surface,
-        fonoran: guess.spelling,
-        parts: guess.roots,
-        resolved: true,
-        gloss: guess.breakdown,
-        kind: 'guessed',
-        source: 'generator',
-        pronunciation: pronunciationForParts(guess.roots),
-        role,
-      }, {
-        resolution_kind: 'guessed',
-        confidence: guess.unique ? 'medium' : 'low',
-        concept_id: guess.components?.map(c => c.id).join('+') ?? null,
+    const single = lookupByConceptId(ctx, conceptIds[0]);
+    if (single.resolved) {
+      return enrichToken({ ...single, role, english: surface }, {
+        resolution_kind: 'semantic',
+        confidence: 'medium',
         interpreted: true,
         interpreted_from: surface,
-        interpret_reason: 'guessed compound',
-        guessed: true,
-        guess_components: guess.components,
+        interpret_reason: interp?.reason ?? 'nearest concept',
       });
     }
-
-    if (conceptIds.length === 1) {
-      const partial = lookupByConceptId(ctx, conceptIds[0]);
-      if (partial.concept_id && !partial.resolved) {
-        return enrichToken({ ...partial, role, english: surface, resolved: false }, {
-          resolution_kind: 'unknown',
-          confidence: 'low',
-          concept_id: conceptIds[0],
-          interpreted: true,
-          interpreted_from: surface,
-          interpret_reason: interp?.reason ?? 'concept without spelling',
-        });
-      }
+    if (single.concept_id && !single.resolved) {
+      return enrichToken({ ...single, role, english: surface, resolved: false }, {
+        resolution_kind: 'unknown',
+        confidence: 'low',
+        concept_id: conceptIds[0],
+        interpreted: true,
+        interpreted_from: surface,
+        interpret_reason: interp?.reason ?? 'concept without spelling',
+      });
     }
   }
 
@@ -624,22 +568,4 @@ export async function resolveEnglishToken(english, ctx, {
     resolution_kind: 'unknown',
     confidence: 'low',
   });
-}
-
-/** Expand unresolved tokens via WordNet for word-generator suggestComponents. */
-export async function expandTokenToConcept(token, ctx) {
-  const { synonyms, hypernym_concepts } = await expandWord(token);
-  for (const cid of hypernym_concepts) {
-    if (ctx.rootById.has(cid)) {
-      return { concept_id: cid, via: `hypernym:${cid}` };
-    }
-  }
-  for (const syn of synonyms) {
-    const keys = [syn, syn.replace(/\s+/g, '_'), lemmatizeEnglish(syn, ctx.rules)];
-    const hit = lookupAliasEntry(ctx.aliasIndex, keys);
-    if (hit?.hit?.concept_id && ctx.rootById.has(hit.hit.concept_id)) {
-      return { concept_id: hit.hit.concept_id, via: `synonym:${syn}` };
-    }
-  }
-  return null;
 }

@@ -6,7 +6,7 @@ Fonora is [MIT-licensed](../LICENSE). The project also bundles or calls these co
 | --- | --- | --- |
 | **eSpeak NG** | IPA pronunciation (WASM) | [GPL-3.0-or-later](https://github.com/espeak-ng/espeak-ng) — see [espeak-integration.md](espeak-integration.md) |
 | **@echogarden/espeak-ng-emscripten**, **espeak-ng** (npm) | Bundled eSpeak engine | Same GPL chain as eSpeak NG |
-| **WordNet** | Word Generator semantic lookup (synonyms, hypernyms) | [Princeton WordNet license](https://wordnet.princeton.edu/license-and-commercial-use) — attribution required for research and non-commercial use |
+| **WordNet** | Translator semantic lookup (synonyms, hypernyms) | [Princeton WordNet license](https://wordnet.princeton.edu/license-and-commercial-use) — attribution required for research and non-commercial use |
 | **wordpos** | Node.js interface to WordNet | MIT |
 | **Piper** / **piper-tts-web** | Neural TTS (“Listen” in the builder) | MIT (library); voice models from [rhasspy/piper-voices](https://huggingface.co/rhasspy/piper-voices) (see each model card) |
 | **ONNX Runtime Web** | Piper inference in the browser | Apache-2.0 |
@@ -15,7 +15,7 @@ Fonora is [MIT-licensed](../LICENSE). The project also bundles or calls these co
 
 ## WordNet attribution
 
-WordNet is a lexical database developed at Princeton University. Fonoran’s Word Generator uses WordNet synsets and hypernym chains (via **wordpos** and `tools/fonoran-semantic-lookup.js`) to map English input to concept primitives. Results are cached in `data/fonoran-semantic-cache.json`.
+WordNet is a lexical database developed at Princeton University. Fonoran’s translator uses WordNet synsets and hypernym chains (via **wordpos** and `tools/fonoran-semantic-lookup.js`) to map English input to existing concept primitives (the `semantic` resolution tier). Results are cached in `data/fonoran-semantic-cache.json`.
 
 WordNet is free for research and non-commercial use with attribution. Read the [full license](https://wordnet.princeton.edu/license-and-commercial-use) before commercial redistribution.
 

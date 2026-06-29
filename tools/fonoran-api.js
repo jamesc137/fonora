@@ -24,7 +24,6 @@ import { translateEnglish } from './fonoran-translator.js';
 import { loadTranslationCorpus, runTranslationGapReport, loadLatestGapReport } from './fonoran-translation-gaps.js';
 import { loadParticles } from './fonoran-particles.js';
 import { buildFonoran } from './fonoran-build.js';
-import { generateWords } from './fonoran-word-generator.js';
 import {
   getRootCandidates,
   getRootCandidate,
@@ -202,11 +201,6 @@ export async function handleFonoranApi(req, res, pathname, method) {
       const lab = await getLab();
       const level = body.level != null ? Number(body.level) : null;
       return done(200, await runTranslationGapReport({ level, lab }));
-    }
-    if (pathname === '/api/fonoran/word-generator' && method === 'POST') {
-      const body = await readJsonBody(req);
-      const lab = await getLab();
-      return done(200, await generateWords(body.text ?? '', { components: body.components ?? null, lab }));
     }
     if (pathname === '/api/fonoran/lab/health' && method === 'GET') {
       return done(200, await getHealth());

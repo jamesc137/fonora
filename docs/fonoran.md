@@ -28,7 +28,6 @@ flowchart TD
   subgraph ui [Builder UI]
     Review["Review"]
     Creator["Word Creator"]
-    Generator["Word Generator"]
     Dict["Dictionary"]
   end
 
@@ -42,7 +41,6 @@ flowchart TD
   Build --> Lab
   Lab --> Review
   Lab --> Creator
-  Lab --> Generator
   Lab --> Dict
 ```
 
@@ -62,8 +60,7 @@ npm run fonoran:build    # assign roots + build curated compounds → lab
 | --- | --- | --- |
 | **Dictionary** | Public | Browse roots and words; word trees and family graphs |
 | **Grammar** | Public | Language specification ([fonoran-grammar.md](fonoran-grammar.md)) |
-| **Translator** | Public | English → Fonoran sentences (beta) |
-| **Word Generator** | Sign-in | English phrase → ranked compound suggestions (beta; uses [WordNet](third-party.md)) |
+| **Translator** | Public | English → Fonoran sentences. Resolves via curated aliases, interpretation rules, and a single-concept WordNet fallback; unknown words surface as honest gaps (never fabricated). |
 | **Root Creator** | Sign-in | Manual CV/CVC syllables |
 | **Word Creator** | Sign-in | Stack roots and approved words → save compound |
 | **Concept Editor** | Sign-in | Edit concept gloss, aliases, and spelling |
@@ -168,6 +165,22 @@ npm run fonoran:reset && npm run fonoran:build
 # → npm run fonoran:build again after approving roots
 ```
 
+### Translator regression suite
+
+[../data/fonoran-translation-tests.json](../data/fonoran-translation-tests.json)
+is a golden corpus of ~100 canonical sentences, each with the exact `fon` output
+the project commits to. Run it on every grammar/root/rule change so unexpected
+drift is caught before it reaches the language (details in
+[fonoran-grammar.md → Resolution cascade & golden regression suite](fonoran-grammar.md#rule-7-translator-architecture)):
+
+```bash
+npm run test:translator          # assert: FAIL on any drift from golden or new gap
+npm run test:translator:update   # accept current output as the new golden baseline
+node scripts/fonoran-translation-gaps.js   # full report: coverage, gaps, quality, collapses
+```
+
+`npm test` runs the unit suite **and** this golden regression automatically.
+
 ### CV/CVC rule
 
 Every primitive root is exactly **one syllable**: **CV** (`ba`, `te`) or **CVC** (`bel`, `dam`). Multi-syllable forms are compounds, not roots. Enforced at generation and at build time.
@@ -209,13 +222,12 @@ Reserved particles (never roots): `mi`, `na`, `ta`.
 
 | Endpoint | Method | Purpose |
 | --- | --- | --- |
-| `/api/fonoran/word-generator` | POST | English phrase → ranked compounds |
 | `/api/fonoran/translate` | POST | English sentence → Fonoran |
 | `/api/fonoran/concepts` | GET | Concept inventory + spellings |
 
 ## Credits
 
-Word Generator semantic lookup uses **WordNet** (via **wordpos**). See [third-party.md](third-party.md) for full attribution and licenses.
+The translator's semantic lookup uses **WordNet** (via **wordpos**). See [third-party.md](third-party.md) for full attribution and licenses.
 
 ## Related
 

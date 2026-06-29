@@ -1,46 +1,26 @@
 {
-  "version": "2.0-grammar-inventory",
+  "version": "2.1-grammar-inventory",
   "status": "active",
   "description": "Fonoran grammar particle inventory. Particles mark relationships in the sentence skeleton (Subject · Time · Event · Object · Modifiers); they are invariant and never fuse into lexical spellings (docs/fonoran-grammar.md Rule 3). All forms are reserved in data/fonoran-primitive-roots-config.json so the root generator never assigns them to a lexical concept.",
   "philosophy_source": "docs/fonoran-grammar.md",
+  "scope_note": "This is a closed, minimal class. A particle belongs here ONLY if it is genuinely grammatical (cannot be expressed as a lexical concept) AND is either sanctioned by the grammar doc or actively wired in the translator. Spatial/relational meaning (in/at/toward/from/with, this/that) is LEXICAL in Fonoran — it lives in concepts/roots such as inside, here, there, near, far, up, down, reach — so those are deliberately NOT particles. Personal pronouns other than mi resolve lexically and are out of scope for now.",
   "note": "Present tense has no particle: it is the default when the Time slot is empty. Polarity is grammar, not vocabulary: false = no + true, different = no + same. Quantifier pronouns compose at the particle/root layer: nobody = no + person, everyone = all + person.",
-  "triggers_note": "triggers[] are English surface words that compile to this particle. Empty triggers[] means the particle is reserved/displayed but is handled structurally (e.g. and/or via clause splitting, prepositions via skip) or emitted programmatically (question marker).",
+  "triggers_note": "triggers[] are English surface words that compile to this particle. Empty triggers[] means the particle is core grammar emitted programmatically (tense via the translator's tense pass; the question marker when a wh-word is present).",
   "existing_placeholders": {
     "mi": { "role": "pronoun", "gloss": "I" },
     "ta": { "role": "tense", "gloss": "past" },
-    "na": { "role": "tense", "gloss": "future" }
+    "sa": { "role": "tense", "gloss": "future" }
   },
   "particles": [
     { "id": "pronoun_i", "role": "pronoun", "gloss": "I; the speaker", "group": "pronoun", "form": "mi", "triggers": ["i", "me"] },
-    { "id": "pronoun_you", "role": "pronoun", "gloss": "you; the addressee", "group": "pronoun", "form": "va", "triggers": [] },
-    { "id": "pronoun_we", "role": "pronoun", "gloss": "we; speaker and others", "group": "pronoun", "form": "ve", "triggers": [] },
-    { "id": "pronoun_they", "role": "pronoun", "gloss": "they; others not including speaker", "group": "pronoun", "form": "vi", "triggers": [] },
-    { "id": "pronoun_he", "role": "pronoun", "gloss": "he; male third person", "group": "pronoun", "form": "vo", "triggers": [] },
-    { "id": "pronoun_she", "role": "pronoun", "gloss": "she; female third person", "group": "pronoun", "form": "vu", "triggers": [] },
-    { "id": "pronoun_it", "role": "pronoun", "gloss": "it; non-person entity", "group": "pronoun", "form": "van", "triggers": [] },
 
     { "id": "tense_past", "role": "tense", "gloss": "past time", "group": "tense", "form": "ta", "triggers": [] },
     { "id": "tense_present", "role": "tense", "gloss": "present time (inferred; no surface particle)", "group": "tense", "form": null, "triggers": [], "note": "Omitted on surface. Default when Time slot is empty." },
-    { "id": "tense_future", "role": "tense", "gloss": "future time", "group": "tense", "form": "na", "triggers": [] },
+    { "id": "tense_future", "role": "tense", "gloss": "future time", "group": "tense", "form": "sa", "triggers": [] },
 
     { "id": "logic_not", "role": "negation", "gloss": "not; negation", "group": "logical", "form": "no", "triggers": ["not", "never", "n't", "no"] },
     { "id": "logic_yes", "role": "affirmation", "gloss": "yes; affirmative", "group": "logical", "form": "ya", "triggers": ["yes", "yeah", "yep"] },
-    { "id": "logic_no", "role": "denial", "gloss": "no; negative answer", "group": "logical", "form": "no", "triggers": [] },
-    { "id": "logic_and", "role": "conjunction", "gloss": "and; conjunction", "group": "logical", "form": "ven", "triggers": [] },
-    { "id": "logic_or", "role": "disjunction", "gloss": "or; alternative", "group": "logical", "form": "vin", "triggers": [] },
     { "id": "logic_if", "role": "conditional", "gloss": "if; condition", "group": "logical", "form": "von", "triggers": ["if"] },
-    { "id": "logic_because", "role": "causal", "gloss": "because; gives reason", "group": "logical", "form": "vun", "triggers": [] },
-    { "id": "logic_therefore", "role": "result", "gloss": "therefore; follows from reason", "group": "logical", "form": "zan", "triggers": [] },
-
-    { "id": "rel_with", "role": "accompaniment", "gloss": "with; together with", "group": "relationship", "form": "zen", "triggers": [] },
-    { "id": "rel_without", "role": "absence", "gloss": "without; lacking", "group": "relationship", "form": "zin", "triggers": [] },
-    { "id": "rel_toward", "role": "direction", "gloss": "toward; in the direction of", "group": "relationship", "form": "zon", "triggers": [] },
-    { "id": "rel_from", "role": "origin", "gloss": "from; originating at", "group": "relationship", "form": "zun", "triggers": [] },
-    { "id": "rel_in", "role": "containment", "gloss": "in; inside relation", "group": "relationship", "form": "vas", "triggers": [] },
-    { "id": "rel_at", "role": "location", "gloss": "at; located on or at", "group": "relationship", "form": "ves", "triggers": [] },
-
-    { "id": "deixis_this", "role": "demonstrative", "gloss": "this; nearby referent", "group": "deixis", "form": "vis", "triggers": [] },
-    { "id": "deixis_that", "role": "demonstrative", "gloss": "that; distal referent", "group": "deixis", "form": "vos", "triggers": [] },
 
     { "id": "query_marker", "role": "interrogative", "gloss": "question marker; flags an interrogative clause", "group": "interrogative", "form": "wo", "triggers": [] },
     { "id": "query_what", "role": "interrogative", "gloss": "what; which thing or idea", "group": "interrogative", "form": "vus", "triggers": ["what"] },
@@ -55,7 +35,7 @@
     { "id": "focus_even", "role": "focus", "gloss": "even; scalar focus", "group": "focus", "form": "vit", "triggers": ["even"] }
   ],
   "quantifier_pronouns": {
-    "note": "Composed at the particle/root layer, not lexical. negation -> logic_not particle; 'all'/'some' resolve to their lexical roots.",
+    "note": "Composed at the particle/root layer, not lexical. 'neg' -> logic_not particle; 'all'/'some' resolve to their lexical roots (concepts all/some).",
     "nobody": ["neg", "person"],
     "no one": ["neg", "person"],
     "nothing": ["neg", "thing"],
@@ -65,5 +45,11 @@
     "someone": ["some", "person"],
     "somebody": ["some", "person"]
   },
-  "particle_count": 35
+  "deliberately_lexical": {
+    "note": "Handled by concepts/roots, NOT particles, to avoid duplicating the lexicon.",
+    "spatial_relations": ["in -> inside", "at/here -> here", "there -> there", "toward up -> up (dal)", "toward down -> down (nat)", "toward/reach -> reach (ni)", "near -> near", "far -> far"],
+    "pronouns": ["you/we/they/he/she/it resolve lexically; only mi is a particle"],
+    "connectives": ["and/or/but handled structurally via clause splitting", "because/so handled as clause connectives"]
+  },
+  "particle_count": 17
 }

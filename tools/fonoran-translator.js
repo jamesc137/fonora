@@ -112,7 +112,7 @@ const TENSE_AUX = {
 const PARTICLE_PLACEHOLDERS = {
   pronoun_i: 'mi',
   tense_past: 'ta',
-  tense_future: 'na',
+  tense_future: 'sa',
 };
 
 function isPastForm(word, rules) {

@@ -14,6 +14,8 @@ import {
 import { addSound, patchSound, loadBucket, consolidateConceptSound } from './fonoran-sound-bucket.js';
 import { labSoundsByConceptId, labSoundState } from './fonoran-concepts.js';
 import { generateRootCandidates } from './fonoran-root-candidates.js';
+import { loadCollisionProfile } from './fonoran-root-collision.js';
+import { buildCompoundPartnerMap } from './fonoran-root-boundary-score.js';
 
 function refreshSummary(store) {
   store.summary = {
@@ -31,9 +33,14 @@ function findCandidate(store, id) {
   return c;
 }
 
-function usedSpellings(store, { exceptId = null } = {}) {
+/**
+ * Spellings that a regenerated root must avoid: every approved, pending, and
+ * rejected spelling — including the candidate's own current spelling, so
+ * regenerate always produces something different.
+ */
+function usedSpellings(store) {
   return store.candidates
-    .filter(c => c.id !== exceptId && (c.status === 'approved' || c.status === 'pending'))
+    .filter(c => c.spelling && ['approved', 'pending', 'rejected'].includes(c.status))
     .map(c => c.spelling.toLowerCase());
 }
 
@@ -102,28 +109,67 @@ export async function regenerateRootCandidate(id) {
   if (!store) throw new Error('No root candidates file');
   const candidate = findCandidate(store, id);
   if (candidate.status === 'approved') throw new Error('Cannot regenerate an approved root');
+  if (candidate.suggested_status === 'compound_candidate') {
+    throw new Error('Compound candidates are not eligible for a root. Promote to a primitive first.');
+  }
 
   const phoneticsConfig = await readDoc('phonetics_config');
   const pool = buildSyllablePool(phoneticsConfig);
-  const taken = usedSpellings(store, { exceptId: id });
+  // Excludes the current spelling plus every other approved/pending/rejected form.
+  const taken = usedSpellings(store);
+
+  const profileId = phoneticsConfig.collision_profile ?? 'en';
+  const collisionProfile = await loadCollisionProfile(profileId);
+  const compoundsDoc = (await readDoc('compounds')) ?? { compounds: [] };
+  const partnerMap = buildCompoundPartnerMap(compoundsDoc.compounds ?? []);
+  const spellingByConcept = {};
+  for (const c of store.candidates) {
+    if (c.id !== id && c.spelling && c.status !== 'rejected') spellingByConcept[c.id] = c.spelling;
+  }
+
+  // Use the global priority span so cost targeting matches bulk generation.
+  const priorities = store.candidates.map(c => c.priority).filter(p => typeof p === 'number');
+  const minP = priorities.length ? Math.min(...priorities) : (candidate.priority ?? 0);
+  const maxP = priorities.length ? Math.max(...priorities) : (candidate.priority ?? 1000);
+
   const concept = {
     id: candidate.id,
     gloss: candidate.concept,
     domain: candidate.domain,
     priority: candidate.priority ?? 500,
+    priority_weight: candidate.priority_weight ?? null,
   };
 
-  const newSpelling = regenerateRoot(concept, pool, phoneticsConfig, taken);
-  const template = pool.find(p => p.form === newSpelling)?.template ?? 'CV';
-  const cost = pool.find(p => p.form === newSpelling)?.phonetic_cost ?? null;
+  const best = regenerateRoot(concept, pool, phoneticsConfig, taken, {
+    minP,
+    maxP,
+    collisionProfile,
+    partnerMap,
+    spellingByConcept,
+  });
+  const newSpelling = best.root;
+  const template = best.template ?? 'CV';
+  const cost = best.phonetic_cost ?? null;
   const pronScore = pronunciationEaseScore(cost, template);
+  const scores = best.scores ?? {};
 
   candidate.spelling = newSpelling;
   candidate.ipa = romanToIpa(newSpelling);
   candidate.pronunciation_ease = pronScore;
   candidate.pronunciation_ease_label = easeLabel(pronScore);
   candidate.status = 'pending';
-  candidate.generation = { phonetic_cost: cost, template, tier: pool.find(p => p.form === newSpelling)?.tier ?? null };
+  candidate.generation = {
+    phonetic_cost: cost,
+    template,
+    tier: best.tier ?? null,
+    eligible: true,
+    distinctiveness_score: scores.distinctiveness_score ?? null,
+    editorial_collision_score: scores.editorial_collision_score ?? null,
+    compound_flow_score: scores.compound_flow_score ?? null,
+    collision_profile: profileId,
+  };
+  candidate.collision_warnings = scores.collision_warnings ?? [];
+  candidate.boundary_warnings = scores.boundary_warnings ?? [];
   candidate.review = { ...candidate.review, edited_at: new Date().toISOString(), note: 'regenerated' };
 
   refreshSummary(store);

@@ -31,6 +31,8 @@ async function approveReviewLayer(now) {
   const store = await readDoc('root_candidates');
   for (const c of store.candidates ?? []) {
     if (c.status === 'rejected') continue;
+    // Compound candidates have no spelling and cannot be approved as roots.
+    if (!c.spelling || c.suggested_status === 'compound_candidate') continue;
     c.status = 'approved';
     c.review = { ...(c.review ?? {}), approved_at: c.review?.approved_at ?? now };
   }
@@ -168,8 +170,10 @@ export async function buildFonoran({ preserveReview = true, approveAll = false }
   const locData = await loadLocalization('en');
 
   // 1. Roots — regenerate, locking everything already approved.
+  // Skip rejected rows and compound candidates (semantic-only, no spelling yet).
   const rootOutput = await generateRootCandidates({ preserveReview });
-  const candidates = rootOutput.candidates.filter(c => c.status !== 'rejected');
+  const candidates = rootOutput.candidates.filter(c =>
+    c.status !== 'rejected' && c.spelling && c.suggested_status !== 'compound_candidate');
 
   // Build-time gate: every primitive root must be a valid single-syllable CV or CVC form.
   // CV-CV and multi-syllable spellings are not allowed for primitive roots.

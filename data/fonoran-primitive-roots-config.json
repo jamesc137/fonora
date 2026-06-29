@@ -10,6 +10,7 @@
     "note": "The embedded concepts[] list was removed. All generators read data/fonoran-concept-inventory.json.",
     "path": "data/fonoran-concept-inventory.json"
   },
+  "collision_profile": "en",
   "reserved_particles": {
     "note": "Never assign as lexical roots. From grammar placeholders and planned inventory.",
     "forms": ["mi", "ta", "na"]
@@ -25,7 +26,8 @@
     "vowels_by_cost": ["a", "e", "i", "o", "u"],
     "coda_onsets": ["b", "d", "f", "g", "k", "l", "m", "n", "s", "t"],
     "max_cv_per_rhyme": 4,
-    "max_same_onset": 5
+    "max_same_onset": 5,
+    "max_same_onset_priority": 3
   },
   "excluded_composites": [
     "tribe", "family", "government", "language", "nation", "religion",

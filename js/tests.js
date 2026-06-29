@@ -33,6 +33,10 @@ import { loadLanguageRulesFromMarkdown } from './load-language-rules.js';
 import { romanToFonoraScript } from '../tools/fonoran-fonora-bridge.js';
 import { parseSyllable, isValidSyllable, buildSyllable, enumerateOpenSyllables, enumerateAllSyllables } from '../tools/fonoran-pronunciation.js';
 import { checkCompoundBoundary } from '../tools/fonoran-gen3-readability.js';
+import { priorityWeight, derivePriority } from '../tools/fonoran-priority.js';
+import { loadCollisionProfile, scoreEditorialCollision, collisionSafetyScore } from '../tools/fonoran-root-collision.js';
+import { buildCompoundPartnerMap, scoreCompoundBoundary } from '../tools/fonoran-root-boundary-score.js';
+import { assignRoots, buildSyllablePool, regenerateRoot } from '../tools/fonoran-root-sound-assign.js';
 
 function assert(cond, msg) {
   if (!cond) throw new Error(msg);
@@ -278,13 +282,18 @@ const fonoranTranslatorResult = await (async () => {
 
     const jumped = await translateEnglish('the man jumped');
     assert(jumped.unresolved.length === 0, `jumped unresolved: ${jumped.unresolved.join(', ')}`);
-    assert(jumped.surface.roman === 'ba ta so', `jumped roman: ${jumped.surface.roman}`);
+    // The 'move' root spelling is a generated artifact; assert structure (man + past particle + move)
+    // rather than a fixed spelling so the test survives regeneration.
+    const movedRoman = jumped.tokens.find(t => t.english === 'jumped')?.fonoran;
+    assert(Boolean(movedRoman), `jumped move token: ${JSON.stringify(jumped.tokens)}`);
+    assert(jumped.surface.roman === `ba ta ${movedRoman}`, `jumped roman: ${jumped.surface.roman}`);
     assert(jumped.interpretations.some(i => i.english === 'jumped' && i.concept_id === 'move'), `jumped move interp: ${JSON.stringify(jumped.interpretations)}`);
     assert(jumped.semantic?.slots?.time?.length === 1, 'past tense adds time slot');
 
     const future = await translateEnglish('the man is going to jump');
     assert(future.unresolved.length === 0, `future unresolved: ${future.unresolved.join(', ')}`);
-    assert(future.surface.roman === 'ba na so', `future roman: ${future.surface.roman}`);
+    const futureMove = future.tokens.find(t => t.english === 'jump' || t.concept_id === 'move')?.fonoran ?? movedRoman;
+    assert(future.surface.roman === `ba na ${futureMove}`, `future roman: ${future.surface.roman}`);
     assert(!future.surface.roman.includes(' la '), `future should not have la: ${future.surface.roman}`);
     assert(!future.surface.roman.includes(' fi '), `future should not use retired fi: ${future.surface.roman}`);
     assert(future.semantic?.slots?.time?.[0]?.english === 'future', 'future time slot');
@@ -524,9 +533,76 @@ const boundaryDigraphResult = test('checkCompoundBoundary handles digraph bounda
   assert(ngN.valid, 'beng+nal should be valid (ng+n)');
 });
 
+const rootWorkflowResult = await (async () => {
+  const name = 'Root editorial workflow: priority, collision, boundary, assignment';
+  try {
+    // Priority class -> weight mapping and ordering.
+    assert(priorityWeight('essential') === 100, 'essential weight');
+    assert(priorityWeight('questionable') === 20, 'questionable weight');
+    assert(priorityWeight('unknown') === 80, 'unknown defaults to common');
+    assert(derivePriority('essential', 0) > derivePriority('common', 0), 'essential outranks common');
+    assert(derivePriority('common', 0) > derivePriority('common', 5), 'lower index wins within class');
+
+    // Editorial collision profile (English default).
+    const en = await loadCollisionProfile('en');
+    assert(scoreEditorialCollision('fak', en).blocked === true, 'fak is blocked');
+    const gas = scoreEditorialCollision('gas', en);
+    assert(gas.blocked === false && gas.penalty >= 2000, 'gas is discouraged with strong penalty');
+    assert(scoreEditorialCollision('fi', en).warnings.some(w => w.type === 'homophone'), 'fi raises homophone warning');
+    assert(collisionSafetyScore(0, false) === 100 && collisionSafetyScore(0, true) === 0, 'safety score bounds');
+    // Profile swap smoke test: a missing profile blocks nothing.
+    const missing = await loadCollisionProfile('zz-nonexistent');
+    assert(scoreEditorialCollision('fak', missing).blocked === false, 'missing profile blocks nothing');
+
+    // Compound-boundary scoring.
+    const partnerMap = buildCompoundPartnerMap([{ concept: 'c', composition: ['a', 'b'] }]);
+    assert(partnerMap.get('a')?.has('b'), 'partner map links co-occurring concepts');
+    const badBoundary = scoreCompoundBoundary('a', 'bem', partnerMap, { b: 'mam' });
+    assert(badBoundary.warnings.length === 1 && badBoundary.score < 100, 'bem+mam boundary flagged');
+    const goodBoundary = scoreCompoundBoundary('a', 'ben', partnerMap, { b: 'mam' });
+    assert(goodBoundary.warnings.length === 0 && goodBoundary.score === 100, 'ben+mam boundary clean');
+
+    // Assignment integration: blocked never assigned, rejected reserved, regenerate differs.
+    const config = {
+      phonetics: {
+        preferred_onsets: ['b', 'd', 'f'], secondary_onsets: [], tertiary_onsets: [],
+        vowels_by_cost: ['a', 'e', 'i'], coda_onsets: [], max_cv_per_rhyme: 4, max_same_onset: 5,
+      },
+      reserved_particles: { forms: [] },
+      excluded_syllables: { forms: [] },
+    };
+    const pool = buildSyllablePool(config);
+    const blockBa = {
+      penalties: { discouraged: 2000, homophone: 500, particle_near_miss: 800 },
+      blocked: new Map([['ba', { reason: 'test' }]]),
+      discouraged: new Map(), homophones: new Map(), particles: new Map(),
+    };
+    const concepts = [
+      { id: 'one', gloss: 'one', domain: 'x', priority: 100, priority_weight: 100 },
+      { id: 'two', gloss: 'two', domain: 'x', priority: 90, priority_weight: 80 },
+    ];
+    const assigned = assignRoots(concepts, pool, config, { collisionProfile: blockBa, reservedForms: ['be'] });
+    const roots = assigned.map(a => a.root);
+    assert(!roots.includes('ba'), 'blocked form is never assigned');
+    assert(!roots.includes('be'), 'reserved (rejected) form is never reused');
+
+    const regen = regenerateRoot(
+      { id: 'one', gloss: 'one', domain: 'x', priority: 100, priority_weight: 100 },
+      pool, config, ['ba'], { collisionProfile: blockBa },
+    );
+    assert(regen.root !== 'ba', 'regenerate excludes the current/blocked spelling');
+    assert(regen.scores && typeof regen.scores.distinctiveness_score === 'number', 'regenerate returns display scores');
+
+    return { name, ok: true };
+  } catch (e) {
+    return { name, ok: false, error: e.message };
+  }
+})();
+
 const allFailed = [
   ...failed,
   ...corpusResults.filter((r) => !r.ok),
+  ...(rootWorkflowResult.ok ? [] : [rootWorkflowResult]),
   ...(parserResult.ok ? [] : [parserResult]),
   ...(composeResult.ok ? [] : [composeResult]),
   ...(derivedResult.ok ? [] : [derivedResult]),
@@ -572,8 +648,9 @@ const allPassed =
   + (boundaryResult.ok ? 1 : 0)
   + (boundaryPassResult.ok ? 1 : 0)
   + (boundaryMultiResult.ok ? 1 : 0)
-  + (boundaryDigraphResult.ok ? 1 : 0);
-const allTotal = total + corpusResults.length + 21;
+  + (boundaryDigraphResult.ok ? 1 : 0)
+  + (rootWorkflowResult.ok ? 1 : 0);
+const allTotal = total + corpusResults.length + 22;
 
 for (const f of allFailed) console.error('FAIL:', f.name, '-', f.error);
 console.log(`${allPassed}/${allTotal} tests passed`);

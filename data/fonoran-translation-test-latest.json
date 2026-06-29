@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-29T07:16:09.610Z",
+  "generated_at": "2026-06-29T07:39:35.113Z",
   "corpus_version": "1.0",
   "total_phrases": 96,
   "clean_phrases": 96,
@@ -465,7 +465,7 @@
     {
       "level": 4,
       "phrase": "I will eat tomorrow.",
-      "roman": "mi na nel shu",
+      "roman": "mi sa nel shu",
       "unresolved": [],
       "counts": {
         "direct": 4,
@@ -489,7 +489,7 @@
     {
       "level": 4,
       "phrase": "We will build a bridge.",
-      "roman": "ben na kel kalye",
+      "roman": "ben sa kel kalye",
       "unresolved": [],
       "counts": {
         "direct": 3,
@@ -513,7 +513,7 @@
     {
       "level": 4,
       "phrase": "He will return.",
-      "roman": "ba na gi",
+      "roman": "ba sa gi",
       "unresolved": [],
       "counts": {
         "direct": 2,
@@ -537,7 +537,7 @@
     {
       "level": 4,
       "phrase": "Winter will come.",
-      "roman": "kampu na gi",
+      "roman": "kampu sa gi",
       "unresolved": [],
       "counts": {
         "direct": 3,
@@ -561,7 +561,7 @@
     {
       "level": 4,
       "phrase": "The child will learn.",
-      "roman": "namba na lahu",
+      "roman": "namba sa lahu",
       "unresolved": [],
       "counts": {
         "direct": 3,
@@ -621,7 +621,7 @@
     {
       "level": 5,
       "phrase": "When will you return?",
-      "roman": "wo zes na fem gi",
+      "roman": "wo zes sa fem gi",
       "unresolved": [],
       "counts": {
         "direct": 5,
@@ -681,7 +681,7 @@
     {
       "level": 5,
       "phrase": "Will it rain?",
-      "roman": "to na natye",
+      "roman": "to sa natye",
       "unresolved": [],
       "counts": {
         "direct": 3,
@@ -1029,7 +1029,7 @@
     {
       "level": 8,
       "phrase": "If you help me, we will finish today.",
-      "roman": "von na fem kat mi ben mek che",
+      "roman": "von sa fem kat mi ben mek che",
       "unresolved": [],
       "counts": {
         "direct": 8,

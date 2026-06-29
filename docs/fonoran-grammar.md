@@ -19,33 +19,37 @@ This is inspired by how toddlers learn language, but it is **not** a literal tod
 | Is this causal linking (because / therefore)? | **Grammar particle** | n/a |
 
 ```example
-kaso sha
+ben ba
 
-love collective
-
-↓
-
-kasosha (family)
-```
-
-```example
-move + fast
+collective person
 
 ↓
 
-run
+benba (tribe)
 ```
 
 ```example
+je + cha
+
+big + change
+
+↓
+
+jecha (grow)
+```
+
+```example
+hu + di
+
 know + before
 
 ↓
 
-remember
+hudi (remember)
 ```
 
 ```example
-water
+ye (water)
 
 (no simpler Fonoran explanation)
 
@@ -69,7 +73,7 @@ Fonoran grammar deliberately avoids copying English or traditional linguistic ca
 There are no permanent nouns, verbs, or adjectives. Only concepts that take on roles from context.
 
 ```example
-mi kaso
+mi bem
 
 ↓
 
@@ -77,16 +81,16 @@ I love.
 ```
 
 - **mi** = I (placeholder pronoun, *Under Development*)
-- **kaso** = love
+- **bem** = love
 
 Notice that **love never changes form**.
 
 English requires: love, loves, loved, loving.
 
-Fonoran simply uses **kaso**. Grammar communicates the relationship, not the word itself.
+Fonoran simply uses **bem**. Grammar communicates the relationship, not the word itself.
 
 ```example
-mi ta kaso
+mi ta bem
 
 ↓
 
@@ -94,34 +98,34 @@ I loved.
 ```
 
 - **ta** = past (*Under Development*)
-- **kaso** never changes
+- **bem** never changes
 
 ```example
-mi na kaso
+mi sa bem
 
 ↓
 
 I will love.
 ```
 
-- **na** = future (*Under Development*)
+- **sa** = future (*Under Development*)
 - The event concept stays identical regardless of tense
 
 ```example
-mi ta shakafa
+mi ta benbanal
 
 ↓
 
 I fought.
 ```
 
-- **shakafa** never changes
+- **benbanal** never changes
 - Only **ta** marks that the event is in the past
 
 Concepts can also sit beside other concepts as modifiers:
 
 ```example
-kaso ka
+bem ba
 
 love person
 
@@ -131,7 +135,7 @@ loving person
 ```
 
 ```example
-kaso sha
+bem ben
 
 love collective
 
@@ -141,7 +145,7 @@ loving community
 ```
 
 ```example
-kaso fa
+bem nal
 
 love conflict
 
@@ -156,16 +160,16 @@ The same concept, three different readings. No spelling change required.
 
 New meaning is built by stacking known concepts.
 
-When you know **sha** (collective) and **ka** (person), **shaka** (tribe) should feel inevitable.
+When you know **ben** (collective) and **ba** (person), **benba** (tribe) should feel inevitable.
 
 ```example
-sha ka
+ben ba
 
 collective person
 
 ↓
 
-tribe
+benba (tribe)
 ```
 
 You did not memorize a new word. You read a relationship.
@@ -175,9 +179,9 @@ You did not memorize a new word. You read a relationship.
 Words never inflect. Relationships never hide inside spelling changes.
 
 ```example
-mi ta kaso
-mi kaso
-mi na kaso
+mi ta bem
+mi bem
+mi sa bem
 
 ↓
 
@@ -186,7 +190,7 @@ I love.
 I will love.
 ```
 
-**kaso** stays **kaso** in every sentence. Only **ta** or **na** mark non-present time.
+**bem** stays **bem** in every sentence. Only **ta** or **sa** mark non-present time.
 
 ### Minimal syntax
 
@@ -196,23 +200,23 @@ The surface grammar stays small on purpose. One predictable sentence skeleton ca
 Subject · Time · Event · Object · Modifiers
 ```
 
-The **Time** slot is **empty for present**. Present is the default and is inferred from context. Only past (**ta**) or future (**na**) need a particle.
+The **Time** slot is **empty for present**. Present is the default and is inferred from context. Only past (**ta**) or future (**sa**) need a particle.
 
 ### Transparent meaning
 
 Reading a compound should reveal its ancestry.
 
 ```example
-shaka fa
+benba nal
 
 tribe conflict
 
 ↓
 
-war
+benbanal (war)
 ```
 
-**shakafa** is not an opaque token. It is **shaka** (tribe) in relation to **fa** (conflict). The spelling is a compressed semantic tree.
+**benbanal** is not an opaque token. It is **benba** (tribe) in relation to **nal** (conflict). The spelling is a compressed semantic tree.
 
 ## Rule 1: Concepts Are Universal
 
@@ -220,17 +224,17 @@ Every word is simply a **concept**.
 
 | Concept | Meaning |
 | --- | --- |
-| **ka** | person |
-| **fa** | conflict |
-| **sha** | collective |
-| **kaso** | love |
-| **shaka** | tribe |
-| **shakafa** | war |
+| **ba** | person |
+| **nal** | conflict |
+| **ben** | collective |
+| **bem** | love |
+| **benba** | tribe |
+| **benbanal** | war |
 
 These are not permanently nouns or verbs. Their role depends on **sentence position** and **surrounding particles**.
 
 ```example
-ka fa
+ba nal
 
 person conflict
 
@@ -240,7 +244,7 @@ a person's conflict
 ```
 
 ```example
-fa ka
+nal ba
 
 conflict person
 
@@ -257,12 +261,12 @@ Fonoran has no conjugation, declension, grammatical gender, plural endings, or c
 
 A word is always written the same way.
 
-**shakafa** always remains **shakafa**.
+**benbanal** always remains **benbanal**.
 
 ```example
-mi ta shakafa
-mi shakafa
-sha shakafa
+mi ta benbanal
+mi benbanal
+benba benbanal
 
 ↓
 
@@ -271,7 +275,7 @@ There is war.
 The tribe is at war.
 ```
 
-Present sentences omit the time particle. **shakafa** never changes.
+Present sentences omit the time particle. **benbanal** never changes.
 
 Time, plurality, and relationships are expressed through **particles** and **word order**, not through mutating the concept itself.
 
@@ -288,11 +292,11 @@ Present is **not** a particle. It is the default when no time marker appears.
 | Tense | Particle | Status |
 | --- | --- | --- |
 | Past | ta | Under Development |
-| Future | na | Under Development |
+| Future | sa | Under Development |
 
 ### Other particles
 
-The full inventory (forms, roles, English triggers) lives in [../data/fonoran-grammar-particles.json](../data/fonoran-grammar-particles.json). Core grammatical particles:
+The full inventory (forms, roles, English triggers) lives in [../data/fonoran-grammar-particles.json](../data/fonoran-grammar-particles.json). The particle class is **closed and minimal**: a word is a particle only if it is genuinely grammatical (cannot be a lexical concept) *and* is sanctioned here or wired in the translator.
 
 | Role | Particle | Status |
 | --- | --- | --- |
@@ -300,23 +304,21 @@ The full inventory (forms, roles, English triggers) lives in [../data/fonoran-gr
 | Affirmation | ya | Active |
 | Question (marker) | wo | Active |
 | Conditional (if) | von | Active |
-| Causal (because) | vun | Active |
-| Result (therefore) | zan | Active |
-| Conjunction (and) | ven | Active |
-| Disjunction (or) | vin | Active |
-| Focus (only) | vat | Active |
-| Focus (also) | vet | Active |
-| Focus (even) | vit | Active |
 | Interrogative (what) | vus | Active |
 | Interrogative (who) | zas | Active |
 | Interrogative (when) | zes | Active |
 | Interrogative (where) | zis | Active |
 | Interrogative (why) | zos | Active |
 | Interrogative (how) | zus | Active |
+| Focus (only) | vat | Active |
+| Focus (also) | vet | Active |
+| Focus (even) | vit | Active |
 | Possession | TBD | Under Development |
 | Comparison | TBD | Under Development |
 
-Particles are **reserved**: the root generator never assigns particle forms to a lexical concept. The reserved set is `mi`, `ta`, `na`, `no`, `ya`, `wo` plus the `v*`/`z*` particle forms enumerated in [../data/fonoran-primitive-roots-config.json](../data/fonoran-primitive-roots-config.json) (`reserved_particles.forms`).
+Particles are **reserved**: the root generator never assigns particle forms to a lexical concept. The reserved set is `mi`, `ta`, `sa`, `no`, `ya`, `wo` plus the `v*`/`z*` particle forms enumerated in [../data/fonoran-primitive-roots-config.json](../data/fonoran-primitive-roots-config.json) (`reserved_particles.forms`).
+
+**Grammar vs. lexicon.** Spatial and relational meaning is *lexical*, not grammatical: "in/inside", "here/there", and the three sense of "toward" (`up`/`dal`, `down`/`nat`, `reach`/`ni`), plus `near`/`far`, are **concepts/roots**, never particles. Likewise, personal pronouns other than `mi` (you/we/they/he/she/it) resolve lexically, and conjunctions (`and`/`or`/`but`/`because`) are handled structurally as clause connectives rather than as emitted particles. This keeps the particle class small and prevents it from shadowing the lexicon.
 
 Polarity is grammar, not vocabulary — **false** is `no` + **true**, **different** is `no` + **same**. Such antonyms are *not* roots and *not* compounds; they are produced at the particle layer.
 
@@ -332,7 +334,7 @@ Particles occupy fixed positions within the sentence skeleton; they never fuse i
 Even before the full inventory exists, you can already read sentences by treating each slot as a labeled relationship:
 
 ```example
-mi kaso ka
+mi bem ba
 
 ↓
 
@@ -367,7 +369,7 @@ flowchart LR
 - **Easy to parse**: slot-based analysis maps cleanly to a semantic graph
 
 ```example
-shaka shakafa
+benba benbanal
 
 ↓
 
@@ -375,7 +377,7 @@ The tribe is at war.
 ```
 
 ```example
-mi kaso shaka
+mi bem benba
 
 ↓
 
@@ -383,7 +385,7 @@ I love the tribe.
 ```
 
 ```example
-mi na kaso shaka
+mi sa bem benba
 
 ↓
 
@@ -400,41 +402,41 @@ Almost every complex concept should be expressed through **composition**.
 
 | | |
 | --- | --- |
-| **sha** | collective |
-| **ka** | person |
+| **ben** | collective |
+| **ba** | person |
 
 ↓
 
 | | |
 | --- | --- |
-| **shaka** | tribe |
+| **benba** | tribe |
 
 **Step 2: extend the tree**
 
 | | |
 | --- | --- |
-| **shaka** | tribe |
-| **fa** | conflict |
+| **benba** | tribe |
+| **nal** | conflict |
 
 ↓
 
 | | |
 | --- | --- |
-| **shakafa** | war |
+| **benbanal** | war |
 
 Every derived word **preserves its ancestry**. Words form a semantic tree rather than existing independently.
 
 ```mermaid
 graph TD
-  sha["sha\ncollective"]
-  ka["ka\nperson"]
-  shaka["shaka\ntribe"]
-  fa["fa\nconflict"]
-  shakafa["shakafa\nwar"]
-  sha --> shaka
-  ka --> shaka
-  shaka --> shakafa
-  fa --> shakafa
+  ben["ben\ncollective"]
+  ba["ba\nperson"]
+  benba["benba\ntribe"]
+  nal["nal\nconflict"]
+  benbanal["benbanal\nwar"]
+  ben --> benba
+  ba --> benba
+  benba --> benbanal
+  nal --> benbanal
 ```
 
 Compounding rules for the translator: prefer the **shortest transparent path** through approved concepts; omit concepts implied by human experience unless emphasis or disambiguation is needed (**semantic economy**); reject opaque shortcuts that break the tree (*implementation Under Development*).
@@ -448,10 +450,10 @@ This rule preserves Fonoran's core promise: **what you hear = what you write = w
 | Left | Right | Boundary | Valid? | Reason |
 | --- | --- | --- | --- | --- |
 | bem | mam | m + m | **No** | identical consonants |
-| kal | lum | l + l | **No** | identical consonants |
-| bem | lam | m + l | Yes | different consonants |
+| kal | lem | l + l | **No** | identical consonants |
+| bem | lek | m + l | Yes | different consonants |
 | ben | mam | n + m | Yes | different consonants |
-| ka | so | a + s | Yes | vowel–consonant boundary |
+| ba | so | a + s | Yes | vowel–consonant boundary |
 | so | a | o + a | Yes | vowel–vowel boundary |
 
 **This is a generation constraint, not a pronunciation rule.** Fonoran never collapses, lengthens, or silently alters boundary sounds. The constraint prevents generating compounds that would require hidden spelling or pronunciation exceptions.
@@ -500,26 +502,26 @@ This principle should guide both manual word creation and future automated compo
 
 ## Rule 6: Meaning Is Visible
 
-When someone learns **sha** (collective) and **ka** (person), they should naturally understand **shaka** (tribe) without memorization.
+When someone learns **ben** (collective) and **ba** (person), they should naturally understand **benba** (tribe) without memorization.
 
 ```example
-sha ka
+ben ba
 
 collective person
 
 ↓
 
-tribe
+benba (tribe)
 ```
 
 ```example
-shaka fa
+benba nal
 
 tribe conflict
 
 ↓
 
-war
+benbanal (war)
 ```
 
 As vocabulary grows, **understanding accelerates**. Each new root unlocks many compounds, and each compound reinforces the roots below it.
@@ -551,12 +553,12 @@ flowchart TD
 3. **Semantic graph**: entities, events, relations, time, negation
 4. **Primitive concepts**: map graph nodes to approved Fonoran roots
 5. **Compound construction**: build or select transparent compounds for complex nodes
-6. **Grammar particles**: attach past (**ta**), future (**na**), question, possession, etc. (*Under Development*). **Omit time particles for present.**
+6. **Grammar particles**: attach past (**ta**), future (**sa**), question, possession, etc. (*Under Development*). **Omit time particles for present.**
 7. **Fonoran sentence**: emit fixed-order surface string
 
 Full implementation spec: [fonoran-interpretive-translator.md](fonoran-interpretive-translator.md).
 
-**Default tense rule:** if the semantic frame has no time particle, the translator treats the sentence as **present** (or contextually current). Only **ta** (past) and **na** (future) appear on the surface.
+**Default tense rule:** if the semantic frame has no time particle, the translator treats the sentence as **present** (or contextually current). Only **ta** (past) and **sa** (future) appear on the surface.
 
 Whenever a concept cannot yet be expressed in Fonoran, the translator must show it in **red**. Never silently omit it. Never substitute English without marking it as unresolved.
 
@@ -579,20 +581,20 @@ family
 
 Fonoran:
 mi
-kaso
-kasosha
+bem
+tatba
 ```
 
-**family** compiles to **kasosha** (love + collective). No time particle: present by default. Every slot resolves through known concepts or transparent compounding.
+**family** compiles to **tatba** (bond + person). No time particle: present by default. Every slot resolves through known concepts or transparent compounding.
 
 ```example
-kaso sha
+tat ba
 
-love collective
+bond person
 
 ↓
 
-kasosha (family)
+tatba (family)
 ```
 
 ### Example: full compile
@@ -606,11 +608,11 @@ tribe
 war
 
 Fonoran:
-shaka
-shakafa
+benba
+benbanal
 ```
 
-Every known concept compiles into Fonoran. **shaka** (tribe), **shakafa** (war). No time particle: the tribe **is at war now**. Nothing hidden. Nothing borrowed from English without marking it.
+Every known concept compiles into Fonoran. **benba** (tribe), **benbanal** (war). No time particle: the tribe **is at war now**. Nothing hidden. Nothing borrowed from English without marking it.
 
 This architecture allows multiple English expressions to converge into the **same underlying semantic representation**, then diverge again only at the particle layer when needed.
 

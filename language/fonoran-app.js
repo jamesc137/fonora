@@ -3196,11 +3196,6 @@
       return '<span class="concept-editor__status concept-editor__status--pending">pending</span>';
     }
 
-    function conceptEditorIpaForSpelling(spelling) {
-      const sp = (spelling ?? '').trim().toLowerCase();
-      return sp ? romanToIpa(sp) : '';
-    }
-
     function conceptEditorCurrentId() {
       if (STATE.conceptEditorIsNew) {
         return ($('ce-id')?.value ?? STATE.conceptEditorDraft?.id ?? '').trim().toLowerCase();
@@ -3338,40 +3333,18 @@
       });
     }
 
-    function updateConceptEditorPron(spelling) {
+    function updateConceptEditorSound(spelling) {
       const sp = (spelling ?? '').trim();
-      const shell = document.querySelector('.concept-editor__pron-shell');
-      const scriptEl = $('ce-pron-script');
-      const sayEl = $('ce-pron-say');
-      const likeEl = $('ce-pron-like');
-      const ipaEl = $('ce-ipa-display');
-      const invalidEl = $('ce-pron-invalid');
+      const invalidEl = $('ce-spelling-invalid');
       const hearBtn = $('ce-hear');
-      if (!scriptEl || !sayEl || !likeEl || !ipaEl) return;
-
-      const valid = isValidSyllable(sp);
-      shell?.classList.toggle('is-empty', !sp);
-      shell?.classList.toggle('is-invalid', Boolean(sp && !valid));
 
       if (!sp) {
-        scriptEl.textContent = '\u00a0';
-        scriptEl.classList.add('is-placeholder');
-        scriptEl.setAttribute('aria-hidden', 'true');
-        sayEl.textContent = '-';
-        likeEl.textContent = '-';
-        ipaEl.textContent = '-';
         if (invalidEl) { invalidEl.hidden = true; invalidEl.textContent = ''; }
         if (hearBtn) hearBtn.disabled = true;
         return;
       }
 
-      if (!valid) {
-        scriptEl.textContent = '\u00a0';
-        scriptEl.classList.add('is-placeholder');
-        scriptEl.setAttribute('aria-hidden', 'true');
-        sayEl.textContent = '-';
-        likeEl.textContent = '-';
-        ipaEl.textContent = '-';
+      if (!isValidSyllable(sp)) {
         if (invalidEl) {
           invalidEl.hidden = false;
           invalidEl.textContent = `“${sp}” isn’t a valid Fonoran syllable yet.`;
@@ -3380,13 +3353,6 @@
         return;
       }
 
-      const { script, sayLine, englishLine } = wordPreviewPron(sp);
-      scriptEl.textContent = script || '\u00a0';
-      scriptEl.classList.toggle('is-placeholder', !script);
-      scriptEl.toggleAttribute('aria-hidden', !script);
-      sayEl.textContent = sayLine || '-';
-      likeEl.textContent = englishLine || '-';
-      ipaEl.textContent = conceptEditorIpaForSpelling(sp) || '-';
       if (invalidEl) { invalidEl.hidden = true; invalidEl.textContent = ''; }
       if (hearBtn) hearBtn.disabled = false;
     }
@@ -3417,27 +3383,14 @@
       panel.innerHTML = `
         <form class="concept-editor__form" id="concept-editor-form">
           <div class="concept-editor__form-head">${headHtml}</div>
-          <div class="concept-editor__pair">
-            <div class="concept-editor__pair-sound">
-              <input type="text" id="ce-spelling" class="mono" value="${escapeHtml(d.spelling)}" data-write-input autocomplete="off" spellcheck="false" aria-label="Fonoran sound">
-            </div>
-            <div class="concept-editor__pair-meaning">
-              <input type="text" id="ce-concept" value="${escapeHtml(d.concept)}" data-write-input autocomplete="off" aria-label="Concept meaning">
-            </div>
+          <label class="fld" for="ce-spelling">Fonoran sound</label>
+          <div class="concept-editor__sound-row">
+            <input type="text" id="ce-spelling" class="mono" value="${escapeHtml(d.spelling)}" data-write-input autocomplete="off" spellcheck="false">
+            <button type="button" class="btn" id="ce-hear" disabled>▶ Hear</button>
           </div>
-          <div class="concept-editor__pron-block">
-            <div class="concept-editor__pron-shell is-empty" aria-live="polite">
-              <div class="concept-editor__pron-head">
-                <div class="concept-editor__script fonora-script symbol-text" id="ce-pron-script" aria-hidden="true">&nbsp;</div>
-                <span class="concept-editor__pron-divider" aria-hidden="true">|</span>
-                <div class="concept-editor__say pron-line">Say: <strong id="ce-pron-say">-</strong></div>
-              </div>
-              <div class="concept-editor__like pron-english">Sounds like: <span id="ce-pron-like">-</span></div>
-              <p class="concept-editor__ipa mono" id="ce-ipa-display">-</p>
-            </div>
-            <button type="button" class="btn" id="ce-hear">▶ Hear</button>
-          </div>
-          <p class="concept-editor__invalid syl-invalid" id="ce-pron-invalid" hidden></p>
+          <p class="concept-editor__invalid syl-invalid" id="ce-spelling-invalid" hidden></p>
+          <label class="fld" for="ce-concept">Definition</label>
+          <input type="text" id="ce-concept" value="${escapeHtml(d.concept)}" data-write-input autocomplete="off">
           <div id="ce-spelling-alerts" class="concept-editor__alerts" aria-live="polite"></div>
           <label class="fld" for="ce-domain">Domain</label>
           <select id="ce-domain" data-write-input>
@@ -3469,11 +3422,11 @@
       syncDomainCustom();
 
       $('ce-spelling')?.addEventListener('input', (e) => {
-        updateConceptEditorPron(e.target.value);
+        updateConceptEditorSound(e.target.value);
         updateConceptEditorSoundChecks(e.target.value);
       });
 
-      updateConceptEditorPron(d.spelling);
+      updateConceptEditorSound(d.spelling);
       updateConceptEditorSoundChecks(d.spelling);
 
       $('ce-hear')?.addEventListener('click', () => {

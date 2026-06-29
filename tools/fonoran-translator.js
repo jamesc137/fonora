@@ -63,8 +63,11 @@ const GRAMMAR_SKELETON = 'Subject · Time · Event · Path · Object · Modifier
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PARTICLES_PATH = join(ROOT, 'data/fonoran-grammar-particles.json');
 
+// Contentless words dropped from the lexical stream. Meaning-bearing relational
+// words (e.g. `from` -> source) are NOT skipped: they resolve to a concept or
+// surface as an honest gap rather than being silently discarded.
 const SKIP = new Set([
-  'a', 'an', 'the', 'to', 'at', 'in', 'on', 'of', 'for', 'with', 'by', 'from', 'into', 'about',
+  'a', 'an', 'the', 'to', 'at', 'in', 'on', 'of', 'for', 'with', 'by', 'into', 'about',
   'my', 'your', 'his', 'her', 'its', 'our', 'their', 'mine', 'yours', 'this', 'that', 'these', 'those',
   ...CONJUNCTIONS,
   ...MODALS,
@@ -75,9 +78,11 @@ const PRONOUNS = {
   me: 'mi',
 };
 
-/** Subject pronouns → nearest concept id for resolution. */
+/**
+ * Subject pronouns → nearest concept id for resolution.
+ */
 const PRONOUN_CONCEPTS = {
-  you: 'different',
+  you: 'addressee',
   we: 'collective',
   us: 'collective',
   they: 'collective',

@@ -1,10 +1,20 @@
 {
-  "generated_at": "2026-06-29T07:39:35.113Z",
-  "corpus_version": "1.0",
-  "total_phrases": 96,
-  "clean_phrases": 96,
+  "generated_at": "2026-06-29T21:15:43.887Z",
+  "corpus_version": "2.0",
+  "total_phrases": 100,
+  "clean_phrases": 100,
   "coverage_pct": 100,
   "distinct_gaps": 0,
+  "quality": {
+    "tokens": {
+      "pass": 354,
+      "soft": 19,
+      "hard": 0
+    },
+    "pass_phrases": 85,
+    "soft_phrases": 15,
+    "hard_phrases": 0
+  },
   "levels": [
     {
       "level": 1,
@@ -85,9 +95,477 @@
       "clean": 15,
       "coverage": 100,
       "unresolved_words": 0
+    },
+    {
+      "level": 11,
+      "name": "Super-hard",
+      "phrases": 4,
+      "clean": 4,
+      "coverage": 100,
+      "unresolved_words": 0
     }
   ],
   "gaps": [],
+  "collapses": [
+    {
+      "root": "gi",
+      "words": [
+        "came",
+        "chases",
+        "cold they continued",
+        "come",
+        "continuing",
+        "crossed",
+        "flies",
+        "follows",
+        "left",
+        "moves",
+        "ran",
+        "return",
+        "returned",
+        "runs",
+        "travels",
+        "walked",
+        "walking",
+        "young"
+      ],
+      "concepts": [
+        "move"
+      ]
+    },
+    {
+      "root": "ba",
+      "words": [
+        "baby",
+        "he",
+        "man",
+        "parents",
+        "person",
+        "she",
+        "traveler",
+        "woman"
+      ],
+      "concepts": [
+        "person"
+      ]
+    },
+    {
+      "root": "ben",
+      "words": [
+        "everyone",
+        "group",
+        "they",
+        "together",
+        "us",
+        "we"
+      ],
+      "concepts": [
+        "collective"
+      ]
+    },
+    {
+      "root": "kel",
+      "words": [
+        "build",
+        "builds",
+        "built",
+        "cooked",
+        "ready",
+        "toy"
+      ],
+      "concepts": [
+        "make"
+      ]
+    },
+    {
+      "root": "kan",
+      "words": [
+        "peaceful",
+        "quiet",
+        "quietly",
+        "rested",
+        "stayed",
+        "stopped"
+      ],
+      "concepts": [
+        "still"
+      ]
+    },
+    {
+      "root": "wi",
+      "words": [
+        "finds",
+        "saw",
+        "see",
+        "sees",
+        "watched"
+      ],
+      "concepts": [
+        "see"
+      ]
+    },
+    {
+      "root": "nel",
+      "words": [
+        "ate",
+        "eat",
+        "fish",
+        "tastes"
+      ],
+      "concepts": [
+        "eat"
+      ]
+    },
+    {
+      "root": "tet",
+      "words": [
+        "animal",
+        "bird",
+        "cat",
+        "dog"
+      ],
+      "concepts": [
+        "animal"
+      ]
+    },
+    {
+      "root": "se",
+      "words": [
+        "said",
+        "speaks",
+        "stories",
+        "tells"
+      ],
+      "concepts": [
+        "speak"
+      ]
+    },
+    {
+      "root": "to",
+      "words": [
+        "although it",
+        "it",
+        "thing",
+        "this"
+      ],
+      "concepts": [
+        "thing"
+      ]
+    },
+    {
+      "root": "namba",
+      "words": [
+        "child",
+        "children",
+        "small child"
+      ],
+      "concepts": [
+        "child"
+      ]
+    },
+    {
+      "root": "ye",
+      "words": [
+        "drink",
+        "drinks",
+        "water"
+      ],
+      "concepts": [
+        "water"
+      ]
+    },
+    {
+      "root": "dal",
+      "words": [
+        "over",
+        "rises",
+        "rose"
+      ],
+      "concepts": [
+        "up"
+      ]
+    },
+    {
+      "root": "nat",
+      "words": [
+        "fall",
+        "fell",
+        "sets"
+      ],
+      "concepts": [
+        "down"
+      ]
+    },
+    {
+      "root": "sas",
+      "words": [
+        "leaves",
+        "old tree",
+        "tree"
+      ],
+      "concepts": [
+        "plant"
+      ]
+    },
+    {
+      "root": "ja",
+      "words": [
+        "house",
+        "man who built house",
+        "new house"
+      ],
+      "concepts": [
+        "place"
+      ]
+    },
+    {
+      "root": "fes",
+      "words": [
+        "carries",
+        "keeps",
+        "protect"
+      ],
+      "concepts": [
+        "hold"
+      ]
+    },
+    {
+      "root": "kelkal",
+      "words": [
+        "open",
+        "opened",
+        "opens"
+      ],
+      "concepts": [
+        "to open; to make a way through"
+      ]
+    },
+    {
+      "root": "dat",
+      "words": [
+        "bright",
+        "light",
+        "shines"
+      ],
+      "concepts": [
+        "light"
+      ]
+    },
+    {
+      "root": "di",
+      "words": [
+        "before",
+        "old",
+        "yesterday"
+      ],
+      "concepts": [
+        "before"
+      ]
+    },
+    {
+      "root": "shu",
+      "words": [
+        "after",
+        "then",
+        "tomorrow"
+      ],
+      "concepts": [
+        "after"
+      ]
+    },
+    {
+      "root": "mek",
+      "words": [
+        "finish",
+        "finished",
+        "something"
+      ],
+      "concepts": [
+        "bound"
+      ]
+    },
+    {
+      "root": "kat",
+      "words": [
+        "friends help",
+        "help",
+        "helped"
+      ],
+      "concepts": [
+        "help"
+      ]
+    },
+    {
+      "root": "cha",
+      "words": [
+        "changed",
+        "each other",
+        "wakes"
+      ],
+      "concepts": [
+        "change"
+      ]
+    },
+    {
+      "root": "tak",
+      "words": [
+        "all",
+        "everyone",
+        "everything"
+      ],
+      "concepts": [
+        "all"
+      ]
+    },
+    {
+      "root": "mi",
+      "words": [
+        "i",
+        "me"
+      ],
+      "concepts": []
+    },
+    {
+      "root": "fen",
+      "words": [
+        "hot",
+        "warm"
+      ],
+      "concepts": [
+        "hot"
+      ]
+    },
+    {
+      "root": "je",
+      "words": [
+        "large",
+        "tall"
+      ],
+      "concepts": [
+        "big"
+      ]
+    },
+    {
+      "root": "nelto",
+      "words": [
+        "bread",
+        "food"
+      ],
+      "concepts": [
+        "food"
+      ]
+    },
+    {
+      "root": "kalmek",
+      "words": [
+        "door",
+        "doorway"
+      ],
+      "concepts": [
+        "door; a passage through a boundary"
+      ]
+    },
+    {
+      "root": "kelhuba",
+      "words": [
+        "teacher",
+        "teaches"
+      ],
+      "concepts": [
+        "teacher"
+      ]
+    },
+    {
+      "root": "mal",
+      "words": [
+        "fast",
+        "high"
+      ],
+      "concepts": [
+        "fast"
+      ]
+    },
+    {
+      "root": "gumet",
+      "words": [
+        "happy",
+        "laughed"
+      ],
+      "concepts": [
+        "joy"
+      ]
+    },
+    {
+      "root": "mel",
+      "words": [
+        "king",
+        "strong"
+      ],
+      "concepts": [
+        "strong"
+      ]
+    },
+    {
+      "root": "guwi",
+      "words": [
+        "beautiful",
+        "cold but morning was beautiful"
+      ],
+      "concepts": [
+        "beautiful; good to see"
+      ]
+    },
+    {
+      "root": "natye",
+      "words": [
+        "because it rained",
+        "rain"
+      ],
+      "concepts": [
+        "rain"
+      ]
+    },
+    {
+      "root": "mo",
+      "words": [
+        "guard",
+        "work"
+      ],
+      "concepts": [
+        "do"
+      ]
+    },
+    {
+      "root": "kek",
+      "words": [
+        "here",
+        "you here"
+      ],
+      "concepts": [
+        "here"
+      ]
+    },
+    {
+      "root": "hu",
+      "words": [
+        "know",
+        "knows"
+      ],
+      "concepts": [
+        "know"
+      ]
+    },
+    {
+      "root": "gat",
+      "words": [
+        "pain",
+        "sick"
+      ],
+      "concepts": [
+        "pain"
+      ]
+    }
+  ],
   "phrases": [
     {
       "level": 1,
@@ -96,22 +574,44 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 2,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "mi nel",
+      "matches_golden": true
     },
     {
       "level": 1,
       "phrase": "You sleep.",
-      "roman": "nek tem",
+      "roman": "ti tem",
       "unresolved": [],
       "counts": {
         "direct": 1,
-        "semantic": 0,
         "interpreted": 1,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 2,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "ti tem",
+      "matches_golden": true
     },
     {
       "level": 1,
@@ -120,10 +620,21 @@
       "unresolved": [],
       "counts": {
         "direct": 1,
-        "semantic": 0,
         "interpreted": 1,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 2,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "namba gi",
+      "matches_golden": true
     },
     {
       "level": 1,
@@ -132,10 +643,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "tet ye ye",
+      "matches_golden": true
     },
     {
       "level": 1,
@@ -144,10 +666,21 @@
       "unresolved": [],
       "counts": {
         "direct": 1,
-        "semantic": 0,
         "interpreted": 1,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 2,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "tet gi",
+      "matches_golden": true
     },
     {
       "level": 1,
@@ -156,10 +689,21 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 2,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "datbel dal",
+      "matches_golden": true
     },
     {
       "level": 1,
@@ -168,22 +712,44 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 2,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "datbel nat",
+      "matches_golden": true
     },
     {
       "level": 1,
       "phrase": "Fire is hot.",
-      "roman": "nan nan",
+      "roman": "nan fen",
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 2,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "nan fen",
+      "matches_golden": true
     },
     {
       "level": 1,
@@ -192,10 +758,21 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 2,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "ye kam",
+      "matches_golden": true
     },
     {
       "level": 1,
@@ -204,10 +781,21 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 2,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "sas je",
+      "matches_golden": true
     },
     {
       "level": 2,
@@ -216,22 +804,44 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "mi nel nelto",
+      "matches_golden": true
     },
     {
       "level": 2,
       "phrase": "You drink water.",
-      "roman": "nek ye ye",
+      "roman": "ti ye ye",
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 0,
         "interpreted": 1,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "ti ye ye",
+      "matches_golden": true
     },
     {
       "level": 2,
@@ -240,10 +850,29 @@
       "unresolved": [],
       "counts": {
         "direct": 1,
-        "semantic": 1,
         "interpreted": 1,
+        "semantic": 1,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "soft",
+        "pass": 2,
+        "soft": 1,
+        "hard": 0
+      },
+      "review": [
+        {
+          "english": "house",
+          "kind": "semantic",
+          "concept_id": "place",
+          "fonoran": "ja"
+        }
+      ],
+      "gaps": [],
+      "expected": "ben kel ja",
+      "matches_golden": true,
+      "note": "review: house→ja(semantic)"
     },
     {
       "level": 2,
@@ -252,10 +881,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "namba wi tet",
+      "matches_golden": true
     },
     {
       "level": 2,
@@ -264,10 +904,29 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 1,
         "interpreted": 0,
+        "semantic": 1,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "soft",
+        "pass": 2,
+        "soft": 1,
+        "hard": 0
+      },
+      "review": [
+        {
+          "english": "baby",
+          "kind": "semantic",
+          "concept_id": "person",
+          "fonoran": "ba"
+        }
+      ],
+      "gaps": [],
+      "expected": "ba fes ba",
+      "matches_golden": true,
+      "note": "review: baby→ba(semantic)"
     },
     {
       "level": 2,
@@ -276,10 +935,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "ba kelkal kalmek",
+      "matches_golden": true
     },
     {
       "level": 2,
@@ -288,10 +958,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "tet gi tet",
+      "matches_golden": true
     },
     {
       "level": 2,
@@ -300,10 +981,21 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 2,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "kelhuba se",
+      "matches_golden": true
     },
     {
       "level": 2,
@@ -312,10 +1004,21 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 2,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "lahuba gem",
+      "matches_golden": true
     },
     {
       "level": 2,
@@ -324,10 +1027,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "bek gi sas",
+      "matches_golden": true
     },
     {
       "level": 3,
@@ -336,10 +1050,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 1,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 4,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "je tet gi mal",
+      "matches_golden": true
     },
     {
       "level": 3,
@@ -348,10 +1073,21 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 2,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "namba gumet",
+      "matches_golden": true
     },
     {
       "level": 3,
@@ -360,10 +1096,21 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 2,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "sas mel",
+      "matches_golden": true
     },
     {
       "level": 3,
@@ -372,23 +1119,52 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 2,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "ja guwi",
+      "matches_golden": true
     },
     {
       "level": 3,
       "phrase": "The red flower grows.",
-      "roman": "nanles paba jecha",
+      "roman": "nanles pa jecha",
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 0,
         "interpreted": 0,
-        "unknown": 0,
-        "guessed": 1
-      }
+        "semantic": 1,
+        "alias_weak": 0,
+        "unknown": 0
+      },
+      "quality": {
+        "gate": "soft",
+        "pass": 2,
+        "soft": 1,
+        "hard": 0
+      },
+      "review": [
+        {
+          "english": "flower",
+          "kind": "semantic",
+          "concept_id": "flow",
+          "fonoran": "pa"
+        }
+      ],
+      "gaps": [],
+      "expected": "nanles pa jecha",
+      "matches_golden": true,
+      "note": "review: flower→pa(semantic)"
     },
     {
       "level": 3,
@@ -397,10 +1173,29 @@
       "unresolved": [],
       "counts": {
         "direct": 1,
-        "semantic": 1,
         "interpreted": 0,
+        "semantic": 1,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "soft",
+        "pass": 1,
+        "soft": 1,
+        "hard": 0
+      },
+      "review": [
+        {
+          "english": "wide",
+          "kind": "semantic",
+          "concept_id": "whole",
+          "fonoran": "taktes"
+        }
+      ],
+      "gaps": [],
+      "expected": "pakal taktes",
+      "matches_golden": true,
+      "note": "review: wide→taktes(semantic)"
     },
     {
       "level": 3,
@@ -408,11 +1203,30 @@
       "roman": "redal mal",
       "unresolved": [],
       "counts": {
-        "direct": 2,
-        "semantic": 0,
+        "direct": 1,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 1,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "soft",
+        "pass": 1,
+        "soft": 1,
+        "hard": 0
+      },
+      "review": [
+        {
+          "english": "high",
+          "kind": "alias_weak",
+          "concept_id": "fast",
+          "fonoran": "mal"
+        }
+      ],
+      "gaps": [],
+      "expected": "redal mal",
+      "matches_golden": true,
+      "note": "review: high→mal(alias_weak)"
     },
     {
       "level": 3,
@@ -421,10 +1235,21 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 0,
         "interpreted": 1,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "nelto nel gu",
+      "matches_golden": true
     },
     {
       "level": 3,
@@ -433,10 +1258,21 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 2,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "gespu kan",
+      "matches_golden": true
     },
     {
       "level": 3,
@@ -445,10 +1281,21 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 2,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "datdi dat",
+      "matches_golden": true
     },
     {
       "level": 4,
@@ -457,10 +1304,21 @@
       "unresolved": [],
       "counts": {
         "direct": 4,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 4,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "mi ta nel di",
+      "matches_golden": true
     },
     {
       "level": 4,
@@ -469,10 +1327,21 @@
       "unresolved": [],
       "counts": {
         "direct": 4,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 4,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "mi sa nel shu",
+      "matches_golden": true
     },
     {
       "level": 4,
@@ -481,10 +1350,29 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 1,
         "interpreted": 1,
+        "semantic": 1,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "soft",
+        "pass": 3,
+        "soft": 1,
+        "hard": 0
+      },
+      "review": [
+        {
+          "english": "house",
+          "kind": "semantic",
+          "concept_id": "place",
+          "fonoran": "ja"
+        }
+      ],
+      "gaps": [],
+      "expected": "ben ta kel ja",
+      "matches_golden": true,
+      "note": "review: house→ja(semantic)"
     },
     {
       "level": 4,
@@ -493,10 +1381,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 1,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 4,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "ben sa kel kalye",
+      "matches_golden": true
     },
     {
       "level": 4,
@@ -505,10 +1404,21 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 0,
         "interpreted": 1,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "ba gi lelja",
+      "matches_golden": true
     },
     {
       "level": 4,
@@ -517,10 +1427,21 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 0,
         "interpreted": 1,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "ba sa gi",
+      "matches_golden": true
     },
     {
       "level": 4,
@@ -529,10 +1450,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "natye ta kan",
+      "matches_golden": true
     },
     {
       "level": 4,
@@ -541,10 +1473,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "kampu sa gi",
+      "matches_golden": true
     },
     {
       "level": 4,
@@ -553,10 +1496,29 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 1,
         "interpreted": 1,
+        "semantic": 1,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "soft",
+        "pass": 3,
+        "soft": 1,
+        "hard": 0
+      },
+      "review": [
+        {
+          "english": "work",
+          "kind": "semantic",
+          "concept_id": "do",
+          "fonoran": "mo"
+        }
+      ],
+      "gaps": [],
+      "expected": "ben ta mek mo",
+      "matches_golden": true,
+      "note": "review: work→mo(semantic)"
     },
     {
       "level": 4,
@@ -565,34 +1527,67 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "namba sa lahu",
+      "matches_golden": true
     },
     {
       "level": 5,
       "phrase": "Where are you?",
-      "roman": "wo zis fem",
+      "roman": "wo zis ti",
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "wo zis ti",
+      "matches_golden": true
     },
     {
       "level": 5,
       "phrase": "Who are you?",
-      "roman": "wo zas fem",
+      "roman": "wo zas ti",
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "wo zas ti",
+      "matches_golden": true
     },
     {
       "level": 5,
@@ -601,10 +1596,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "wo vus to",
+      "matches_golden": true
     },
     {
       "level": 5,
@@ -613,34 +1619,67 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "wo zos kek",
+      "matches_golden": true
     },
     {
       "level": 5,
       "phrase": "When will you return?",
-      "roman": "wo zes sa fem gi",
+      "roman": "wo zes sa ti gi",
       "unresolved": [],
       "counts": {
         "direct": 5,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 5,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "wo zes sa ti gi",
+      "matches_golden": true
     },
     {
       "level": 5,
       "phrase": "How do you know?",
-      "roman": "wo zus fem hu",
+      "roman": "wo zus ti hu",
       "unresolved": [],
       "counts": {
         "direct": 4,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 4,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "wo zus ti hu",
+      "matches_golden": true
     },
     {
       "level": 5,
@@ -649,34 +1688,75 @@
       "unresolved": [],
       "counts": {
         "direct": 1,
-        "semantic": 1,
         "interpreted": 0,
+        "semantic": 1,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "soft",
+        "pass": 1,
+        "soft": 1,
+        "hard": 0
+      },
+      "review": [
+        {
+          "english": "ready",
+          "kind": "semantic",
+          "concept_id": "make",
+          "fonoran": "kel"
+        }
+      ],
+      "gaps": [],
+      "expected": "nelto kel",
+      "matches_golden": true,
+      "note": "review: ready→kel(semantic)"
     },
     {
       "level": 5,
       "phrase": "Can you help me?",
-      "roman": "nek kat mi",
+      "roman": "ti kat mi",
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 0,
         "interpreted": 1,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "ti kat mi",
+      "matches_golden": true
     },
     {
       "level": 5,
       "phrase": "Did you see it?",
-      "roman": "fem ta wi to",
+      "roman": "ti ta wi to",
       "unresolved": [],
       "counts": {
         "direct": 4,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 4,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "ti ta wi to",
+      "matches_golden": true
     },
     {
       "level": 5,
@@ -685,10 +1765,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "to sa natye",
+      "matches_golden": true
     },
     {
       "level": 6,
@@ -697,22 +1788,44 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "mi bem tatba",
+      "matches_golden": true
     },
     {
       "level": 6,
       "phrase": "Friends help each other.",
-      "roman": "kat nek",
+      "roman": "kat cha",
       "unresolved": [],
       "counts": {
         "direct": 1,
-        "semantic": 0,
         "interpreted": 1,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 2,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "kat cha",
+      "matches_golden": true
     },
     {
       "level": 6,
@@ -721,10 +1834,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "kelhuba kelhuba lahuba",
+      "matches_golden": true
     },
     {
       "level": 6,
@@ -733,10 +1857,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "ba fes namba",
+      "matches_golden": true
     },
     {
       "level": 6,
@@ -745,10 +1880,35 @@
       "unresolved": [],
       "counts": {
         "direct": 1,
-        "semantic": 2,
         "interpreted": 0,
+        "semantic": 2,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "soft",
+        "pass": 1,
+        "soft": 2,
+        "hard": 0
+      },
+      "review": [
+        {
+          "english": "king",
+          "kind": "semantic",
+          "concept_id": "strong",
+          "fonoran": "mel"
+        },
+        {
+          "english": "guard",
+          "kind": "semantic",
+          "concept_id": "do",
+          "fonoran": "mo"
+        }
+      ],
+      "gaps": [],
+      "expected": "mel tat mo",
+      "matches_golden": true,
+      "note": "review: king→mel(semantic), guard→mo(semantic)"
     },
     {
       "level": 6,
@@ -757,10 +1917,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "balatet gi tet",
+      "matches_golden": true
     },
     {
       "level": 6,
@@ -769,10 +1940,21 @@
       "unresolved": [],
       "counts": {
         "direct": 4,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 4,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "bakat katba gat yiba",
+      "matches_golden": true
     },
     {
       "level": 6,
@@ -781,10 +1963,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "basas jecha nelto",
+      "matches_golden": true
     },
     {
       "level": 6,
@@ -793,10 +1986,29 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 1,
         "interpreted": 0,
+        "semantic": 1,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "soft",
+        "pass": 2,
+        "soft": 1,
+        "hard": 0
+      },
+      "review": [
+        {
+          "english": "traveler",
+          "kind": "semantic",
+          "concept_id": "person",
+          "fonoran": "ba"
+        }
+      ],
+      "gaps": [],
+      "expected": "ba wi pakal",
+      "matches_golden": true,
+      "note": "review: traveler→ba(semantic)"
     },
     {
       "level": 6,
@@ -805,10 +2017,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "ben kel ben",
+      "matches_golden": true
     },
     {
       "level": 7,
@@ -817,10 +2040,21 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 2,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "datbeldal guwi",
+      "matches_golden": true
     },
     {
       "level": 7,
@@ -829,10 +2063,21 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 2,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "datbelnat kan",
+      "matches_golden": true
     },
     {
       "level": 7,
@@ -841,10 +2086,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "datkamdat dat pakal",
+      "matches_golden": true
     },
     {
       "level": 7,
@@ -853,10 +2109,21 @@
       "unresolved": [],
       "counts": {
         "direct": 4,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 4,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "nanja fes ben fen",
+      "matches_golden": true
     },
     {
       "level": 7,
@@ -865,10 +2132,21 @@
       "unresolved": [],
       "counts": {
         "direct": 4,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 4,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "baye ta gi pakal",
+      "matches_golden": true
     },
     {
       "level": 7,
@@ -876,11 +2154,30 @@
       "roman": "bakelmak ta sak makmek",
       "unresolved": [],
       "counts": {
-        "direct": 4,
-        "semantic": 0,
+        "direct": 3,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 1,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "soft",
+        "pass": 3,
+        "soft": 1,
+        "hard": 0
+      },
+      "review": [
+        {
+          "english": "made",
+          "kind": "alias_weak",
+          "concept_id": "substance",
+          "fonoran": "sak"
+        }
+      ],
+      "gaps": [],
+      "expected": "bakelmak ta sak makmek",
+      "matches_golden": true,
+      "note": "review: made→sak(alias_weak)"
     },
     {
       "level": 7,
@@ -889,10 +2186,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "badi se se",
+      "matches_golden": true
     },
     {
       "level": 7,
@@ -901,10 +2209,21 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 2,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "kalmek kelkal",
+      "matches_golden": true
     },
     {
       "level": 7,
@@ -913,10 +2232,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "yenat nat kan",
+      "matches_golden": true
     },
     {
       "level": 7,
@@ -925,10 +2255,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 1,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 4,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "tetse cha ben ba",
+      "matches_golden": true
     },
     {
       "level": 8,
@@ -937,10 +2278,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "mi ta san",
+      "matches_golden": true
     },
     {
       "level": 8,
@@ -949,10 +2301,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 2,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 5,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "ben ta kan lel natye",
+      "matches_golden": true
     },
     {
       "level": 8,
@@ -961,10 +2324,21 @@
       "unresolved": [],
       "counts": {
         "direct": 6,
-        "semantic": 0,
         "interpreted": 1,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 7,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "namba ta gumet shu tet gi nes",
+      "matches_golden": true
     },
     {
       "level": 8,
@@ -973,10 +2347,21 @@
       "unresolved": [],
       "counts": {
         "direct": 6,
-        "semantic": 0,
         "interpreted": 1,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 7,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "wo zes datbel dal ben bel gi",
+      "matches_golden": true
     },
     {
       "level": 8,
@@ -985,10 +2370,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "to ta gi",
+      "matches_golden": true
     },
     {
       "level": 8,
@@ -997,10 +2393,21 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 2,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "mi kek",
+      "matches_golden": true
     },
     {
       "level": 8,
@@ -1009,10 +2416,21 @@
       "unresolved": [],
       "counts": {
         "direct": 4,
-        "semantic": 0,
         "interpreted": 1,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 5,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "ba se ba gi shu",
+      "matches_golden": true
     },
     {
       "level": 8,
@@ -1021,22 +2439,44 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 2,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "ja tatde",
+      "matches_golden": true
     },
     {
       "level": 8,
       "phrase": "If you help me, we will finish today.",
-      "roman": "von sa fem kat mi ben mek che",
+      "roman": "von sa ti kat mi ben mek che",
       "unresolved": [],
       "counts": {
         "direct": 8,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 8,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "von sa ti kat mi ben mek che",
+      "matches_golden": true
     },
     {
       "level": 8,
@@ -1045,10 +2485,21 @@
       "unresolved": [],
       "counts": {
         "direct": 5,
-        "semantic": 0,
         "interpreted": 1,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 6,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "ben ta kan di gi gikal",
+      "matches_golden": true
     },
     {
       "level": 9,
@@ -1057,10 +2508,21 @@
       "unresolved": [],
       "counts": {
         "direct": 27,
-        "semantic": 0,
         "interpreted": 3,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 30,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "di ta ben gi pakal ye ta guwi ben ta kel nam nan kel nelto shu ta ben nel ben wi datbeldal dal re shu ta ben gi lelja ben",
+      "matches_golden": true
     },
     {
       "level": 10,
@@ -1069,10 +2531,21 @@
       "unresolved": [],
       "counts": {
         "direct": 6,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 6,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "mi ta vat wi nanles tet",
+      "matches_golden": true
     },
     {
       "level": 10,
@@ -1081,10 +2554,21 @@
       "unresolved": [],
       "counts": {
         "direct": 6,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 6,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "vat ta mi wi nanles tet",
+      "matches_golden": true
     },
     {
       "level": 10,
@@ -1093,10 +2577,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "mi yones nat",
+      "matches_golden": true
     },
     {
       "level": 10,
@@ -1105,22 +2600,44 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "mi no se",
+      "matches_golden": true
     },
     {
       "level": 10,
       "phrase": "Everyone knows something.",
-      "roman": "tak ba hu tes",
+      "roman": "tak ba hu mek",
       "unresolved": [],
       "counts": {
         "direct": 4,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 4,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "tak ba hu mek",
+      "matches_golden": true
     },
     {
       "level": 10,
@@ -1129,10 +2646,21 @@
       "unresolved": [],
       "counts": {
         "direct": 5,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 5,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "no ba hu tak to",
+      "matches_golden": true
     },
     {
       "level": 10,
@@ -1141,10 +2669,21 @@
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "kalmek ta kelkal",
+      "matches_golden": true
     },
     {
       "level": 10,
@@ -1153,10 +2692,21 @@
       "unresolved": [],
       "counts": {
         "direct": 4,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 4,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "mi ta kelkal kalmek",
+      "matches_golden": true
     },
     {
       "level": 10,
@@ -1164,11 +2714,36 @@
       "roman": "namba ta sak kel",
       "unresolved": [],
       "counts": {
-        "direct": 3,
-        "semantic": 1,
+        "direct": 2,
         "interpreted": 0,
+        "semantic": 1,
+        "alias_weak": 1,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "soft",
+        "pass": 2,
+        "soft": 2,
+        "hard": 0
+      },
+      "review": [
+        {
+          "english": "made",
+          "kind": "alias_weak",
+          "concept_id": "substance",
+          "fonoran": "sak"
+        },
+        {
+          "english": "toy",
+          "kind": "semantic",
+          "concept_id": "make",
+          "fonoran": "kel"
+        }
+      ],
+      "gaps": [],
+      "expected": "namba ta sak kel",
+      "matches_golden": true,
+      "note": "review: made→sak(alias_weak), toy→kel(semantic)"
     },
     {
       "level": 10,
@@ -1176,11 +2751,36 @@
       "roman": "kel ta sak namba",
       "unresolved": [],
       "counts": {
-        "direct": 3,
-        "semantic": 1,
+        "direct": 2,
         "interpreted": 0,
+        "semantic": 1,
+        "alias_weak": 1,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "soft",
+        "pass": 2,
+        "soft": 2,
+        "hard": 0
+      },
+      "review": [
+        {
+          "english": "toy",
+          "kind": "semantic",
+          "concept_id": "make",
+          "fonoran": "kel"
+        },
+        {
+          "english": "made",
+          "kind": "alias_weak",
+          "concept_id": "substance",
+          "fonoran": "sak"
+        }
+      ],
+      "gaps": [],
+      "expected": "kel ta sak namba",
+      "matches_golden": true,
+      "note": "review: toy→kel(semantic), made→sak(alias_weak)"
     },
     {
       "level": 10,
@@ -1189,10 +2789,21 @@
       "unresolved": [],
       "counts": {
         "direct": 7,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 7,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "mi ta mas ba hu ba gi",
+      "matches_golden": true
     },
     {
       "level": 10,
@@ -1201,10 +2812,35 @@
       "unresolved": [],
       "counts": {
         "direct": 2,
-        "semantic": 2,
         "interpreted": 0,
+        "semantic": 2,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "soft",
+        "pass": 2,
+        "soft": 2,
+        "hard": 0
+      },
+      "review": [
+        {
+          "english": "young",
+          "kind": "semantic",
+          "concept_id": "move",
+          "fonoran": "gi"
+        },
+        {
+          "english": "son",
+          "kind": "semantic",
+          "concept_id": "word",
+          "fonoran": "nense"
+        }
+      ],
+      "gaps": [],
+      "expected": "di ba gi nense",
+      "matches_golden": true,
+      "note": "review: young→gi(semantic), son→nense(semantic)"
     },
     {
       "level": 10,
@@ -1213,10 +2849,29 @@
       "unresolved": [],
       "counts": {
         "direct": 0,
-        "semantic": 1,
         "interpreted": 1,
+        "semantic": 1,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "soft",
+        "pass": 1,
+        "soft": 1,
+        "hard": 0
+      },
+      "review": [
+        {
+          "english": "fish",
+          "kind": "semantic",
+          "concept_id": "eat",
+          "fonoran": "nel"
+        }
+      ],
+      "gaps": [],
+      "expected": "ben nel",
+      "matches_golden": true,
+      "note": "review: fish→nel(semantic)"
     },
     {
       "level": 10,
@@ -1225,22 +2880,136 @@
       "unresolved": [],
       "counts": {
         "direct": 1,
-        "semantic": 0,
         "interpreted": 1,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 2,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "pu gi",
+      "matches_golden": true
     },
     {
       "level": 10,
       "phrase": "Light travels fast.",
-      "roman": "ges kal mal",
+      "roman": "dat gi mal",
       "unresolved": [],
       "counts": {
         "direct": 3,
-        "semantic": 0,
         "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
         "unknown": 0
-      }
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 3,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "dat gi mal",
+      "matches_golden": true
+    },
+    {
+      "level": 11,
+      "phrase": "If you had not helped us, we would not have finished the bridge.",
+      "roman": "von no ti kat ben ben mek kalye",
+      "unresolved": [],
+      "counts": {
+        "direct": 8,
+        "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
+        "unknown": 0
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 8,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "von no ti kat ben ben mek kalye",
+      "matches_golden": true
+    },
+    {
+      "level": 11,
+      "phrase": "The woman who taught me said that the river had changed.",
+      "roman": "wo ba ta zas kelhu mi se pakal cha",
+      "unresolved": [],
+      "counts": {
+        "direct": 9,
+        "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
+        "unknown": 0
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 9,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "wo ba ta zas kelhu mi se pakal cha",
+      "matches_golden": true
+    },
+    {
+      "level": 11,
+      "phrase": "Why did the old hunter give the child his knife?",
+      "roman": "wo zos ta di balatet ku namba makmek",
+      "unresolved": [],
+      "counts": {
+        "direct": 8,
+        "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
+        "unknown": 0
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 8,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "wo zos ta di balatet ku namba makmek",
+      "matches_golden": true
+    },
+    {
+      "level": 11,
+      "phrase": "Time heals all wounds, but memory keeps the pain alive.",
+      "roman": "pu kelgu tak gatdam hudito fes gat fo",
+      "unresolved": [],
+      "counts": {
+        "direct": 8,
+        "interpreted": 0,
+        "semantic": 0,
+        "alias_weak": 0,
+        "unknown": 0
+      },
+      "quality": {
+        "gate": "pass",
+        "pass": 8,
+        "soft": 0,
+        "hard": 0
+      },
+      "review": [],
+      "gaps": [],
+      "expected": "pu kelgu tak gatdam hudito fes gat fo",
+      "matches_golden": true
     }
   ]
 }

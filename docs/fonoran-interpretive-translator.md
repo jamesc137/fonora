@@ -30,7 +30,7 @@ Present has **no time particle**. Past uses **ta**, future **na**.
 English text
     ↓  Frame parser (phrase-aware, multi-sentence)
 Semantic frame (subject, time, event, path, object, modifiers)
-    ↓  Resolution (shared with Word Generator)
+    ↓  Resolution (curated aliases → rules → semantic; honest gaps)
 Concept ids + spellings
     ↓  Surface builder
 Roman line + pronunciation + script
@@ -63,42 +63,45 @@ Tokenizes English, skips articles/auxiliaries/conjunctions, assigns **grammar sl
 | Spatial phrase | `jumped over the moon` → event + path + object |
 | Future peel | `going to`, `will` → `na` + main verb phrase |
 
-**Pronouns:** `I` / `me` → particle **mi** (any slot). Other pronouns map to nearest concept hints (`we` → `collective`, etc.).
+**Pronouns:** `I` / `me` → particle **mi** (any slot). Other pronouns map to nearest concept hints (`we` → `collective`, etc.). Second-person `you` has **no root yet**, so it surfaces as a gap rather than mis-mapping.
 
 ### Layer 2: Resolution
 
-Shared module: `tools/fonoran-english-resolve.js` (also used by Word Generator).
+Module: `tools/fonoran-english-resolve.js`.
 
 **Tiers** (best → worst):
 
 | Tier | Meaning | UI |
 | --- | --- | --- |
-| `direct` | Alias or lab match | default |
+| `direct` | Strong (curated) alias or lab match | default |
 | `interpreted` | Rules, class, idiom, frame hint | yellow |
-| `semantic` | WordNet synonym / hypernym | orange |
-| `guessed` | Ephemeral compound suggestion | orange |
+| `semantic` | WordNet synonym / hypernym (existing root only) | orange |
+| `alias_weak` | Weak (description/gloss-derived) alias — low confidence | orange |
 | `unknown` | No approved spelling | **red** `[english]` |
 
 Resolution order per token:
 
 1. Frame **concept hint** (linking verbs, idioms, path slots)
-2. Direct alias — inventory, `data/localizations/en.json`, lab sounds/compounds
+2. Direct (strong) alias — inventory, `data/localizations/en.json`, lab sounds/compounds
 3. Class / irregular past — `data/fonoran-interpretation-rules.json`
-4. WordNet (semantic tier), then compound guess
-5. Unresolved — never silently dropped
+4. WordNet single-concept fallback (`semantic`) → else weak alias (`alias_weak`)
+5. Unresolved — never silently dropped, never fabricated
 
-**Locale aliases beat lab gloss aliases** for the same concept id. Interpretation never mints new roots.
+**Strong aliases beat weak (description-derived) aliases** for the same key,
+regardless of order — so a gloss token like `light` from dark's "no light" can
+never shadow the real `light` root. Interpretation never mints new roots, and
+there is no generated-compound guess tier (the Word Generator was removed).
 
 ### Layer 3: Surface
 
-Walks resolved tokens in slot order. Grammar particles (`mi`, `ta`, `na`) emit as-is. Unresolved slots stay **red** in the UI.
+Walks resolved tokens in slot order. Grammar particles (`mi`, `ta`, `sa`) emit as-is. Unresolved slots stay **red** in the UI.
 
 ## UI
 
 Translator tab: `language/index.html` + `language/fonoran-app.js`.
 
-- Color tiers on tokens (interpreted / semantic / unknown)
-- Click unresolved tokens → Word Generator deep link
+- Color tiers on tokens (interpreted / semantic / alias_weak / unknown)
+- Unresolved tokens render in red as honest gaps — add a root/compound in the Root Creator or Word Creator
 - Example chips use sentences that resolve cleanly (e.g. *All men are created equal*)
 
 ## Data files

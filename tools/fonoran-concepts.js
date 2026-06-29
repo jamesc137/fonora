@@ -277,10 +277,23 @@ export function buildRootById(concepts, lab = null) {
 export function buildConceptAliasIndex(concepts, lab = null, locData = {}, { labFirst = false } = {}) {
   const index = new Map();
 
-  const register = (alias, entry, { force = false } = {}) => {
+  // Alias strength controls shadowing. `strong` aliases are authoritative
+  // (concept id, curated locale/stored aliases, lab meaning + aliases); `weak`
+  // aliases are derived from description/gloss text and must never shadow a
+  // strong claim. Order-independent rule: a weak registration never overwrites
+  // an existing entry, and a strong registration may overwrite an existing weak
+  // entry (so e.g. the strong `light` root always wins over the weak `light`
+  // token leaked from dark's gloss "no light"). `force` (lab-canonical) wins
+  // over anything.
+  const register = (alias, entry, { force = false, strength = 'strong' } = {}) => {
     const key = String(alias ?? '').trim().toLowerCase();
-    if (!key || (index.has(key) && !force)) return;
-    index.set(key, entry);
+    if (!key) return;
+    const existing = index.get(key);
+    if (existing && !force) {
+      const overrideWeak = strength === 'strong' && existing.alias_strength === 'weak';
+      if (!overrideWeak) return;
+    }
+    index.set(key, { ...entry, alias_strength: strength });
   };
 
   const baseFor = (c) => ({
@@ -328,14 +341,33 @@ export function buildConceptAliasIndex(concepts, lab = null, locData = {}, { lab
       source: 'lab',
       state: sound.state,
     };
-    register(meaning, entry, { force });
-    if (sound.concept_id) {
-      for (const alias of hit?.aliases ?? [sound.concept_id]) {
-        register(alias, { ...entry, matched_alias: alias }, { force });
+    // The sound's own meaning + curated aliases are authoritative (strong).
+    register(meaning, entry, { force, strength: 'strong' });
+
+    // Curated strong set = concept id + localized aliases + the meaning label.
+    // Lab-sound `aliases` arrays historically also include description/gloss
+    // tokens (e.g. dark's "light", path's "travel", surface's "you"); those must
+    // be demoted to weak so they can never shadow the real root they belong to.
+    const strongSet = new Set([meaning]);
+    if (hit) {
+      for (const alias of strongAliases(hit)) {
+        const key = String(alias).toLowerCase();
+        strongSet.add(key);
+        register(alias, { ...entry, matched_alias: alias }, { force, strength: 'strong' });
       }
+      for (const alias of weakAliases(hit)) {
+        register(alias, { ...entry, matched_alias: alias }, { strength: 'weak' });
+      }
+    } else if (sound.concept_id) {
+      strongSet.add(String(sound.concept_id).toLowerCase());
+      register(sound.concept_id, { ...entry, matched_alias: sound.concept_id }, { force, strength: 'strong' });
     }
     for (const alias of sound.aliases ?? []) {
-      register(alias, { ...entry, matched_alias: alias }, { force });
+      const isStrong = strongSet.has(String(alias).toLowerCase());
+      register(alias, { ...entry, matched_alias: alias }, {
+        force: force && isStrong,
+        strength: isStrong ? 'strong' : 'weak',
+      });
     }
   };
 
@@ -349,11 +381,11 @@ export function buildConceptAliasIndex(concepts, lab = null, locData = {}, { lab
 
   for (const c of concepts) {
     const base = baseFor(c);
-    for (const alias of strongAliases(c)) register(alias, { ...base, matched_alias: alias });
+    for (const alias of strongAliases(c)) register(alias, { ...base, matched_alias: alias }, { strength: 'strong' });
   }
   for (const c of concepts) {
     const base = baseFor(c);
-    for (const alias of weakAliases(c)) register(alias, { ...base, matched_alias: alias });
+    for (const alias of weakAliases(c)) register(alias, { ...base, matched_alias: alias }, { strength: 'weak' });
   }
 
   const bestByConcept = labSoundsByConceptId(lab);

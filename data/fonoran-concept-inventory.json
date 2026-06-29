@@ -908,11 +908,20 @@
       "priority_class": "common",
       "suggested_status": "primitive",
       "plain_description": "a name"
+    },
+    {
+      "id": "addressee",
+      "domain": "being",
+      "description": "the entity spoken to; you",
+      "priority_class": "essential",
+      "suggested_status": "primitive",
+      "plain_description": "the entity spoken to; you",
+      "primitive_test_note": "Distinct from self (speaker locus) and person (generic someone). Mirrors self for second-person deixis."
     }
   ],
   "description": "Converged Fonoran concept inventory: 97 primitive roots + grammar particles. Derivable concepts live in data/fonoran-compounds.json; polarity/tense/mood are particles, not roots.",
   "extended_count": 8,
-  "primitive_count": 97,
+  "primitive_count": 98,
   "productive_dimensions": {
     "bond": [
       "family",

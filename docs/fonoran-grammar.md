@@ -463,7 +463,6 @@ Multi-part compounds must satisfy the constraint at **every boundary**, not just
 The constraint is enforced at:
 - **Root generation** (`fonoran-root-boundary-score.js`) — when a root is assigned a spelling, candidate forms are scored against the root's likely compound partners; forms that would create boundary collisions are penalized and any remaining risk is surfaced as a warning in Review (`compound_flow_score` + `boundary_warnings`).
 - **Build time** (`npm run fonoran:build`) — curated compounds that violate it are dropped with a clear reason.
-- **Word generator** (`fonoran-word-generator.js`) — boundary-invalid candidates are excluded from ranked options.
 - **Word composer UI** — saving is blocked and the violation is shown inline.
 - **API** (`POST /api/fonoran/lab/compounds`) — the server rejects the request with a descriptive error.
 
@@ -567,6 +566,57 @@ Whenever a concept cannot yet be expressed in Fonoran, the translator must show 
 Unknown concepts are valuable. They reveal where the language needs to grow. As the language grows, fewer words will appear in red.
 
 The translator should function as a **language development tool**, not just a translation tool.
+
+### Resolution cascade & honest gaps
+
+Each English token is resolved through an ordered cascade. The first legitimate
+match wins; if none matches, the token is an **honest gap** (red) — the
+translator never fabricates a spelling.
+
+| Tier | `resolution_kind` | Quality | Notes |
+| --- | --- | --- | --- |
+| Curated alias | `direct` | pass | Concept id, localized alias, or lab meaning/alias. |
+| Interpretation rule | `interpreted` | pass | Tense lemmas, idioms, spatial/relational frames, pronoun hints. |
+| Nearest existing root | `semantic` | review | A real WordNet hypernym that already has a root. Single concept only. |
+| Weak (gloss) alias | `alias_weak` | review | Alias derived from a concept's *description* text (low confidence). |
+| Unresolved | `unknown` | gap | No legitimate match — surfaces in red for the designer to grow a root. |
+
+**Strong vs weak aliases.** An alias is **strong** when it comes from a curated
+source: the concept id, its localized aliases, or a lab sound's meaning/curated
+aliases. An alias is **weak** when it is merely a token from a concept's
+*description gloss* (e.g. `dark`'s gloss "no light" leaks the token `light`).
+Weak aliases can **never shadow** a strong root, regardless of registration
+order, and they resolve as `alias_weak` (low confidence) so the quality gate can
+flag mismatches like the old `travel → path` and `light → dark` errors.
+
+**No generated guesses.** The translator does not invent multi-root compounds
+for unknown words. The standalone Word Generator has been removed; the only
+non-curated tier is the single-concept `semantic` fallback to an *existing*
+root. Anything else is an honest gap.
+
+**Meaningful function words.** Relational words that carry meaning are not
+blanket-skipped: e.g. `from` resolves to the `source` root rather than being
+dropped. Only truly contentless articles/possessives/conjunctions are skipped.
+Second-person **`you`** resolves lexically to the **`addressee`** root (**`ti`**), symmetric to **`self`** (**`de`**) for the speaker.
+
+### Golden regression suite
+
+[../data/fonoran-translation-tests.json](../data/fonoran-translation-tests.json)
+is a **golden corpus**: ~100 canonical English sentences (11 levels), each with
+the exact `fon` (roman) output the project commits to, plus a `note` recording
+known gaps/decisions. It is the permanent regression snapshot — run it on every
+grammar, root, or rule change:
+
+```bash
+npm run test:translator          # assert: FAIL on any drift or new gap
+npm run test:translator:update   # accept current output as the new golden baseline
+node scripts/fonoran-translation-gaps.js   # full human report (coverage, gaps, collapses)
+```
+
+The runner also grades resolution quality (pass / review / gap) and reports
+**concept collapses** — distinct English words sharing one root (e.g.
+`man`, `woman`, `baby → ba`) — so the designer can decide whether a concept
+needs its own root. `npm test` runs this suite automatically.
 
 ### Example: love and family
 

@@ -1838,11 +1838,9 @@
       }
     }
 
-    /* --- Translator / Word Generator --- */
+    /* --- Translator --- */
     html[data-fonora-page='translator'] #page-translator,
-    #page-translator.active,
-    html[data-fonora-page='wordgen'] #page-wordgen,
-    #page-wordgen.active {
+    #page-translator.active {
       display:block !important;
     }
     .translator-page { max-width:72rem; margin:0 auto; padding:0 1rem 2rem; min-width:0; width:100%; }
@@ -1850,20 +1848,7 @@
     .translator-unresolved-sample { color:var(--danger, #c0392b); font-weight:600; }
     .translator-resolved--interpreted { color:#b8860b; font-weight:600; }
     .translator-resolved--semantic { color:#c2700a; font-weight:600; }
-    .translator-resolved--guessed {
-      color:#c2700a;
-      font-weight:600;
-      text-decoration:underline;
-      text-decoration-style:dashed;
-      text-underline-offset:0.15em;
-    }
-    .translator-token__wordgen-link {
-      font-size:0.74rem;
-      margin-left:0.25rem;
-      color:var(--accent, #5a7a9a);
-      text-decoration:none;
-    }
-    .translator-token__wordgen-link:hover { text-decoration:underline; }
+    .translator-resolved--alias_weak { color:#c2700a; font-weight:600; }
     .translator-playback-bar {
       display:flex;
       flex-wrap:wrap;
@@ -2101,101 +2086,6 @@
       .translator-playback-bar { flex-direction:column; align-items:stretch; }
       .translator-playback-bar__actions { justify-content:flex-start; }
     }
-
-    /* ---------- Word Generator (split layout) ---------- */
-    .wg-beta-banner {
-      display:flex; align-items:flex-start; gap:0.6rem;
-      background:rgba(184,116,42,0.08); border:1px solid rgba(184,116,42,0.22);
-      border-radius:8px; padding:0.6rem 0.75rem; margin-bottom:0.85rem;
-      font-size:0.8rem; color:var(--muted); line-height:1.45;
-    }
-    .wg-beta-badge {
-      flex:0 0 auto; background:var(--accent,#b8742a); color:#fff;
-      font-size:0.68rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase;
-      padding:0.15rem 0.45rem; border-radius:4px; margin-top:0.05rem;
-    }
-    #page-wordgen .fonoran-split-picker,
-    #page-wordgen .fonoran-split-workspace {
-      position:sticky;
-      top:var(--fonoran-split-chrome-offset, 9rem);
-      max-height:calc(100svh - var(--fonoran-split-chrome-offset, 9rem) - 1.25rem);
-      overflow:auto;
-    }
-    #page-wordgen .dict-item {
-      scroll-margin-top:calc(var(--fonoran-split-chrome-offset, 9rem) + 1rem);
-    }
-    .wg-chrome-row {
-      display:flex;
-      gap:0.5rem;
-      align-items:stretch;
-      margin-bottom:0.65rem;
-    }
-    .wg-chrome-row input[type=text] { flex:1; margin:0; }
-    .wg-chrome-row .btn { flex:0 0 auto; align-self:stretch; }
-    .wg-examples {
-      display:flex;
-      flex-wrap:wrap;
-      align-items:center;
-      gap:0.4rem;
-      margin:0;
-    }
-    .wg-examples__label { font-size:0.82rem; color:var(--muted); margin-right:0.15rem; }
-    .wg-hint { color:var(--muted); font-size:0.82rem; font-weight:400; }
-    .wg-editor { padding:0.85rem 1rem; display:flex; flex-direction:column; gap:1.25rem; }
-    .wg-editor-section .fld:first-child { margin-top:0; }
-    .wg-chips { display:flex; flex-wrap:wrap; gap:0.4rem; margin:0.35rem 0 0.75rem; min-height:1.5rem; align-items:center; }
-    .wg-chip {
-      display:inline-flex; align-items:center; gap:0.4rem;
-      padding:0.25rem 0.3rem 0.25rem 0.6rem;
-      border:1px solid var(--border); border-radius:999px;
-      background:var(--surface); font-size:0.85rem;
-    }
-    .wg-chip__id { font-weight:600; }
-    .wg-chip__type {
-      font-size:0.65rem; text-transform:uppercase; letter-spacing:0.04em;
-      color:var(--muted); padding:0.1rem 0.35rem; border-radius:4px;
-      background:var(--bg); border:1px solid var(--border);
-    }
-    .wg-chip__root { color:var(--accent); font-family:var(--font-mono); }
-    .wg-chip__x {
-      border:none; background:transparent; cursor:pointer; line-height:1;
-      font-size:1rem; color:var(--muted); padding:0 0.15rem; border-radius:50%;
-    }
-    .wg-chip__x:hover { color:var(--danger,#c0392b); }
-    .wg-add-row { display:flex; gap:0.5rem; align-items:stretch; }
-    .wg-add-row input[type=text] { flex:1; margin:0; }
-    .wg-unresolved { margin:0 0 0.75rem; color:var(--danger,#c0392b); font-size:0.88rem; }
-    .wg-detail__hero { margin-bottom:0.75rem; }
-    .wg-detail__glyphs { font-size:2rem; line-height:1.2; margin-bottom:0.35rem; }
-    .wg-detail__spelling { font-size:1.35rem; font-weight:700; letter-spacing:0.01em; }
-    .wg-detail__breakdown { margin-top:0.35rem; color:var(--muted); font-size:0.9rem; }
-    .wg-detail__meta {
-      display:flex; flex-wrap:wrap; gap:0.5rem 0.9rem;
-      font-size:0.82rem; color:var(--muted);
-    }
-    .wg-detail__meta-row {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:0.75rem;
-      flex-wrap:wrap;
-      margin-bottom:0.85rem;
-    }
-    .wg-detail__hear {
-      flex-shrink:0;
-      padding:0.4rem 0.75rem;
-      font-size:0.82rem;
-      white-space:nowrap;
-    }
-    .wg-editor-footer {
-      margin-top:auto;
-      padding-top:0.85rem;
-      border-top:1px solid var(--border);
-    }
-    .wg-editor-footer .btn { width:100%; justify-content:center; }
-    .wg-tag { padding:0.05rem 0.5rem; border-radius:999px; font-weight:600; font-size:0.72rem; }
-    .wg-tag--ok { background:rgba(46,160,99,0.14); color:#2e7d4f; }
-    .wg-tag--warn { background:rgba(192,57,43,0.12); color:#c0392b; }
 
     /* ── Translation gap test ─────────────────────────────────────── */
     .gap-controls { display:flex; align-items:flex-end; gap:0.85rem; flex-wrap:wrap; margin:0.5rem 0 0.35rem; }

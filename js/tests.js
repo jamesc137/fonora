@@ -293,7 +293,9 @@ const fonoranTranslatorResult = await (async () => {
     const future = await translateEnglish('the man is going to jump');
     assert(future.unresolved.length === 0, `future unresolved: ${future.unresolved.join(', ')}`);
     const futureMove = future.tokens.find(t => t.english === 'jump' || t.concept_id === 'move')?.fonoran ?? movedRoman;
-    assert(future.surface.roman === `ba na ${futureMove}`, `future roman: ${future.surface.roman}`);
+    // Future is a single particle `sa` (the near-future `na` was retired when the
+    // particle inventory was trimmed to a rule-compliant core).
+    assert(future.surface.roman === `ba sa ${futureMove}`, `future roman: ${future.surface.roman}`);
     assert(!future.surface.roman.includes(' la '), `future should not have la: ${future.surface.roman}`);
     assert(!future.surface.roman.includes(' fi '), `future should not use retired fi: ${future.surface.roman}`);
     assert(future.semantic?.slots?.time?.[0]?.english === 'future', 'future time slot');
@@ -312,7 +314,7 @@ const fonoranTranslatorResult = await (async () => {
     assert(futureEat.unresolved.length === 0, `futureEat unresolved: ${futureEat.unresolved.join(', ')}`);
     const feEat = futureEat.tokens.find(t => t.english === 'eat' || t.concept_id === 'eat')?.fonoran;
     const feAnimal = futureEat.tokens.find(t => t.english === 'animal' || t.concept_id === 'animal')?.fonoran;
-    assert(futureEat.surface.roman === `ba na ${feEat} ${feAnimal}`, `futureEat roman: ${futureEat.surface.roman}`);
+    assert(futureEat.surface.roman === `ba sa ${feEat} ${feAnimal}`, `futureEat roman: ${futureEat.surface.roman}`);
 
     const morningLab = {
       sounds: [],
@@ -401,6 +403,28 @@ const fonoranTranslatorResult = await (async () => {
     assert(!udhr.tokens.some(t => t.english === 'should'), 'udhr modal should omitted');
     assert(!udhr.tokens.some(t => t.english === 'spirit' && t.concept_id === 'feel'), 'udhr spirit must not map to feel');
     assert(udhr.unresolved.includes('free') && udhr.unresolved.includes('dignity'), `udhr expected reds: ${udhr.unresolved.join(', ')}`);
+
+    // Regression: weak (description/gloss-derived) aliases must never shadow a
+    // real root. `light` previously resolved to dark (ges) and `travels` to path
+    // (kal) via gloss tokens leaked through lab-sound aliases.
+    const light = await translateEnglish('Light travels fast.');
+    assert(light.surface.roman === 'dat gi mal', `light roman: ${light.surface.roman}`);
+    const lightTok = light.tokens.find(t => t.english === 'light');
+    assert(lightTok?.fonoran === 'dat' && lightTok?.resolution_kind === 'direct', `light token: ${JSON.stringify(lightTok)}`);
+    const travelsTok = light.tokens.find(t => t.english === 'travels');
+    assert(travelsTok?.concept_id === 'move' && travelsTok?.fonoran === 'gi', `travels token: ${JSON.stringify(travelsTok)}`);
+
+    // Regression: second-person `you` resolves to the addressee root (`ti`).
+    const youSleep = await translateEnglish('You sleep.');
+    assert(youSleep.unresolved.length === 0, `you sleep unresolved: ${youSleep.unresolved.join(', ')}`);
+    const youTok = youSleep.tokens.find(t => t.english === 'you');
+    assert(youTok?.concept_id === 'addressee' && youTok?.fonoran === 'ti', `you token: ${JSON.stringify(youTok)}`);
+
+    // Regression: `from` carries origin meaning and resolves to the `source`
+    // root (bel) instead of being silently dropped as a function word.
+    const fromRiver = await translateEnglish('I come from the river.');
+    const fromTok = fromRiver.tokens.find(t => t.english === 'from');
+    assert(fromTok?.concept_id === 'source' && Boolean(fromTok?.fonoran), `from -> source: ${JSON.stringify(fromTok)}`);
 
     return { name: testName, ok: true };
   } catch (e) {

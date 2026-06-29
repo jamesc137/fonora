@@ -1,8 +1,8 @@
 {
   "version": "1.0-approved-roots",
-  "updated_at": "2026-06-29T06:23:06.688Z",
+  "updated_at": "2026-06-29T21:11:51.392Z",
   "philosophy": "Only human-approved roots from Root Review are canonical.",
-  "root_count": 97,
+  "root_count": 98,
   "roots": [
     {
       "id": "person",
@@ -876,6 +876,15 @@
       "domain": "communication",
       "reason": "a name — basic everyday idea that deserves its own root.",
       "approved_at": "2026-06-29T06:23:04.546Z"
+    },
+    {
+      "id": "addressee",
+      "spelling": "ti",
+      "ipa": "/tɪ/",
+      "concept": "the entity spoken to; you",
+      "domain": "being",
+      "reason": "New concept: the person spoken to.",
+      "approved_at": "2026-06-29T21:09:49.678Z"
     }
   ]
 }

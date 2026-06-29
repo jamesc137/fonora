@@ -48,7 +48,6 @@ The **Language Builder Tools** at [`/fonoran/`](fonoran/) are the suite used to 
 | Builder tool | Purpose |
 | --- | --- |
 | [Review](fonoran/#review) | Approve roots and words (Root queue · Roots · Words · Generated) |
-| [Word Generator](fonoran/#wordgen) | English phrase → compound suggestions (beta) |
 | [Word Creator](fonoran/#create) | Stack roots and approved words |
 | [Root Creator](fonoran/#roots) | Create primitive syllables (CV / CVC) |
 | [Concept Editor](fonoran/#concepts) | Edit concepts, aliases, spellings |

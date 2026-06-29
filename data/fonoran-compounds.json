@@ -191,17 +191,17 @@
       "concept": "friend",
       "composition": [
         "bond",
-        "self"
+        "near"
       ],
-      "gloss": "one bonded to oneself"
+      "gloss": "a close bond"
     },
     {
       "concept": "leader",
       "composition": [
-        "before",
+        "head",
         "person"
       ],
-      "gloss": "the person who goes before"
+      "gloss": "the head person"
     },
     {
       "concept": "helper",
@@ -342,10 +342,10 @@
     {
       "concept": "rain",
       "composition": [
-        "down",
-        "water"
+        "water",
+        "down"
       ],
-      "gloss": "water coming down"
+      "gloss": "water falling down"
     },
     {
       "concept": "cloud",

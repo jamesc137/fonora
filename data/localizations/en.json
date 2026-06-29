@@ -606,6 +606,15 @@
         "shining"
       ]
     },
+    "metal": {
+      "label": "metal",
+      "aliases": [
+        "metal",
+        "iron",
+        "steel",
+        "bronze"
+      ]
+    },
     "place": {
       "label": "place",
       "aliases": [
@@ -892,6 +901,13 @@
         "we",
         "us",
         "everyone"
+      ]
+    },
+    "parent": {
+      "label": "parent",
+      "aliases": [
+        "parent",
+        "parents"
       ]
     }
   },

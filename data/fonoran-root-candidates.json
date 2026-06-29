@@ -1,9 +1,9 @@
 {
   "status": "proposal",
   "summary": {
-    "total": 98,
+    "total": 100,
     "pending": 0,
-    "approved": 98,
+    "approved": 100,
     "rejected": 0
   },
   "version": "2.0-editorial-workflow",
@@ -3630,6 +3630,64 @@
       "plain_description": "the entity spoken to; you",
       "pronunciation_ease": null,
       "primitive_test_note": "Distinct from self (speaker locus) and person (generic someone). Mirrors self for second-person deixis.",
+      "semantic_usefulness": null,
+      "pronunciation_ease_label": null,
+      "semantic_usefulness_label": null
+    },
+    {
+      "id": "metal",
+      "ipa": "/pɛl/",
+      "domain": "element",
+      "reason": "metal — a basic worked material; needed for tools, weapons, and a smith.",
+      "review": {
+        "note": "created in concept editor",
+        "edited_at": "2026-06-29T21:23:10.830Z",
+        "approved_at": "2026-06-29T21:23:15.573Z",
+        "rejected_at": null
+      },
+      "status": "approved",
+      "concept": "a hard shiny material you can shape, like iron",
+      "priority": 0,
+      "spelling": "pel",
+      "generation": {
+        "tier": "concept-editor",
+        "template": null,
+        "phonetic_cost": null
+      },
+      "priority_class": "common",
+      "priority_weight": 80,
+      "suggested_status": "primitive",
+      "plain_description": "a hard shiny material you can shape, like iron",
+      "pronunciation_ease": null,
+      "semantic_usefulness": null,
+      "pronunciation_ease_label": null,
+      "semantic_usefulness_label": null
+    },
+    {
+      "id": "parent",
+      "ipa": "/pɑ/",
+      "domain": "being",
+      "reason": "parent — core kinship root for family terms like grandparent.",
+      "review": {
+        "note": "created in concept editor",
+        "edited_at": "2026-06-29T21:34:03.895Z",
+        "approved_at": "2026-06-29T21:23:25.725Z",
+        "rejected_at": null
+      },
+      "status": "approved",
+      "concept": "a mother or father",
+      "priority": 0,
+      "spelling": "po",
+      "generation": {
+        "tier": "concept-editor",
+        "template": null,
+        "phonetic_cost": null
+      },
+      "priority_class": "common",
+      "priority_weight": 80,
+      "suggested_status": "primitive",
+      "plain_description": "a mother or father",
+      "pronunciation_ease": null,
       "semantic_usefulness": null,
       "pronunciation_ease_label": null,
       "semantic_usefulness_label": null

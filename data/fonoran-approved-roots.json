@@ -1,8 +1,8 @@
 {
   "version": "1.0-approved-roots",
-  "updated_at": "2026-06-29T21:11:51.392Z",
+  "updated_at": "2026-06-29T21:34:06.720Z",
   "philosophy": "Only human-approved roots from Root Review are canonical.",
-  "root_count": 98,
+  "root_count": 100,
   "roots": [
     {
       "id": "person",
@@ -885,6 +885,24 @@
       "domain": "being",
       "reason": "New concept: the person spoken to.",
       "approved_at": "2026-06-29T21:09:49.678Z"
+    },
+    {
+      "id": "metal",
+      "spelling": "pel",
+      "ipa": "/pɛl/",
+      "concept": "a hard shiny material you can shape, like iron",
+      "domain": "element",
+      "reason": "metal — a basic worked material; needed for tools, weapons, and a smith.",
+      "approved_at": "2026-06-29T21:23:15.573Z"
+    },
+    {
+      "id": "parent",
+      "spelling": "po",
+      "ipa": "/pɑ/",
+      "concept": "a mother or father",
+      "domain": "being",
+      "reason": "parent — core kinship root for family terms like grandparent.",
+      "approved_at": "2026-06-29T21:23:25.725Z"
     }
   ]
 }

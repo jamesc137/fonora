@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-29T21:15:43.887Z",
+  "generated_at": "2026-06-29T21:35:47.581Z",
   "corpus_version": "2.0",
   "total_phrases": 100,
   "clean_phrases": 100,
@@ -7,12 +7,12 @@
   "distinct_gaps": 0,
   "quality": {
     "tokens": {
-      "pass": 354,
-      "soft": 19,
+      "pass": 355,
+      "soft": 18,
       "hard": 0
     },
-    "pass_phrases": 85,
-    "soft_phrases": 15,
+    "pass_phrases": 86,
+    "soft_phrases": 14,
     "hard_phrases": 0
   },
   "levels": [
@@ -139,7 +139,6 @@
         "baby",
         "he",
         "man",
-        "parents",
         "person",
         "she",
         "traveler",
@@ -205,18 +204,6 @@
       ]
     },
     {
-      "root": "nel",
-      "words": [
-        "ate",
-        "eat",
-        "fish",
-        "tastes"
-      ],
-      "concepts": [
-        "eat"
-      ]
-    },
-    {
       "root": "tet",
       "words": [
         "animal",
@@ -250,6 +237,17 @@
       ],
       "concepts": [
         "thing"
+      ]
+    },
+    {
+      "root": "nel",
+      "words": [
+        "ate",
+        "eat",
+        "tastes"
+      ],
+      "concepts": [
+        "eat"
       ]
     },
     {
@@ -553,6 +551,16 @@
       ],
       "concepts": [
         "know"
+      ]
+    },
+    {
+      "root": "tat",
+      "words": [
+        "my friend",
+        "trusts"
+      ],
+      "concepts": [
+        "bond"
       ]
     },
     {
@@ -1138,7 +1146,7 @@
     {
       "level": 3,
       "phrase": "The red flower grows.",
-      "roman": "nanles pa jecha",
+      "roman": "nanwi pa jecha",
       "unresolved": [],
       "counts": {
         "direct": 2,
@@ -1163,7 +1171,7 @@
       ],
       "gaps": [],
       "expected": "nanles pa jecha",
-      "matches_golden": true,
+      "matches_golden": false,
       "note": "review: flower→pa(semantic)"
     },
     {
@@ -1853,7 +1861,7 @@
     {
       "level": 6,
       "phrase": "Parents protect children.",
-      "roman": "ba fes namba",
+      "roman": "po fes namba",
       "unresolved": [],
       "counts": {
         "direct": 3,
@@ -1871,7 +1879,7 @@
       "review": [],
       "gaps": [],
       "expected": "ba fes namba",
-      "matches_golden": true
+      "matches_golden": false
     },
     {
       "level": 6,
@@ -1913,7 +1921,7 @@
     {
       "level": 6,
       "phrase": "The hunter follows the animal.",
-      "roman": "balatet gi tet",
+      "roman": "latetba gi tet",
       "unresolved": [],
       "counts": {
         "direct": 3,
@@ -1931,12 +1939,12 @@
       "review": [],
       "gaps": [],
       "expected": "balatet gi tet",
-      "matches_golden": true
+      "matches_golden": false
     },
     {
       "level": 6,
       "phrase": "The doctor helps sick people.",
-      "roman": "bakat katba gat yiba",
+      "roman": "kelguba katba gat yiba",
       "unresolved": [],
       "counts": {
         "direct": 4,
@@ -1954,12 +1962,12 @@
       "review": [],
       "gaps": [],
       "expected": "bakat katba gat yiba",
-      "matches_golden": true
+      "matches_golden": false
     },
     {
       "level": 6,
       "phrase": "The farmer grows food.",
-      "roman": "basas jecha nelto",
+      "roman": "kelsasba jecha nelto",
       "unresolved": [],
       "counts": {
         "direct": 3,
@@ -1977,7 +1985,7 @@
       "review": [],
       "gaps": [],
       "expected": "basas jecha nelto",
-      "matches_golden": true
+      "matches_golden": false
     },
     {
       "level": 6,
@@ -2128,7 +2136,7 @@
     {
       "level": 7,
       "phrase": "The fisherman crossed the river.",
-      "roman": "baye ta gi pakal",
+      "roman": "yetetba ta gi pakal",
       "unresolved": [],
       "counts": {
         "direct": 4,
@@ -2146,12 +2154,12 @@
       "review": [],
       "gaps": [],
       "expected": "baye ta gi pakal",
-      "matches_golden": true
+      "matches_golden": false
     },
     {
       "level": 7,
       "phrase": "The blacksmith made a knife.",
-      "roman": "bakelmak ta sak makmek",
+      "roman": "pelkelba ta sak pelmek",
       "unresolved": [],
       "counts": {
         "direct": 3,
@@ -2176,13 +2184,13 @@
       ],
       "gaps": [],
       "expected": "bakelmak ta sak makmek",
-      "matches_golden": true,
+      "matches_golden": false,
       "note": "review: made→sak(alias_weak)"
     },
     {
       "level": 7,
       "phrase": "The grandmother tells stories.",
-      "roman": "badi se se",
+      "roman": "dipo se se",
       "unresolved": [],
       "counts": {
         "direct": 3,
@@ -2200,7 +2208,7 @@
       "review": [],
       "gaps": [],
       "expected": "badi se se",
-      "matches_golden": true
+      "matches_golden": false
     },
     {
       "level": 7,
@@ -2435,7 +2443,7 @@
     {
       "level": 8,
       "phrase": "The man who built the house is my friend.",
-      "roman": "ja tatde",
+      "roman": "ja tat",
       "unresolved": [],
       "counts": {
         "direct": 2,
@@ -2453,7 +2461,7 @@
       "review": [],
       "gaps": [],
       "expected": "ja tatde",
-      "matches_golden": true
+      "matches_golden": false
     },
     {
       "level": 8,
@@ -2527,7 +2535,7 @@
     {
       "level": 10,
       "phrase": "I only saw the red bird.",
-      "roman": "mi ta vat wi nanles tet",
+      "roman": "mi ta vat wi nanwi tet",
       "unresolved": [],
       "counts": {
         "direct": 6,
@@ -2545,12 +2553,12 @@
       "review": [],
       "gaps": [],
       "expected": "mi ta vat wi nanles tet",
-      "matches_golden": true
+      "matches_golden": false
     },
     {
       "level": 10,
       "phrase": "Only I saw the red bird.",
-      "roman": "vat ta mi wi nanles tet",
+      "roman": "vat ta mi wi nanwi tet",
       "unresolved": [],
       "counts": {
         "direct": 6,
@@ -2568,7 +2576,7 @@
       "review": [],
       "gaps": [],
       "expected": "vat ta mi wi nanles tet",
-      "matches_golden": true
+      "matches_golden": false
     },
     {
       "level": 10,
@@ -2845,32 +2853,25 @@
     {
       "level": 10,
       "phrase": "They can fish.",
-      "roman": "ben nel",
+      "roman": "ben yetet",
       "unresolved": [],
       "counts": {
-        "direct": 0,
+        "direct": 1,
         "interpreted": 1,
-        "semantic": 1,
+        "semantic": 0,
         "alias_weak": 0,
         "unknown": 0
       },
       "quality": {
-        "gate": "soft",
-        "pass": 1,
-        "soft": 1,
+        "gate": "pass",
+        "pass": 2,
+        "soft": 0,
         "hard": 0
       },
-      "review": [
-        {
-          "english": "fish",
-          "kind": "semantic",
-          "concept_id": "eat",
-          "fonoran": "nel"
-        }
-      ],
+      "review": [],
       "gaps": [],
       "expected": "ben nel",
-      "matches_golden": true,
+      "matches_golden": false,
       "note": "review: fish→nel(semantic)"
     },
     {
@@ -2968,7 +2969,7 @@
     {
       "level": 11,
       "phrase": "Why did the old hunter give the child his knife?",
-      "roman": "wo zos ta di balatet ku namba makmek",
+      "roman": "wo zos ta di latetba ku namba pelmek",
       "unresolved": [],
       "counts": {
         "direct": 8,
@@ -2986,7 +2987,7 @@
       "review": [],
       "gaps": [],
       "expected": "wo zos ta di balatet ku namba makmek",
-      "matches_golden": true
+      "matches_golden": false
     },
     {
       "level": 11,

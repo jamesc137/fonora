@@ -126,12 +126,44 @@ export function lemmaCandidates(word, rules) {
   return [...out].filter(Boolean);
 }
 
+/** Surface forms that are passive participles but not -ed/-en (born, sworn, …). */
+const PARTICIPLE_LEmmas = new Set(['born', 'sworn', 'forbidden', 'hidden', 'shorn', 'worn']);
+
 export function looksLikeParticiple(word, rules) {
   const w = String(word ?? '').trim().toLowerCase();
   if (!w) return false;
   if (irregularPastLemma(w, rules)) return true;
+  if (PARTICIPLE_LEmmas.has(w)) return true;
+  if (rules?.participles?.[w]) return true;
+  for (const lemma of lemmaCandidates(w, rules)) {
+    if (rules?.participles?.[lemma]) return true;
+  }
   if (w.endsWith('ed') || w.endsWith('en')) return true;
   return false;
+}
+
+/** Split copula predicate into separate modifier slots (free, equal, dignity, rights). */
+export function splitPredicateModifiers(text) {
+  const raw = String(text ?? '').trim();
+  if (!raw) return [];
+
+  const segments = [];
+  const inMatch = raw.match(/^(.+?)\s+in\s+(.+)$/i);
+  if (inMatch) {
+    segments.push(...splitAndCoordinated(inMatch[1]));
+    segments.push(...splitAndCoordinated(inMatch[2]));
+  } else {
+    segments.push(...splitAndCoordinated(raw));
+  }
+
+  return segments.filter(Boolean).map(english => ({ english, role: 'modifier' }));
+}
+
+function splitAndCoordinated(phrase) {
+  return String(phrase ?? '')
+    .split(/\s+and\s+/i)
+    .map(s => s.trim())
+    .filter(Boolean);
 }
 
 /**
@@ -171,18 +203,41 @@ export function headNounToken(tokens, opts = {}) {
  * Parse tokens after an idiom/clause into object vs modifier slots.
  */
 export function parseTrailingPhrase(tokens, { skip = null } = {}) {
-  const words = tokens.filter(w => {
+  const raw = tokens.filter(w => {
     const x = w.toLowerCase();
-    return !BE_FORMS.has(x) && !ARTICLES.has(x) && !skip?.has(x);
+    return !BE_FORMS.has(x) && !ARTICLES.has(x);
   });
-  if (!words.length) return { object: [], modifiers: [] };
+  if (!raw.length) return { object: [], modifiers: [] };
 
-  if (PREP_OBJECT.has(words[0]?.toLowerCase())) {
-    const np = stripLeadingFunctionWords(words.slice(1), { skip });
+  if (PREP_OBJECT.has(raw[0]?.toLowerCase())) {
+    const npRaw = raw.slice(1);
+    const npText = npRaw.join(' ');
+    const coordParts = npText.split(/\s+and\s+/i).map(s => s.trim()).filter(Boolean);
+    if (coordParts.length > 1) {
+      return {
+        object: [{ english: coordParts[0], role: 'object' }],
+        modifiers: coordParts.slice(1).map(p => ({ english: p, role: 'modifier' })),
+      };
+    }
+    const np = npRaw.filter(w => !skip?.has(w.toLowerCase()));
     if (np.length) {
       return {
         object: [{ english: np.join(' '), role: 'object' }],
         modifiers: [],
+      };
+    }
+  }
+
+  const words = raw.filter(w => !skip?.has(w.toLowerCase()));
+  if (!words.length) return { object: [], modifiers: [] };
+
+  if (words.length >= 2 && words.some(w => w.toLowerCase() === 'and')) {
+    const joined = words.join(' ');
+    const parts = joined.split(/\s+and\s+/i).map(s => s.trim()).filter(Boolean);
+    if (parts.length > 1) {
+      return {
+        object: [{ english: parts[0], role: 'object' }],
+        modifiers: parts.slice(1).map(p => ({ english: p, role: 'modifier' })),
       };
     }
   }
@@ -363,7 +418,11 @@ const COORD_CLAUSE_VERBS = new Set([
   'love', 'loves', 'loved', 'loving',
   'sing', 'sings', 'sang', 'singing',
   'wake', 'wakes', 'woke', 'waking',
+  'act', 'acts', 'acted', 'acting',
 ]);
+
+/** Modals — start a new coordinated clause when followed by a main verb. */
+export const MODALS = new Set(['should', 'must', 'may', 'might', 'can', 'could', 'would', 'shall']);
 
 /**
  * Split token list on clause boundaries: and + (the|pronoun|verb).
@@ -376,7 +435,9 @@ export function splitIntoClauses(tokens, { pronounWords = null } = {}) {
     const t = tokens[i]?.toLowerCase();
     if (t === 'and' && i + 1 < tokens.length) {
       const next = tokens[i + 1]?.toLowerCase();
-      if (next === 'the' || pronouns.has(next) || COORD_CLAUSE_VERBS.has(next)) {
+      const afterModal = tokens[i + 2]?.toLowerCase();
+      const modalClause = MODALS.has(next) && afterModal && COORD_CLAUSE_VERBS.has(afterModal);
+      if (next === 'the' || pronouns.has(next) || COORD_CLAUSE_VERBS.has(next) || modalClause) {
         if (cur.length) out.push(cur);
         cur = [];
         continue;
@@ -404,8 +465,71 @@ export function matchSubjectBeAdj(content, rules) {
  * SUBJECT* + be + (past participle | adjective) (+ trailing modifiers).
  * Scans for any be-form so multi-word subjects and auxiliaries are handled.
  */
-export function matchBeConstruction(content, rules) {
-  if (!content?.length || content.length < 3) return null;
+/** Passive participle head → nearest event concept. */
+const PARTICIPLE_CONCEPT = {
+  born: 'birth',
+  borne: 'birth',
+  endowed: 'give',
+};
+
+function beConstructionFromParts(subject, be, afterBe, rules) {
+  if (!subject || !afterBe.length) return null;
+
+  const head = afterBe[0];
+  const trailing = afterBe.slice(1);
+
+  if (peelFutureIntent(afterBe)) return null;
+
+  const headLower = head.toLowerCase();
+  if (PREP_OBJECT.has(headLower) || rules?.spatial_path?.[headLower]) return null;
+
+  if (looksLikeParticiple(head, rules)) {
+    let modifiers = [];
+    let prepTrail = [];
+    if (trailing.length && PREP_OBJECT.has(trailing[0]?.toLowerCase())) {
+      prepTrail = trailing;
+    } else if (trailing.length) {
+      modifiers = splitPredicateModifiers(trailing.join(' '));
+    }
+    return {
+      subject,
+      be,
+      event: {
+        english: head,
+        role: 'event',
+        ...(PARTICIPLE_CONCEPT[headLower]
+          ? { concept_hint: PARTICIPLE_CONCEPT[headLower], interpret_reason: 'passive participle' }
+          : {}),
+      },
+      modifiers,
+      trailingTokens: prepTrail,
+    };
+  }
+
+  if (afterBe.length >= 1 && !looksLikeParticiple(head, rules)) {
+    return {
+      subject,
+      be,
+      event: null,
+      modifiers: splitPredicateModifiers(afterBe.join(' ')),
+      trailingTokens: [],
+    };
+  }
+
+  return null;
+}
+
+export function matchBeConstruction(content, rules, { priorSubject = null } = {}) {
+  if (!content?.length) return null;
+
+  if (priorSubject && BE_FORMS.has(content[0]?.toLowerCase())) {
+    const afterBe = content.slice(1).filter(w => !ARTICLES.has(w.toLowerCase()));
+    if (afterBe.length) {
+      return beConstructionFromParts(priorSubject, content[0].toLowerCase(), afterBe, rules);
+    }
+  }
+
+  if (content.length < 3) return null;
 
   for (let i = 1; i < content.length; i += 1) {
     const be = content[i]?.toLowerCase();
@@ -415,34 +539,8 @@ export function matchBeConstruction(content, rules) {
     const afterBe = content.slice(i + 1).filter(w => !ARTICLES.has(w.toLowerCase()));
     if (!subjectParts.length || !afterBe.length) continue;
 
-    const subject = subjectParts.join(' ');
-    const head = afterBe[0];
-    const trailing = afterBe.slice(1);
-
-    if (peelFutureIntent(afterBe)) continue;
-
-    const headLower = head.toLowerCase();
-    if (PREP_OBJECT.has(headLower) || rules?.spatial_path?.[headLower]) continue;
-
-    if (looksLikeParticiple(head, rules)) {
-      return {
-        subject,
-        be,
-        event: { english: head, role: 'event' },
-        modifiers: trailing.length
-          ? [{ english: trailing.join(' '), role: 'modifier' }]
-          : [],
-      };
-    }
-
-    if (afterBe.length >= 1 && !looksLikeParticiple(head, rules)) {
-      return {
-        subject,
-        be,
-        event: null,
-        modifiers: [{ english: afterBe.join(' '), role: 'modifier' }],
-      };
-    }
+    const hit = beConstructionFromParts(subjectParts.join(' '), be, afterBe, rules);
+    if (hit) return hit;
   }
 
   return null;
@@ -463,6 +561,44 @@ export function matchSubjectVerbToNp(content, rules) {
     subject: { english: subject, role: 'subject' },
     event: { english: verb, role: 'event' },
     object: { english: objectParts.join(' '), role: 'object' },
+  };
+}
+
+/**
+ * Split a spatial landmark NP: peel leading idioms, then modifier tail.
+ */
+export function splitLandmarkPhrase(phrase, rules, { skip = null } = {}) {
+  const words = String(phrase ?? '').trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return { object: [], modifiers: [] };
+
+  const idiom = matchIdiomPhrase(words, rules);
+  if (idiom) {
+    const afterWords = idiom.after.filter(w => {
+      const x = w.toLowerCase();
+      return !ARTICLES.has(x) && !skip?.has(x);
+    });
+    const spec = idiom.spec;
+    const slotKey = spec.slot ?? 'object';
+    const entry = {
+      english: idiom.phrase,
+      role: slotKey,
+      concept_hint: spec.concept_id,
+      interpret_reason: spec.reason ?? `idiom: ${idiom.phrase}`,
+    };
+    const tailMods = afterWords.length > 1
+      ? afterWords.map(w => ({ english: w, role: 'modifier' }))
+      : (afterWords.length
+        ? splitPredicateModifiers(afterWords.join(' '))
+        : []);
+    if (slotKey === 'object') {
+      return { object: [entry], modifiers: tailMods };
+    }
+    return { object: [], modifiers: [entry, ...tailMods] };
+  }
+
+  return {
+    object: [{ english: words.join(' '), role: 'object' }],
+    modifiers: [],
   };
 }
 

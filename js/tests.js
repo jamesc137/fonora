@@ -370,6 +370,21 @@ const fonoranTranslatorResult = await (async () => {
     assert(paragraph.tokens.some(t => t.english === 'feels' && t.fonoran === 'ko'), `paragraph feel: ${JSON.stringify(paragraph.tokens)}`);
     assert(!paragraph.tokens.some(t => t.english === 'every' && t.role === 'subject'), 'every should not be subject');
 
+    const udhr = await translateEnglish(
+      'All human beings are born free and equal in dignity and rights. They are endowed with reason and conscience and should act towards one another in a spirit of brotherhood.',
+    );
+    assert(udhr.mode === 'discourse', `udhr mode: ${udhr.mode}`);
+    assert(!udhr.surface.roman.includes(' ta '), `udhr present should omit ta: ${udhr.surface.roman}`);
+    assert(!udhr.tokens.some(t => t.english === 'born free and equal in dignity and rights'), 'udhr must not blob predicate');
+    assert(udhr.tokens.some(t => t.english === 'born' && t.fonoran === 'me'), `udhr born -> birth: ${udhr.surface.roman}`);
+    assert(udhr.tokens.some(t => t.english === 'equal' && t.fonoran === 'mal'), 'udhr equal resolved');
+    assert(udhr.tokens.some(t => t.english === 'endowed' && t.fonoran === 'tu'), 'udhr endowed -> give');
+    assert(udhr.tokens.some(t => t.english === 'reason' && t.fonoran === 'pa'), 'udhr reason -> think not earth');
+    assert(udhr.tokens.some(t => t.english === 'one another' && t.fonoran === 'sam'), 'udhr reciprocal idiom');
+    assert(!udhr.tokens.some(t => t.english === 'should'), 'udhr modal should omitted');
+    assert(!udhr.tokens.some(t => t.english === 'spirit' && t.fonoran === 'ko'), 'udhr spirit must not map to feel');
+    assert(udhr.unresolved.includes('free') && udhr.unresolved.includes('dignity'), `udhr expected reds: ${udhr.unresolved.join(', ')}`);
+
     return { name: testName, ok: true };
   } catch (e) {
     return { name: testName, ok: false, error: e.message };

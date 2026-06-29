@@ -126,6 +126,21 @@ Translator tab: `language/index.html` + `language/fonoran-app.js`.
 
 **Idiom** — add multi-word entry to `idioms` in rules JSON.
 
+## Formal / legal English
+
+Long formal prose (declarations, statutes) will surface **many red tokens** until matching roots exist — that is intentional. The compiler should still:
+
+- Split `be + participle` predicates into separate slots (`born` → event, adjectives as modifiers)
+- Carry subject across coordinated clauses (`They … and should act …`)
+- Omit modals (`should`, `must`, …) until obligation grammar exists
+- Block bogus WordNet mappings (`reason` ≠ earth, `spirit` ≠ feel)
+
+Example acceptance target (UDHR Article 1, today’s lexicon):
+
+```text
+ba me [free] mal [dignity] [rights] · fi tu pa [conscience] che mam sam [spirit] [brotherhood]
+```
+
 ## Implementation
 
 | Module | Role |

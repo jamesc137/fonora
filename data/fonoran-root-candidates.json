@@ -1,7 +1,7 @@
 {
   "version": "1.0-root-workflow",
   "status": "proposal",
-  "generated_at": "2026-06-28T20:01:47.471Z",
+  "generated_at": "2026-06-29T00:07:32.212Z",
   "philosophy": {
     "premise": "Words come first. The semantic network evolves after roots are approved.",
     "workflow": "Generate candidates → human review → canonical roots → compounds later",
@@ -9,8 +9,8 @@
   },
   "summary": {
     "total": 118,
-    "pending": 0,
-    "approved": 118,
+    "pending": 118,
+    "approved": 0,
     "rejected": 0
   },
   "candidates": [
@@ -26,9 +26,9 @@
       "semantic_usefulness": 5,
       "semantic_usefulness_label": "very high",
       "priority": 1000,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -51,9 +51,9 @@
       "semantic_usefulness": 5,
       "semantic_usefulness_label": "very high",
       "priority": 999,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -70,17 +70,17 @@
       "ipa": "/fɪ/",
       "concept": "collective",
       "domain": "being",
-      "reason": "Fundamental being concept: many treated as one. Cannot be naturally reduced into simpler Fonoran roots.",
+      "reason": "Fundamental being concept: collective. Cannot be naturally reduced into simpler Fonoran roots.",
       "pronunciation_ease": 4,
       "pronunciation_ease_label": "easy",
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 998,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
-        "edited_at": "2026-06-28T23:26:30.656Z",
+        "edited_at": null,
         "note": null
       },
       "generation": {
@@ -101,9 +101,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 997,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -126,9 +126,9 @@
       "semantic_usefulness": 5,
       "semantic_usefulness_label": "very high",
       "priority": 996,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -151,9 +151,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 995,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -176,9 +176,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 994,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -201,9 +201,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 993,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -226,9 +226,9 @@
       "semantic_usefulness": 5,
       "semantic_usefulness_label": "very high",
       "priority": 992,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -251,9 +251,9 @@
       "semantic_usefulness": 5,
       "semantic_usefulness_label": "very high",
       "priority": 991,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -276,9 +276,9 @@
       "semantic_usefulness": 5,
       "semantic_usefulness_label": "very high",
       "priority": 990,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -301,9 +301,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 989,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -326,9 +326,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 988,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -351,9 +351,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 987,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -376,9 +376,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 986,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -401,9 +401,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 985,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -426,9 +426,9 @@
       "semantic_usefulness": 5,
       "semantic_usefulness_label": "very high",
       "priority": 984,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -451,9 +451,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 983,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -476,9 +476,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 982,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -501,9 +501,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 981,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -526,9 +526,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 980,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -551,9 +551,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 979,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -576,9 +576,9 @@
       "semantic_usefulness": 5,
       "semantic_usefulness_label": "very high",
       "priority": 978,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -601,9 +601,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 977,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -626,9 +626,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 976,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -651,9 +651,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 975,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -676,9 +676,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 974,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -701,9 +701,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 973,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -726,9 +726,9 @@
       "semantic_usefulness": 5,
       "semantic_usefulness_label": "very high",
       "priority": 972,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -751,9 +751,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 971,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -776,9 +776,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 970,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -801,9 +801,9 @@
       "semantic_usefulness": 5,
       "semantic_usefulness_label": "very high",
       "priority": 969,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -826,9 +826,9 @@
       "semantic_usefulness": 5,
       "semantic_usefulness_label": "very high",
       "priority": 968,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -851,9 +851,9 @@
       "semantic_usefulness": 5,
       "semantic_usefulness_label": "very high",
       "priority": 967,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -876,9 +876,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 966,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -901,9 +901,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 965,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -926,9 +926,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 964,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -951,9 +951,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 963,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -976,9 +976,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 962,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1001,9 +1001,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 961,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1026,9 +1026,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 960,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1051,9 +1051,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 959,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1076,9 +1076,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 958,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1101,9 +1101,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 957,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1126,9 +1126,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 956,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1151,9 +1151,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 955,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1176,9 +1176,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 954,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1201,9 +1201,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 953,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1226,9 +1226,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 952,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1251,9 +1251,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 951,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1276,9 +1276,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 950,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1301,9 +1301,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 949,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1326,9 +1326,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 948,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1351,9 +1351,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 947,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1376,9 +1376,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 946,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1401,9 +1401,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 945,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1426,9 +1426,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 944,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1451,9 +1451,9 @@
       "semantic_usefulness": 5,
       "semantic_usefulness_label": "very high",
       "priority": 943,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1476,9 +1476,9 @@
       "semantic_usefulness": 5,
       "semantic_usefulness_label": "very high",
       "priority": 942,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1501,9 +1501,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 941,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1526,9 +1526,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 940,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1551,9 +1551,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 939,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1576,9 +1576,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 938,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1601,9 +1601,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 937,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1626,9 +1626,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 936,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1651,9 +1651,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 935,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1676,9 +1676,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 934,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1701,9 +1701,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 933,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1726,9 +1726,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 932,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1751,9 +1751,9 @@
       "semantic_usefulness": 4,
       "semantic_usefulness_label": "high",
       "priority": 931,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1776,9 +1776,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 930,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1801,9 +1801,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 929,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1826,9 +1826,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 928,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1851,9 +1851,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 927,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1876,9 +1876,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 926,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1901,9 +1901,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 925,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1926,9 +1926,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 924,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1951,9 +1951,9 @@
       "semantic_usefulness": 5,
       "semantic_usefulness_label": "very high",
       "priority": 923,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -1976,9 +1976,9 @@
       "semantic_usefulness": 5,
       "semantic_usefulness_label": "very high",
       "priority": 922,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2001,9 +2001,9 @@
       "semantic_usefulness": 5,
       "semantic_usefulness_label": "very high",
       "priority": 921,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2026,9 +2026,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 920,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2051,9 +2051,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 919,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2076,9 +2076,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 918,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2101,9 +2101,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 917,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2126,9 +2126,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 916,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2151,9 +2151,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 915,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2176,9 +2176,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 914,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2201,9 +2201,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 913,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2226,9 +2226,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 912,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2251,9 +2251,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 911,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2276,9 +2276,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 910,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2301,9 +2301,9 @@
       "semantic_usefulness": 5,
       "semantic_usefulness_label": "very high",
       "priority": 909,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2326,9 +2326,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 908,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2351,9 +2351,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 907,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2376,11 +2376,11 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 906,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
-        "edited_at": "2026-06-28T01:10:56.577Z",
+        "edited_at": null,
         "note": null
       },
       "generation": {
@@ -2401,9 +2401,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 905,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2426,9 +2426,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 904,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2451,9 +2451,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 903,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2476,9 +2476,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 902,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2501,9 +2501,9 @@
       "semantic_usefulness": 3,
       "semantic_usefulness_label": "moderate",
       "priority": 901,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2526,9 +2526,9 @@
       "semantic_usefulness": 2,
       "semantic_usefulness_label": "low",
       "priority": 900,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2551,9 +2551,9 @@
       "semantic_usefulness": 2,
       "semantic_usefulness_label": "low",
       "priority": 899,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2576,9 +2576,9 @@
       "semantic_usefulness": 2,
       "semantic_usefulness_label": "low",
       "priority": 898,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2601,9 +2601,9 @@
       "semantic_usefulness": 2,
       "semantic_usefulness_label": "low",
       "priority": 897,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2626,9 +2626,9 @@
       "semantic_usefulness": 2,
       "semantic_usefulness_label": "low",
       "priority": 896,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2651,9 +2651,9 @@
       "semantic_usefulness": 2,
       "semantic_usefulness_label": "low",
       "priority": 895,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2676,9 +2676,9 @@
       "semantic_usefulness": 2,
       "semantic_usefulness_label": "low",
       "priority": 894,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2701,9 +2701,9 @@
       "semantic_usefulness": 2,
       "semantic_usefulness_label": "low",
       "priority": 893,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2726,9 +2726,9 @@
       "semantic_usefulness": 2,
       "semantic_usefulness_label": "low",
       "priority": 892,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2751,9 +2751,9 @@
       "semantic_usefulness": 2,
       "semantic_usefulness_label": "low",
       "priority": 891,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2776,9 +2776,9 @@
       "semantic_usefulness": 2,
       "semantic_usefulness_label": "low",
       "priority": 890,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2801,9 +2801,9 @@
       "semantic_usefulness": 2,
       "semantic_usefulness_label": "low",
       "priority": 889,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2826,9 +2826,9 @@
       "semantic_usefulness": 2,
       "semantic_usefulness_label": "low",
       "priority": 888,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2851,9 +2851,9 @@
       "semantic_usefulness": 2,
       "semantic_usefulness_label": "low",
       "priority": 887,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2876,9 +2876,9 @@
       "semantic_usefulness": 2,
       "semantic_usefulness_label": "low",
       "priority": 886,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2901,9 +2901,9 @@
       "semantic_usefulness": 2,
       "semantic_usefulness_label": "low",
       "priority": 885,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2926,9 +2926,9 @@
       "semantic_usefulness": 2,
       "semantic_usefulness_label": "low",
       "priority": 884,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null
@@ -2951,9 +2951,9 @@
       "semantic_usefulness": 2,
       "semantic_usefulness_label": "low",
       "priority": 883,
-      "status": "approved",
+      "status": "pending",
       "review": {
-        "approved_at": "2026-06-27T23:32:47.346Z",
+        "approved_at": null,
         "rejected_at": null,
         "edited_at": null,
         "note": null

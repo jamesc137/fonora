@@ -56,7 +56,16 @@
       "concept_id": "conflict",
       "reason": "conflict verb",
       "words": ["battle", "battled", "battling", "battles", "attack", "attacked", "attacking", "attacks"]
+    },
+    "endowment": {
+      "concept_id": "give",
+      "reason": "endowment verb",
+      "words": ["endow", "endowed", "endowing", "endows"]
     }
+  },
+  "participles": {
+    "born": "birth",
+    "endowed": "give"
   },
   "irregular_past": {
     "ate": "eat",
@@ -153,6 +162,16 @@
       "slot": "modifier",
       "concept_id": "bad",
       "reason": "idiom: in danger"
+    },
+    "one another": {
+      "slot": "object",
+      "concept_id": "different",
+      "reason": "idiom: reciprocal one another"
+    },
+    "each other": {
+      "slot": "object",
+      "concept_id": "different",
+      "reason": "idiom: reciprocal each other"
     }
   }
 }

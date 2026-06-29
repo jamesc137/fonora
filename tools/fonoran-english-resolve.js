@@ -60,6 +60,18 @@ const GUESS_SCORE_THRESHOLD = 800;
 /** Block WordNet/hypernym guessing on function words. */
 const SEMANTIC_BLOCK = new Set([
   'something', 'anything', 'nothing', 'everything', 'another', 'else', 'someone', 'anyone',
+  'spirit',
+]);
+
+/** Force nearest concept before WordNet (honest bridges). */
+const SEMANTIC_BRIDGE = new Map([
+  ['reason', 'think'],
+]);
+
+/** Synonyms to reject during semantic tier. */
+const SEMANTIC_DENY_SYNONYMS = new Map([
+  ['reason', new Set(['ground', 'earth'])],
+  ['spirit', new Set(['feel', 'feeling', 'emotion'])],
 ]);
 
 /** Conjunctions — not content words. */
@@ -387,6 +399,12 @@ export async function resolveEnglishToken(english, ctx, {
     allowGuess = false;
   }
 
+  const bridgeConcept = SEMANTIC_BRIDGE.get(lookupWord);
+  if (bridgeConcept && !hints.concept_hint) {
+    hints.concept_hint = bridgeConcept;
+    hints.interpret_reason = hints.interpret_reason ?? 'semantic bridge';
+  }
+
   if (hints.concept_hint) {
     const hintHit = lookupByConceptId(ctx, hints.concept_hint);
     if (hintHit.resolved) {
@@ -518,6 +536,9 @@ export async function resolveEnglishToken(english, ctx, {
     }
 
     for (const syn of synonyms) {
+      const synNorm = String(syn).toLowerCase().replace(/_/g, ' ').trim();
+      const denied = SEMANTIC_DENY_SYNONYMS.get(lookupWord);
+      if (denied?.has(synNorm)) continue;
       const synKeys = buildTryKeys(syn.replace(/\s+/g, '_'), ctx.rules);
       synKeys.push(syn, lemmatizeEnglish(syn, ctx.rules));
       const synHit = lookupAliasEntry(ctx.aliasIndex, [...new Set(synKeys)]);

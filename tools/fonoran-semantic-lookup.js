@@ -93,6 +93,7 @@ const HYPERNYM_BRIDGE = new Map([
   ['cognition',         ['think']],
   ['thought',           ['think']],
   ['knowledge',         ['know']],
+  ['reason',            ['think']],
   ['feeling',           ['feel']],
   ['emotion',           ['feel']],
 

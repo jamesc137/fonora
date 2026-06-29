@@ -19,4 +19,6 @@ jobs:
 
       - run: npm ci
 
+      - run: npm run fonoran:build
+
       - run: npm test

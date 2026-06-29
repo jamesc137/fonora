@@ -431,6 +431,7 @@ This rule preserves Fonoran's core promise: **what you hear = what you write = w
 Multi-part compounds must satisfy the constraint at **every boundary**, not just the first one.
 
 The constraint is enforced at:
+- **Root generation** (`fonoran-root-boundary-score.js`) — when a root is assigned a spelling, candidate forms are scored against the root's likely compound partners; forms that would create boundary collisions are penalized and any remaining risk is surfaced as a warning in Review (`compound_flow_score` + `boundary_warnings`).
 - **Build time** (`npm run fonoran:build`) — curated compounds that violate it are dropped with a clear reason.
 - **Word generator** (`fonoran-word-generator.js`) — boundary-invalid candidates are excluded from ranked options.
 - **Word composer UI** — saving is blocked and the violation is shown inline.

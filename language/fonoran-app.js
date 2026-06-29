@@ -1775,14 +1775,13 @@
         ? `<div class="word-preview__hear-row">${hearRowExtra}</div>`
         : '';
       const stateBadgeHtml = showBadges ? previewStateBadge(focus.state || 'draft') : '';
-      const showToolbar = Boolean(stateBadgeHtml || metaExtra);
+      const badgeParts = [stateBadgeHtml, metaExtra].filter(Boolean).join('');
+      const showToolbar = Boolean(badgeParts);
 
       return `<div class="word-preview">
         <div class="word-preview__card">
           ${showToolbar ? `<div class="word-preview__toolbar">
-            ${stateBadgeHtml
-              ? `<div class="word-preview__badges" aria-label="Word status">${stateBadgeHtml}</div>`
-              : (metaExtra ? `<div class="word-preview__badges">${metaExtra}</div>` : '')}
+            <div class="word-preview__badges" aria-label="Word status">${badgeParts}</div>
           </div>` : ''}
           <div class="word-preview__hero">
             ${wordmarkHtml}
@@ -2237,49 +2236,145 @@
       }));
     }
 
+    function compoundReviewPartSpellings(item) {
+      if (!item) return [];
+      if (item.components?.length) return composerFlatSpellings(item.components);
+      if (item.parts?.length) return item.parts.map(p => String(p).toLowerCase());
+      return [];
+    }
+
+    function compoundReviewRecipeText(item) {
+      const readable = item.composition_readable?.trim();
+      if (readable) return readable;
+      const hint = item.generator_hint?.trim();
+      if (!hint) return '';
+      return hint.replace(/^curated:\s*/i, '');
+    }
+
     function compoundReviewMetrics(item) {
       const spelling = (item.spelling ?? '').trim().toLowerCase();
-      if (!spelling) return { parseScore: 1, pronScore: 1 };
-      const segs = segmentCompound(spelling, reviewParseInventory());
-      const parseScore = segs.length === 0 ? 1
-        : segs.length === 1 ? 5
-          : segs.length === 2 ? 3
+      const partSpellings = compoundReviewPartSpellings(item);
+      if (!spelling) {
+        return { parseScore: 1, pronScore: 1, segmentations: [], partSpellings };
+      }
+      const segmentations = segmentCompound(spelling, reviewParseInventory());
+      const parseScore = segmentations.length === 0 ? 1
+        : segmentations.length === 1 ? 5
+          : segmentations.length === 2 ? 3
             : 2;
       const pronScore = Math.max(1, Math.min(5, Math.round(pronounceabilityScore(spelling).score / 20)));
-      return { parseScore, pronScore };
+      return { parseScore, pronScore, segmentations, partSpellings };
+    }
+
+    function compoundReviewBoundaryHtml(partSpellings) {
+      if (partSpellings.length < 2) return '';
+      const result = checkCompoundBoundary(partSpellings);
+      if (result.valid) return '';
+      const items = result.violations.map(v =>
+        `<li class="root-review__warn root-review__warn--boundary">${escapeHtml(v.reason)}</li>`,
+      );
+      return `<ul class="root-review__warnings">${items.join('')}</ul>`;
+    }
+
+    function compoundReviewSegmentationHtml(metrics) {
+      const { parseScore, segmentations } = metrics;
+      if (parseScore >= 5) return '';
+      if (!segmentations.length) {
+        return '<div class="root-review__hint sans">Cannot segment this spelling with the current root inventory.</div>';
+      }
+      const shown = segmentations.slice(0, 5).map(s => s.join('+')).join(' · ');
+      const more = segmentations.length > 5 ? ` (+${segmentations.length - 5} more)` : '';
+      return `<ul class="root-review__warnings"><li class="root-review__warn root-review__warn--homophone">Also parses as: <span class="mono">${escapeHtml(shown)}</span>${more}</li></ul>`;
     }
 
     function buildCompoundReviewScoresHtml(item) {
-      const { parseScore, pronScore } = compoundReviewMetrics(item);
-      return `<div class="root-review__scores">
-          <div class="root-review__score">
-            <span class="root-review__score-label">Parseability</span>
-            ${rootScoreBar(parseScore)}
-          </div>
-          <div class="root-review__score">
-            <span class="root-review__score-label">Pronounceability</span>
-            ${rootScoreBar(pronScore)}
-          </div>
+      const metrics = compoundReviewMetrics(item);
+      const { parseScore, pronScore } = metrics;
+      const scores = `<div class="root-review__scores">
+          ${rootReviewScoreCell('Parseability', parseScore, 5)}
+          ${rootReviewScoreCell('Pronounceability', pronScore, 5)}
+        </div>`;
+      return scores
+        + compoundReviewSegmentationHtml(metrics)
+        + compoundReviewBoundaryHtml(metrics.partSpellings);
+    }
+
+    function priorityClassBadge(pc) {
+      if (!pc) return '';
+      return `<span class="root-review__chip root-review__chip--${escapeHtml(pc)}">${escapeHtml(pc)}</span>`;
+    }
+
+    function suggestedStatusBadge(ss) {
+      if (!ss || ss === 'primitive') return '';
+      const label = ss === 'compound_candidate' ? 'compound candidate' : ss;
+      return `<span class="root-review__chip root-review__chip--${escapeHtml(ss)}">${escapeHtml(label)}</span>`;
+    }
+
+    function rootReviewWarningsHtml(c) {
+      const collisions = c.collision_warnings ?? [];
+      const boundary = c.boundary_warnings ?? [];
+      if (!collisions.length && !boundary.length) return '';
+      const items = [];
+      for (const w of collisions) {
+        items.push(`<li class="root-review__warn root-review__warn--${escapeHtml(w.type ?? 'collision')}">${escapeHtml(w.message ?? '')}</li>`);
+      }
+      for (const b of boundary) {
+        items.push(`<li class="root-review__warn root-review__warn--boundary">Compound boundary: ${escapeHtml(b.left)} + ${escapeHtml(b.right)} → doubled ${escapeHtml(b.phoneme)}</li>`);
+      }
+      return `<ul class="root-review__warnings">${items.join('')}</ul>`;
+    }
+
+    function compoundRecipeHintHtml(c) {
+      const match = STATE.lab?.compounds?.find(x => x.concept_id === c.id);
+      if (match?.composition_readable) {
+        return `Suggested compound: <span class="mono">${escapeHtml(match.composition_readable)}</span>.`;
+      }
+      return 'Define a compound recipe in the Word Creator once its parts are approved.';
+    }
+
+    const ROOT_REVIEW_SCORE_TIPS = {
+      Pronunciation: 'How easy this syllable is to say aloud. Shorter, simpler CV forms score higher.',
+      'Compound usefulness': 'How often this root matters inside compounds. High-leverage concepts score higher.',
+      Distinctiveness: 'How spread out this sound is from other roots. Low scores mean similar-sounding neighbors.',
+      'Compound flow': 'How cleanly this root joins likely compound partners without awkward doubled consonants at morpheme boundaries.',
+      Parseability: 'Whether this word segments back into its intended parts uniquely. Ambiguous compounds score lower.',
+      Pronounceability: 'How speakable the full compound is aloud. Long forms and consonant pile-ups score lower.',
+    };
+
+    function rootReviewScoreCell(label, value, max) {
+      const tip = ROOT_REVIEW_SCORE_TIPS[label];
+      const titleAttr = tip ? ` title="${escapeHtml(tip)}"` : '';
+      return `<div class="root-review__score">
+          <span class="root-review__score-label"${titleAttr}>${escapeHtml(label)}</span>
+          ${rootScoreBar(value ?? 0, max)}
         </div>`;
     }
 
     function buildRootReviewScoresHtml(c) {
-      return `<div class="root-review__scores">
-          <div class="root-review__score">
-            <span class="root-review__score-label">Pronunciation</span>
-            ${rootScoreBar(c.pronunciation_ease)}
-          </div>
-          <div class="root-review__score">
-            <span class="root-review__score-label">Compound usefulness</span>
-            ${rootScoreBar(c.semantic_usefulness)}
-          </div>
-        </div>`;
+      const g = c.generation ?? {};
+      const chips = [suggestedStatusBadge(c.suggested_status)].filter(Boolean).join('');
+      const chipRow = chips ? `<div class="root-review__chips">${chips}</div>` : '';
+      const note = c.primitive_test_note ? `<div class="root-review__note sans">${escapeHtml(c.primitive_test_note)}</div>` : '';
+
+      if (c.suggested_status === 'compound_candidate' || !c.spelling) {
+        return `${chipRow}${note}<div class="root-review__hint sans">Not eligible for a primitive root until promoted to a primitive. ${compoundRecipeHintHtml(c)}</div>`;
+      }
+
+      const cells = [
+        rootReviewScoreCell('Pronunciation', c.pronunciation_ease, 5),
+        rootReviewScoreCell('Compound usefulness', c.semantic_usefulness, 5),
+      ];
+      if (g.distinctiveness_score != null) cells.push(rootReviewScoreCell('Distinctiveness', g.distinctiveness_score, 100));
+      // English safety: omit bar — collision_warnings below surface homophones, common words, etc.
+      if (g.compound_flow_score != null) cells.push(rootReviewScoreCell('Compound flow', g.compound_flow_score, 100));
+
+      return `${chipRow}${note}<div class="root-review__scores">${cells.join('')}</div>${rootReviewWarningsHtml(c)}`;
     }
 
     function buildCandidateReviewPreviewHtml(c) {
       const focus = {
-        spelling: c.spelling,
-        meaning: c.concept,
+        spelling: c.spelling ?? '',
+        meaning: c.plain_description || c.concept,
         state: c.status === 'pending' ? 'needs_review' : c.status,
         components: [],
       };
@@ -2288,6 +2383,7 @@
         showHear: true,
         hearId: 'root-hear',
         showBuiltFrom: false,
+        metaExtra: priorityClassBadge(c.priority_class),
         descriptionHtml: `<div class="word-preview__context sans">${escapeHtml(c.reason)}</div>`,
         footerHtml: buildRootReviewScoresHtml(c),
         unnamedStyle: 'review',
@@ -2304,8 +2400,14 @@
       };
       let footer = '';
       let descriptionHtml = '';
+      if (!isSound) {
+        const recipe = compoundReviewRecipeText(item);
+        if (recipe) {
+          descriptionHtml = `<div class="word-preview__context sans">Recipe: <span class="mono">${escapeHtml(recipe)}</span></div>`;
+        }
+      }
       if (concept?.reason) {
-        descriptionHtml = `<div class="word-preview__context sans">${escapeHtml(concept.reason)}</div>`;
+        descriptionHtml += `<div class="word-preview__context sans">${escapeHtml(concept.reason)}</div>`;
       }
       if (!isSound) {
         footer += buildCompoundReviewScoresHtml(item);
@@ -2423,11 +2525,15 @@
     function reviewRootsPickerMarkup(candidates, sounds) {
       const tiles = [];
       for (const c of candidates) {
+        const isCompoundCand = c.suggested_status === 'compound_candidate' || !c.spelling;
+        const meta = c.status === 'rejected'
+          ? badge('rejected')
+          : (isCompoundCand ? '<span class="review-pick__tag">semantic only</span>' : '');
         tiles.push(pickerCellHtml({
-          spelling: c.spelling,
-          meaning: pickerMeaningShort(c.concept),
+          spelling: c.spelling || '—',
+          meaning: pickerMeaningShort(c.plain_description || c.concept),
           type: 'root',
-          meta: c.status === 'rejected' ? badge('rejected') : '',
+          meta,
           selected: isReviewSelected('candidate', c.id),
           extraClasses: 'review-pick',
           attrs: { 'data-review-type': 'candidate', 'data-review-ref': c.id },
@@ -2865,7 +2971,11 @@
       const el = $('word-review');
       if (!el || !c) return;
 
-      const canRegenerate = c.status !== 'approved';
+      // Compound candidates carry no spelling; they cannot be approved or
+      // regenerated until promoted to a primitive in the concept editor.
+      const eligible = c.suggested_status !== 'compound_candidate' && Boolean(c.spelling);
+      const canApprove = eligible && c.status !== 'approved';
+      const canRegenerate = eligible && c.status !== 'approved';
       const canReopen = c.status === 'rejected';
 
       el.innerHTML = `
@@ -2873,8 +2983,8 @@
           ${buildCandidateReviewPreviewHtml(c)}
           <div class="review-decision">
             <div class="feel-actions root-review__actions">
-              <button type="button" class="fa-approve" id="root-approve" data-write ${c.status === 'approved' ? 'disabled' : ''}>✓ Approve</button>
-              ${canWrite() ? '<button type="button" class="fa-edit" id="root-edit" data-write>✎ Edit</button>' : ''}
+              <button type="button" class="fa-approve" id="root-approve" data-write ${canApprove ? '' : 'disabled'}>✓ Approve</button>
+              ${canWrite() ? `<button type="button" class="fa-edit" id="root-edit" data-write>✎ Edit${eligible ? '' : ' / Promote'}</button>` : ''}
               ${canRegenerate && canWrite() ? '<button type="button" class="btn" id="root-regenerate" data-write>↻ Regenerate</button>' : ''}
               ${canReopen && canWrite() ? '<button type="button" class="btn" id="root-reopen" data-write>Reopen</button>' : ''}
               <button type="button" class="fa-reject" id="root-reject" data-write ${c.status === 'rejected' ? 'disabled' : ''}>✕ Reject</button>
@@ -2882,7 +2992,7 @@
           </div>
         </div>`;
 
-      $('root-hear')?.addEventListener('click', () => speakNeural([c.spelling]));
+      $('root-hear')?.addEventListener('click', () => { if (c.spelling) speakNeural([c.spelling]); });
       wireRootActions(c);
     }
 
@@ -3176,6 +3286,10 @@
         ipa: c.ipa,
         aliases: conceptEditorWordBankText(c),
         status: c.status,
+        plain_description: c.plain_description ?? '',
+        primitive_test_note: c.primitive_test_note ?? '',
+        suggested_status: c.suggested_status ?? 'primitive',
+        priority_class: c.priority_class ?? 'common',
       };
     }
 
@@ -3392,6 +3506,25 @@
           <label class="fld" for="ce-concept">Definition</label>
           <input type="text" id="ce-concept" value="${escapeHtml(d.concept)}" data-write-input autocomplete="off">
           <div id="ce-spelling-alerts" class="concept-editor__alerts" aria-live="polite"></div>
+          <label class="fld" for="ce-plain">Plain description</label>
+          <p class="concept-editor__hint sans">Everyday wording shown in review. Avoid academic glosses.</p>
+          <input type="text" id="ce-plain" value="${escapeHtml(d.plain_description ?? '')}" data-write-input autocomplete="off">
+          <div class="concept-editor__field-pair">
+            <div>
+              <label class="fld" for="ce-priority-class">Priority class</label>
+              <select id="ce-priority-class" data-write-input>
+                ${['essential', 'common', 'useful', 'extended', 'questionable'].map(pc => `<option value="${pc}"${(d.priority_class ?? 'common') === pc ? ' selected' : ''}>${pc}</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <label class="fld" for="ce-suggested-status">Primitive status</label>
+              <select id="ce-suggested-status" data-write-input>
+                ${['primitive', 'compound_candidate', 'unclear'].map(ss => `<option value="${ss}"${(d.suggested_status ?? 'primitive') === ss ? ' selected' : ''}>${ss.replace(/_/g, ' ')}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+          <label class="fld" for="ce-primitive-note">Primitive test note</label>
+          <textarea id="ce-primitive-note" rows="2" data-write-input>${escapeHtml(d.primitive_test_note ?? '')}</textarea>
           <label class="fld" for="ce-domain">Domain</label>
           <select id="ce-domain" data-write-input>
             ${domainOpts}
@@ -3483,11 +3616,26 @@
       const domain = domainSel === '_custom' ? $('ce-domain-custom')?.value.trim().toLowerCase() : domainSel;
       const spelling = $('ce-spelling')?.value.trim().toLowerCase();
       const aliases = $('ce-aliases')?.value ?? '';
-      if (!id || !concept || !domain || !spelling) {
-        toast('Id, concept phrase, domain, and sound are required.');
+      const suggestedStatus = $('ce-suggested-status')?.value || 'primitive';
+      // Compound candidates carry no spelling; a sound is required only for
+      // primitives and for any newly created concept.
+      const needsSpelling = STATE.conceptEditorIsNew || suggestedStatus !== 'compound_candidate';
+      if (!id || !concept || !domain || (needsSpelling && !spelling)) {
+        toast(needsSpelling
+          ? 'Id, concept phrase, domain, and sound are required.'
+          : 'Id, concept phrase, and domain are required.');
         return;
       }
-      const body = { description: concept, domain, spelling, aliases };
+      const body = {
+        description: concept,
+        domain,
+        aliases,
+        plain_description: $('ce-plain')?.value.trim() ?? '',
+        primitive_test_note: $('ce-primitive-note')?.value.trim() ?? '',
+        suggested_status: suggestedStatus,
+        priority_class: $('ce-priority-class')?.value,
+      };
+      if (spelling) body.spelling = spelling;
       const returnPage = STATE.conceptEditorReturnPage;
       try {
         if (STATE.conceptEditorIsNew) {

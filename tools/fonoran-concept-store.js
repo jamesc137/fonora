@@ -7,6 +7,7 @@
 import { romanToIpa, parseSyllable } from './fonoran-pronunciation.js';
 import { loadConceptInventory, clearLocalizationCache, loadRuntimeConceptInventory, loadLocalization } from './fonoran-concepts.js';
 import { readDoc, writeDoc } from './fonoran-store.js';
+import { priorityWeight, DEFAULT_PRIORITY_CLASS } from './fonoran-priority.js';
 import {
   addSound,
   patchSound,
@@ -15,6 +16,38 @@ import {
   effectiveState,
   consolidateConceptSound,
 } from './fonoran-sound-bucket.js';
+
+const SUGGESTED_STATUSES = new Set(['primitive', 'compound_candidate', 'unclear']);
+const PRIORITY_CLASSES = new Set(['essential', 'common', 'useful', 'extended', 'questionable']);
+
+/** Apply optional editorial fields from a request body to a primitive + candidate pair. */
+function applyEditorialFields(body, primitive, candidate) {
+  if (body.plain_description != null) {
+    const pd = String(body.plain_description).trim();
+    primitive.plain_description = pd;
+    if (candidate) candidate.plain_description = pd;
+  }
+  if (body.primitive_test_note != null) {
+    const note = String(body.primitive_test_note).trim();
+    primitive.primitive_test_note = note;
+    if (candidate) candidate.primitive_test_note = note;
+  }
+  if (body.suggested_status != null) {
+    const ss = String(body.suggested_status).trim().toLowerCase();
+    if (!SUGGESTED_STATUSES.has(ss)) throw new Error(`Invalid suggested_status: ${ss}`);
+    primitive.suggested_status = ss;
+    if (candidate) candidate.suggested_status = ss;
+  }
+  if (body.priority_class != null) {
+    const pc = String(body.priority_class).trim().toLowerCase();
+    if (!PRIORITY_CLASSES.has(pc)) throw new Error(`Invalid priority_class: ${pc}`);
+    primitive.priority_class = pc;
+    if (candidate) {
+      candidate.priority_class = pc;
+      candidate.priority_weight = priorityWeight(pc);
+    }
+  }
+}
 
 function validateId(id) {
   const key = String(id ?? '').trim().toLowerCase();
@@ -224,6 +257,8 @@ export async function patchConcept(id, body) {
     aliasesChanged = true;
   }
 
+  applyEditorialFields(body, primitive, candidate);
+
   if (body.spelling != null) {
     const spelling = validateSpelling(body.spelling);
     const dup = store.candidates.find(
@@ -281,6 +316,12 @@ export async function createConcept(body) {
   if (dup) throw new Error(`Spelling "${spelling}" is already used by ${dup.id}`);
 
   const aliases = normalizeAliases(body.aliases);
+  const priorityClass = body.priority_class
+    ? String(body.priority_class).trim().toLowerCase()
+    : DEFAULT_PRIORITY_CLASS;
+  const suggestedStatus = body.suggested_status
+    ? String(body.suggested_status).trim().toLowerCase()
+    : 'primitive';
   const primitive = { id: key, description, domain };
 
   const candidate = {
@@ -299,6 +340,17 @@ export async function createConcept(body) {
     review: { approved_at: null, rejected_at: null, edited_at: new Date().toISOString(), note: 'created in concept editor' },
     generation: { phonetic_cost: null, template: null, tier: 'concept-editor' },
   };
+
+  applyEditorialFields(
+    {
+      plain_description: body.plain_description ?? description,
+      primitive_test_note: body.primitive_test_note ?? null,
+      suggested_status: suggestedStatus,
+      priority_class: priorityClass,
+    },
+    primitive,
+    candidate,
+  );
 
   semantic.primitives.push(primitive);
   semantic.primitive_count = semantic.primitives.length;

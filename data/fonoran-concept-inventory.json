@@ -1,5 +1,5 @@
 {
-  "version": "1.0-converged",
+  "version": "1.0-converged-editorial",
   "status": "canonical",
   "description": "Single converged Fonoran concept inventory: 99 core semantic primitives + curated extended dimensions. Source of truth for root-candidates and the unified build.",
   "source": "merge of data/fonoran-semantic-primitives.json (core) + data/fonoran-primitive-roots-config.json (extended)",
@@ -11,709 +11,1181 @@
       "id": "person",
       "domain": "being",
       "tier": "core",
-      "description": "a sentient being; someone"
+      "description": "a sentient being; someone",
+      "plain_description": "a sentient being; someone",
+      "priority_class": "essential",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "self",
       "domain": "being",
       "tier": "core",
-      "description": "oneself; me or mine"
+      "description": "oneself; me or mine",
+      "plain_description": "oneself; me or mine",
+      "priority_class": "essential",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "collective",
       "domain": "being",
       "tier": "core",
-      "description": "collective"
+      "description": "collective",
+      "plain_description": "collective",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "body",
       "domain": "being",
       "tier": "core",
-      "description": "the physical form of a being"
+      "description": "the physical form of a being",
+      "plain_description": "the physical form of a being",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "life",
       "domain": "being",
       "tier": "core",
-      "description": "the state of being alive"
+      "description": "the state of being alive",
+      "plain_description": "the state of being alive",
+      "priority_class": "essential",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "death",
       "domain": "being",
       "tier": "core",
-      "description": "the end of life"
+      "description": "the end of life",
+      "plain_description": "the end of life",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "birth",
       "domain": "being",
       "tier": "core",
-      "description": "the beginning of an individual life"
+      "description": "the beginning of an individual life",
+      "plain_description": "the beginning of an individual life",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "breath",
       "domain": "being",
       "tier": "core",
-      "description": "the air stream of living"
+      "description": "the air stream of living",
+      "plain_description": "the air stream of living",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "move",
       "domain": "action",
       "tier": "core",
-      "description": "change position in space; all locomotion inherits from this"
+      "description": "change position in space; all locomotion inherits from this",
+      "plain_description": "change position in space; all locomotion inherits from this",
+      "priority_class": "essential",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "give",
       "domain": "action",
       "tier": "core",
-      "description": "transfer something to another"
+      "description": "transfer something to another",
+      "plain_description": "transfer something to another",
+      "priority_class": "essential",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "take",
       "domain": "action",
       "tier": "core",
-      "description": "receive something from another"
+      "description": "receive something from another",
+      "plain_description": "receive something from another",
+      "priority_class": "essential",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "hold",
       "domain": "action",
       "tier": "core",
-      "description": "retain in grasp or keeping"
+      "description": "retain in grasp or keeping",
+      "plain_description": "retain in grasp or keeping",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "use",
       "domain": "action",
       "tier": "core",
-      "description": "employ a thing for a purpose"
+      "description": "employ a thing for a purpose",
+      "plain_description": "employ a thing for a purpose",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "help",
       "domain": "action",
       "tier": "core",
-      "description": "act so another can do or have"
+      "description": "act so another can do or have",
+      "plain_description": "act so another can do or have",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "make",
       "domain": "action",
       "tier": "core",
-      "description": "bring something into being"
+      "description": "bring something into being",
+      "plain_description": "bring something into being",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "do",
       "domain": "action",
       "tier": "core",
-      "description": "perform an action; act"
+      "description": "perform an action; act",
+      "plain_description": "perform an action; act",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "speak",
       "domain": "action",
       "tier": "core",
-      "description": "talk; use the voice with words"
+      "description": "talk; use the voice with words",
+      "plain_description": "talk; use the voice with words",
+      "priority_class": "essential",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "see",
       "domain": "action",
       "tier": "core",
-      "description": "perceive with the eyes"
+      "description": "perceive with the eyes",
+      "plain_description": "perceive with the eyes",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "hear",
       "domain": "action",
       "tier": "core",
-      "description": "perceive with the ears"
+      "description": "perceive with the ears",
+      "plain_description": "perceive with the ears",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "touch",
       "domain": "action",
       "tier": "core",
-      "description": "feel by contact with skin"
+      "description": "feel by contact with skin",
+      "plain_description": "feel by contact with skin",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "smell",
       "domain": "action",
       "tier": "core",
-      "description": "perceive with the nose"
+      "description": "perceive with the nose",
+      "plain_description": "perceive with the nose",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "taste",
       "domain": "action",
       "tier": "core",
-      "description": "perceive with the mouth"
+      "description": "perceive with the mouth",
+      "plain_description": "perceive with the mouth",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "know",
       "domain": "action",
       "tier": "core",
-      "description": "understand; hold as true"
+      "description": "understand; hold as true",
+      "plain_description": "understand; hold as true",
+      "priority_class": "essential",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "think",
       "domain": "action",
       "tier": "core",
-      "description": "use the mind"
+      "description": "use the mind",
+      "plain_description": "use the mind",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "feel",
       "domain": "action",
       "tier": "core",
-      "description": "experience inner sensation"
+      "description": "experience inner sensation",
+      "plain_description": "experience inner sensation",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "want",
       "domain": "action",
       "tier": "core",
-      "description": "desire; wish for"
+      "description": "desire; wish for",
+      "plain_description": "desire; wish for",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "eat",
       "domain": "action",
       "tier": "core",
-      "description": "consume food"
+      "description": "consume food",
+      "plain_description": "consume food",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "sleep",
       "domain": "action",
       "tier": "core",
-      "description": "rest in unconsciousness"
+      "description": "rest in unconsciousness",
+      "plain_description": "rest in unconsciousness",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "thing",
       "domain": "ontology",
       "tier": "core",
-      "description": "any entity; the primary noun dimension — book, meal, vehicle, lamp inherit from thing + X"
+      "description": "any entity; the primary noun dimension — book, meal, vehicle, lamp inherit from thing + X",
+      "plain_description": "any entity; the primary noun dimension — book, meal, vehicle, lamp inherit from thing + X",
+      "priority_class": "essential",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "substance",
       "domain": "ontology",
       "tier": "core",
-      "description": "physical stuff; matter"
+      "description": "physical stuff; matter",
+      "plain_description": "physical stuff; matter",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "form",
       "domain": "ontology",
       "tier": "core",
-      "description": "shape or look of something"
+      "description": "shape or look of something",
+      "plain_description": "shape or look of something",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "change",
       "domain": "ontology",
       "tier": "core",
-      "description": "become different; grow, age, damage, improve inherit from this"
+      "description": "become different; grow, age, damage, improve inherit from this",
+      "plain_description": "become different; grow, age, damage, improve inherit from this",
+      "priority_class": "essential",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "empty",
       "domain": "ontology",
       "tier": "core",
-      "description": "contains nothing; nothing inside"
+      "description": "contains nothing; nothing inside",
+      "plain_description": "contains nothing; nothing inside",
+      "priority_class": "essential",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "water",
       "domain": "element",
       "tier": "core",
-      "description": "liquid water to drink or touch"
+      "description": "liquid water to drink or touch",
+      "plain_description": "liquid water to drink or touch",
+      "priority_class": "essential",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "fire",
       "domain": "element",
       "tier": "core",
-      "description": "flame; hot bright burning"
+      "description": "flame; hot bright burning",
+      "plain_description": "flame; hot bright burning",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "earth",
       "domain": "element",
       "tier": "core",
-      "description": "ground; dirt underfoot"
+      "description": "ground; dirt underfoot",
+      "plain_description": "ground; dirt underfoot",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "air",
       "domain": "element",
       "tier": "core",
-      "description": "what we breathe; invisible atmosphere"
+      "description": "what we breathe; invisible atmosphere",
+      "plain_description": "what we breathe; invisible atmosphere",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "light",
       "domain": "element",
       "tier": "core",
-      "description": "brightness you can see by"
+      "description": "brightness you can see by",
+      "plain_description": "brightness you can see by",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "dark",
       "domain": "element",
       "tier": "core",
-      "description": "absence of light"
+      "description": "absence of light",
+      "plain_description": "absence of light",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "hot",
       "domain": "element",
       "tier": "core",
-      "description": "high temperature; burns"
+      "description": "high temperature; burns",
+      "plain_description": "high temperature; burns",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "cold",
       "domain": "element",
       "tier": "core",
-      "description": "low temperature; shiver"
+      "description": "low temperature; shiver",
+      "plain_description": "low temperature; shiver",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "stone",
       "domain": "element",
       "tier": "core",
-      "description": "hard rock"
+      "description": "hard rock",
+      "plain_description": "hard rock",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "plant",
       "domain": "element",
       "tier": "core",
-      "description": "living vegetation"
+      "description": "living vegetation",
+      "plain_description": "living vegetation",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "animal",
       "domain": "element",
       "tier": "core",
-      "description": "living creature that is not a person"
+      "description": "living creature that is not a person",
+      "plain_description": "living creature that is not a person",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "inside",
       "domain": "space",
       "tier": "core",
-      "description": "within an interior"
+      "description": "within an interior",
+      "plain_description": "within an interior",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "outside",
       "domain": "space",
       "tier": "core",
-      "description": "beyond a boundary; exterior"
+      "description": "beyond a boundary; exterior",
+      "plain_description": "beyond a boundary; exterior",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "here",
       "domain": "space",
       "tier": "core",
-      "description": "at this place"
+      "description": "at this place",
+      "plain_description": "at this place",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "there",
       "domain": "space",
       "tier": "core",
-      "description": "at that place"
+      "description": "at that place",
+      "plain_description": "at that place",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "near",
       "domain": "space",
       "tier": "core",
-      "description": "close in space"
+      "description": "close in space",
+      "plain_description": "close in space",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "far",
       "domain": "space",
       "tier": "core",
-      "description": "distant in space"
+      "description": "distant in space",
+      "plain_description": "distant in space",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "up",
       "domain": "space",
       "tier": "core",
-      "description": "higher position"
+      "description": "higher position",
+      "plain_description": "higher position",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "down",
       "domain": "space",
       "tier": "core",
-      "description": "lower position"
+      "description": "lower position",
+      "plain_description": "lower position",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "path",
       "domain": "space",
       "tier": "core",
-      "description": "a way leading through space"
+      "description": "a way leading through space",
+      "plain_description": "a way leading through space",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "place",
       "domain": "space",
       "tier": "core",
-      "description": "a location; somewhere"
+      "description": "a location; somewhere",
+      "plain_description": "a location; somewhere",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "surface",
       "domain": "space",
       "tier": "core",
-      "description": "outer face; what you touch on the outside"
+      "description": "outer face; what you touch on the outside",
+      "plain_description": "outer face; what you touch on the outside",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "bound",
       "domain": "space",
       "tier": "core",
-      "description": "edge; where something stops"
+      "description": "edge; where something stops",
+      "plain_description": "edge; where something stops",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "center",
       "domain": "space",
       "tier": "core",
-      "description": "middle point"
+      "description": "middle point",
+      "plain_description": "middle point",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "before",
       "domain": "time",
       "tier": "core",
-      "description": "earlier in time; yesterday inherits from this"
+      "description": "earlier in time; yesterday inherits from this",
+      "plain_description": "earlier in time; yesterday inherits from this",
+      "priority_class": "essential",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "after",
       "domain": "time",
       "tier": "core",
-      "description": "later in time; tomorrow inherits from this"
+      "description": "later in time; tomorrow inherits from this",
+      "plain_description": "later in time; tomorrow inherits from this",
+      "priority_class": "essential",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "now",
       "domain": "time",
       "tier": "core",
-      "description": "this moment"
+      "description": "this moment",
+      "plain_description": "this moment",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "time",
       "domain": "time",
       "tier": "core",
-      "description": "duration; while things happen"
+      "description": "duration; while things happen",
+      "plain_description": "duration; while things happen",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "one",
       "domain": "quantity",
       "tier": "core",
-      "description": "a single unit"
+      "description": "a single unit",
+      "plain_description": "a single unit",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "many",
       "domain": "quantity",
       "tier": "core",
-      "description": "large quantity; plurality"
+      "description": "large quantity; plurality",
+      "plain_description": "large quantity; plurality",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "all",
       "domain": "quantity",
       "tier": "core",
-      "description": "every one without exception"
+      "description": "every one without exception",
+      "plain_description": "every one without exception",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "some",
       "domain": "quantity",
       "tier": "core",
-      "description": "an indefinite portion"
+      "description": "an indefinite portion",
+      "plain_description": "an indefinite portion",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "more",
       "domain": "quantity",
       "tier": "core",
-      "description": "greater amount"
+      "description": "greater amount",
+      "plain_description": "greater amount",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "less",
       "domain": "quantity",
       "tier": "core",
-      "description": "smaller amount"
+      "description": "smaller amount",
+      "plain_description": "smaller amount",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "fast",
       "domain": "quantity",
       "tier": "core",
-      "description": "quick; high speed"
+      "description": "quick; high speed",
+      "plain_description": "quick; high speed",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "love",
       "domain": "emotion",
       "tier": "core",
-      "description": "deep affection; care"
+      "description": "deep affection; care",
+      "plain_description": "deep affection; care",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "fear",
       "domain": "emotion",
       "tier": "core",
-      "description": "apprehension of harm"
+      "description": "apprehension of harm",
+      "plain_description": "apprehension of harm",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "joy",
       "domain": "emotion",
       "tier": "core",
-      "description": "happiness; delight"
+      "description": "happiness; delight",
+      "plain_description": "happiness; delight",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "pain",
       "domain": "emotion",
       "tier": "core",
-      "description": "hurt; suffering"
+      "description": "hurt; suffering",
+      "plain_description": "hurt; suffering",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "sad",
       "domain": "emotion",
       "tier": "core",
-      "description": "sorrow; unhappiness"
+      "description": "sorrow; unhappiness",
+      "plain_description": "sorrow; unhappiness",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "good",
       "domain": "evaluation",
       "tier": "core",
-      "description": "desirable; works well"
+      "description": "desirable; works well",
+      "plain_description": "desirable; works well",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "bad",
       "domain": "evaluation",
       "tier": "core",
-      "description": "undesirable; harmful"
+      "description": "undesirable; harmful",
+      "plain_description": "undesirable; harmful",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "true",
       "domain": "evaluation",
       "tier": "core",
-      "description": "corresponds to reality"
+      "description": "corresponds to reality",
+      "plain_description": "corresponds to reality",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "false",
       "domain": "evaluation",
       "tier": "core",
-      "description": "does not correspond to reality"
+      "description": "does not correspond to reality",
+      "plain_description": "does not correspond to reality",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "equal",
       "domain": "evaluation",
       "tier": "core",
-      "description": "same amount; fair match; balance and exchange inherit from this"
+      "description": "same amount; fair match; balance and exchange inherit from this",
+      "plain_description": "same amount; fair match; balance and exchange inherit from this",
+      "priority_class": "essential",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "bond",
       "domain": "relationships",
       "tier": "core",
-      "description": "connection that holds together"
+      "description": "connection that holds together",
+      "plain_description": "connection that holds together",
+      "priority_class": "essential",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "conflict",
       "domain": "relationships",
       "tier": "core",
-      "description": "opposition; clash; fight"
+      "description": "opposition; clash; fight",
+      "plain_description": "opposition; clash; fight",
+      "priority_class": "essential",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "same",
       "domain": "relationships",
       "tier": "core",
-      "description": "not different; matching"
+      "description": "not different; matching",
+      "plain_description": "not different; matching",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "different",
       "domain": "relationships",
       "tier": "core",
-      "description": "not the same"
+      "description": "not the same",
+      "plain_description": "not the same",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "part",
       "domain": "relationships",
       "tier": "core",
-      "description": "a piece of a larger whole"
+      "description": "a piece of a larger whole",
+      "plain_description": "a piece of a larger whole",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "whole",
       "domain": "relationships",
       "tier": "core",
-      "description": "all parts together"
+      "description": "all parts together",
+      "plain_description": "all parts together",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "mark",
       "domain": "process",
       "tier": "core",
-      "description": "a visible sign, drawing, or trace"
+      "description": "a visible sign, drawing, or trace",
+      "plain_description": "a visible sign, drawing, or trace",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "source",
       "domain": "process",
       "tier": "core",
-      "description": "where something begins"
+      "description": "where something begins",
+      "plain_description": "where something begins",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "container",
       "domain": "process",
       "tier": "core",
-      "description": "something that holds other things"
+      "description": "something that holds other things",
+      "plain_description": "something that holds other things",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "flow",
       "domain": "process",
       "tier": "core",
-      "description": "continuous passage without stopping"
+      "description": "continuous passage without stopping",
+      "plain_description": "continuous passage without stopping",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "pulse",
       "domain": "process",
       "tier": "core",
-      "description": "rhythmic recurrence"
+      "description": "rhythmic recurrence",
+      "plain_description": "rhythmic recurrence",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "still",
       "domain": "process",
       "tier": "core",
-      "description": "without motion; staying"
+      "description": "without motion; staying",
+      "plain_description": "without motion; staying",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "will",
       "domain": "process",
       "tier": "core",
-      "description": "intent; directed purpose"
+      "description": "intent; directed purpose",
+      "plain_description": "intent; directed purpose",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "strong",
       "domain": "process",
       "tier": "core",
-      "description": "great force; hard to break; power and leadership inherit from this"
+      "description": "great force; hard to break; power and leadership inherit from this",
+      "plain_description": "great force; hard to break; power and leadership inherit from this",
+      "priority_class": "essential",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "reach",
       "domain": "process",
       "tier": "core",
-      "description": "extension through space"
+      "description": "extension through space",
+      "plain_description": "extension through space",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "wave",
       "domain": "process",
       "tier": "core",
-      "description": "disturbance that travels outward"
+      "description": "disturbance that travels outward",
+      "plain_description": "disturbance that travels outward",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "food",
       "domain": "life",
       "tier": "core",
-      "description": "what is eaten to sustain life"
+      "description": "what is eaten to sustain life",
+      "plain_description": "what is eaten to sustain life",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "hand",
       "domain": "body",
       "tier": "core",
-      "description": "the grasping part of the body"
+      "description": "the grasping part of the body",
+      "plain_description": "the grasping part of the body",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "eye",
       "domain": "body",
       "tier": "core",
-      "description": "the seeing part of the body"
+      "description": "the seeing part of the body",
+      "plain_description": "the seeing part of the body",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "skin",
       "domain": "body",
       "tier": "core",
-      "description": "the outer covering of the body"
+      "description": "the outer covering of the body",
+      "plain_description": "the outer covering of the body",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "bone",
       "domain": "body",
       "tier": "core",
-      "description": "the rigid inner frame of the body"
+      "description": "the rigid inner frame of the body",
+      "plain_description": "the rigid inner frame of the body",
+      "priority_class": "common",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "big",
       "domain": "quality",
       "tier": "extended",
-      "description": "large size; not small"
+      "description": "large size; not small",
+      "plain_description": "large size; not small",
+      "priority_class": "extended",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "small",
       "domain": "quality",
       "tier": "extended",
-      "description": "little size; not big"
+      "description": "little size; not big",
+      "plain_description": "little size; not big",
+      "priority_class": "extended",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "head",
       "domain": "body",
       "tier": "extended",
-      "description": "upper body part; seat of mind"
+      "description": "upper body part; seat of mind",
+      "plain_description": "upper body part; seat of mind",
+      "priority_class": "extended",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "heart",
       "domain": "body",
       "tier": "extended",
-      "description": "central organ; seat of emotion"
+      "description": "central organ; seat of emotion",
+      "plain_description": "central organ; seat of emotion",
+      "priority_class": "extended",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "mouth",
       "domain": "body",
       "tier": "extended",
-      "description": "oral opening; speech organ"
+      "description": "oral opening; speech organ",
+      "plain_description": "oral opening; speech organ",
+      "priority_class": "extended",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "grow",
       "domain": "process",
       "tier": "extended",
-      "description": "increase in size; develop"
+      "description": "increase in size; develop",
+      "plain_description": "increase in size; develop",
+      "priority_class": "extended",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "need",
       "domain": "cognition",
       "tier": "extended",
-      "description": "require; lack necessitating fulfillment"
+      "description": "require; lack necessitating fulfillment",
+      "plain_description": "require; lack necessitating fulfillment",
+      "priority_class": "extended",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "cause",
       "domain": "relation",
       "tier": "extended",
-      "description": "what brings about an effect"
+      "description": "what brings about an effect",
+      "plain_description": "what brings about an effect",
+      "priority_class": "extended",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "learn",
       "domain": "cognition",
       "tier": "extended",
-      "description": "acquire knowledge or skill"
+      "description": "acquire knowledge or skill",
+      "plain_description": "acquire knowledge or skill",
+      "priority_class": "extended",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "teach",
       "domain": "cognition",
       "tier": "extended",
-      "description": "impart knowledge or skill"
+      "description": "impart knowledge or skill",
+      "plain_description": "impart knowledge or skill",
+      "priority_class": "extended",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "remember",
       "domain": "cognition",
       "tier": "extended",
-      "description": "retain in mind; recall past"
+      "description": "retain in mind; recall past",
+      "plain_description": "retain in mind; recall past",
+      "priority_class": "extended",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "known",
       "domain": "cognition",
       "tier": "extended",
-      "description": "established certainty; indexed truth"
+      "description": "established certainty; indexed truth",
+      "plain_description": "established certainty; indexed truth",
+      "priority_class": "extended",
+      "suggested_status": "unclear",
+      "primitive_test_note": "Gloss is abstract; rewrite in plain language and confirm it is a true primitive."
     },
     {
       "id": "unknown",
       "domain": "cognition",
       "tier": "extended",
-      "description": "not established; opaque"
+      "description": "not established; opaque",
+      "plain_description": "not established; opaque",
+      "priority_class": "extended",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "name",
       "domain": "communication",
       "tier": "extended",
-      "description": "identifier for an entity"
+      "description": "identifier for an entity",
+      "plain_description": "identifier for an entity",
+      "priority_class": "extended",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "signal",
       "domain": "communication",
       "tier": "extended",
-      "description": "discrete emission; communicative packet"
+      "description": "discrete emission; communicative packet",
+      "plain_description": "discrete emission; communicative packet",
+      "priority_class": "extended",
+      "suggested_status": "unclear",
+      "primitive_test_note": "Gloss is abstract; rewrite in plain language and confirm it is a true primitive."
     },
     {
       "id": "seed",
       "domain": "life",
       "tier": "extended",
-      "description": "origin of new life; generative kernel"
+      "description": "origin of new life; generative kernel",
+      "plain_description": "origin of new life; generative kernel",
+      "priority_class": "extended",
+      "suggested_status": "unclear",
+      "primitive_test_note": "Gloss is abstract; rewrite in plain language and confirm it is a true primitive."
     },
     {
       "id": "cycle",
       "domain": "process",
       "tier": "extended",
-      "description": "return path; repeating sequence"
+      "description": "return path; repeating sequence",
+      "plain_description": "return path; repeating sequence",
+      "priority_class": "extended",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "void",
       "domain": "ontology",
       "tier": "extended",
-      "description": "absence; empty interior"
+      "description": "absence; empty interior",
+      "plain_description": "absence; empty interior",
+      "priority_class": "extended",
+      "suggested_status": "primitive",
+      "primitive_test_note": "Fundamental concept; cannot be reduced to simpler Fonoran roots."
     },
     {
       "id": "agent",
       "domain": "agency",
       "tier": "extended",
-      "description": "activated locus; one who acts"
+      "description": "activated locus; one who acts",
+      "plain_description": "activated locus; one who acts",
+      "priority_class": "extended",
+      "suggested_status": "unclear",
+      "primitive_test_note": "Gloss is abstract; rewrite in plain language and confirm it is a true primitive."
     }
   ],
   "productive_dimensions": {

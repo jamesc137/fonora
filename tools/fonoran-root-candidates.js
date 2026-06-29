@@ -17,58 +17,120 @@ import {
   pronunciationEaseScore,
   usefulnessLabel,
 } from './fonoran-root-sound-assign.js';
+import { derivePriority, priorityWeight, DEFAULT_PRIORITY_CLASS } from './fonoran-priority.js';
+import { loadCollisionProfile } from './fonoran-root-collision.js';
+import { buildCompoundPartnerMap } from './fonoran-root-boundary-score.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUTPUT_PATH = join(ROOT, 'data/fonoran-root-candidates.json');
 
-function buildReason(concept, highLeverage) {
-  const lead = (concept.description ?? concept.gloss ?? '').split(';')[0].trim();
-  if (highLeverage.has(concept.id)) {
+/** Normalize one inventory primitive into the metadata the generator works from. */
+function conceptMeta(p, index) {
+  const priorityClass = p.priority_class ?? DEFAULT_PRIORITY_CLASS;
+  const gloss = p.plain_description ?? p.description ?? p.gloss ?? '';
+  return {
+    id: p.id,
+    gloss,
+    domain: p.domain,
+    plain_description: p.plain_description ?? p.description ?? p.gloss ?? '',
+    primitive_test_note: p.primitive_test_note ?? null,
+    suggested_status: p.suggested_status ?? 'primitive',
+    priority_class: priorityClass,
+    priority_weight: priorityWeight(priorityClass),
+    priority: derivePriority(priorityClass, index),
+    inventory_index: index,
+    collision_profile: null,
+  };
+}
+
+/** Compound candidates are not eligible for a generated root until promoted. */
+function isEligible(meta) {
+  return meta.suggested_status !== 'compound_candidate';
+}
+
+function buildReason(meta, highLeverage) {
+  const lead = (meta.gloss ?? '').split(';')[0].trim();
+  if (highLeverage.has(meta.id)) {
     return `High-leverage root: ${lead}. Appears frequently inside compounds.`;
   }
-  return `Fundamental ${concept.domain} concept: ${lead}. Cannot be naturally reduced into simpler Fonoran roots.`;
+  return `Fundamental ${meta.domain} concept: ${lead}. Cannot be naturally reduced into simpler Fonoran roots.`;
 }
 
-function semanticUsefulness(concept, highLeverage, rank, total) {
-  if (highLeverage.has(concept.id)) return 5;
-  const t = rank / total;
-  if (['being', 'action', 'ontology', 'element'].includes(concept.domain) && t < 0.4) return 4;
-  if (t < 0.6) return 4;
-  if (t < 0.85) return 3;
-  return 2;
+function semanticUsefulness(meta, highLeverage) {
+  if (highLeverage.has(meta.id)) return 5;
+  switch (meta.priority_class) {
+    case 'essential': return 5;
+    case 'common': return 4;
+    case 'useful': return 3;
+    default: return 2;
+  }
 }
 
-function assignmentToCandidate(assignment, rank, total, highLeverage) {
+function baseFields(meta) {
+  return {
+    id: meta.id,
+    concept: meta.gloss,
+    domain: meta.domain,
+    plain_description: meta.plain_description,
+    primitive_test_note: meta.primitive_test_note,
+    suggested_status: meta.suggested_status,
+    priority_class: meta.priority_class,
+    priority_weight: meta.priority_weight,
+    priority: meta.priority,
+  };
+}
+
+/** A semantic-only row for a concept that is not eligible for a root yet. */
+function semanticOnlyCandidate(meta) {
+  const lead = (meta.gloss ?? '').split(';')[0].trim();
+  return {
+    ...baseFields(meta),
+    spelling: null,
+    ipa: null,
+    reason: `Compound candidate: ${lead}. Not eligible for a primitive root until promoted to a primitive.`,
+    pronunciation_ease: null,
+    pronunciation_ease_label: null,
+    semantic_usefulness: null,
+    semantic_usefulness_label: null,
+    status: 'pending',
+    review: { approved_at: null, rejected_at: null, edited_at: null, note: null },
+    generation: { phonetic_cost: null, template: null, tier: null, eligible: false },
+    collision_warnings: [],
+    boundary_warnings: [],
+  };
+}
+
+function assignmentToCandidate(assignment, meta, highLeverage) {
   const spelling = assignment.root;
-  const template = assignment.scoring?.template ?? 'CV';
-  const cost = assignment.scoring?.phonetic_cost;
+  const s = assignment.scoring ?? {};
+  const template = s.template ?? 'CV';
+  const cost = s.phonetic_cost;
   const pronScore = pronunciationEaseScore(cost, template);
-  const useScore = semanticUsefulness(assignment, highLeverage, rank, total);
+  const useScore = semanticUsefulness(meta, highLeverage);
 
   return {
-    id: assignment.id,
+    ...baseFields(meta),
     spelling,
     ipa: romanToIpa(spelling),
-    concept: assignment.gloss,
-    domain: assignment.domain,
-    reason: buildReason(assignment, highLeverage),
+    reason: buildReason(meta, highLeverage),
     pronunciation_ease: pronScore,
     pronunciation_ease_label: easeLabel(pronScore),
     semantic_usefulness: useScore,
     semantic_usefulness_label: usefulnessLabel(useScore),
-    priority: assignment.priority,
     status: 'pending',
-    review: {
-      approved_at: null,
-      rejected_at: null,
-      edited_at: null,
-      note: null,
-    },
+    review: { approved_at: null, rejected_at: null, edited_at: null, note: null },
     generation: {
       phonetic_cost: cost,
       template,
-      tier: assignment.scoring?.tier ?? null,
+      tier: s.tier ?? null,
+      eligible: true,
+      distinctiveness_score: s.distinctiveness_score ?? null,
+      editorial_collision_score: s.editorial_collision_score ?? null,
+      compound_flow_score: s.compound_flow_score ?? null,
+      collision_profile: meta.collision_profile ?? null,
     },
+    collision_warnings: s.collision_warnings ?? [],
+    boundary_warnings: s.boundary_warnings ?? [],
   };
 }
 
@@ -85,17 +147,10 @@ export async function generateRootCandidates({ preserveReview = true } = {}) {
     ...productiveIds,
   ]);
   const primitives = semantic.primitives ?? [];
-  const concepts = primitives.map((p, i) => ({
-    id: p.id,
-    gloss: p.description ?? p.gloss,
-    domain: p.domain,
-    priority: 1000 - i,
-  }));
+  const metas = primitives.map((p, i) => conceptMeta(p, i));
+  const metaById = Object.fromEntries(metas.map(m => [m.id, m]));
 
   const pool = buildSyllablePool(phoneticsConfig);
-  if (pool.length < concepts.length) {
-    throw new Error(`Syllable pool (${pool.length}) smaller than concepts (${concepts.length})`);
-  }
 
   // Primitive roots must be exactly one syllable: CV or CVC.
   // Fail fast if the pool builder somehow produced a multi-syllable or unparseable form.
@@ -120,27 +175,64 @@ export async function generateRootCandidates({ preserveReview = true } = {}) {
 
   const lockedRoots = {};
   const preserved = new Map();
+  const reservedForms = [];
 
   if (preserveReview && existing?.candidates) {
     for (const c of existing.candidates) {
       if (c.status === 'approved') {
-        lockedRoots[c.id] = c.spelling;
+        if (c.spelling) lockedRoots[c.id] = c.spelling;
         preserved.set(c.id, c);
       } else if (c.status === 'rejected') {
         preserved.set(c.id, c);
+        if (c.spelling) reservedForms.push(c.spelling.toLowerCase());
       }
     }
   }
 
-  const assignments = assignRoots(concepts, pool, phoneticsConfig, { lockedRoots });
-  const total = assignments.length;
+  // Editorial collision profile + compound partner map drive the new scorers.
+  const profileId = phoneticsConfig.collision_profile ?? 'en';
+  const collisionProfile = await loadCollisionProfile(profileId);
+  for (const m of metas) m.collision_profile = profileId;
+  const compoundsDoc = (await readDoc('compounds')) ?? { compounds: [] };
+  const partnerMap = buildCompoundPartnerMap(compoundsDoc.compounds ?? []);
 
-  const candidates = assignments.map((a, i) => {
-    const preservedEntry = preserved.get(a.id);
+  // Concepts the assigner processes: eligible pending concepts + approved
+  // (locked) ones so their spelling stays reserved. Rejected rows are preserved
+  // and their spellings reserved separately. Sort by derived priority so
+  // essential concepts pick from the syllable pool first.
+  const assignList = metas
+    .filter(m => {
+      const pre = preserved.get(m.id);
+      if (pre?.status === 'rejected') return false;
+      if (pre?.status === 'approved') return true;
+      return isEligible(m);
+    })
+    .sort((a, b) => b.priority - a.priority);
+
+  if (pool.length < assignList.length) {
+    throw new Error(`Syllable pool (${pool.length}) smaller than assignable concepts (${assignList.length})`);
+  }
+
+  const assignments = assignRoots(assignList, pool, phoneticsConfig, {
+    lockedRoots,
+    collisionProfile,
+    partnerMap,
+    reservedForms,
+  });
+  const assignmentById = Object.fromEntries(assignments.map(a => [a.id, a]));
+
+  // Emit candidates in inventory order for a stable, reviewable file.
+  const candidates = primitives.map((p) => {
+    const id = p.id;
+    const preservedEntry = preserved.get(id);
     if (preservedEntry?.status === 'approved' || preservedEntry?.status === 'rejected') {
       return preservedEntry;
     }
-    return assignmentToCandidate(a, i + 1, total, highLeverage);
+    const meta = metaById[id];
+    if (!isEligible(meta)) return semanticOnlyCandidate(meta);
+    const assignment = assignmentById[id];
+    if (!assignment) return semanticOnlyCandidate(meta);
+    return assignmentToCandidate(assignment, meta, highLeverage);
   });
 
   const summary = {
@@ -148,15 +240,17 @@ export async function generateRootCandidates({ preserveReview = true } = {}) {
     pending: candidates.filter(c => c.status === 'pending').length,
     approved: candidates.filter(c => c.status === 'approved').length,
     rejected: candidates.filter(c => c.status === 'rejected').length,
+    compound_candidates: candidates.filter(c => c.suggested_status === 'compound_candidate').length,
   };
 
   const output = {
-    version: '1.0-root-workflow',
+    version: '2.0-editorial-workflow',
     status: 'proposal',
     generated_at: new Date().toISOString(),
+    collision_profile: profileId,
     philosophy: {
-      premise: 'Words come first. The semantic network evolves after roots are approved.',
-      workflow: 'Generate candidates → human review → canonical roots → compounds later',
+      premise: 'Concepts are canonical. Sounds are editorial proposals until approved.',
+      workflow: 'meaning cleanup → primitive test → priority class → sound generation → distinctiveness + collision + boundary scoring → human approval → compounds',
       source_concepts: 'data/fonoran-concept-inventory.json',
     },
     summary,

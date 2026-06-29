@@ -96,8 +96,11 @@ Spelling = concatenation of component phonetic forms, left to right.
 
 One converged pipeline. **`npm run fonoran:build`** regenerates root spellings (locking approved ones), resolves curated compounds, validates unique segmentation, and imports into the lab.
 
+**Guiding principle: concepts are canonical; sounds are editorial proposals until approved.** Generators propose, humans decide.
+
 ```text
-concept-inventory → root-candidates → review → fonoran:build → lab
+meaning cleanup → primitive test → priority class → sound generation
+  → distinctiveness + collision + boundary scoring → human approval → compounds
 ```
 
 | Step | What happens |
@@ -106,15 +109,40 @@ concept-inventory → root-candidates → review → fonoran:build → lab
 | 2. Review | Open **Review** at `/fonoran/#review` — approve, reject, edit, or regenerate roots |
 | 3. Rebuild | Re-run build; approved spellings stay locked; **user-created lab items are preserved** |
 
+### Concept metadata drives generation
+
+Each concept in the inventory carries editorial metadata (seed defaults via `npm run fonoran:inventory-migrate`):
+
+| Field | Purpose |
+| --- | --- |
+| `plain_description` | Everyday gloss shown in review (avoid academic wording) |
+| `primitive_test_note` | Short rationale: is this a true primitive? |
+| `suggested_status` | `primitive` \| `compound_candidate` \| `unclear` (semantic metadata, **not** a review state) |
+| `priority_class` | `essential` \| `common` \| `useful` \| `extended` \| `questionable` |
+
+`priority_class` maps to an internal weight (essential 100 → questionable 20) in `tools/fonoran-priority.js`. Concepts are assigned sounds in priority order, so the most important concepts pick the cheapest syllables first. **Compound candidates are ineligible for a root** while marked `compound_candidate` — they stay in the inventory and review queue for semantic review, and become eligible again the moment they are promoted to `primitive` (no code change). Review states stay `pending | approved | rejected`.
+
+### Scoring layers
+
+Every candidate syllable is scored on four stacked layers (all feed one penalty):
+
+1. **Phonetic cost** — shorter, simpler syllables for higher-priority concepts.
+2. **Phonetic distinctiveness** — spread the sound space so unrelated roots do not cluster (`ba/be/bi/bo`, `ban/dan/gan`).
+3. **Editorial collision** — locale-specific profile (default English) that blocks profanity/reserved particles, discourages common words, and warns on homophones and particle near-misses. See `data/fonoran-collision-profiles/`.
+4. **Compound-boundary flow** — penalizes spellings that would form awkward `mm`/`ll` joins with their likely compound partners.
+
+Distinctiveness, collision, and boundary scores plus any warnings are surfaced per candidate in the Review UI. The `fi`/collective case: assignment follows priority weight + phonetic cost, not semantic fit — `fi` is now penalized as an English homophone of "fee".
+
 ### Data files
 
 | File | Role |
 | --- | --- |
-| `data/fonoran-concept-inventory.json` | 118 semantic concepts (no phonetics) |
-| `data/fonoran-root-candidates.json` | Proposed spellings + review status |
+| `data/fonoran-concept-inventory.json` | 118 semantic concepts + editorial metadata (no phonetics) |
+| `data/fonoran-root-candidates.json` | Proposed spellings + scores + warnings + review status |
 | `data/fonoran-approved-roots.json` | Canonical approved roots |
 | `data/fonoran-compounds.json` | 46 curated compound recipes |
-| `data/fonoran-primitive-roots-config.json` | Phonetics rules only (onsets, vowels, codas) |
+| `data/fonoran-primitive-roots-config.json` | Phonetics rules + active `collision_profile` |
+| `data/fonoran-collision-profiles/` | Editorial collision profiles (default `en.json`) |
 | `data/fonoran-sound-bucket.json` | Runtime lab: sounds, compounds, history (seed + snapshot format) |
 | `data/localizations/en.json` | English word banks per concept |
 
@@ -127,6 +155,7 @@ npm run fonoran:reset              # blank lab + review queue + canonical roots
 npm run fonoran:build              # full pipeline → lab (needs review)
 npm run fonoran:build:approved     # same, everything pre-approved (testing)
 npm run fonoran:root-candidates    # refresh candidates only (no lab import)
+npm run fonoran:inventory-migrate  # seed editorial metadata fields on the concept inventory
 npm run fonoran:snapshot:export -- --to=data/   # Postgres → seed JSON (commit milestones)
 npm run fonoran:snapshot:import -- --from=data/ # seed JSON → Postgres (local bootstrap)
 ```

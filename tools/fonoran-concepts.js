@@ -100,6 +100,10 @@ export function conceptRecord(candidate, approvedRoot = null, primitive = null, 
     reason: candidate.reason ?? null,
     pronunciation_ease: candidate.pronunciation_ease ?? null,
     semantic_usefulness: candidate.semantic_usefulness ?? null,
+    plain_description: primitive?.plain_description ?? candidate.plain_description ?? null,
+    primitive_test_note: primitive?.primitive_test_note ?? candidate.primitive_test_note ?? null,
+    suggested_status: primitive?.suggested_status ?? candidate.suggested_status ?? 'primitive',
+    priority_class: primitive?.priority_class ?? candidate.priority_class ?? null,
   };
 }
 

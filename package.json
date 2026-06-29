@@ -45,6 +45,7 @@
     "fonoran:build": "node tools/fonoran-build.js",
     "fonoran:build:approved": "node tools/fonoran-build.js --approve-all",
     "fonoran:root-candidates": "node tools/fonoran-root-candidates.js",
+    "fonoran:inventory-migrate": "node tools/fonoran-inventory-migrate.js",
     "fonoran:reconcile-inventory": "node scripts/fonoran-reconcile-inventory.js",
     "fonoran:root-capacity": "node scripts/fonoran-root-capacity.js",
     "fonoran:root-capacity:tiers": "node scripts/fonoran-root-capacity-tiers.js",

@@ -236,6 +236,7 @@
       reviewShowLabWords: true,
       reviewShowGeneratedWords: false,
       reviewNeedsReviewOnly: false,
+      reviewShowRejected: false,
       reviewSelection: null,
       conceptEditorFilter: '',
       conceptEditorSelected: null,
@@ -2323,8 +2324,12 @@
 
     function reviewPickableCandidates() {
       const q = (STATE.reviewFilter ?? '').trim().toLowerCase();
-      let list = rootReviewList().filter(c => c.status === 'pending' || c.status === 'rejected');
-      if (STATE.reviewNeedsReviewOnly) list = list.filter(c => c.status === 'pending');
+      let list = rootReviewList();
+      if (STATE.reviewShowRejected) list = list.filter(c => c.status === 'rejected');
+      else {
+        list = list.filter(c => c.status === 'pending' || c.status === 'rejected');
+        if (STATE.reviewNeedsReviewOnly) list = list.filter(c => c.status === 'pending');
+      }
       if (!q) return list;
       return list.filter(c => `${c.id} ${c.spelling} ${c.concept} ${c.domain}`.toLowerCase().includes(q));
     }
@@ -2341,10 +2346,17 @@
       if (!STATE.lab) return [];
       const q = (STATE.reviewFilter ?? '').trim().toLowerCase();
       const queued = queuedCandidateConceptIds();
-      let list = userSounds()
-        .filter(s => !s.concept_id || !queued.has(s.concept_id))
-        .map(s => ({ ...s, reviewKind: 'sound' }));
-      if (STATE.reviewNeedsReviewOnly) list = list.filter(s => isOpen(s.state));
+      let list;
+      if (STATE.reviewShowRejected) {
+        list = STATE.lab.sounds
+          .filter(s => s.state === 'rejected' && (!s.concept_id || !queued.has(s.concept_id)))
+          .map(s => ({ ...s, reviewKind: 'sound' }));
+      } else {
+        list = userSounds()
+          .filter(s => !s.concept_id || !queued.has(s.concept_id))
+          .map(s => ({ ...s, reviewKind: 'sound' }));
+        if (STATE.reviewNeedsReviewOnly) list = list.filter(s => isOpen(s.state));
+      }
       if (!q) return list;
       return list.filter(s => `${s.spelling} ${s.meaning ?? ''} ${s.legacy_label ?? ''}`.toLowerCase().includes(q));
     }
@@ -2352,8 +2364,15 @@
     function reviewPickableLabCompounds() {
       if (!STATE.lab) return [];
       const q = (STATE.reviewFilter ?? '').trim().toLowerCase();
-      let list = [...userWords(), ...generatedLabWords()].map(c => ({ ...c, reviewKind: 'compound' }));
-      if (STATE.reviewNeedsReviewOnly) list = list.filter(c => isOpen(c.state));
+      let list;
+      if (STATE.reviewShowRejected) {
+        list = STATE.lab.compounds
+          .filter(c => !c.generator_hint && c.state === 'rejected')
+          .map(c => ({ ...c, reviewKind: 'compound' }));
+      } else {
+        list = [...userWords(), ...generatedLabWords()].map(c => ({ ...c, reviewKind: 'compound' }));
+        if (STATE.reviewNeedsReviewOnly) list = list.filter(c => isOpen(c.state));
+      }
       if (!q) return list;
       return list.filter(c => `${c.spelling} ${c.meaning ?? ''} ${c.generator_hint ?? ''}`.toLowerCase().includes(q));
     }
@@ -2361,8 +2380,15 @@
     function reviewPickableGeneratedCompounds() {
       if (!STATE.lab) return [];
       const q = (STATE.reviewFilter ?? '').trim().toLowerCase();
-      let list = generatedLabWords().map(c => ({ ...c, reviewKind: 'compound' }));
-      if (STATE.reviewNeedsReviewOnly) list = list.filter(c => isOpen(c.state));
+      let list;
+      if (STATE.reviewShowRejected) {
+        list = STATE.lab.compounds
+          .filter(c => c.generator_hint && c.state === 'rejected')
+          .map(c => ({ ...c, reviewKind: 'compound' }));
+      } else {
+        list = generatedLabWords().map(c => ({ ...c, reviewKind: 'compound' }));
+        if (STATE.reviewNeedsReviewOnly) list = list.filter(c => isOpen(c.state));
+      }
       if (!q) return list;
       return list.filter(c => `${c.spelling} ${c.meaning ?? ''} ${c.generator_hint ?? ''}`.toLowerCase().includes(q));
     }
@@ -2384,12 +2410,11 @@
         return c ? { kind: 'candidate', item: c } : null;
       }
       if (sel.type === 'sound') {
-        const s = userSounds().find(x => x.spelling === sel.ref);
+        const s = STATE.lab?.sounds?.find(x => x.spelling === sel.ref);
         return s ? { kind: 'sound', item: { ...s, reviewKind: 'sound' } } : null;
       }
       if (sel.type === 'compound') {
-        const c = userWords().find(x => x.id === sel.ref)
-          ?? generatedLabWords().find(x => x.id === sel.ref);
+        const c = STATE.lab?.compounds?.find(x => x.id === sel.ref);
         return c ? { kind: 'compound', item: { ...c, reviewKind: 'compound' } } : null;
       }
       return null;
@@ -2402,6 +2427,7 @@
           spelling: c.spelling,
           meaning: pickerMeaningShort(c.concept),
           type: 'root',
+          meta: c.status === 'rejected' ? badge('rejected') : '',
           selected: isReviewSelected('candidate', c.id),
           extraClasses: 'review-pick',
           attrs: { 'data-review-type': 'candidate', 'data-review-ref': c.id },
@@ -2412,6 +2438,7 @@
           spelling: s.spelling,
           meaning: pickerMeaningForSound(s),
           type: 'root',
+          meta: s.state === 'rejected' ? badge('rejected') : '',
           selected: isReviewSelected('sound', s.spelling),
           extraClasses: 'review-pick',
           attrs: { 'data-review-type': 'sound', 'data-review-ref': s.spelling },
@@ -2432,6 +2459,7 @@
           meaning: pickerMeaningForCompound(c),
           glyphs,
           type: 'word',
+          meta: c.state === 'rejected' ? badge('rejected') : '',
           selected,
           extraClasses: 'review-pick',
           attrs: { 'data-review-type': 'compound', 'data-review-ref': c.id },
@@ -2474,7 +2502,8 @@
         const on = key === 'roots' ? showRoots
           : key === 'words' ? showWords
             : key === 'generated' ? showGenerated
-              : STATE.reviewNeedsReviewOnly;
+              : key === 'rejected' ? STATE.reviewShowRejected
+                : STATE.reviewNeedsReviewOnly;
         chip.classList.toggle('active', on);
       });
 
@@ -2681,6 +2710,7 @@
       const reviewEl = $('word-review');
       if (!reviewEl || !c) return;
       const isSound = c.reviewKind === 'sound';
+      const canReopen = c.state === 'rejected';
       const savedNote = STATE.justSaved === c.spelling
         ? `<div class="saved-banner">✓ Saved <strong>${escapeHtml(c.spelling)}</strong>. Find it anytime in Dictionary.</div>` : '';
       reviewEl.innerHTML = `
@@ -2691,7 +2721,8 @@
             <div class="feel-actions root-review__actions">
               <button type="button" class="fa-approve" id="approve"${writeDisabledAttr(!c.meaning)} data-write>✓ Approve</button>
               ${canWrite() ? '<button type="button" class="fa-edit" id="edit" data-write>✎ Edit</button>' : ''}
-              <button type="button" class="fa-reject" id="reject" data-write>✕ Reject</button>
+              ${canReopen && canWrite() ? '<button type="button" class="btn" id="reopen" data-write>Reopen</button>' : ''}
+              <button type="button" class="fa-reject" id="reject" data-write ${canReopen ? 'disabled' : ''}>✕ Reject</button>
             </div>
           </div>
         </div>`;
@@ -2777,6 +2808,15 @@
         const id = isSound ? item.spelling : item.id;
         await api(`/api/fonoran/lab/state/${kind}/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify({ state: 'rejected' }) });
         toast(`Rejected ${item.spelling}`); await advanceReviewItem(item);
+      });
+      $('reopen')?.addEventListener('click', async () => {
+        if (!canWrite()) { toast('Sign in required'); return; }
+        const kind = isSound ? 'sound' : 'compound';
+        const id = isSound ? item.spelling : item.id;
+        await api(`/api/fonoran/lab/state/${kind}/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify({ state: 'needs_review' }) });
+        toast(`Reopened ${item.spelling}`);
+        await load({ skipRender: true });
+        renderUnifiedReview();
       });
     }
     async function advanceReviewItem(current) {
@@ -4506,7 +4546,14 @@
       if (key === 'roots') STATE.reviewShowRoots = !STATE.reviewShowRoots;
       else if (key === 'words') STATE.reviewShowLabWords = !STATE.reviewShowLabWords;
       else if (key === 'generated') STATE.reviewShowGeneratedWords = !STATE.reviewShowGeneratedWords;
-      else if (key === 'needs-review') STATE.reviewNeedsReviewOnly = !STATE.reviewNeedsReviewOnly;
+      else if (key === 'needs-review') {
+        STATE.reviewNeedsReviewOnly = !STATE.reviewNeedsReviewOnly;
+        if (STATE.reviewNeedsReviewOnly) STATE.reviewShowRejected = false;
+      }
+      else if (key === 'rejected') {
+        STATE.reviewShowRejected = !STATE.reviewShowRejected;
+        if (STATE.reviewShowRejected) STATE.reviewNeedsReviewOnly = false;
+      }
       renderUnifiedReview();
     });
     $('wc-meaning')?.addEventListener('input', () => {

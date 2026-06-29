@@ -30,6 +30,8 @@ import {
   matchSubjectLinkingPredicate,
   splitIntoClauses,
   mergePhrasalTokens,
+  MODALS,
+  splitLandmarkPhrase,
 } from './fonoran-interpretation.js';
 import {
   buildResolveContext,
@@ -50,6 +52,7 @@ const SKIP = new Set([
   'a', 'an', 'the', 'to', 'at', 'in', 'on', 'of', 'for', 'with', 'by', 'from', 'into', 'about',
   'my', 'your', 'his', 'her', 'its', 'our', 'their', 'mine', 'yours', 'this', 'that', 'these', 'those',
   ...CONJUNCTIONS,
+  ...MODALS,
 ]);
 
 const PRONOUNS = {
@@ -201,12 +204,33 @@ export function splitSentences(text) {
     .filter(Boolean);
 }
 
-function applyBeConstruction(beHit, slots) {
+function applyBeConstruction(beHit, slots, rules) {
   if (!slots.subject.length) {
     slots.subject.push({ english: beHit.subject, role: 'subject' });
   }
   if (beHit.event) slots.event.push(beHit.event);
-  slots.modifiers.push(...beHit.modifiers);
+
+  const trailingTokens = beHit.trailingTokens ?? [];
+  if (trailingTokens.length) {
+    const trailing = parseTrailingPhrase(trailingTokens, { skip: SKIP });
+    for (const obj of trailing.object) {
+      const parts = obj.english.split(/\s+and\s+/i).map(s => s.trim()).filter(Boolean);
+      if (parts.length > 1) {
+        slots.object.push({ english: parts[0], role: 'object' });
+        for (const part of parts.slice(1)) {
+          slots.modifiers.push({ english: part, role: 'modifier' });
+        }
+      } else {
+        slots.object.push(obj);
+      }
+    }
+    slots.modifiers.push(...trailing.modifiers);
+  }
+
+  for (const mod of beHit.modifiers ?? []) {
+    if (typeof mod === 'object' && mod.english) slots.modifiers.push(mod);
+  }
+
   const beTense = TENSE_AUX[beHit.be];
   if (beTense === 'past' && !slots.time.length) {
     slots.time.push({ english: 'past', role: 'time', particle: PARTICLE_PLACEHOLDERS.tense_past });
@@ -231,7 +255,7 @@ function patternScanTokens(tokens, start = 0) {
  * @param {string[]} rawTokens
  * @param {object} rules
  */
-async function compileClause(rawTokens, rules) {
+async function compileClause(rawTokens, rules, { carriedSubject = null } = {}) {
   const subject = [];
   const time = [];
   const event = [];
@@ -240,6 +264,10 @@ async function compileClause(rawTokens, rules) {
   const modifiers = [];
 
   let tokens = [...rawTokens];
+
+  while (tokens.length && MODALS.has(tokens[0]?.toLowerCase())) {
+    tokens = tokens.slice(1);
+  }
 
   const timeHit = matchLeadingTimeAdverbial(tokens);
   if (timeHit) {
@@ -277,6 +305,23 @@ async function compileClause(rawTokens, rules) {
 
   const earlyIdiom = matchIdiomPhrase(idiomScan, rules);
   if (earlyIdiom) {
+    const beforeContent = earlyIdiom.before.filter(w => {
+      const x = w?.toLowerCase();
+      return !TENSE_AUX[x] && !MODALS.has(x);
+    });
+    const trySpatial = [...beforeContent, earlyIdiom.phrase, ...earlyIdiom.after];
+    const spatialFromIdiom = beforeContent.length >= 1 && trySpatial.length >= 3
+      ? matchVerbSpatialLandmark(trySpatial, rules)
+      : null;
+    if (spatialFromIdiom) {
+      event.push(spatialFromIdiom.event);
+      path.push(spatialFromIdiom.path);
+      const split = splitLandmarkPhrase(spatialFromIdiom.object.english, rules, { skip: SKIP });
+      object.push(...split.object);
+      modifiers.push(...split.modifiers);
+      return { subject, time, event, path, object, modifiers };
+    }
+
     const slots = { subject, time, event, path, object, modifiers };
     const tense = scanAuxTense ?? 'present';
     if (tense === 'past') {
@@ -289,10 +334,13 @@ async function compileClause(rawTokens, rules) {
   }
 
   const patternTokens = [...idiomScan];
-  const beHit = matchBeConstruction(patternTokens, rules);
+  const priorSubject = subject.length === 1 && !subject[0].particle
+    ? subject[0].english
+    : (carriedSubject?.[0]?.english ?? null);
+  const beHit = matchBeConstruction(patternTokens, rules, { priorSubject });
   if (beHit) {
     const slots = { subject, time, event, path, object, modifiers };
-    applyBeConstruction(beHit, slots);
+    applyBeConstruction(beHit, slots, rules);
     return slots;
   }
 
@@ -316,7 +364,7 @@ async function compileClause(rawTokens, rules) {
     working = [...futurePeel.before, ...futurePeel.after];
   } else if (auxTense === 'past') {
     tense = 'past';
-  } else if (working.some(w => isPastForm(w, rules))) {
+  } else if (auxTense == null && working.some(w => isPastForm(w, rules))) {
     tense = 'past';
   } else {
     tense = 'present';
@@ -376,7 +424,9 @@ async function compileClause(rawTokens, rules) {
     }
     event.push(phrase.event);
     path.push(phrase.path);
-    object.push(phrase.object);
+    const split = splitLandmarkPhrase(phrase.object.english, rules, { skip: SKIP });
+    object.push(...split.object);
+    modifiers.push(...split.modifiers);
     return slots;
   }
 
@@ -433,11 +483,9 @@ async function compileSemanticSlots(tokens, rules) {
   const combined = emptySlots();
   let carriedSubject = null;
   for (const clause of clauses) {
-    const slotData = await compileClause(clause, rules);
+    const slotData = await compileClause(clause, rules, { carriedSubject });
     if (slotData.subject.length) {
       carriedSubject = slotData.subject;
-    } else if (carriedSubject?.length) {
-      slotData.subject.push(...carriedSubject.map(s => ({ ...s })));
     }
     appendSlots(combined, slotData);
   }

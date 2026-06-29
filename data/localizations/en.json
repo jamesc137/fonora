@@ -15,7 +15,9 @@
         "men",
         "women",
         "healer",
-        "healers"
+        "healers",
+        "being",
+        "beings"
       ]
     },
     "self": {
@@ -135,6 +137,9 @@
       "aliases": [
         "doing",
         "act",
+        "acting",
+        "acted",
+        "acts",
         "action"
       ]
     },

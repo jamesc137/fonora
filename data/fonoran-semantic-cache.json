@@ -660,5 +660,62 @@
   "when": {
     "synonyms": [],
     "hypernym_concepts": []
+  },
+  "free": {
+    "synonyms": [
+      "free people",
+      "liberate",
+      "release",
+      "unloose",
+      "unloosen",
+      "loose",
+      "rid",
+      "disembarrass",
+      "dislodge",
+      "exempt",
+      "relieve",
+      "discharge",
+      "disengage",
+      "absolve",
+      "relinquish",
+      "resign",
+      "give up",
+      "unblock",
+      "unfreeze",
+      "complimentary",
+      "costless",
+      "gratis(p)",
+      "gratuitous",
+      "detached",
+      "spare",
+      "barren",
+      "destitute",
+      "devoid",
+      "innocent",
+      "liberal"
+    ],
+    "hypernym_concepts": []
+  },
+  "dignity": {
+    "synonyms": [
+      "self-respect",
+      "self-regard",
+      "self-worth",
+      "lordliness",
+      "gravitas"
+    ],
+    "hypernym_concepts": []
+  },
+  "reason_conscience": {
+    "synonyms": [],
+    "hypernym_concepts": []
+  },
+  "one_another_spirit_brotherhood": {
+    "synonyms": [],
+    "hypernym_concepts": []
+  },
+  "spirit_brotherhood": {
+    "synonyms": [],
+    "hypernym_concepts": []
   }
 }

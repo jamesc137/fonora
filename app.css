@@ -2522,6 +2522,8 @@ body.app-body--fonoran .btn-primary:hover {
   box-shadow: 0 1px 0 #ccc;
   cursor: pointer;
   font-family: inherit;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .fonora-key:hover:not(:disabled) {
@@ -2643,18 +2645,110 @@ body.app-body--fonoran .btn-primary:hover {
 }
 
 @media (max-width: 640px) {
+  #tab-keyboard.panel {
+    padding: 1rem 0.65rem;
+  }
+
+  #tab-keyboard .symbol-input {
+    min-height: 4.5rem;
+    padding: 0.65rem;
+  }
+
+  .fonora-keyboard {
+    margin: 0.65rem 0 0.85rem;
+    padding: 0.25rem 0 max(0.75rem, env(safe-area-inset-bottom));
+    width: 100%;
+    max-width: 100%;
+    gap: 0.2rem;
+    overflow-x: hidden;
+  }
+
+  .fonora-keyboard__row {
+    width: 100%;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+
+  .fonora-keyboard__row:nth-child(2) {
+    padding-left: 0.4rem;
+  }
+
+  .fonora-keyboard__row:nth-child(3) {
+    padding-left: 0.8rem;
+  }
+
+  .fonora-keyboard__row:nth-child(4) {
+    max-width: 100%;
+    gap: 0.2rem;
+  }
+
   .fonora-key {
-    min-width: 2.25rem;
-    height: 2.5rem;
-    padding-bottom: 0.4rem;
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    height: 2.75rem;
+    min-height: 44px;
+    padding: 0.2rem 0.12rem 0.35rem;
+    border-radius: 5px;
   }
 
   .fonora-key__symbol {
-    font-size: 1.35rem;
+    font-size: 1.25rem;
+  }
+
+  .fonora-key__label {
+    font-size: 0.55rem;
+    right: 0.15rem;
+    bottom: 0.12rem;
   }
 
   .fonora-key--space {
-    min-width: 8rem;
+    flex: 2.75 1 0;
+    min-width: 0;
+  }
+
+  .fonora-key--backspace {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .fonora-vowel-popup {
+    max-width: calc(100vw - 1rem);
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.2rem;
+    padding: 0.4rem;
+  }
+
+  .fonora-vowel-popup__option {
+    min-width: 2.75rem;
+    min-height: 44px;
+    padding: 0.35rem 0.4rem;
+  }
+
+  .fonora-vowel-popup__symbol {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .fonora-keyboard__row:nth-child(2),
+  .fonora-keyboard__row:nth-child(3) {
+    padding-left: 0;
+  }
+
+  .fonora-key {
+    height: 2.5rem;
+    min-height: 40px;
+    padding-bottom: 0.3rem;
+  }
+
+  .fonora-key__symbol {
+    font-size: 1.1rem;
+  }
+
+  .fonora-key__label {
+    font-size: 0.5rem;
   }
 }
 

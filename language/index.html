@@ -502,31 +502,15 @@
               <p class="sans adv-danger-zone__hint">Clears Dictionary, Review queue, and assigned sounds. Concept inventory is kept.</p>
             </div>
           </div>
-          <label class="sans wc-toggle" style="display:block;margin-top:1rem"><input type="checkbox" id="adv-debug-dda" data-write-input> Show debug DDA fields</label>
+          <label class="sans wc-toggle adv-debug-toggle"><input type="checkbox" id="adv-debug-dda" data-write-input> Show debug DDA fields</label>
           <pre id="adv-debug-panel" class="debug-panel" hidden></pre>
-          <p class="sans" style="font-size:0.86rem;color:var(--muted);margin:1rem 0 0">Historical bulk generators are archived in <a href="../?path=docs%2Ffonoran-generator-archive.md">Generator archive</a>.</p>
+          <p class="sans adv-archive-link">Historical bulk generators are archived in <a href="/?path=docs%2Ffonoran-generator-archive.md">Generator archive</a>.</p>
         </div>
       </section>
     </main>
   </div>
 
-  <footer class="site-footer">
-    <div class="site-footer-inner">
-      <p class="site-footer-copy">
-        © 2026 <a href="https://jamescalhoun.co" target="_blank" rel="noopener noreferrer">James Calhoun</a>.
-        Released under the <a href="https://github.com/jamesc137/fonora/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>.
-      </p>
-      <p class="site-footer-links">
-        <a href="/script">Script</a>
-        <span class="site-footer-sep" aria-hidden="true">·</span>
-        <a href="/tools">Tools</a>
-        <span class="site-footer-sep" aria-hidden="true">·</span>
-        <a href="https://fonora.org/language">fonora.org</a>
-        <span class="site-footer-sep" aria-hidden="true">·</span>
-        <a href="https://github.com/jamesc137/fonora" target="_blank" rel="noopener noreferrer">GitHub</a>
-      </p>
-    </div>
-  </footer>
+  <div id="site-footer-root"></div>
 
   <div id="sheet-backdrop" class="modal-backdrop" hidden aria-hidden="true"></div>
   <div id="sheet" class="sheet explorer-sheet" role="dialog" aria-modal="true" aria-label="Word explorer" hidden>

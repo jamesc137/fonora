@@ -26,6 +26,7 @@ import {
   parseResearchLocation,
   setResearchDocEntries,
 } from './doc-urls.js';
+import { mountSiteFooter } from './site-footer.js';
 import { RESEARCH_PHASES, resolveNotePhase } from './research-notes.js';
 import {
   getPublishedNotes,
@@ -577,6 +578,7 @@ function onDocumentClick(event) {
 }
 
 function boot() {
+  mountSiteFooter();
   const parsed = parseResearchLocation() || { view: 'index' };
   setNavSelectHandlers({
     onSignOut: () => {

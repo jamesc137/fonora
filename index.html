@@ -76,6 +76,19 @@
         </div>
       </nav>
     </div>
+    <div class="app-header__row app-header__row--tools" data-nav-row="tools-tools">
+      <nav class="main-nav" aria-label="Tools">
+        <div class="main-nav-primary">
+          <button type="button" class="tab-btn" data-tab="tools-home">Home</button>
+          <button type="button" class="tab-btn" data-tab="research-notes">Research Notes</button>
+          <button type="button" class="tab-btn" data-tab="keyboard">Keyboard</button>
+          <button type="button" class="tab-btn" data-tab="reverse">Reverse</button>
+          <button type="button" class="tab-btn" data-tab="symbols">Symbols</button>
+          <button type="button" class="tab-btn" data-tab="encoder-testing">Pronunciation Testing</button>
+          <button type="button" class="tab-btn" data-tab="pronunciation-validation">Validation</button>
+        </div>
+      </nav>
+    </div>
   </header>
 
   <main class="main-content" id="main-content">
@@ -321,6 +334,14 @@
             <p>Validate that Fonora preserves pronunciation through the full encode/decode pipeline.</p>
             <div class="home-layer-card__actions">
               <button type="button" class="btn" data-tab="pronunciation-validation">Open Validation</button>
+            </div>
+          </article>
+          <article class="home-layer-card">
+            <p class="home-layer-card__tag">Research</p>
+            <h3>Research Notes</h3>
+            <p>Draft, format, and publish research notebook articles to the public site.</p>
+            <div class="home-layer-card__actions">
+              <button type="button" class="btn btn--primary" data-tab="research-notes">Open Research Notes</button>
             </div>
           </article>
         </div>
@@ -883,6 +904,15 @@
           </table>
         </div>
       </div>
+    </section>
+
+    <!-- Research notes editor -->
+    <section class="panel tab-panel content-page" id="tab-research-notes" data-tab-panel="research-notes" hidden aria-labelledby="research-notes-title">
+      <header class="content-section content-section--intro">
+        <h1 id="research-notes-title">Research Notes</h1>
+        <p class="section-desc">Draft and publish research notebook articles. Published notes appear on the public <a href="/research">Research</a> site immediately.</p>
+      </header>
+      <div id="research-notes-editor-root" class="rn-editor-root"></div>
     </section>
 
     <!-- Symbol editor -->

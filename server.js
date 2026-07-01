@@ -6,7 +6,9 @@ import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { handleAuthRoutes, logAuthStatus } from './tools/fonoran-auth.js';
 import { handleFonoranApi } from './tools/fonoran-api.js';
+import { handleResearchApi } from './tools/research-notes-api.js';
 import { maybeAutoSeedOnStartup, initStore } from './tools/fonoran-store.js';
+import { initResearchNotesStore } from './tools/research-notes-store.js';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const host = process.env.HOST || '0.0.0.0';
@@ -199,6 +201,14 @@ createServer(async (req, res) => {
       return;
     }
 
+    if (url.pathname.startsWith('/api/research/')) {
+      const handled = await handleResearchApi(req, res, url.pathname, method);
+      if (handled) return;
+      res.writeHead(404, { 'Content-Type': 'application/json', ...SECURITY_HEADERS });
+      res.end(JSON.stringify({ error: 'Not found' }));
+      return;
+    }
+
     const legacyRedirect = legacyFonoranRedirect(url.pathname, url.search, url.hash);
     if (legacyRedirect) {
       res.writeHead(301, { Location: legacyRedirect, ...SECURITY_HEADERS });
@@ -284,6 +294,7 @@ createServer(async (req, res) => {
   logAuthStatus();
   try {
     await initStore();
+    await initResearchNotesStore();
     await maybeAutoSeedOnStartup();
   } catch (err) {
     console.warn('Fonoran auto-import skipped:', err instanceof Error ? err.message : err);

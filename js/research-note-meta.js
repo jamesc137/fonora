@@ -1,0 +1,224 @@
+/**
+ * Research note metadata extraction, validation, and markdown export.
+ * Shared by the editor (client) and store/API (server).
+ */
+
+import { githubCommitUrl } from './doc-urls.js';
+
+/** @param {string} markdown @returns {string|null} First H1, or null if none */
+export function extractMarkdownH1(markdown) {
+  const match = String(markdown).match(/^#\s+(.+)$/m);
+  return match ? match[1].trim() : null;
+}
+
+/**
+ * Title for a research note page: metadata is canonical; H1 in body overrides when present.
+ * @param {string} markdown
+ * @param {string} [metadataTitle]
+ */
+export function resolveResearchNoteTitle(markdown, metadataTitle = '') {
+  return extractMarkdownH1(markdown) || String(metadataTitle || '').trim() || 'Research note';
+}
+
+export const NOTE_STATUSES = ['Foundational', 'Active', 'Superseded', 'Open'];
+
+export const NEW_NOTE_TEMPLATE = `# [Title]
+
+> **TL;DR.** One-line summary.
+
+## The question
+
+## The hypothesis
+
+## The constraints
+
+## What we built
+
+## What happened
+
+## The question that followed
+`;
+
+/** @param {string} title */
+export function slugifyTitle(title) {
+  return String(title || '')
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+/** @param {string} text */
+export function firstSentence(text, maxLen = 160) {
+  const clean = String(text || '').replace(/\s+/g, ' ').trim();
+  if (!clean) return '';
+  const match = clean.match(/^[^.!?]+[.!?]?/);
+  const sentence = (match ? match[0] : clean).trim();
+  if (sentence.length <= maxLen) return sentence;
+  return `${sentence.slice(0, maxLen - 1).trim()}…`;
+}
+
+/** @param {string} markdown */
+export function extractTldr(markdown) {
+  const match = String(markdown).match(/^>\s*\*\*TL;DR\.\*\*\s*(.+)$/m);
+  return match ? match[1].trim() : '';
+}
+
+/** @param {string} markdown */
+export function extractDescription(markdown) {
+  const tldr = extractTldr(markdown);
+  if (tldr) return tldr;
+  const lines = String(markdown).split('\n');
+  let pastTitle = false;
+  for (const line of lines) {
+    if (/^#\s+/.test(line)) {
+      pastTitle = true;
+      continue;
+    }
+    if (!pastTitle) continue;
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('>') || trimmed.startsWith('#')) continue;
+    return trimmed.replace(/\*\*/g, '').replace(/`/g, '');
+  }
+  return '';
+}
+
+/** @param {string} markdown */
+export function extractRelatedSlugs(markdown) {
+  const slugs = new Set();
+  const re = /\/research\/notes\/([a-z0-9-]+)/gi;
+  let m;
+  while ((m = re.exec(String(markdown))) !== null) {
+    slugs.add(m[1].toLowerCase());
+  }
+  return [...slugs];
+}
+
+const REPO_PATH_RE =
+  /(?:^|[\s('"`<])(?:\.\.\/)?(docs\/[^\s'"`<>)]+\.md|js\/[^\s'"`<>)]+\.js|tools\/[^\s'"`<>)]+\.js|data\/[^\s'"`<>)]+\.json)/gi;
+
+/** @param {string} markdown */
+export function extractSourcePaths(markdown) {
+  const paths = new Set();
+  let m;
+  while ((m = REPO_PATH_RE.exec(String(markdown))) !== null) {
+    const path = m[1].replace(/^\.\.\//, '');
+    paths.add(path);
+  }
+  return [...paths].map((path) => ({
+    label: path.split('/').pop() || path,
+    path,
+  }));
+}
+
+/**
+ * @param {string} markdown
+ * @param {object} [existing]
+ * @param {string[]} [knownSlugs]
+ */
+export function deriveMetadataFromBody(markdown, existing = {}, knownSlugs = []) {
+  const h1 = extractMarkdownH1(markdown);
+  const description = extractDescription(markdown);
+  const derivedSlug = slugifyTitle(h1 || existing.title || '');
+  const related = extractRelatedSlugs(markdown).filter((s) => s !== existing.slug);
+  const source = extractSourcePaths(markdown);
+
+  return {
+    title: h1 || existing.title || '',
+    description: description || existing.description || '',
+    abstract: firstSentence(description || existing.description || '') || existing.abstract || '',
+    slug: existing.slug || derivedSlug,
+    related: related.length ? related : existing.related || [],
+    source: source.length ? source : existing.source || [],
+  };
+}
+
+/**
+ * @param {string[]} codes e.g. ['RN-01', 'RN-17']
+ */
+export function nextResearchCode(codes) {
+  let max = 0;
+  for (const code of codes) {
+    const m = String(code).match(/^RN-(\d+)$/i);
+    if (m) max = Math.max(max, Number(m[1]));
+  }
+  return `RN-${String(max + 1).padStart(2, '0')}`;
+}
+
+/**
+ * @param {object} metadata
+ * @param {object} [opts]
+ */
+export function validateNoteMetadata(metadata, opts = {}) {
+  const errors = [];
+  const slug = String(metadata.slug || '').trim();
+  if (!slug || !/^[a-z0-9-]+$/.test(slug)) {
+    errors.push('slug must be lowercase letters, numbers, and hyphens');
+  }
+  if (!metadata.title?.trim()) errors.push('title is required');
+  if (!metadata.code?.trim()) errors.push('code is required');
+  if (!metadata.phase?.trim() && !metadata.act?.trim()) errors.push('phase is required');
+  if (!metadata.date?.trim()) errors.push('date is required');
+  if (!metadata.description?.trim()) errors.push('description is required');
+  if (!metadata.abstract?.trim()) errors.push('abstract is required');
+  if (!NOTE_STATUSES.includes(metadata.status)) {
+    errors.push(`status must be one of: ${NOTE_STATUSES.join(', ')}`);
+  }
+  if (opts.existingSlugs && opts.existingSlugs.includes(slug) && slug !== opts.currentSlug) {
+    errors.push('slug already in use');
+  }
+  return errors;
+}
+
+function yamlEscape(value) {
+  const s = String(value ?? '');
+  if (!s) return '""';
+  if (/[:#\n\r]/.test(s) || s.startsWith(' ') || s.endsWith(' ')) {
+    return JSON.stringify(s);
+  }
+  return s;
+}
+
+function yamlList(key, items) {
+  if (!items?.length) return `${key}: []`;
+  return `${key}:\n${items.map((item) => `  - ${yamlEscape(item)}`).join('\n')}`;
+}
+
+/**
+ * @param {object} row { metadata, body, published_at?, updated_at? }
+ */
+export function formatNoteMarkdownExport(row) {
+  const meta = row.metadata || {};
+  const lines = ['---'];
+  lines.push(`slug: ${yamlEscape(meta.slug)}`);
+  lines.push(`code: ${yamlEscape(meta.code)}`);
+  lines.push(`title: ${yamlEscape(meta.title)}`);
+  lines.push(`status: ${yamlEscape(meta.status)}`);
+  lines.push(`phase: ${yamlEscape(meta.phase || meta.act?.replace(/^act-/, 'phase-'))}`);
+  lines.push(`date: ${yamlEscape(meta.date)}`);
+  lines.push(`description: ${yamlEscape(meta.description)}`);
+  lines.push(`abstract: ${yamlEscape(meta.abstract)}`);
+  lines.push(yamlList('related', meta.related));
+  if (row.published_at) lines.push(`published_at: ${yamlEscape(row.published_at)}`);
+  if (meta.git_commit) {
+    lines.push(`git_commit: ${yamlEscape(meta.git_commit)}`);
+    lines.push(`git_commit_url: ${yamlEscape(githubCommitUrl(meta.git_commit))}`);
+  }
+  lines.push('---', '', String(row.body || '').trimEnd(), '');
+  return lines.join('\n');
+}
+
+/** @returns {Promise<string|null>} */
+export async function resolveGitCommit() {
+  if (process.env.HEROKU_SLUG_COMMIT?.trim()) {
+    return process.env.HEROKU_SLUG_COMMIT.trim();
+  }
+  try {
+    const { execSync } = await import('node:child_process');
+    return execSync('git rev-parse HEAD', { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  } catch {
+    return null;
+  }
+}

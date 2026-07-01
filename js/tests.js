@@ -16,6 +16,8 @@ import { LANGUAGE_RULES_PATH } from './fonora-config.js';
 import { runTests } from './tests-core.js';
 import { runKeyboardComposeTests } from './fonora-keyboard-compose.test.js';
 import { runKeyboardTestWordsTests } from './keyboard-test-words.test.js';
+import { runResearchNoteMetaTests } from './research-note-meta.test.js';
+import { runResearchNotesStoreTests } from '../tools/research-notes-store.test.js';
 import { initEspeak, textToIpa } from './ipa.js';
 import { normalizeIpa } from './ipa-normalize.js';
 import { encodeFromIpa } from './ipa-encode-helper.js';
@@ -463,6 +465,14 @@ const keyboardTestWordsPassed = keyboardTestWordsResults.passed;
 const keyboardTestWordsTotal = keyboardTestWordsResults.total;
 const keyboardTestWordsFailed = keyboardTestWordsResults.failed;
 
+const researchMetaResults = runResearchNoteMetaTests();
+const researchMetaFailed = researchMetaResults.filter((r) => !r.ok);
+const researchMetaPassed = researchMetaResults.length - researchMetaFailed.length;
+
+const researchStoreResults = await runResearchNotesStoreTests();
+const researchStoreFailed = researchStoreResults.filter((r) => !r.ok);
+const researchStorePassed = researchStoreResults.length - researchStoreFailed.length;
+
 async function runCorpusIpaTests() {
   const bundle = loadActiveRulesFixture();
   applyBundleMaps(bundle);
@@ -651,6 +661,8 @@ const allFailed = [
   ...failed,
   ...keyboardFailed,
   ...keyboardTestWordsFailed,
+  ...researchMetaFailed,
+  ...researchStoreFailed,
   ...corpusResults.filter((r) => !r.ok),
   ...(rootWorkflowResult.ok ? [] : [rootWorkflowResult]),
   ...(parserResult.ok ? [] : [parserResult]),
@@ -679,6 +691,8 @@ const allPassed =
   passed
   + keyboardPassed
   + keyboardTestWordsPassed
+  + researchMetaPassed
+  + researchStorePassed
   + corpusResults.filter((r) => r.ok).length
   + (parserResult.ok ? 1 : 0)
   + (composeResult.ok ? 1 : 0)
@@ -702,7 +716,7 @@ const allPassed =
   + (boundaryMultiResult.ok ? 1 : 0)
   + (boundaryDigraphResult.ok ? 1 : 0)
   + (rootWorkflowResult.ok ? 1 : 0);
-const allTotal = total + keyboardTotal + keyboardTestWordsTotal + corpusResults.length + 22;
+const allTotal = total + keyboardTotal + keyboardTestWordsTotal + researchMetaResults.length + researchStoreResults.length + corpusResults.length + 22;
 
 for (const f of allFailed) console.error('FAIL:', f.name, '-', f.error);
 console.log(`${allPassed}/${allTotal} tests passed`);

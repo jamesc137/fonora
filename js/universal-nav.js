@@ -66,7 +66,18 @@ const TOOLS_TITLES = {
   symbols: 'Symbols',
   'encoder-testing': 'Pronunciation Testing',
   'pronunciation-validation': 'Pronunciation Validation',
+  'research-notes': 'Research Notes',
 };
+
+const TOOLS_ROW_TABS = [
+  { id: 'tools-home', label: 'Home' },
+  { id: 'research-notes', label: 'Research Notes' },
+  { id: 'keyboard', label: 'Keyboard' },
+  { id: 'reverse', label: 'Reverse' },
+  { id: 'symbols', label: 'Symbols' },
+  { id: 'encoder-testing', label: 'Pronunciation Testing' },
+  { id: 'pronunciation-validation', label: 'Validation' },
+];
 
 const PLATFORM_TABS = [
   { id: 'platform', label: 'About' },
@@ -247,6 +258,22 @@ function renderLearnRow2(activeTab) {
     </div>`;
 }
 
+function renderToolsRow2(activeTab) {
+  const tabs = TOOLS_ROW_TABS.map(
+    (t) => `
+      <button type="button" class="tab-btn${t.id === activeTab ? ' tab-btn--active' : ''}" data-tab="${t.id}"${
+        t.id === activeTab ? ' aria-current="page"' : ''
+      }>${t.label}</button>`,
+  ).join('');
+
+  return `
+    <div class="app-header__row app-header__row--tools" data-nav-row="tools-tools">
+      <nav class="main-nav" aria-label="Tools">
+        <div class="main-nav-primary">${tabs}</div>
+      </nav>
+    </div>`;
+}
+
 function updateDocumentTitle() {
   if (state.context === 'platform') {
     if (state.activeTab === 'docs') {
@@ -356,9 +383,11 @@ function render() {
           ? renderScriptRow2(state.activeTab)
           : state.context === 'learn'
             ? renderLearnRow2(state.activeTab)
-            : state.context === 'platform'
-              ? renderPlatformRow2(state.activeTab)
-              : '';
+            : state.context === 'tools'
+              ? renderToolsRow2(state.activeTab)
+              : state.context === 'platform'
+                ? renderPlatformRow2(state.activeTab)
+                : '';
 
     root.className = `app-header ${contextClass}`;
     root.innerHTML = `${renderRow1(state.context)}${row2}`;

@@ -35,6 +35,7 @@
     'encoder-testing',
     'pronunciation-validation',
     'symbols',
+    'research-notes',
   ]);
 
   const FONORAN_PAGES = new Set([

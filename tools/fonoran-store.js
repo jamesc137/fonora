@@ -57,6 +57,16 @@ CREATE TABLE IF NOT EXISTS fonoran_editorial_docs (
   body JSONB NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS research_notes (
+  slug TEXT PRIMARY KEY,
+  workflow TEXT NOT NULL DEFAULT 'draft',
+  metadata JSONB NOT NULL,
+  body TEXT NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  published_at TIMESTAMPTZ,
+  updated_by TEXT
+);
+
 INSERT INTO fonoran_lab_meta (id, schema_version)
 VALUES (1, ${SCHEMA_VERSION})
 ON CONFLICT (id) DO NOTHING;

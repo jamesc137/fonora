@@ -35,18 +35,12 @@ const BUILDER_TABS = [
   { id: 'grammar', label: 'Grammar' },
 ];
 
-const LEARN_TABS = [
-  { id: 'writing', label: 'Writing' },
-  { id: 'reading', label: 'Reading' },
-  { id: 'speaking', label: 'Speaking' },
-  { id: 'listening', label: 'Listening' },
-];
-
 const LEARN_TITLES = {
   writing: 'Writing',
   reading: 'Reading',
-  speaking: 'Speaking',
+  breakdown: 'Breakdown',
   listening: 'Listening',
+  'learn-home': 'Learn',
 };
 
 const SCRIPT_TITLES = {

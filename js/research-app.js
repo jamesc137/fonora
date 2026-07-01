@@ -77,14 +77,139 @@ function statusClass(status) {
   return `research-badge research-badge--${String(status).toLowerCase()}`;
 }
 
-function noteId(slug) {
-  return `n_${slug.replace(/-/g, '_')}`;
-}
-
 function formatDate(iso) {
   const d = new Date(`${iso}T00:00:00Z`);
   if (Number.isNaN(d.getTime())) return iso;
   return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
+}
+
+/* ----------------------------- timeline view ---------------------------- */
+
+function plainExcerpt(text, max = 150) {
+  const plain = String(text)
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/[*_`]/g, '');
+  return plain.length > max ? `${plain.slice(0, max - 1)}…` : plain;
+}
+
+function phaseShortLabel(phase) {
+  const match = phase.label.match(/^(Phase [IVXLC]+)/);
+  return match ? match[1] : phase.label;
+}
+
+function phaseTitle(phase) {
+  const match = phase.label.match(/^Phase [IVXLC]+ — (.+)$/);
+  return match ? match[1] : phase.label;
+}
+
+/** @type {Record<string, string>} */
+const TIMELINE_DEMOTIONS = {
+  'dda-coordinates': 'the-constitution',
+  'huffman-roots': 'the-constitution',
+};
+
+function timelineDemotion(note) {
+  const targetSlug = TIMELINE_DEMOTIONS[note.slug];
+  if (!targetSlug) return '';
+  const target = getResearchNote(targetSlug);
+  if (!target) return '';
+  return `
+    <p class="tl-step__demotion">
+      <span class="tl-step__demotion-mark" aria-hidden="true">↳</span>
+      Superseded by
+      <a href="${escapeHtml(researchHref(targetSlug))}">${escapeHtml(target.code)} · ${escapeHtml(target.title)}</a>
+    </p>`;
+}
+
+function timelineStep(note, { isLastInPhase }) {
+  const status = String(note.status).toLowerCase();
+  const abstract = note.abstract ? plainExcerpt(note.abstract) : '';
+  return `
+    <li class="tl-step${isLastInPhase ? ' tl-step--last' : ''}">
+      <div class="tl-step__rail" aria-hidden="true">
+        <span class="tl-step__dot tl-step__dot--${escapeHtml(status)}"></span>
+      </div>
+      <article class="tl-step__body">
+        <a class="tl-step__card" href="${escapeHtml(researchHref(note.slug))}">
+          <div class="tl-step__meta">
+            <span class="tl-step__code">${escapeHtml(note.code)}</span>
+            <span class="${statusClass(note.status)}">${escapeHtml(note.status)}</span>
+            <time class="tl-step__date" datetime="${escapeHtml(note.date)}">${escapeHtml(formatDate(note.date))}</time>
+          </div>
+          <h3 class="tl-step__title">${escapeHtml(note.title)}</h3>
+          ${abstract ? `<p class="tl-step__abstract">${escapeHtml(abstract)}</p>` : ''}
+        </a>
+        ${timelineDemotion(note)}
+      </article>
+    </li>`;
+}
+
+function renderTimelineJourney() {
+  return notesByPhase(RESEARCH_PHASES)
+    .map(({ phase, notes }, index) => {
+      if (!notes.length) return '';
+      return `
+      <section class="tl-phase tl-phase--${index + 1}" aria-labelledby="tl-phase-${index}-h">
+        <header class="tl-phase__banner" id="tl-phase-${index}-h">
+          <p class="tl-phase__eyebrow">${escapeHtml(phaseShortLabel(phase))}</p>
+          <h2 class="tl-phase__title">${escapeHtml(phaseTitle(phase))}</h2>
+          <p class="tl-phase__blurb">${escapeHtml(phase.blurb)}</p>
+        </header>
+        <ol class="tl-phase__steps">
+          ${notes
+            .map((note, noteIndex) =>
+              timelineStep(note, { isLastInPhase: noteIndex === notes.length - 1 }),
+            )
+            .join('')}
+        </ol>
+      </section>`;
+    })
+    .join('');
+}
+
+async function renderTimeline() {
+  const el = root();
+  if (!el) return;
+  const token = ++loadToken;
+
+  el.innerHTML = `
+    <article class="research-page research-page--timeline content-page">
+      <header class="research-hero research-hero--compact">
+        <p class="research-hero__tag">How one experiment led to the next</p>
+        <h1 class="research-hero__title">Research Timeline</h1>
+        <p class="research-hero__lead">
+          The project unfolded in three phases: building the script, inventing the language,
+          then making communication work in practice. Each card is one research note. Read down
+          the spine in order, or open any entry that catches your eye.
+        </p>
+      </header>
+
+      <div class="tl-legend" aria-label="How to read this timeline">
+        <span class="tl-legend__item">
+          <span class="tl-legend__swatch tl-legend__swatch--line" aria-hidden="true"></span>
+          Chronological order
+        </span>
+        <span class="tl-legend__item">
+          <span class="tl-legend__swatch tl-legend__swatch--demoted" aria-hidden="true">↳</span>
+          Track demoted by a later decision
+        </span>
+      </div>
+
+      <div class="tl-journey">
+        ${renderTimelineJourney()}
+      </div>
+    </article>`;
+
+  if (token !== loadToken) return;
+
+  setMeta({
+    title: 'Fonora Research | Timeline',
+    description:
+      'A visual timeline of the Fonora research project: how the phonetic script and the Fonoran language evolved across three eras of open-source experiments.',
+    slug: 'timeline',
+    type: 'website',
+    jsonLd: null,
+  });
 }
 
 function noteCard(note) {
@@ -248,96 +373,6 @@ function renderOpen() {
     description:
       'The live frontier of the Fonora research project: open experiments and unresolved threads across the script, the language, the translator, and the grammar.',
     slug: 'open',
-    type: 'website',
-    jsonLd: null,
-  });
-}
-
-/* ----------------------------- timeline view ---------------------------- */
-
-function timelineMermaidSource() {
-  const notes = getPublishedNotes();
-  const nid = (slug) => noteId(slug);
-  const clean = (s) => String(s).replace(/"/g, '');
-  const lines = ['flowchart TB'];
-  RESEARCH_PHASES.forEach((phase, pi) => {
-    lines.push(`  subgraph phase_${pi} ["${clean(phase.label)}"]`);
-    notes.filter((n) => resolveNotePhase(n) === phase.id).forEach((n) => {
-      lines.push(`    ${nid(n.slug)}["${clean(n.code)}: ${clean(n.title)}"]`);
-    });
-    lines.push('  end');
-  });
-  for (let i = 0; i < notes.length - 1; i += 1) {
-    lines.push(`  ${nid(notes[i].slug)} --> ${nid(notes[i + 1].slug)}`);
-  }
-  lines.push(`  ${nid('dda-coordinates')} -. "demoted by" .-> ${nid('the-constitution')}`);
-  lines.push(`  ${nid('huffman-roots')} -. "demoted by" .-> ${nid('the-constitution')}`);
-  return lines.join('\n');
-}
-
-function renderSpine() {
-  return notesByPhase(RESEARCH_PHASES)
-    .map(
-      ({ phase, notes }) => `
-      <section class="research-spine__phase">
-        <h3 class="research-spine__phase-title">${escapeHtml(phase.label)}</h3>
-        <ol class="research-spine__list">
-          ${notes
-            .map(
-              (n) => `
-            <li class="research-spine__item">
-              <span class="research-spine__dot research-spine__dot--${escapeHtml(String(n.status).toLowerCase())}" aria-hidden="true"></span>
-              <a class="research-spine__link" href="${escapeHtml(researchHref(n.slug))}">
-                <span class="research-spine__code">${escapeHtml(n.code)}</span>
-                <span class="research-spine__name">${escapeHtml(n.title)}</span>
-                <span class="${statusClass(n.status)}">${escapeHtml(n.status)}</span>
-                <span class="research-spine__date">${escapeHtml(formatDate(n.date))}</span>
-              </a>
-            </li>`,
-            )
-            .join('')}
-        </ol>
-      </section>`,
-    )
-    .join('');
-}
-
-async function renderTimeline() {
-  const el = root();
-  if (!el) return;
-  const token = ++loadToken;
-
-  const diagramMarkdown = ['```mermaid', timelineMermaidSource(), '```'].join('\n');
-
-  el.innerHTML = `
-    <article class="research-page content-page">
-      <header class="research-hero research-hero--compact">
-        <p class="research-hero__tag">How one experiment led to the next</p>
-        <h1 class="research-hero__title">Research Timeline</h1>
-        <p class="research-hero__lead">
-          Read it as a laboratory notebook, not a changelog. The graph shows how each experiment
-          raised the next question; dashed arrows mark tracks that a later decision demoted. The
-          spine below the diagram is the same story in chronological order — every entry is clickable.
-        </p>
-      </header>
-
-      <section class="research-graph" aria-label="Research dependency graph">
-        ${renderMarkdown(diagramMarkdown, { docPath: 'research/timeline' })}
-      </section>
-
-      <section class="research-spine" aria-label="Chronological research spine">
-        ${renderSpine()}
-      </section>
-    </article>`;
-
-  await renderMermaidIn(el);
-  if (token !== loadToken) return;
-
-  setMeta({
-    title: 'Fonora Research | Timeline',
-    description:
-      'A visual timeline of the Fonora research project: how the phonetic script and the Fonoran language evolved across three eras of open-source experiments.',
-    slug: 'timeline',
     type: 'website',
     jsonLd: null,
   });

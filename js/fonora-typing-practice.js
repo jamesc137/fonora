@@ -151,6 +151,10 @@ export function createTypingPractice({ rules, ids, tabId, loadWords, emptyMessag
     const target = el(ids, 'input');
     if (!container || !target || !rulesRef) return;
 
+    const panel = target.closest('[data-tab-panel]');
+    const isPracticePanelActive = () =>
+      Boolean(panel && !panel.hidden && panel.classList.contains('tab-panel--active'));
+
     practiceKeyboard?.destroy();
     practiceKeyboard = createFonoraKeyboard({
       rules: rulesRef,
@@ -158,6 +162,7 @@ export function createTypingPractice({ rules, ids, tabId, loadWords, emptyMessag
       target,
       popupEl: el(ids, 'popup'),
       tabId,
+      isActive: isPracticePanelActive,
       layout: 'practice',
       enterKeyLabel: 'check',
       onEnter: checkAnswer,
@@ -175,7 +180,7 @@ export function createTypingPractice({ rules, ids, tabId, loadWords, emptyMessag
     currentIndex = 0;
     showCurrentWord();
 
-    if (document.documentElement.getAttribute('data-fonora-tab') === tabId) {
+    if (isPracticePanelActive()) {
       practiceKeyboard.activate();
     }
   }

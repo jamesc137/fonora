@@ -106,10 +106,10 @@
       'speaking',
       'listening',
     ];
-    if (!hash || learnHashes.includes(hash)) {
+    if (hash && learnHashes.includes(hash)) {
       let tab = 'writing';
-      if (hash && LEARN_TABS.has(hash)) tab = hash;
-      else if (hash && LEGACY_LEARN_HASH[hash]) tab = LEGACY_LEARN_HASH[hash];
+      if (LEARN_TABS.has(hash)) tab = hash;
+      else if (LEGACY_LEARN_HASH[hash]) tab = LEGACY_LEARN_HASH[hash];
       const nextHash = tab === 'writing' ? '' : `#${tab}`;
       window.location.replace(`/learn${nextHash}${window.location.search}`);
       return;

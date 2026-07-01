@@ -664,9 +664,9 @@ function migrateLegacyUrl() {
       'speaking',
       'listening',
     ];
-    if (!hash || learnHashes.includes(hash)) {
+    if (hash && learnHashes.includes(hash)) {
       const navTab =
-        hash && LEGACY_LEARN_HASH[hash]
+        LEGACY_LEARN_HASH[hash]
           ? LEGACY_LEARN_HASH[hash]
           : hash === 'writing' || hash === 'reading' || hash === 'speaking' || hash === 'listening'
             ? hash

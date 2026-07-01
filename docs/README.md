@@ -1,6 +1,8 @@
 # Fonora documentation
 
-Index of project docs. See **[platform-overview.md](platform-overview.md)** for the three-layer map.
+Index of project docs. See **[platform-overview.md](platform-overview.md)** for the section map (Fonora, Script, Language, Research, Tools) and the project's hypothesis.
+
+For the *story* of how the project evolved — each experiment as a research note — see the **[Research notebook](/research)** and its **[timeline](/research/timeline)**. The notebook is the narrative layer; the docs below are the reference layer it links to.
 
 **Authoritative symbol rules:** [language-rules.md](language-rules.md) (`fonora_version: v3`).
 
@@ -30,19 +32,32 @@ Index of project docs. See **[platform-overview.md](platform-overview.md)** for 
 
 ---
 
-## Language layer
+## Language layer (Fonoran, `/language`)
 
 | Topic | Document |
 | --- | --- |
+| **Fonoran constitution** | [fonoran-constitution.md](fonoran-constitution.md) |
 | **Fonoran guide** | [fonoran.md](fonoran.md) |
 | Fonoran grammar | [fonoran-grammar.md](fonoran-grammar.md) |
 | Interpretive translator | [fonoran-interpretive-translator.md](fonoran-interpretive-translator.md) |
 
 ---
 
+## Research notebook (`/research`)
+
+Narrative research notes (one per major experiment), authored in `docs/research/`. Open the rendered notebook at [/research](/research); each note links back to the reference docs and tools below.
+
+| Era | Notes |
+| --- | --- |
+| Act I — Writing sound | the articulation grid, IPA pipeline, vowel v2 → v3, multilingual script, collision audit |
+| Act II — Inventing a language | Gen 1/2 roots, Gen 3 DDA, Gen 3.1 distinctiveness, the 200-primitive allocation |
+| Act III — A usable language | semantic foundation, the Constitution, the editorial pipeline, grammar particles, the translator, typing, puzzle conversation |
+
+---
+
 ## Archive
 
-Historical experiments and audits. Not the active Fonoran workflow (see [fonoran.md](fonoran.md)).
+Historical experiments and audits, preserved as primary sources for the research notes above. Not the active Fonoran workflow (see [fonoran.md](fonoran.md)).
 
 | Document | Notes |
 | --- | --- |
@@ -52,7 +67,6 @@ Historical experiments and audits. Not the active Fonoran workflow (see [fonoran
 | [fonoran-semantic-foundation.md](fonoran-semantic-foundation.md) | Semantic proposal (reference) |
 | [fonoran-primitive-roots-report.md](fonoran-primitive-roots-report.md) | Old generator report |
 | [FONORA_CLEANUP_AUDIT.md](FONORA_CLEANUP_AUDIT.md) | June 2026 audit |
-| [fonoran-root-workflow.md](fonoran-root-workflow.md) | Redirect → [fonoran.md#pipeline](fonoran.md#pipeline) |
 
 ---
 

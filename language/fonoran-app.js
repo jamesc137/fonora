@@ -103,10 +103,11 @@
     }
 
     async function refreshAuth() {
+      let data = null;
       try {
         const returnTo = authReturnPath();
         const res = await fetch(`/auth/session?returnTo=${encodeURIComponent(returnTo)}`, { credentials: 'include' });
-        const data = await res.json();
+        data = await res.json();
         AUTH.required = Boolean(data.authRequired);
         AUTH.authenticated = Boolean(data.authenticated);
         AUTH.email = data.email ?? null;
@@ -117,6 +118,8 @@
       }
       setFonoranAuth({
         required: AUTH.required,
+        configured: Boolean(data?.authConfigured),
+        toolsGated: Boolean(data?.toolsGated ?? data?.learnToolsGated),
         authenticated: AUTH.authenticated,
         email: AUTH.email,
         loginUrl: AUTH.loginUrl,
@@ -178,14 +181,17 @@
     let landerShowcaseWord = null;
     let landerShowcaseToken = 0;
 
+    const LANDER_SHOWCASE_SPELLING = 'shakafa';
+
     function pickLanderShowcaseWord() {
       const pool = (STATE.lab?.compounds ?? []).filter((c) => {
         if (c.state === 'rejected') return false;
         const partCount = c.components?.length ?? c.parts?.length ?? 0;
         return partCount >= 2;
       });
-      if (!pool.length) return null;
-      return pool[Math.floor(Math.random() * pool.length)];
+      const preferred = pool.find((c) => c.spelling === LANDER_SHOWCASE_SPELLING);
+      if (preferred) return preferred;
+      return pool[0] ?? null;
     }
     let landerHealthToken = 0;
 
@@ -530,7 +536,6 @@
       if (STATE.page === 'home') {
         wireLander();
         renderLanderShowcase();
-        renderLanderHealth();
       }
       else if (STATE.page === 'create') renderWordComposer();
       else if (STATE.page === 'review') renderUnifiedReview();
@@ -1572,17 +1577,8 @@
 
     async function renderExplorerMermaidIn(rootEl, mermaidSource, graphNodes, onNavigate) {
       if (!window.mermaid || !mermaidSource || !rootEl) return;
-      window.mermaid.initialize({
-        startOnLoad: false,
-        theme: 'base',
-        themeVariables: {
-          fontFamily: 'ui-monospace, Menlo, monospace',
-          lineColor: '#a89f95',
-          clusterBkg: '#faf8f5',
-          clusterBorder: '#e8e2da',
-        },
-        securityLevel: 'loose',
-      });
+      const { MERMAID_INIT } = await import('../js/mermaid-theme.js');
+      window.mermaid.initialize(MERMAID_INIT);
       await new Promise((resolve) => requestAnimationFrame(resolve));
       const nodes = rootEl.querySelectorAll('.mermaid');
       try {
@@ -1953,23 +1949,15 @@
       </div>`;
     }
 
-    function buildShowcaseHtml(data, word = landerShowcaseWord) {
+    function buildShowcaseHtml(data) {
       const f = data.focus;
       const speakParts = wordPreviewSpeakParts(f, 'word');
-
-      const html = `
-        ${buildWordPreviewHtml(f, {
-          kind: 'word',
-          speakParts,
-          showBadges: false,
-          hearId: 'lander-showcase-hear',
-        })}
-        ${buildUsedInChipsHtml(data.used_in)}
-        ${buildWordTreeSectionHtml(data.mermaid, { variant: 'showcase' })}
-        <div class="showcase-dda-section">
-          ${buildDdaPanelHtml(word?.dda, f.components)}
-        </div>`;
-
+      const html = buildWordPreviewHtml(f, {
+        kind: 'word',
+        speakParts,
+        showBadges: false,
+        hearId: 'lander-showcase-hear',
+      });
       return { html, speakParts };
     }
 
@@ -2054,13 +2042,9 @@
       try {
         const data = await fetchShowcaseGraph(landerShowcaseWord);
         if (token !== landerShowcaseToken) return;
-        const { html, speakParts } = buildShowcaseHtml(data, landerShowcaseWord);
+        const { html, speakParts } = buildShowcaseHtml(data);
         el.innerHTML = html;
         $('lander-showcase-hear')?.addEventListener('click', () => speakNeural(speakParts));
-        el.querySelectorAll('.showcase-used-chip[data-explore-word]').forEach((btn) => {
-          btn.addEventListener('click', () => openExplorer('word', btn.dataset.exploreWord));
-        });
-        await renderExplorerMermaidIn(el, data.mermaid, data.graph_nodes);
       } catch {
         if (token !== landerShowcaseToken) return;
         el.innerHTML = '<p class="fonoran-showcase__error">Could not load the example word. Start the dev server with <code>npm start</code>.</p>';
@@ -4420,17 +4404,8 @@
 
     async function renderGrammarMermaidIn(rootEl) {
       if (!window.mermaid || !rootEl) return;
-      window.mermaid.initialize({
-        startOnLoad: false,
-        theme: 'base',
-        themeVariables: {
-          fontFamily: 'ui-monospace, Menlo, monospace',
-          lineColor: '#a89f95',
-          clusterBkg: '#faf8f5',
-          clusterBorder: '#e8e2da',
-        },
-        securityLevel: 'loose',
-      });
+      const { MERMAID_INIT } = await import('../js/mermaid-theme.js');
+      window.mermaid.initialize(MERMAID_INIT);
       await new Promise((resolve) => requestAnimationFrame(resolve));
       await window.mermaid.run({ nodes: rootEl.querySelectorAll('.mermaid') });
       const { initMermaidPanZoomIn } = await import('../js/mermaid-pan-zoom.js');

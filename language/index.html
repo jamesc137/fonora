@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fonoran: Constructing Meaning</title>
   <meta name="description" content="Fonoran is an experiment in whether a small shared vocabulary of intuitive concepts can enable people from different native languages to communicate by constructing meaning rather than memorizing it.">
+  <meta property="og:title" content="Fonoran: Constructing Meaning">
+  <meta property="og:description" content="An experimental language built on Fonora Script: communicate by constructing meaning from a small shared set of roots rather than memorizing vocabulary.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://fonora.org/language">
+  <meta property="og:site_name" content="Fonora">
+  <link rel="canonical" href="https://fonora.org/language">
   <script src="/js/nav-boot.js"></script>
   <link rel="stylesheet" href="/app.css">
   <link rel="stylesheet" href="/language/fonoran.css">
@@ -19,40 +25,21 @@
           <nav class="platform-tabs" role="tablist" aria-label="Fonora sections">
             <a href="/" class="platform-tab" data-nav-tab="platform">Fonora</a>
             <a href="/script" class="platform-tab" data-nav-tab="script">Script</a>
-            <a href="/language" class="platform-tab" data-nav-tab="language">Language</a>
+            <a href="/language" class="platform-tab platform-tab--active" data-nav-tab="language">Language</a>
+            <a href="/learn" class="platform-tab" data-nav-tab="learn">Learn</a>
+            <a href="/tools" class="platform-tab" data-nav-tab="tools" id="platform-tab-tools" hidden>Tools</a>
           </nav>
         </div>
         <nav class="app-header__global" aria-label="Account" data-nav-auth></nav>
       </div>
     </div>
     <div class="app-header__row app-header__row--tools" data-nav-row="language-tools">
-      <nav class="main-nav" aria-label="Fonoran tools">
+      <nav class="main-nav" aria-label="Language">
         <div class="main-nav-primary">
-          <button type="button" class="tab-btn" data-fonoran-page="home">Home</button>
+          <button type="button" class="tab-btn" data-fonoran-page="home">About</button>
           <button type="button" class="tab-btn" data-fonoran-page="translator">Translator</button>
           <button type="button" class="tab-btn" data-fonoran-page="dictionary">Dictionary</button>
           <button type="button" class="tab-btn" data-fonoran-page="grammar">Grammar</button>
-        </div>
-        <div class="nav-dropdown" id="fonoran-nav-more">
-          <button type="button" class="nav-dropdown-trigger tab-btn" id="fonoran-nav-more-trigger" aria-expanded="false" aria-haspopup="true" aria-controls="fonoran-nav-more-menu">
-            More
-            <span class="nav-dropdown-chevron" aria-hidden="true">▾</span>
-          </button>
-          <div class="nav-dropdown-menu" id="fonoran-nav-more-menu" role="menu" hidden>
-            <p class="nav-dropdown-label" role="presentation">Experiment</p>
-            <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="puzzle" role="menuitem">Puzzle Conversation</button>
-            <p class="nav-dropdown-label" role="presentation">Vocabulary</p>
-            <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="roots" role="menuitem">Root Creator</button>
-            <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="create" role="menuitem">Word Creator</button>
-            <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="concepts" role="menuitem">Concept Editor</button>
-            <p class="nav-dropdown-label" role="presentation">Review</p>
-            <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="review" role="menuitem">Review</button>
-            <p class="nav-dropdown-label" role="presentation">Tools</p>
-            <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="health" role="menuitem">Health</button>
-            <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="gaps" role="menuitem">Translation Test</button>
-            <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="progress" role="menuitem">Lab progress</button>
-            <button type="button" class="tab-btn nav-dropdown-item" data-fonoran-page="advanced" role="menuitem">Advanced</button>
-          </div>
         </div>
       </nav>
     </div>
@@ -65,98 +52,162 @@
 
       <section id="page-home" class="page">
         <div class="fonoran-lander content-page">
-          <section class="content-section content-section--intro">
-            <header class="home-intro-header">
-              <h1>Fonoran</h1>
-              <p class="home-subtitle">Communicate by constructing meaning, not memorizing it.</p>
-            </header>
+          <section class="content-section content-section--intro page-hero-split">
+            <div class="page-hero-split__text">
+              <header class="home-intro-header">
+                <h1>Fonoran</h1>
+                <p class="home-subtitle">Communicate by constructing meaning, not memorizing it.</p>
+              </header>
 
-            <div class="home-prose">
-              <p>Fonoran is an experiment in whether a small shared vocabulary of intuitive concepts can enable people from different native languages to communicate by constructing meaning rather than memorizing it.</p>
-              <p>Built on the Fonora phonetic writing system, Fonoran uses a compact set of primitive concepts and compound words. Speakers combine these building blocks to express new ideas instead of learning thousands of fixed translations.</p>
-              <p>The project includes tools for exploring roots, compounds, and semantic relationships — both to develop the language and to test whether this approach works in practice.</p>
+              <div class="home-prose">
+                <p>
+                  Fonoran is an experimental language built on <a href="/script">Fonora Script</a> to test whether people from different native languages can communicate by combining a small shared set of semantic roots.
+                </p>
+                <p>
+                  Rather than memorizing thousands of unrelated words, speakers build meaning from simple concepts. If two people know the same roots, they should be able to invent expressions that the other person can reasonably understand, even if they don't choose exactly the same wording.
+                </p>
+                <p>
+                  Every root, compound, and grammar rule is evaluated by a single question:
+                </p>
+                <p class="home-hypothesis">
+                  <strong>If someone only knew the shared roots, would they probably recover the intended meaning?</strong>
+                </p>
+                <p>
+                  The goal is communication, not perfect decomposition.
+                </p>
+                <p>
+                  Our central hypothesis is simple:
+                </p>
+                <p class="home-hypothesis">
+                  <strong>Can a language designed from first principles be learned quickly enough that two people with no shared native language can achieve practical communication after only a short period of study?</strong>
+                </p>
+              </div>
             </div>
+
+            <aside class="page-hero-split__visual page-hero-split__visual-panel" aria-label="Example word">
+              <div id="lander-showcase" class="fonoran-showcase" aria-live="polite">
+                <p class="fonoran-showcase__loading">Loading example word…</p>
+              </div>
+            </aside>
           </section>
 
-          <section class="fonoran-lander__showcase content-section" aria-labelledby="showcase-heading">
-            <h2 id="showcase-heading">See the tooling in action</h2>
-            <p class="section-lead">Every word is traced from roots through word trees, semantic coordinates (DDA), and interactive exploration with pronunciation in the Fonora script.</p>
-            <div id="lander-showcase" class="fonoran-showcase" aria-live="polite">
-              <p class="fonoran-showcase__loading">Loading example word…</p>
+          <section class="home-section content-section" aria-labelledby="fonoran-tiers-heading">
+            <h2 id="fonoran-tiers-heading">A Tiered Language</h2>
+            <p>
+              Fonoran is intentionally built in layers.
+            </p>
+
+            <div class="home-tier-cards">
+              <article class="home-tier-card home-tier-card--primary">
+                <h3 class="home-how-subheading">Communicative Core (~50 roots)</h3>
+                <p>
+                  The minimum vocabulary needed to communicate everyday survival and social ideas.
+                </p>
+                <p>
+                  Every proposed root must pass the <strong>Campfire Test</strong>:
+                </p>
+                <p class="home-callout">Could this realistically come up between two strangers with no shared language during their first week together?</p>
+              </article>
+
+              <article class="home-tier-card">
+                <h3 class="home-how-subheading">Extended Core (~100 roots)</h3>
+                <p>
+                  Expands communication into everyday conversation while preserving the same compositional approach.
+                </p>
+              </article>
+
+              <article class="home-tier-card">
+                <h3 class="home-how-subheading">Complete Language</h3>
+                <p>
+                  An open-ended vocabulary for specialized, technical, scientific, and abstract concepts.
+                </p>
+              </article>
             </div>
+
+            <p>
+              Roots are introduced in the order humans experience the world:
+            </p>
+            <div class="home-sequence" aria-label="Root introduction order">
+              <span class="home-sequence__item">survival</span>
+              <span class="home-sequence__arrow" aria-hidden="true">→</span>
+              <span class="home-sequence__item">body</span>
+              <span class="home-sequence__arrow" aria-hidden="true">→</span>
+              <span class="home-sequence__item">space</span>
+              <span class="home-sequence__arrow" aria-hidden="true">→</span>
+              <span class="home-sequence__item">objects</span>
+              <span class="home-sequence__arrow" aria-hidden="true">→</span>
+              <span class="home-sequence__item">people</span>
+              <span class="home-sequence__arrow" aria-hidden="true">→</span>
+              <span class="home-sequence__item">actions</span>
+              <span class="home-sequence__arrow" aria-hidden="true">→</span>
+              <span class="home-sequence__item">emotions</span>
+              <span class="home-sequence__arrow" aria-hidden="true">→</span>
+              <span class="home-sequence__item">time</span>
+              <span class="home-sequence__arrow" aria-hidden="true">→</span>
+              <span class="home-sequence__item">thinking</span>
+              <span class="home-sequence__arrow" aria-hidden="true">→</span>
+              <span class="home-sequence__item">abstraction</span>
+            </div>
+            <p>
+              Abstract concepts are added only when simpler combinations consistently prove insufficient.
+            </p>
           </section>
 
-          <section class="fonoran-lander__health content-section" aria-labelledby="health-heading">
-            <h2 id="health-heading">Language health</h2>
-            <p class="section-lead">A live readability audit of vocabulary by four dimensions that measure internal consistency, morphological transparency, and learner ergonomics. Designed for conlang pedagogy, not English familiarity.</p>
-            <div id="lander-health" class="lander-health" aria-live="polite">
-              <p class="lander-health__loading">Loading health metrics…</p>
+          <section class="home-section home-section--layers content-section" aria-labelledby="fonoran-learn-heading">
+            <h2 id="fonoran-learn-heading">Learn to read Fonoran</h2>
+            <div class="home-layer-cards">
+              <article class="home-layer-card">
+                <p class="home-layer-card__tag">Start here</p>
+                <h3>Learn the Sounds</h3>
+                <p>See a Fonora symbol, work out the sound. The first step: recognizing the script Fonoran is written in.</p>
+                <div class="home-layer-card__actions">
+                  <a href="/learn#reading" class="btn btn--primary">Learn the Sounds</a>
+                </div>
+              </article>
+              <article class="home-layer-card">
+                <p class="home-layer-card__tag">How words sound</p>
+                <h3>Breakdown</h3>
+                <p>See how spoken words break down into Fonora symbols, sound by sound.</p>
+                <div class="home-layer-card__actions">
+                  <a href="/learn#speaking" class="btn">Try Breakdown</a>
+                </div>
+              </article>
+              <article class="home-layer-card">
+                <p class="home-layer-card__tag">Hear it</p>
+                <h3>Samples</h3>
+                <p>Hear Fonora Script read aloud, the same demo that shows it works as a universal script.</p>
+                <div class="home-layer-card__actions">
+                  <a href="/learn#listening" class="btn">Listen to Samples</a>
+                </div>
+              </article>
             </div>
           </section>
 
           <section class="fonoran-lander__compare content-section" aria-labelledby="compare-heading">
-            <h2 id="compare-heading">Fonora vs. Fonoran</h2>
+            <h2 id="compare-heading">Script and tools</h2>
             <div class="fonoran-compare-grid content-card-grid content-card-grid--2">
               <article class="fonoran-compare-card content-card fonoran-compare-card--script">
                 <p class="home-layer-card__tag">Fonora</p>
                 <h3>The writing system</h3>
-                <p>Fonora is the phonetic writing system. It defines how speech is represented using a small set of phonetic symbols.</p>
-                <ul>
-                  <li>A universal phonetic script.</li>
-                </ul>
+                <p>Fonora is the phonetic writing system Fonoran is written in. It defines how speech is represented using a small set of phonetic symbols.</p>
                 <a class="btn fonoran-compare-card__btn" href="/script#grid">Explore the script</a>
               </article>
               <article class="fonoran-compare-card content-card fonoran-compare-card--language">
-                <p class="home-layer-card__tag">Fonoran</p>
-                <h3>The language</h3>
-                <p>Fonoran tests whether people from different native languages can communicate using a small shared vocabulary of intuitive concepts, composed into meaning on the fly.</p>
-                <ul>
-                  <li>Construct meaning from roots and compounds, not memorized glosses.</li>
-                </ul>
+                <p class="home-layer-card__tag">Tools</p>
+                <h3>Build &amp; test the vocabulary</h3>
+                <p>Root and word creation, review, health metrics, and experiments: the tooling used to build and stress-test Fonoran.</p>
+                <a class="btn fonoran-compare-card__btn" href="/tools#tools-home">Open Tools</a>
               </article>
             </div>
-            <p class="section-foot">The experiment also serves as a reference language for the Fonora language-building platform.</p>
-          </section>
-
-          <section class="fonoran-lander__tools content-section" aria-labelledby="tools-heading">
-            <h2 id="tools-heading">Language Builder Tools</h2>
-            <p class="section-lead">Create, review, and explore your Fonoran vocabulary. Your words live in a local lab bucket; they are never overwritten by reference data.</p>
-            <div class="fonoran-tool-cards content-card-grid content-card-grid--2">
-              <button type="button" class="fonoran-tool-card" data-goto-page="review">
-                <strong>Review</strong>
-                <span>Search, approve, and edit roots, words, and candidates</span>
-              </button>
-              <button type="button" class="fonoran-tool-card" data-goto-page="translator">
-                <strong>Translator</strong>
-                <span>English → Fonoran with script &amp; pronunciation</span>
-              </button>
-              <button type="button" class="fonoran-tool-card" data-goto-page="roots">
-                <strong>Root Creator</strong>
-                <span>Create primitive syllables</span>
-              </button>
-              <button type="button" class="fonoran-tool-card" data-goto-page="create">
-                <strong>Word Creator</strong>
-                <span>Stack roots into words</span>
-              </button>
-              <button type="button" class="fonoran-tool-card" data-goto-page="dictionary">
-                <strong>Dictionary</strong>
-                <span>Browse and explore derivations</span>
-              </button>
-              <button type="button" class="fonoran-tool-card" data-goto-page="grammar">
-                <strong>Grammar</strong>
-                <span>Read the language specification</span>
-              </button>
-              <button type="button" class="fonoran-tool-card" data-goto-page="review">
-                <strong>Review</strong>
-                <span>Approve or revise vocabulary</span>
-              </button>
-            </div>
+            <p class="section-foot">This is where Fonoran's vocabulary is created, reviewed, and tested against the hypothesis above.</p>
           </section>
 
           <footer class="lander-footer">
             <a href="#grammar">Read the grammar specification</a>
             <span aria-hidden="true">·</span>
             <a href="../?path=docs%2Ffonoran.md">Read the Fonoran guide</a>
+            <span aria-hidden="true">·</span>
+            <a href="/tools#tools-home">Open Tools</a>
             <span aria-hidden="true">·</span>
             <a href="../?path=docs%2Fthird-party.md">Third-party licenses</a>
             <span aria-hidden="true">·</span>
@@ -464,6 +515,8 @@
       </p>
       <p class="site-footer-links">
         <a href="/script">Script</a>
+        <span class="site-footer-sep" aria-hidden="true">·</span>
+        <a href="/tools">Tools</a>
         <span class="site-footer-sep" aria-hidden="true">·</span>
         <a href="https://fonora.org/language">fonora.org</a>
         <span class="site-footer-sep" aria-hidden="true">·</span>

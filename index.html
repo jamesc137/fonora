@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fonora | Universal Phonetic Script</title>
+  <title>Fonora | Phonetic Script</title>
   <meta name="description" content="Fonora is an open-source phonetic writing system designed around nine simple symbols that visually represent how speech sounds are produced.">
   <meta name="keywords" content="fonora, phonetic language, phonetic writing system, universal writing system, constructed language, conlang, speech symbols, oral language, phonetic alphabet, open source language">
-  <meta property="og:title" content="Fonora | Universal Phonetic Script">
+  <meta property="og:title" content="Fonora | Phonetic Script">
   <meta property="og:description" content="Fonora is an open-source phonetic writing system designed around nine simple symbols that visually represent how speech sounds are produced.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://fonora.org/">
@@ -38,6 +38,7 @@
             <a href="/" class="platform-tab" data-nav-tab="platform">Fonora</a>
             <a href="/script" class="platform-tab" data-nav-tab="script">Script</a>
             <a href="/language" class="platform-tab" data-nav-tab="language">Language</a>
+            <a href="/learn" class="platform-tab" data-nav-tab="learn">Learn</a>
             <a href="/tools" class="platform-tab" data-nav-tab="tools" id="platform-tab-tools" hidden>Tools</a>
           </nav>
         </div>
@@ -48,7 +49,9 @@
       <nav class="main-nav" aria-label="Fonora">
         <div class="main-nav-primary">
           <button type="button" class="tab-btn" data-platform-tab="platform">About</button>
-          <button type="button" class="tab-btn" data-platform-tab="open-problems">Research</button>
+          <a href="/research" class="tab-btn" data-platform-tab="research">Research</a>
+          <a href="/research/timeline" class="tab-btn" data-platform-tab="timeline">Timeline</a>
+          <a href="/research#open" class="tab-btn" data-platform-tab="open">Open Questions</a>
           <button type="button" class="tab-btn" data-platform-tab="docs">Docs</button>
         </div>
       </nav>
@@ -56,35 +59,121 @@
     <div class="app-header__row app-header__row--tools" data-nav-row="script-tools">
       <nav class="main-nav" aria-label="Script tools">
         <div class="main-nav-primary">
-          <button type="button" class="tab-btn" data-tab="home">Home</button>
+          <button type="button" class="tab-btn" data-tab="home">About</button>
           <button type="button" class="tab-btn" data-tab="translator">Transliterate</button>
           <button type="button" class="tab-btn" data-tab="alphabet">Alphabet</button>
           <button type="button" class="tab-btn" data-tab="grid">Sound Grid</button>
         </div>
-        <div class="nav-dropdown" id="nav-more">
-          <button type="button" class="nav-dropdown-trigger tab-btn" id="nav-more-trigger" aria-expanded="false" aria-haspopup="true" aria-controls="nav-more-menu">
-            More
-            <span class="nav-dropdown-chevron" aria-hidden="true">▾</span>
-          </button>
-          <div class="nav-dropdown-menu" id="nav-more-menu" role="menu" hidden>
-            <p class="nav-dropdown-label" role="presentation">Transliteration</p>
-            <button type="button" class="tab-btn nav-dropdown-item" data-tab="breakdown" role="menuitem">Breakdown</button>
-            <button type="button" class="tab-btn nav-dropdown-item" data-tab="samples" role="menuitem">Samples</button>
-            <button type="button" class="tab-btn nav-dropdown-item" data-tab="keyboard" role="menuitem">Keyboard Testing</button>
-            <button type="button" class="tab-btn nav-dropdown-item" data-tab="spelling-practice" role="menuitem">Spelling Practice</button>
-            <button type="button" class="tab-btn nav-dropdown-item" data-tab="reverse" role="menuitem">Reverse Lookup</button>
-            <p class="nav-dropdown-label" role="presentation">Script QA</p>
-            <button type="button" class="tab-btn nav-dropdown-item" data-tab="symbols" role="menuitem">Symbols</button>
-            <button type="button" class="tab-btn nav-dropdown-item" data-tab="quiz" role="menuitem">Quiz</button>
-            <button type="button" class="tab-btn nav-dropdown-item" data-tab="encoder-testing" role="menuitem">Pronunciation Testing</button>
-            <button type="button" class="tab-btn nav-dropdown-item" data-tab="pronunciation-validation" role="menuitem">Pronunciation Validation</button>
-          </div>
+      </nav>
+    </div>
+    <div class="app-header__row app-header__row--tools" data-nav-row="learn-tools">
+      <nav class="main-nav" aria-label="Learn">
+        <div class="main-nav-primary">
+          <button type="button" class="tab-btn" data-learn-tab="writing">Writing</button>
+          <button type="button" class="tab-btn" data-learn-tab="reading">Reading</button>
+          <button type="button" class="tab-btn" data-learn-tab="speaking">Speaking</button>
+          <button type="button" class="tab-btn" data-learn-tab="listening">Listening</button>
         </div>
       </nav>
     </div>
   </header>
 
   <main class="main-content" id="main-content">
+    <!-- Platform home -->
+    <section class="platform-home content-page tab-panel" id="tab-platform" data-tab-panel="platform" aria-labelledby="platform-title">
+      <section class="content-section content-section--intro page-hero-split" aria-labelledby="platform-title">
+        <div class="page-hero-split__text">
+          <header class="home-intro-header">
+            <h1 id="platform-title">Fonora</h1>
+            <p class="home-subtitle">An open research project exploring language from first principles.</p>
+          </header>
+          <div class="home-prose">
+            <p>
+              Fonora is an open-source research project exploring how writing systems and languages can be designed from first principles. It combines experimental software, a phonetic script, and a constructed language to test new ideas about communication.
+            </p>
+            <p class="home-hypothesis">
+              Our hypothesis: <strong>Can a language designed from first principles be learned quickly enough that two people with no shared native language can achieve practical communication after only a short period of study?</strong>
+            </p>
+          </div>
+        </div>
+
+        <aside class="page-hero-split__visual page-hero-split__visual-panel" aria-label="Projects">
+          <nav class="platform-hero-nav">
+            <div class="platform-hero-nav__item">
+              <p class="platform-hero-nav__tag">Script</p>
+              <p class="platform-hero-nav__title">Fonora Script</p>
+              <p class="platform-hero-nav__desc">A phonetic writing system built from nine core symbols.</p>
+              <button type="button" class="btn btn--primary platform-hero-nav__action" data-tab="home">Explore Script</button>
+            </div>
+            <div class="platform-hero-nav__item">
+              <p class="platform-hero-nav__tag">Language</p>
+              <p class="platform-hero-nav__title">Fonoran</p>
+              <p class="platform-hero-nav__desc">An experimental language for practical communication across native languages.</p>
+              <a href="/language" class="btn btn--primary platform-hero-nav__action">Learn Fonoran</a>
+            </div>
+            <div class="platform-hero-nav__item">
+              <p class="platform-hero-nav__tag">Learn</p>
+              <p class="platform-hero-nav__title">Learn</p>
+              <p class="platform-hero-nav__desc">Practice reading, hearing, and writing Fonora Script.</p>
+              <a href="/learn" class="btn btn--primary platform-hero-nav__action">Start Learning</a>
+            </div>
+          </nav>
+        </aside>
+      </section>
+
+      <section class="home-section home-section--layers content-section" aria-labelledby="explore-heading">
+        <h2 id="explore-heading">Projects</h2>
+        <div class="home-layer-cards">
+          <article class="home-layer-card home-layer-card--script">
+            <p class="home-layer-card__tag">Script</p>
+            <h3>Fonora Script</h3>
+            <p>A phonetic writing system built from nine core symbols that represent where and how speech sounds are physically produced.</p>
+            <div class="home-layer-card__actions">
+              <button type="button" class="btn btn--primary" data-tab="home">Explore Script</button>
+              <button type="button" class="btn" data-tab="translator">Transliterate</button>
+            </div>
+          </article>
+          <article class="home-layer-card home-layer-card--language">
+            <p class="home-layer-card__tag">Language</p>
+            <h3>Fonoran</h3>
+            <p>An experimental language built on Fonora Script to test whether a small shared vocabulary can enable practical communication across native languages.</p>
+            <div class="home-layer-card__actions">
+              <a href="/language" class="btn btn--primary">Learn Fonoran</a>
+            </div>
+          </article>
+          <article class="home-layer-card home-layer-card--tools">
+            <p class="home-layer-card__tag">Tools</p>
+            <h3>Tools</h3>
+            <p>The software used to build, analyze, and experiment with both the script and the language.</p>
+            <div class="home-layer-card__actions">
+              <a href="/tools" class="btn btn--primary">Open Tools</a>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="home-section home-section--card content-section" aria-labelledby="platform-goals-heading">
+        <h2 id="platform-goals-heading">Project Goals</h2>
+        <ul class="home-list home-list--goals">
+          <li>Explore new approaches to written and spoken language</li>
+          <li>Design a highly learnable writing system</li>
+          <li>Design a highly learnable constructed language</li>
+          <li>Reduce memorization through phonetic writing and semantic composition</li>
+          <li>Test communication between people with different native languages</li>
+          <li>Build open-source tools for language experimentation</li>
+        </ul>
+
+        <h2 id="platform-status-heading" class="home-section__subheading">Experimental Research Project</h2>
+        <p>Fonora is an active open-source research project exploring how written and spoken language can be designed from first principles.</p>
+        <p>The project includes a phonetic writing system, an experimental constructed language, and the software used to build, analyze, and test both.</p>
+        <p>Every symbol, sound mapping, root, and grammar rule is treated as a hypothesis rather than a conclusion. Ideas are refined through experimentation, measurement, and community feedback.</p>
+        <p>The central research question is simple:</p>
+        <p class="home-hypothesis">
+          <strong>Can a writing system and language designed from first principles be learned quickly enough that two people with no shared native language can achieve practical communication after only a short period of study?</strong>
+        </p>
+      </section>
+    </section>
+
     <!-- Tools auth gate -->
     <section class="content-page tab-panel tools-auth-gate" id="tab-tools-auth-gate" data-tab-panel="tools-auth-gate" hidden aria-labelledby="tools-auth-gate-title">
       <section class="content-section content-section--intro">
@@ -93,47 +182,224 @@
           <p class="home-subtitle">Builder and QA tools are available to signed-in @fonora.org accounts.</p>
         </header>
         <div class="auth-gate auth-gate--page">
-          <p>Sign in with Google to access script debugging tools and language builder utilities.</p>
+          <p>Sign in with Google to access script debugging tools and language builder utilities. Learn exercises stay public without an account.</p>
           <a href="/auth/google?returnTo=/tools%23tools-home" class="btn btn--primary auth-gate__sign-in" id="tools-auth-gate-sign-in">Sign in with Google</a>
         </div>
       </section>
     </section>
 
-    <!-- Platform home -->
-    <section class="platform-home content-page tab-panel" id="tab-platform" data-tab-panel="platform" aria-labelledby="platform-title">
-      <section class="content-section content-section--intro" aria-labelledby="platform-title">
+    <!-- Learn: Speaking (placeholder) -->
+    <section class="content-page tab-panel" id="tab-speaking" data-tab-panel="speaking" hidden aria-labelledby="learn-speaking-title">
+      <section class="content-section content-section--intro" aria-labelledby="learn-speaking-title">
         <header class="home-intro-header">
-          <h1 id="platform-title">Fonora</h1>
-          <p class="home-subtitle">An open platform for phonetic writing and constructed language.</p>
+          <h1 id="learn-speaking-title">Speaking</h1>
+          <p class="home-subtitle">Practice producing Fonora sounds and words aloud.</p>
+        </header>
+        <div class="home-prose">
+          <p>Speaking exercises are coming soon.</p>
+        </div>
+      </section>
+    </section>
+
+    <!-- Learn home -->
+    <section class="content-page tab-panel" id="tab-learn-home" data-tab-panel="learn-home" hidden aria-labelledby="learn-home-title">
+      <section class="content-section content-section--intro" aria-labelledby="learn-home-title">
+        <header class="home-intro-header">
+          <h1 id="learn-home-title">Learn</h1>
+          <p class="home-subtitle">Learn to read, hear, and write Fonora Script.</p>
         </header>
         <div class="home-prose">
           <p>
-            Fonora brings together a universal phonetic script, an experiment in cross-language meaning construction, and tools for building and documenting new languages on a shared phonetic foundation.
+            The learning tools are designed to answer a practical question:
+          </p>
+          <p class="home-hypothesis">
+            <strong>How quickly can someone learn an unfamiliar writing system if the symbols themselves explain how sounds are produced?</strong>
           </p>
           <p>
-            Start with the script to learn how sounds are written, explore Fonoran to test whether a small shared vocabulary can enable communication across native languages, or jump into the language builder to create vocabulary of your own.
+            Practice reading symbols, hearing pronunciation, writing words from sound, and recognizing patterns. Each exercise helps evaluate whether Fonora is genuinely easier to learn than conventional writing systems.
           </p>
         </div>
       </section>
 
-      <section class="home-section home-section--layers content-section" aria-labelledby="explore-heading">
-        <h2 id="explore-heading">Explore</h2>
+      <section class="home-section home-section--layers content-section" aria-labelledby="learn-tools-heading">
+        <h2 id="learn-tools-heading">Learning Tools</h2>
         <div class="home-layer-cards">
           <article class="home-layer-card">
-            <p class="home-layer-card__tag">Script</p>
-            <h3>Fonora Script</h3>
-            <p>A phonetic writing system built from nine core symbols that represent where and how speech sounds are produced.</p>
+            <p class="home-layer-card__tag">Learn</p>
+            <h3>Learn the Sounds</h3>
+            <p>See a Fonora symbol, work out the sound it represents.</p>
             <div class="home-layer-card__actions">
-              <button type="button" class="btn btn--primary" data-tab="home">Explore Script</button>
-              <button type="button" class="btn" data-tab="translator">Transliterate</button>
+              <button type="button" class="btn btn--primary" data-learn-tab="reading">Learn the Sounds</button>
             </div>
           </article>
           <article class="home-layer-card">
-            <p class="home-layer-card__tag">Language</p>
-            <h3>Fonoran</h3>
-            <p>An experiment in cross-language communication: a small vocabulary of intuitive concepts you combine to construct meaning, written in Fonora.</p>
+            <p class="home-layer-card__tag">Pronunciation</p>
+            <h3>Breakdown</h3>
+            <p>See how spoken words break down into Fonora symbols, sound by sound.</p>
             <div class="home-layer-card__actions">
-              <a href="/language" class="btn btn--primary">Explore Language</a>
+              <button type="button" class="btn" data-learn-tab="speaking">Try Breakdown</button>
+            </div>
+          </article>
+          <article class="home-layer-card">
+            <p class="home-layer-card__tag">Demo</p>
+            <h3>Samples</h3>
+            <p>Hear Fonora Script read aloud — a demo of it working as a universal script.</p>
+            <div class="home-layer-card__actions">
+              <button type="button" class="btn" data-learn-tab="listening">Listen to Samples</button>
+            </div>
+          </article>
+          <article class="home-layer-card">
+            <p class="home-layer-card__tag">Practice</p>
+            <h3>Spelling Practice</h3>
+            <p>Type the romanized word in Fonora script and check your spelling.</p>
+            <div class="home-layer-card__actions">
+              <button type="button" class="btn" data-learn-tab="writing">Practice Spelling</button>
+            </div>
+          </article>
+        </div>
+      </section>
+    </section>
+
+    <!-- Tools home -->
+    <section class="content-page tab-panel" id="tab-tools-home" data-tab-panel="tools-home" hidden aria-labelledby="tools-home-title">
+      <section class="content-section content-section--intro" aria-labelledby="tools-home-title">
+        <header class="home-intro-header">
+          <h1 id="tools-home-title">Tools</h1>
+          <p class="home-subtitle">The software used to build, analyze, and test Fonora Script and Fonoran.</p>
+        </header>
+        <div class="home-prose">
+          <p>
+            These experimental tools power the research behind the project.
+          </p>
+          <p>
+            Explore the script editor, transliterator, sound grid, language builder, root explorer, derivation graphs, corpus analysis, and other utilities used to design and evaluate both the writing system and the language.
+          </p>
+          <p>
+            These tools are intended for researchers, contributors, and anyone interested in language creation. If you're looking to learn the script itself, start with the <strong>Learn</strong> section.
+          </p>
+        </div>
+      </section>
+
+      <section class="home-section home-section--layers content-section" aria-labelledby="tools-script-heading">
+        <h2 id="tools-script-heading">Script Tools</h2>
+        <div class="home-layer-cards">
+          <article class="home-layer-card">
+            <p class="home-layer-card__tag">Practice</p>
+            <h3>Keyboard Testing</h3>
+            <p>Type Fonora phonemes directly using the on-screen keyboard layout.</p>
+            <div class="home-layer-card__actions">
+              <button type="button" class="btn" data-tab="keyboard">Test Keyboard</button>
+            </div>
+          </article>
+          <article class="home-layer-card">
+            <p class="home-layer-card__tag">Lookup</p>
+            <h3>Reverse Lookup</h3>
+            <p>Type a sound (e.g. sh, ng) to find its symbol combination.</p>
+            <div class="home-layer-card__actions">
+              <button type="button" class="btn" data-tab="reverse">Reverse Lookup</button>
+            </div>
+          </article>
+          <article class="home-layer-card">
+            <p class="home-layer-card__tag">Debug &amp; QA</p>
+            <h3>Symbols</h3>
+            <p>Experiment with primary symbols and apply overrides for this session.</p>
+            <div class="home-layer-card__actions">
+              <button type="button" class="btn" data-tab="symbols">Edit Symbols</button>
+            </div>
+          </article>
+          <article class="home-layer-card">
+            <p class="home-layer-card__tag">Debug &amp; QA</p>
+            <h3>Pronunciation Testing</h3>
+            <p>Evaluate IPA → Fonora encoding across languages.</p>
+            <div class="home-layer-card__actions">
+              <button type="button" class="btn" data-tab="encoder-testing">Open Pronunciation Testing</button>
+            </div>
+          </article>
+          <article class="home-layer-card">
+            <p class="home-layer-card__tag">Debug &amp; QA</p>
+            <h3>Pronunciation Validation</h3>
+            <p>Validate that Fonora preserves pronunciation through the full encode/decode pipeline.</p>
+            <div class="home-layer-card__actions">
+              <button type="button" class="btn" data-tab="pronunciation-validation">Open Validation</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="home-section home-section--layers content-section" aria-labelledby="tools-language-heading">
+        <h2 id="tools-language-heading">Language Tools</h2>
+        <p>These open the <a href="/language">Language Builder</a> app directly to the tool you need.</p>
+        <div class="home-layer-cards">
+          <article class="home-layer-card">
+            <p class="home-layer-card__tag">Experiment</p>
+            <h3>Puzzle Conversation</h3>
+            <p>Test whether two people can communicate using only the Communicative Core.</p>
+            <div class="home-layer-card__actions">
+              <a href="/language#puzzle" class="btn btn--primary">Open Puzzle Conversation</a>
+            </div>
+          </article>
+          <article class="home-layer-card">
+            <p class="home-layer-card__tag">Vocabulary</p>
+            <h3>Root Creator</h3>
+            <p>Create and define Fonoran roots.</p>
+            <div class="home-layer-card__actions">
+              <a href="/language#roots" class="btn">Open Root Creator</a>
+            </div>
+          </article>
+          <article class="home-layer-card">
+            <p class="home-layer-card__tag">Vocabulary</p>
+            <h3>Word Creator</h3>
+            <p>Compose Fonoran words from roots.</p>
+            <div class="home-layer-card__actions">
+              <a href="/language#create" class="btn">Open Word Creator</a>
+            </div>
+          </article>
+          <article class="home-layer-card">
+            <p class="home-layer-card__tag">Vocabulary</p>
+            <h3>Concept Editor</h3>
+            <p>Manage the concept inventory that roots and words are built from.</p>
+            <div class="home-layer-card__actions">
+              <a href="/language#concepts" class="btn">Open Concept Editor</a>
+            </div>
+          </article>
+          <article class="home-layer-card">
+            <p class="home-layer-card__tag">Review</p>
+            <h3>Review</h3>
+            <p>Review and approve pending roots and words.</p>
+            <div class="home-layer-card__actions">
+              <a href="/language#review" class="btn">Open Review</a>
+            </div>
+          </article>
+          <article class="home-layer-card">
+            <p class="home-layer-card__tag">Analysis</p>
+            <h3>Health</h3>
+            <p>Check vocabulary coverage and consistency metrics.</p>
+            <div class="home-layer-card__actions">
+              <a href="/language#health" class="btn">Open Health</a>
+            </div>
+          </article>
+          <article class="home-layer-card">
+            <p class="home-layer-card__tag">Analysis</p>
+            <h3>Translation Test</h3>
+            <p>Stress-test translation gaps against real text.</p>
+            <div class="home-layer-card__actions">
+              <a href="/language#gaps" class="btn">Open Translation Test</a>
+            </div>
+          </article>
+          <article class="home-layer-card">
+            <p class="home-layer-card__tag">Analysis</p>
+            <h3>Lab progress</h3>
+            <p>Track vocabulary growth over time.</p>
+            <div class="home-layer-card__actions">
+              <a href="/language#progress" class="btn">Open Lab progress</a>
+            </div>
+          </article>
+          <article class="home-layer-card">
+            <p class="home-layer-card__tag">Advanced</p>
+            <h3>Advanced</h3>
+            <p>Low-level tools for the language lab.</p>
+            <div class="home-layer-card__actions">
+              <a href="/language#advanced" class="btn">Open Advanced</a>
             </div>
           </article>
         </div>
@@ -142,46 +408,51 @@
 
     <!-- Script home -->
     <section class="home-page content-page tab-panel" id="tab-home" data-tab-panel="home" hidden aria-labelledby="home-title">
-      <section class="home-section home-section--intro content-section content-section--intro" aria-labelledby="home-title">
-        <header class="home-intro-header">
-          <h1 id="home-title">Fonora Script</h1>
-          <p class="home-subtitle">An experimental phonetic writing system constructed from speech itself.</p>
-        </header>
+      <section class="home-section home-section--intro content-section content-section--intro page-hero-split" aria-labelledby="home-title">
+        <div class="page-hero-split__text">
+          <header class="home-intro-header">
+            <h1 id="home-title">Fonora Script</h1>
+            <p class="home-subtitle">An experimental phonetic writing system constructed from speech itself.</p>
+          </header>
 
-        <div class="home-prose">
-          <p>
-            Fonora is an experimental open-source writing system that represents speech using a small set of symbols based on how sounds are physically produced in the mouth.
-          </p>
-          <p>
-            Rather than relying on historical spelling conventions, Fonora encodes pronunciation directly. The symbols themselves describe where and how sounds are formed, helping readers infer how words should be spoken from the written form alone.
-          </p>
-          <p>
-            The goal is to create a simple, highly learnable phonetic script capable of representing speech across languages and dialects using a minimal visual vocabulary.
-          </p>
+          <div class="home-prose">
+            <p>
+              Fonora is an open-source writing system that represents speech using a small set of symbols based on how sounds are physically produced in the mouth.
+            </p>
+            <p>
+              Rather than preserving historical spelling conventions, Fonora writes pronunciation directly. Each symbol represents either where a sound is produced or how it is modified, allowing readers to infer pronunciation from the written form itself.
+            </p>
+            <p>
+              The project explores whether a compact, highly learnable script can represent speech across many languages while remaining visually simple and consistent.
+            </p>
+          </div>
         </div>
+
+        <aside class="page-hero-split__visual page-hero-split__visual-panel" aria-label="Core symbols">
+          <h3 class="home-how-subheading">Places of Articulation</h3>
+          <div id="home-places" class="home-symbol-grid" role="list" aria-label="Place symbols"></div>
+
+          <h3 class="home-how-subheading">Sound Modifiers</h3>
+          <div id="home-modifiers" class="home-symbol-grid" role="list" aria-label="Modifier symbols"></div>
+        </aside>
       </section>
 
       <section class="home-section home-section--showcase content-section" aria-labelledby="how-heading">
         <h2 id="how-heading">How It Works</h2>
 
-        <h3 class="home-how-subheading">Places of Articulation</h3>
-        <div id="home-places" class="home-symbol-grid" role="list" aria-label="Place symbols"></div>
+        <div class="content-section--panel">
+          <div class="home-how-summary">
+            <h3 class="home-how-subheading">From nine symbols to an alphabet</h3>
+            <p>Fonora is built from only <strong>nine core symbols</strong>.</p>
+            <p>Five symbols represent where speech is produced in the mouth and vocal tract.</p>
+            <p>Four symbols modify those locations to create voiced, nasal, fricative, and glide sounds.</p>
+            <p>Together they combine to represent a wide range of human speech while keeping the visual system intentionally small.</p>
+          </div>
 
-        <h3 class="home-how-subheading">Sound Modifiers</h3>
-        <div id="home-modifiers" class="home-symbol-grid" role="list" aria-label="Modifier symbols"></div>
-
-        <div class="home-how-summary">
-          <p>Fonora is built from only <b>nine</b> core symbols.</p>
-          <ul>
-            <li>Five symbols represent where sounds are produced in the mouth and vocal tract.</li>
-            <li>Four symbols modify those locations to create different sound types.</li>
-          </ul>
-          <p>Together they form a compact system capable of representing a wide range of human speech sounds.</p>
-        </div>
-
-        <div class="home-section-actions">
-          <button type="button" class="btn btn--primary" data-tab="grid">See Sound Grid</button>
-          <button type="button" class="btn" data-tab="alphabet">See Full Alphabet</button>
+          <div class="home-section-actions">
+            <button type="button" class="btn btn--primary" data-tab="grid">See Sound Grid</button>
+            <button type="button" class="btn" data-tab="alphabet">See Full Alphabet</button>
+          </div>
         </div>
       </section>
 
@@ -211,54 +482,6 @@
             <button type="button" class="btn home-sample-more-btn" data-tab="samples">More language samples</button>
           </footer>
         </article>
-      </section>
-
-      <section class="home-section content-section" aria-labelledby="why-heading">
-        <h2 id="why-heading">Why Fonora?</h2>
-        <div class="home-principles">
-          <article class="home-principle">
-            <h3>Learnable</h3>
-            <p>A small number of visual building blocks can generate an entire writing system.</p>
-          </article>
-          <article class="home-principle">
-            <h3>Phonetic</h3>
-            <p>Words are written according to pronunciation rather than historical spelling.</p>
-          </article>
-          <article class="home-principle">
-            <h3>Universal</h3>
-            <p>The system is designed around speech sounds rather than any specific language.</p>
-          </article>
-          <article class="home-principle">
-            <h3>Visual</h3>
-            <p>Symbols reflect how sounds are physically produced, making pronunciation easier to infer.</p>
-          </article>
-          <article class="home-principle">
-            <h3>Minimal</h3>
-            <p>Every symbol serves a specific purpose. The system aims to remain compact and efficient.</p>
-          </article>
-          <article class="home-principle">
-            <h3>Open</h3>
-            <p>Fonora is an open-source experiment that can evolve through testing, research, and community contribution.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="home-section home-section--card content-section" aria-labelledby="goals-heading">
-        <h2 id="goals-heading">Project Goals</h2>
-        <ul class="home-list home-list--goals">
-          <li>Create a highly learnable writing system</li>
-          <li>Reduce memorization and spelling complexity</li>
-          <li>Represent pronunciation directly</li>
-          <li>Support multiple spoken languages</li>
-          <li>Remain visually simple and compact</li>
-          <li>Stay open, accessible, and community-driven</li>
-        </ul>
-
-        <h2 id="status-heading" class="home-section__subheading">Experimental Research Project</h2>
-        <p>Fonora is an active open-source research project.</p>
-        <p>Its symbol inventory, phonetic mappings, encoding rules, and tools continue to evolve through experimentation, testing, and community feedback.</p>
-        <p>This website serves as both documentation and a research platform for exploring new approaches to written language.</p>
-        <p>The goal of Fonora is to develop a universal phonetic writing system whose symbols describe how speech is physically produced, allowing pronunciation to be inferred directly from the written form.</p>
       </section>
     </section>
 
@@ -766,14 +989,9 @@
       </div>
     </section>
 
-    <!-- Open Problems -->
-    <section class="open-problems-page tab-panel" id="tab-open-problems" data-tab-panel="open-problems" hidden aria-labelledby="open-problems-title">
-      <div id="open-problems-root" class="open-problems-root" aria-live="polite"></div>
-    </section>
-
-    <!-- Quiz -->
+    <!-- Quiz: surfaced via Learn as "Learn the Sounds" (data-tab="quiz" panel reused as-is) -->
     <section class="panel tab-panel" id="tab-quiz" data-tab-panel="quiz" hidden>
-      <h2>Test Mode</h2>
+      <h2>Learn the Sounds</h2>
       <p id="quiz-stats" class="quiz-stats">Attempts: 0 · Correct: 0 · Accuracy: 0%</p>
 
       <div class="quiz-type-row">
@@ -828,7 +1046,11 @@
         Released under the <a href="https://github.com/jamesc137/fonora/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>.
       </p>
       <p class="site-footer-links">
-        <a href="/language">Language Builder</a>
+        <a href="/language">Language</a>
+        <span class="site-footer-sep" aria-hidden="true">·</span>
+        <a href="/learn">Learn</a>
+        <span class="site-footer-sep" aria-hidden="true">·</span>
+        <a href="/tools">Tools</a>
         <span class="site-footer-sep" aria-hidden="true">·</span>
         <a href="https://fonora.org">fonora.org</a>
         <span class="site-footer-sep" aria-hidden="true">·</span>

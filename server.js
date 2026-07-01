@@ -19,6 +19,8 @@ const MIME = {
   '.mjs': 'text/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
   '.md': 'text/markdown; charset=utf-8',
+  '.txt': 'text/plain; charset=utf-8',
+  '.xml': 'application/xml; charset=utf-8',
   '.wasm': 'application/wasm',
   '.data': 'application/octet-stream',
 };
@@ -83,10 +85,17 @@ function isDocsViewerRoute(pathname) {
 
 function isScriptAppRoute(pathname) {
   const path = pathname.replace(/\/$/, '') || '/';
-  return path === '/script';
+  return path === '/script' || path === '/tools' || path === '/learn';
 }
 
-function legacyLanguageRedirect(pathname, search, hash) {
+/** /research, /research/timeline, /research/notes/* all render the research notebook shell. */
+function isResearchAppRoute(pathname) {
+  const path = pathname.replace(/\/$/, '') || '/';
+  return path === '/research' || path.startsWith('/research/');
+}
+
+/** /fonoran is a legacy alias for the Language tab (Fonoran the language). */
+function legacyFonoranRedirect(pathname, search, hash) {
   if (pathname === '/fonoran' || pathname.startsWith('/fonoran/')) {
     let rest = pathname.slice('/fonoran'.length);
     if (!rest || rest === '/') rest = '';
@@ -95,9 +104,15 @@ function legacyLanguageRedirect(pathname, search, hash) {
   return null;
 }
 
-/** Canonical section URLs omit trailing slashes (/script, /language). */
+/** Canonical section URLs omit trailing slashes (/script, /tools, /language). */
 function sectionCanonicalRedirect(pathname, search, hash) {
-  if (pathname === '/script/' || pathname === '/language/') {
+  if (
+    pathname === '/script/' ||
+    pathname === '/tools/' ||
+    pathname === '/learn/' ||
+    pathname === '/language/' ||
+    pathname === '/research/'
+  ) {
     return `${pathname.slice(0, -1)}${search}${hash}`;
   }
   return null;
@@ -106,6 +121,8 @@ function sectionCanonicalRedirect(pathname, search, hash) {
 function normalizePathname(pathname) {
   let path = decodeURIComponent(pathname);
   if (path === '/script' || path === '/script/') path = '/index.html';
+  if (path === '/learn' || path === '/learn/') path = '/index.html';
+  if (path === '/tools' || path === '/tools/') path = '/index.html';
   if (path === '/language' || path === '/language/') path = '/language/index.html';
   if (path.endsWith('/')) path += 'index.html';
   if (path === '/') path = '/index.html';
@@ -134,7 +151,15 @@ function findOnnxWasmPath() {
 }
 
 function cacheControl(pathname) {
-  if (pathname === '/index.html' || pathname === '/' || pathname === '/script' || pathname === '/language') {
+  if (
+    pathname === '/index.html' ||
+    pathname === '/' ||
+    pathname === '/script' ||
+    pathname === '/learn' ||
+    pathname === '/tools' ||
+    pathname === '/language' ||
+    pathname === '/research'
+  ) {
     return 'no-cache';
   }
   if (/\.(wasm|data|js|mjs|css)$/.test(pathname)) return 'public, max-age=31536000, immutable';
@@ -174,7 +199,7 @@ createServer(async (req, res) => {
       return;
     }
 
-    const legacyRedirect = legacyLanguageRedirect(url.pathname, url.search, url.hash);
+    const legacyRedirect = legacyFonoranRedirect(url.pathname, url.search, url.hash);
     if (legacyRedirect) {
       res.writeHead(301, { Location: legacyRedirect, ...SECURITY_HEADERS });
       res.end();
@@ -190,6 +215,18 @@ createServer(async (req, res) => {
 
     if (isScriptAppRoute(url.pathname)) {
       const indexPath = join(root, 'index.html');
+      const body = await readFile(indexPath);
+      res.writeHead(200, {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-cache',
+        ...SECURITY_HEADERS,
+      });
+      res.end(body);
+      return;
+    }
+
+    if (isResearchAppRoute(url.pathname)) {
+      const indexPath = join(root, 'research', 'index.html');
       const body = await readFile(indexPath);
       res.writeHead(200, {
         'Content-Type': 'text/html; charset=utf-8',

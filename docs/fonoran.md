@@ -1,6 +1,10 @@
 # Fonoran language guide
 
-> **Start here** for the experimental Fonoran language and its builder at [`/language`](/language).
+> **Read the research.** How this build pipeline was designed is told in the research notebook: [RN-13 · Concepts are canonical, sounds are editorial proposals](/research/notes/editorial-pipeline).
+
+> **Start here** for the experimental Fonoran language and its builder at [`/language`](/language). To
+> practice reading the script Fonoran is written in — Learn the Sounds, Breakdown, Samples — see
+> [`/tools`](/tools) instead; this document covers the builder/lab side.
 >
 > **Why Fonoran exists:** it is an experiment in whether people from different native
 > languages can communicate basic meaning by combining a small shared set of roots. The
@@ -56,7 +60,7 @@ flowchart TD
 ```bash
 npm install
 npm start
-# http://localhost:8000/fonoran/
+# http://localhost:8000/language
 
 npm run fonoran:build    # assign roots + build curated compounds → lab
 ```
@@ -110,7 +114,7 @@ meaning cleanup → primitive test → priority class → sound generation
 | Step | What happens |
 | --- | --- |
 | 1. Build | `npm run fonoran:build` assigns CV/CVC spellings, builds compounds, imports lab |
-| 2. Review | Open **Review** at `/fonoran/#review` — approve, reject, edit, or regenerate roots |
+| 2. Review | Open **Review** at `/language#review` — approve, reject, edit, or regenerate roots |
 | 3. Rebuild | Re-run build; approved spellings stay locked; **user-created lab items are preserved** |
 
 ### Concept metadata drives generation
@@ -169,7 +173,7 @@ Typical loop:
 
 ```bash
 npm run fonoran:reset && npm run fonoran:build
-# → Review at /fonoran/#review
+# → Review at /language#review
 # → npm run fonoran:build again after approving roots
 ```
 

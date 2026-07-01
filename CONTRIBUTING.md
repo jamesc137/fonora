@@ -14,7 +14,6 @@ Open to everyone via GitHub:
 - **Language rules**: propose changes to [`docs/language-rules.md`](docs/language-rules.md) (symbols, grid cells, vowel mappings) with reasoning and test cases
 - **IPA pipeline**: improve normalization, encoding, or validation in `js/`
 - **Documentation**: clarify concepts, add examples, fix outdated docs in `docs/`
-- **Open problems**: review [docs/open-problems.md](docs/open-problems.md) or More → **Open Problems** in the app; file issues for gaps you can reproduce
 - **Bug reports**: open a GitHub issue with reproduction steps
 - **Tests**: extend `js/tests-core.js` when fixing encoding or grammar behavior
 

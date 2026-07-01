@@ -1,5 +1,7 @@
 # Grammar
 
+> **Read the research.** Why grammar lives in closed-class particles instead of the lexicon is told in the research notebook: [RN-14 · Grammar as particles, not words](/research/notes/grammar-particles).
+
 > **Status**: Living specification. This is the authoritative reference for humans and the future Fonoran Translator. Sections marked *Under Development* are intentional placeholders, not omissions.
 >
 > **Read [the Fonoran Constitution](fonoran-constitution.md) first.** It states what
@@ -742,4 +744,4 @@ The following topics are **intentionally incomplete**. They will extend this spe
 
 Contributions should preserve: invariant words, particle-based grammar, fixed default order, visible semantic compounding, and semantic economy in compounds.
 
-*Related: [Fonoran language lab](fonoran.md) · [Semantic foundation](fonoran-semantic-foundation.md) · [Dictionary](/fonoran/#dictionary)*
+*Related: [Fonoran language lab](fonoran.md) · [Semantic foundation](fonoran-semantic-foundation.md) · [Dictionary](/language#dictionary) · [Learn Fonoran](/language)*

@@ -174,7 +174,7 @@
       }
       gate.className = 'auth-gate sans';
       gate.innerHTML = `<p>Sign in with your <strong>@fonora.org</strong> Google account to edit Fonoran vocabulary.</p>
-        <a href="${escapeHtml(AUTH.loginUrl)}" class="btn btn-primary auth-gate__sign-in">Sign in with Google</a>`;
+        <a href="${escapeHtml(AUTH.loginUrl)}" class="btn btn--primary auth-gate__sign-in">Sign in with Google</a>`;
       const host = SPLIT_WRITE_PAGES.has(STATE.page)
         ? $(`page-${STATE.page}`)?.querySelector('.fonoran-split-chrome')
         : main;
@@ -1038,7 +1038,7 @@
           <input type="text" id="new-root-meaning" placeholder="Type or pick from English list…" data-write-input>
           <div id="new-root-dupe"></div>
           <div class="actions" style="margin-top:0.7rem">
-            <button type="button" class="btn btn-primary" id="new-root-save" disabled data-write>Add root</button>
+            <button type="button" class="btn btn--primary" id="new-root-save" disabled data-write>Add root</button>
             <button type="button" class="btn" id="new-root-cancel" hidden data-write>Cancel</button>
           </div>
         </div>`;
@@ -2038,21 +2038,27 @@
       });
     }
 
-    async function renderLanderShowcase() {
+    function renderLanderShowcase() {
       const el = $('lander-showcase');
       if (!el || STATE.page !== 'home' || !STATE.lab) return;
-      const token = ++landerShowcaseToken;
-      landerShowcaseWord = pickLanderShowcaseWord();
-      try {
-        const data = await fetchShowcaseGraph(landerShowcaseWord);
-        if (token !== landerShowcaseToken) return;
-        const { html, speakParts } = buildShowcaseHtml(data);
-        el.innerHTML = html;
-        $('lander-showcase-hear')?.addEventListener('click', () => speakNeural(speakParts));
-      } catch {
-        if (token !== landerShowcaseToken) return;
-        el.innerHTML = '<p class="fonoran-showcase__error">Could not load the example word. Start the dev server with <code>npm start</code>.</p>';
+      if (landerShowcaseCleanup) {
+        landerShowcaseCleanup();
+        landerShowcaseCleanup = null;
       }
+      const scenes = buildComposeScenesFromLab(STATE.lab);
+      if (!scenes.length) {
+        el.innerHTML = '<p class="fonoran-showcase__error">No composed words available yet.</p>';
+        return;
+      }
+      landerShowcaseCleanup = mountComposeShowcase(el, {
+        scenes,
+        toScript: (spelling) => {
+          if (!STATE.rules) return '';
+          const compound = STATE.lab?.compounds?.find((c) => c.spelling === spelling);
+          const parts = compound ? compoundSpeakParts(compound) : [spelling];
+          return romanToFonoraScript(parts, STATE.rules).phrase ?? '';
+        },
+      });
     }
 
     function buildHealthWarningLi(w) {
@@ -2203,7 +2209,7 @@
 
       const buttonHtml = showFullReportButton
         ? `<div class="lander-health__actions lander-health__actions--in-panel">
-          <button type="button" class="btn btn-primary" id="lander-health-open">View full health report</button>
+          <button type="button" class="btn btn--primary" id="lander-health-open">View full health report</button>
         </div>`
         : '';
 
@@ -3546,7 +3552,7 @@
             <div class="concept-editor__chips">${effectivePreview}</div>
           </div>
           <div class="concept-editor__actions">
-            <button type="submit" class="btn btn-primary" data-write>${STATE.conceptEditorIsNew ? 'Create concept' : 'Save changes'}</button>
+            <button type="submit" class="btn btn--primary" data-write>${STATE.conceptEditorIsNew ? 'Create concept' : 'Save changes'}</button>
             <button type="button" class="btn" id="ce-cancel">${STATE.conceptEditorReturnPage ? 'Cancel' : 'Discard changes'}</button>
             ${STATE.conceptEditorIsNew ? '' : `<button type="button" class="btn danger" id="ce-delete" data-write>Delete</button>`}
           </div>

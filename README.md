@@ -1,16 +1,18 @@
 # Fonora
 
-**[fonora.org](https://fonora.org)**: an open-source phonetic writing platform.
+**[fonora.org](https://fonora.org)**: an open-source research project exploring phonetic writing systems, constructed language design, and fast cross-linguistic communication.
 
-This repository contains the **Fonora script**, the **Fonoran experimental language**, and the **Language Builder Tools** used to create and evolve Fonoran, plus research documentation and interactive web apps.
+**Central hypothesis:** can a language designed from first principles be learned quickly enough that two people with no shared native language can achieve practical communication after only a short period of study?
 
-See **[docs/platform-overview.md](docs/platform-overview.md)** for the full platform map and architecture diagram.
+This repository contains the **Fonora script**, the **Fonoran experimental language**, builder tools, a public research notebook, and interactive web apps.
+
+See **[docs/platform-overview.md](docs/platform-overview.md)** for the full platform map.
 
 ## Three layers
 
-### 1. Fonora: the script
+### 1. Fonora Script
 
-**Fonora** is a phonetic **writing system** built from nine core symbols that represent where and how speech sounds are produced. It is not a spoken language, it is the script used to write pronunciation.
+**Fonora** is a phonetic **writing system** built from nine core symbols that represent where and how speech sounds are produced. It is not a spoken language — it is the script used to write pronunciation.
 
 ```
 Text → eSpeak NG → IPA → ipa-normalize.js → encodeSounds() → Fonora symbols
@@ -18,48 +20,50 @@ Text → eSpeak NG → IPA → ipa-normalize.js → encodeSounds() → Fonora sy
 
 Rules version: **v3** ([`docs/language-rules.md`](docs/language-rules.md), vowel grammar `⚬X`, diphthong `⚬XᵔY`).
 
-| Script tool | Purpose |
+| Tool | Route |
 | --- | --- |
-| [Sound Grid](https://fonora.org/#grid) | Place × manner reference |
-| [Alphabet](https://fonora.org/#alphabet) | Primary symbols + phoneme inventory |
-| [Translator](https://fonora.org/#translator) | Text → IPA → Fonora |
-| [Reader](https://fonora.org/#reader) | Neural TTS from Fonora |
-| [Breakdown](https://fonora.org/#breakdown) | Per-word phonetic analysis |
-| [Samples](https://fonora.org/#samples) | Multilingual paragraph demos |
-| [Quiz](https://fonora.org/#quiz) | Decode / construct practice |
+| [Sound Grid](https://fonora.org/script#grid) | Place × manner reference |
+| [Alphabet](https://fonora.org/script#alphabet) | Primary symbols + phoneme inventory |
+| [Transliterate](https://fonora.org/script#translator) | Text → IPA → Fonora |
+| [Breakdown](https://fonora.org/learn#breakdown) | Per-word phonetic analysis |
+| [Samples](https://fonora.org/learn#listening) | Multilingual paragraph demos |
+| [Quiz](https://fonora.org/learn#reading) | Decode / construct practice |
+| [Spelling practice](https://fonora.org/learn#writing) | Type words in Fonora script |
 
-Docs: [language-rules.md](docs/language-rules.md) · [multilingual-support.md](docs/multilingual-support.md) · [IPA pipeline report](docs/IPA-PIPELINE-REPORT.md)
+Docs: [language-rules.md](docs/language-rules.md) · [multilingual-support.md](docs/multilingual-support.md)
 
-### 2. Fonoran: the language
+### 2. Fonoran
 
-**Fonoran** is an **experimental constructed language** built using Fonora. It has primitive root syllables, compound words, English meanings, derivation trees, and a semantic coordinate system (DDA).
+**Fonoran** is an **experimental constructed language** built on Fonora Script. Success is measured by recoverable meaning: can root-knowers understand each other's invented expressions?
 
-| Language asset | Purpose |
+| Asset | Route |
 | --- | --- |
-| [Language builder](/fonoran/) | Create, review, and explore vocabulary |
-| [Dictionary](/fonoran/#dictionary) | Browse roots and compounds |
-| [fonoran.md](docs/fonoran.md) | **Start here** — guide, pipeline, API |
-| Live data | `data/fonoran-sound-bucket.json` (your vocabulary) |
+| [Language app](https://fonora.org/language) | About, Translator, Dictionary, Grammar |
+| [Puzzle Conversation](https://fonora.org/language#puzzle) | Guess-the-meaning playtests |
+| [fonoran.md](docs/fonoran.md) | Guide, pipeline, API |
+| [Constitution](docs/fonoran-constitution.md) | Philosophy and campfire test |
 
-### 3. Language Builder Tools
+Live vocabulary: `data/fonoran-sound-bucket.json` (local runtime; gitignored).
 
-The **Language Builder Tools** at [`/fonoran/`](fonoran/) are the suite used to **create, review, test, and explore** Fonoran.
+### 3. Tools and research
 
-| Builder tool | Purpose |
+| Area | Route |
 | --- | --- |
-| [Review](fonoran/#review) | Approve roots and words (Root queue · Roots · Words · Generated) |
-| [Word Creator](fonoran/#create) | Stack roots and approved words |
-| [Root Creator](fonoran/#roots) | Create primitive syllables (CV / CVC) |
-| [Concept Editor](fonoran/#concepts) | Edit concepts, aliases, spellings |
-| [Dictionary](fonoran/#dictionary) | Derivation trees and family graphs |
-| [Health / Advanced](fonoran/#health) | Scores, Run DDA, import build |
+| [Learn](https://fonora.org/learn) | Public script practice |
+| [Tools](https://fonora.org/tools) | QA and builder utilities (sign-in when OAuth configured) |
+| [Research notebook](https://fonora.org/research) | RN-01 through RN-17 experiment write-ups |
 
-CLI: `npm run fonoran:build`, `fonoran:root-candidates`, `fonoran:reset`. See [docs/fonoran.md](docs/fonoran.md#pipeline).
+CLI: `npm run fonoran:build`, `fonoran:root-candidates`. See [docs/fonoran.md](docs/fonoran.md#pipeline).
 
 ## Live site
 
-**https://fonora.org**: main script app  
-**https://fonora.org/fonoran/**: language builder
+- **https://fonora.org** — platform home
+- **https://fonora.org/script** — Fonora Script
+- **https://fonora.org/language** — Fonoran language app
+- **https://fonora.org/learn** — learner exercises
+- **https://fonora.org/research** — research notebook
+
+(`/fonoran/` redirects to `/language`.)
 
 ## Development
 
@@ -72,60 +76,19 @@ npm install
 npm start
 ```
 
-Open [http://localhost:8000](http://localhost:8000) (script app) and [http://localhost:8000/fonoran/](http://localhost:8000/fonoran/) (builder).
-
-Browsers block `fetch()` and WASM when opening HTML directly (`file://`). Always use the HTTP server.
+Open [http://localhost:8000](http://localhost:8000). Browsers block `fetch()` and WASM over `file://` — always use the HTTP server.
 
 ### Deploy
 
-Production uses the included Node static server (`npm start`). See **[docs/deploy.md](docs/deploy.md)** for Heroku setup, PostgreSQL, custom domain (`fonora.org`), and hosting notes.
-
-Quick Heroku deploy:
-
-```bash
-heroku create
-git push heroku main
-```
-
-### Editing rules
-
-Edit [`docs/language-rules.md`](docs/language-rules.md) and reload the browser. Changes to symbols, keyboard mappings, sounds, and grid cells update automatically.
+See [docs/deploy.md](docs/deploy.md).
 
 ### Tests
 
 ```bash
-npm test                              # unit/integration assertions
-npm run test:vowels                   # vowel readability report → reports/
-npm run test:minimal-pairs            # minimal-pair distinctness report → reports/
-npm run audit:collisions              # collision audit → docs/FONORA_COLLISION_AUDIT.md
-npm run test:pronunciation-validation # IPA round-trip batch report → reports/
-npm run fonoran:import                # import local JSON bucket → PostgreSQL (if configured)
-npm run fonoran:export                # export PostgreSQL bucket → JSON backup
+npm test
+npm run fonoran:build
 ```
-
-| Command | UI equivalent |
-| --- | --- |
-| `npm test` | Append `?test` to the app URL (browser console) |
-| `npm run test:pronunciation-validation` | Pronunciation Validation tab |
-
-### Contributing
-
-Contributions welcome, see [CONTRIBUTING.md](CONTRIBUTING.md). Fonoran vocabulary proposals use a Google Form (see [docs/fonoran-auth-and-release.md](docs/fonoran-auth-and-release.md)). Full documentation index: [docs/README.md](docs/README.md).
 
 ## License
 
-[MIT](LICENSE), Copyright (c) 2026 James Calhoun.
-
-| Component | License |
-| --- | --- |
-| Fonora (this repo) | [MIT](LICENSE) |
-| eSpeak NG (IPA WASM) | GPL-3.0-or-later — [details](docs/espeak-integration.md) |
-| WordNet, Piper, Mermaid, etc. | [third-party.md](docs/third-party.md) |
-
-Full attribution list: **[docs/third-party.md](docs/third-party.md)**.
-
-## Links
-
-- Website: https://fonora.org
-- Repository: https://github.com/jamesc137/fonora
-- Issues: https://github.com/jamesc137/fonora/issues
+MIT — see [LICENSE](LICENSE).

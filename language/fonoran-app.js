@@ -5,8 +5,12 @@
     import { speakFonoraPhrase, cancelSpeech } from '../js/fonora-tts.js';
     import { primeAudioContext } from '../js/espeak-audio.js';
     import { initUniversalNav, setActiveTab, setFonoranUndoDisabled, setFonoranAuth, setNavSelectHandlers } from '../js/universal-nav.js';
+    import { mountSiteFooter } from '../js/site-footer.js';
+    import { createPuzzlePage } from './pages/puzzle-page.js';
+    import { buildComposeScenesFromLab, mountComposeShowcase } from './compose-showcase.js';
     import { bindModalDismiss, setModalBackdropOpen } from '../js/modal-dismiss.js';
     import { extractMarkdownHeadings, normalizeGrammarSource, renderMarkdown } from '../js/markdown-render.js';
+    import { getStoredTheme } from '../js/theme.js';
 
     const AUTH = {
       required: false,
@@ -4401,11 +4405,12 @@
     /* ---------- GRAMMAR SPEC ---------- */
     const GRAMMAR_DOC_PATH = '../docs/fonoran-grammar.md';
     let grammarLoadToken = 0;
+    let grammarMarkdownCache = null;
 
     async function renderGrammarMermaidIn(rootEl) {
       if (!window.mermaid || !rootEl) return;
-      const { MERMAID_INIT } = await import('../js/mermaid-theme.js');
-      window.mermaid.initialize(MERMAID_INIT);
+      const { getMermaidInit } = await import('../js/mermaid-theme.js');
+      window.mermaid.initialize(getMermaidInit());
       await new Promise((resolve) => requestAnimationFrame(resolve));
       await window.mermaid.run({ nodes: rootEl.querySelectorAll('.mermaid') });
       const { initMermaidPanZoomIn } = await import('../js/mermaid-pan-zoom.js');
@@ -4457,6 +4462,13 @@
         body.innerHTML = `<p class="empty">${escapeHtml(e.message)}</p>`;
         if (toc) toc.innerHTML = '';
       }
+    }
+
+    function refreshGrammarTheme() {
+      const body = $('grammar-body');
+      if (!body || !grammarMarkdownCache || STATE.page !== 'grammar') return;
+      body.innerHTML = renderMarkdown(grammarMarkdownCache, { docPath: 'docs/fonoran-grammar.md', grammar: true });
+      void renderGrammarMermaidIn(body);
     }
 
     /* ---------- HEALTH + TIMELINE ---------- */
@@ -5241,6 +5253,10 @@
       });
       wireLander();
       window.addEventListener('resize', syncSplitStickyOffsets);
+      document.addEventListener('fonora-themechange', refreshGrammarTheme);
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        if (getStoredTheme() === 'system') refreshGrammarTheme();
+      });
       await load();
       syncSplitStickyOffsets();
     }

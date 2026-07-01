@@ -1119,7 +1119,7 @@ code {
   margin: 0;
   font-size: 0.85rem;
   line-height: 1.5;
-  color: #6b7280;
+  color: var(--color-text-subtle);
 }
 
 .site-footer-links {
@@ -1127,12 +1127,12 @@ code {
 }
 
 .site-footer a {
-  color: #4b5563;
+  color: var(--color-link);
   text-decoration: none;
 }
 
 .site-footer a:hover {
-  color: #2563eb;
+  color: var(--color-link-hover);
   text-decoration: underline;
 }
 

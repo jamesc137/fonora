@@ -1037,4 +1037,5 @@ function bootstrapShell() {
 }
 
 bootstrapShell();
+mountSiteFooter();
 initApp();

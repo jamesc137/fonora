@@ -5231,6 +5231,7 @@
       onPage: (page) => switchPage(page),
       onSignOut: () => { signOut(); },
     });
+    mountSiteFooter();
     initUniversalNav({ context: 'language', activeTab: initialPage });
     document.querySelectorAll('.page').forEach((p) => p.classList.remove('active'));
     $(`page-${initialPage}`)?.classList.add('active');

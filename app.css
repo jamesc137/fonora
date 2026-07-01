@@ -532,7 +532,6 @@ html[data-fonora-nav='language'] .platform-tab[data-nav-tab='language'],
   color: var(--color-heading);
   background: var(--layout-surface);
   border-color: var(--layout-border);
-  padding-bottom: calc(0.6rem + 1px);
   pointer-events: none;
 }
 
@@ -704,7 +703,7 @@ html[data-fonora-tools-nav='hidden'] .platform-tab[data-nav-tab='tools'] {
 .platform-tab {
   display: inline-block;
   position: relative;
-  padding: 0.55rem 1.15rem 0.6rem;
+  padding: 0.55rem 1.15rem calc(0.6rem + 1px);
   border: 1px solid transparent;
   border-bottom: none;
   border-radius: 7px 7px 0 0;
@@ -727,7 +726,6 @@ html[data-fonora-tools-nav='hidden'] .platform-tab[data-nav-tab='tools'] {
   color: var(--color-heading);
   background: var(--layout-surface);
   border-color: var(--layout-border);
-  padding-bottom: calc(0.6rem + 1px);
 }
 
 .app-header__global {

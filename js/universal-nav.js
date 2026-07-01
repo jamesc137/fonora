@@ -97,7 +97,7 @@ const PLATFORM_TABS = [
 ];
 
 const PLATFORM_TITLES = {
-  platform: 'Phonetic Writing Platform',
+  platform: PLATFORM_PAGE_TITLE,
   research: 'Research Notebook',
   timeline: 'Research Timeline',
   open: 'Open Questions',
@@ -293,26 +293,25 @@ function renderToolsRow2(activeTab) {
 function updateDocumentTitle() {
   if (state.context === 'platform') {
     if (state.activeTab === 'docs') {
-      document.title = 'Fonora | Docs';
+      document.title = pageTitle('Docs');
     } else if (state.activeTab === 'platform') {
-      document.title = 'Fonora | Phonetic Writing Platform';
+      document.title = PLATFORM_HOME_TITLE;
     } else {
-      const label = PLATFORM_TITLES[state.activeTab] ?? 'Fonora';
-      document.title =
-        state.activeTab === 'research' ? 'Fonora | Research Notebook' : `Fonora | ${label}`;
+      const label = PLATFORM_TITLES[state.activeTab] ?? SITE_NAME;
+      document.title = pageTitle(label);
     }
   } else if (state.context === 'script') {
-    const label = SCRIPT_TITLES[state.activeTab] ?? 'Fonora';
-    document.title = state.activeTab === 'home' ? 'Fonora Script | Phonetic Writing' : `Fonora Script | ${label}`;
+    const label = SCRIPT_TITLES[state.activeTab] ?? 'Script';
+    document.title = pageTitle(state.activeTab === 'home' ? 'Fonora Script' : `Fonora Script · ${label}`);
   } else if (state.context === 'learn') {
     const label = LEARN_TITLES[state.activeTab] ?? 'Learn';
-    document.title = `Fonora Learn | ${label}`;
+    document.title = pageTitle(`Learn · ${label}`);
   } else if (state.context === 'tools') {
     const label = TOOLS_TITLES[state.activeTab] ?? 'Tools';
-    document.title = state.activeTab === 'tools-home' ? 'Fonora Tools | Home' : `Fonora Tools | ${label}`;
+    document.title = pageTitle(state.activeTab === 'tools-home' ? 'Tools' : `Tools · ${label}`);
   } else {
-    const label = BUILDER_TITLES[state.activeTab] ?? 'Language Builder';
-    document.title = state.activeTab === 'home' ? 'Language Builder | Fonoran' : `Language Builder | ${label}`;
+    const label = BUILDER_TITLES[state.activeTab] ?? 'Fonoran';
+    document.title = pageTitle(state.activeTab === 'home' ? 'Fonoran' : `Fonoran · ${label}`);
   }
 }
 

@@ -2,14 +2,29 @@ import { escapeHtml } from './utils.js';
 
 /**
  * @param {string} mermaidSource
- * @param {{ wheelZoom?: boolean, variant?: 'diagram' | 'default' }} [options]
+ * @param {{ wheelZoom?: boolean, variant?: 'diagram' | 'default', toolbar?: boolean, hint?: string }} [options]
  */
-export function buildMermaidPanZoomHtml(mermaidSource, { wheelZoom = true, variant = 'default' } = {}) {
+export function buildMermaidPanZoomHtml(mermaidSource, {
+  wheelZoom = true,
+  variant = 'default',
+  toolbar = false,
+  hint = 'Drag to pan · Ctrl or ⌘ scroll to zoom',
+} = {}) {
   if (!mermaidSource) return '';
   const wheelAttr = wheelZoom ? '' : ' data-wheel-zoom="false"';
   const variantClass = variant === 'diagram' ? ' mermaid-pan-zoom--diagram' : '';
+  const toolbarHtml = toolbar
+    ? `<div class="mermaid-pan-zoom__toolbar" aria-label="Graph zoom controls">
+        <button type="button" class="mermaid-pan-zoom__btn" data-mermaid-zoom-out aria-label="Zoom out">−</button>
+        <button type="button" class="mermaid-pan-zoom__btn" data-mermaid-zoom-reset aria-label="Reset view">Fit</button>
+        <button type="button" class="mermaid-pan-zoom__btn" data-mermaid-zoom-in aria-label="Zoom in">+</button>
+      </div>`
+    : '';
   return `<div class="mermaid-pan-zoom${variantClass}"${wheelAttr}>
-    <p class="mermaid-pan-zoom__hint">Ctrl or ⌘ + scroll to zoom</p>
+    <div class="mermaid-pan-zoom__chrome">
+      <p class="mermaid-pan-zoom__hint">${hint}</p>
+      ${toolbarHtml}
+    </div>
     <div class="mermaid-pan-zoom__viewport is-loading">
       <div class="mermaid-pan-zoom__stage">
         <div class="mermaid-wrap"><div class="mermaid">${escapeHtml(mermaidSource)}</div></div>
@@ -20,7 +35,7 @@ export function buildMermaidPanZoomHtml(mermaidSource, { wheelZoom = true, varia
 
 /**
  * @param {Element} panZoomEl
- * @param {{ fitMode?: 'diagram' | 'all' }} [options]
+ * @param {{ fitMode?: 'diagram' | 'all' | 'height' | 'timeline', fitPadding?: number, maxInitialScale?: number, initialZoomSteps?: number, zoomStep?: number, anchor?: 'start' | 'center', anchorX?: 'start' | 'center', anchorY?: 'start' | 'center', edgePadding?: number }} [options]
  */
 export function initMermaidPanZoom(panZoomEl, options = {}) {
   if (!panZoomEl || panZoomEl.dataset.panZoomReady === '1') return;
@@ -42,8 +57,12 @@ export function initMermaidPanZoom(panZoomEl, options = {}) {
   let fitAttempts = 0;
   const minScale = 0.25;
   const maxScale = 5;
-  const maxFitScale = fitMode === 'diagram' ? 4 : 2;
-  const fitPadding = fitMode === 'diagram' ? 1.04 : 1.14;
+  const maxFitScale = fitMode === 'height' || fitMode === 'diagram' ? 4 : 2;
+  const fitPadding = options.fitPadding ?? (fitMode === 'diagram' ? 1.04 : 1.14);
+  const heightFitPadding = 0.92;
+  const maxInitialScale = options.maxInitialScale ?? 1;
+  const zoomStep = options.zoomStep ?? 1.2;
+  const edgePadding = options.edgePadding ?? 28;
 
   const apply = () => {
     stage.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
@@ -90,13 +109,35 @@ export function initMermaidPanZoom(panZoomEl, options = {}) {
     if (!vp.width || !vp.height || !normalizeSvgSize()) return;
     const box = contentBox();
     if (!boxSize(box)) return;
-    scale = Math.min(
-      vp.width / (box.width * fitPadding),
-      vp.height / (box.height * fitPadding),
-      maxFitScale,
-    );
-    scale = Math.max(scale, minScale);
-    centerOn(box, scale);
+    if (fitMode === 'height') {
+      scale = Math.min(vp.height / (box.height * heightFitPadding), maxFitScale);
+      scale = Math.max(scale, minScale);
+      panX = 20 - box.x * scale;
+      panY = (vp.height - box.height * scale) / 2 - box.y * scale;
+    } else if (fitMode === 'timeline') {
+      const widthScale = vp.width / (box.width * fitPadding);
+      const heightScale = vp.height / (box.height * fitPadding);
+      let baseScale = Math.min(widthScale, heightScale, maxInitialScale);
+      baseScale = Math.max(baseScale, minScale);
+      const zoomSteps = options.initialZoomSteps ?? 0;
+      scale = Math.min(maxScale, baseScale * zoomStep ** zoomSteps);
+      const anchorX = options.anchorX ?? (options.anchor === 'start' ? 'start' : 'center');
+      const anchorY = options.anchorY ?? 'center';
+      panX = anchorX === 'start'
+        ? edgePadding - box.x * scale
+        : (vp.width - box.width * scale) / 2 - box.x * scale;
+      panY = anchorY === 'start'
+        ? edgePadding - box.y * scale
+        : (vp.height - box.height * scale) / 2 - box.y * scale;
+    } else {
+      scale = Math.min(
+        vp.width / (box.width * fitPadding),
+        vp.height / (box.height * fitPadding),
+        maxFitScale,
+      );
+      scale = Math.max(scale, minScale);
+      centerOn(box, scale);
+    }
     apply();
   };
 
@@ -138,6 +179,19 @@ export function initMermaidPanZoom(panZoomEl, options = {}) {
     apply();
   };
 
+  panZoomEl.querySelector('[data-mermaid-zoom-in]')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    zoomBy(1.2);
+  });
+  panZoomEl.querySelector('[data-mermaid-zoom-out]')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    zoomBy(1 / 1.2);
+  });
+  panZoomEl.querySelector('[data-mermaid-zoom-reset]')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    fitAll();
+  });
+
   if (panZoomEl.dataset.wheelZoom !== 'false') {
     viewport.addEventListener(
       'wheel',
@@ -160,6 +214,7 @@ export function initMermaidPanZoom(panZoomEl, options = {}) {
 
   const onPointerDown = (e) => {
     if (e.button != null && e.button !== 0) return;
+    if (e.target.closest('.mermaid-pan-zoom__btn')) return;
     dragging = true;
     pointerId = e.pointerId;
     viewport.setPointerCapture(pointerId);
@@ -194,7 +249,7 @@ export function initMermaidPanZoom(panZoomEl, options = {}) {
 
 /**
  * @param {ParentNode | null | undefined} rootEl
- * @param {{ fitMode?: 'diagram' | 'all' }} [options]
+ * @param {{ fitMode?: 'diagram' | 'all' | 'height' | 'timeline', fitPadding?: number, maxInitialScale?: number, initialZoomSteps?: number, zoomStep?: number, anchor?: 'start' | 'center', anchorX?: 'start' | 'center', anchorY?: 'start' | 'center', edgePadding?: number }} [options]
  */
 export function initMermaidPanZoomIn(rootEl, options = {}) {
   if (!rootEl) return;

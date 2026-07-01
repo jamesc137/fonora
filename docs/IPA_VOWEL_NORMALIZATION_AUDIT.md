@@ -1,4 +1,6 @@
 # IPA Vowel Normalization Audit
+> **Now a research note.** This document is preserved as a primary source. Related narrative in the research notebook: [RN-02 · Teaching the machine to hear](/research/notes/ipa-pipeline).
+
 
 Generated: 2026-06-22T04:28:01.368Z
 Dialect: en-us

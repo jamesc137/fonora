@@ -1,4 +1,6 @@
 # IPA Pipeline Implementation Report
+> **Now a research note.** This document is preserved as a primary source. Related narrative in the research notebook: [RN-02 · Teaching the machine to hear](/research/notes/ipa-pipeline).
+
 
 ## Architecture
 

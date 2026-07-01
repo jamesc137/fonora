@@ -1,4 +1,6 @@
 # Fonora Collision Audit
+> **Now a research note.** This document is preserved as a primary source. Related narrative in the research notebook: [RN-06 · Hunting ambiguity in the script](/research/notes/collision-audit).
+
 
 Generated: 2026-06-22T20:11:04.283Z
 Rules version: v3

@@ -1,4 +1,6 @@
 # Deployment
+> **Research notebook.** Operational docs for the open research project live alongside the [Research notebook](/research).
+
 
 Fonora is a **browser-based single-page app** with WASM dependencies. It is not a traditional API backend, but it **does need an HTTP server** in production, not because of server-side logic, but because:
 

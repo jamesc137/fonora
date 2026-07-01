@@ -1,4 +1,6 @@
 # Fonoran primitive roots — generation report
+> **Now a research note.** This document is preserved as a primary source. Related narrative in the research notebook: [RN-10 · Optimal sounds, wrong premise](/research/notes/huffman-roots).
+
 
 > **Status:** experimental · generated 2026-06-27 · **not committed as canonical**
 >

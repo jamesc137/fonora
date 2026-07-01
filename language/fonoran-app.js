@@ -184,6 +184,8 @@
 
     let landerShowcaseWord = null;
     let landerShowcaseToken = 0;
+    /** @type {(() => void) | null} */
+    let landerShowcaseCleanup = null;
 
     const LANDER_SHOWCASE_SPELLING = 'shakafa';
 

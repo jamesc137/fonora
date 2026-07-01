@@ -1,4 +1,6 @@
 # Interpretive Translator
+> **Now a research note.** This document is preserved as a primary source. Related narrative in the research notebook: [RN-15 · Compiling English into meaning](/research/notes/interpretive-translator).
+
 
 > **Status**: Active. Compiles English into **nearest approved Fonoran concepts** — not word-for-word glosses.
 

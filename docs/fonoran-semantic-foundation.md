@@ -1,4 +1,6 @@
 # Fonoran semantic foundation
+> **Now a research note.** This document is preserved as a primary source. Related narrative in the research notebook: [RN-11 · The irreducible dimensions of meaning](/research/notes/semantic-foundation).
+
 
 > **Status:** proposal v1.2 · **Superseded for phonetics** by [fonoran.md](fonoran.md) · Semantic inventory remains reference for compounds
 

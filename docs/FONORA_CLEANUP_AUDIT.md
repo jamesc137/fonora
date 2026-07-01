@@ -1,4 +1,6 @@
 # Fonora Language System Cleanup Audit
+> **Now a research note.** This document is preserved as a primary source. Related narrative in the research notebook: [RN-06 · Hunting ambiguity in the script](/research/notes/collision-audit).
+
 
 > **Post-cleanup addendum (June 2026)**: UI and pipeline changes after this audit:
 >

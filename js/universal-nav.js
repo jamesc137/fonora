@@ -4,6 +4,21 @@
  */
 
 import { docViewerHref, isDocsRoute } from './doc-urls.js';
+import { LEARN_SKILL_ORDER } from './learn-routing.js';
+import { pageTitle, PLATFORM_HOME_TITLE, PLATFORM_PAGE_TITLE, SITE_NAME } from './site-copy.js';
+import { cycleTheme, getStoredTheme } from './theme.js';
+
+const LEARN_TAB_LABELS = {
+  writing: 'Writing',
+  reading: 'Reading',
+  breakdown: 'Breakdown',
+  listening: 'Listening',
+};
+
+const LEARN_TABS = LEARN_SKILL_ORDER.map((id) => ({
+  id,
+  label: LEARN_TAB_LABELS[id] ?? id,
+}));
 
 const SCRIPT_TABS = [
   { id: 'home', label: 'About', primary: true },
@@ -145,16 +160,23 @@ function platformTabHref(_context, tabId) {
   return '/language';
 }
 
+function renderThemeToggle() {
+  const theme = getStoredTheme();
+  const label = theme === 'dark' ? 'Dark' : theme === 'light' ? 'Light' : 'Auto';
+  return `<button type="button" class="app-header__theme-btn" id="fonora-theme-toggle" title="Theme (${label})">${label}</button>`;
+}
+
 function renderGlobalAuthTools() {
-  if (!fonoranAuthState?.configured) return '';
+  const themeBtn = renderThemeToggle();
+  if (!fonoranAuthState?.configured) return themeBtn;
   if (fonoranAuthState.authenticated) {
     const email = escapeAttr(fonoranAuthState.email ?? 'Signed in');
-    return `
+    return `${themeBtn}
         <span class="fonoran-auth-user" title="${email}">${escapeHtml(fonoranAuthState.email ?? 'Signed in')}</span>
         <button type="button" class="app-header__sign-out-btn" id="fonoran-sign-out">Sign out</button>`;
   }
   const loginUrl = escapeAttr(fonoranAuthState.loginUrl);
-  return `<a href="${loginUrl}" class="app-header__global-link">Sign in</a>`;
+  return `${themeBtn}<a href="${loginUrl}" class="app-header__global-link">Sign in</a>`;
 }
 
 function renderPlatformTabs(context) {
@@ -313,6 +335,21 @@ function syncBootAttributes() {
   html.removeAttribute('data-fonora-page');
 }
 
+function wireThemeToggle(authSlot) {
+  authSlot.querySelector('#fonora-theme-toggle')?.addEventListener('click', () => {
+    cycleTheme();
+    authSlot.innerHTML = renderGlobalAuthTools();
+    wireThemeToggle(authSlot);
+  });
+}
+
+function patchAuthSlot(root) {
+  const authSlot = root.querySelector('[data-nav-auth]');
+  if (!authSlot) return;
+  authSlot.innerHTML = renderGlobalAuthTools();
+  wireThemeToggle(authSlot);
+}
+
 function patchStaticNav(root) {
   root.className = `app-header app-header--${state.context}`;
 
@@ -360,11 +397,7 @@ function patchStaticNav(root) {
     else el.removeAttribute('aria-current');
   });
 
-  const authSlot = root.querySelector('[data-nav-auth]');
-  if (authSlot) {
-    authSlot.innerHTML = renderGlobalAuthTools();
-  }
-
+  patchAuthSlot(root);
   syncBootAttributes();
 }
 
@@ -391,6 +424,7 @@ function render() {
 
     root.className = `app-header ${contextClass}`;
     root.innerHTML = `${renderRow1(state.context)}${row2}`;
+    patchAuthSlot(root);
   }
 
   updateDocumentTitle();

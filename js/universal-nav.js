@@ -6,69 +6,44 @@
 import { docViewerHref, isDocsRoute } from './doc-urls.js';
 
 const SCRIPT_TABS = [
-  { id: 'home', label: 'Home', primary: true },
+  { id: 'home', label: 'About', primary: true },
   { id: 'translator', label: 'Transliterate', primary: true },
   { id: 'alphabet', label: 'Alphabet', primary: true },
   { id: 'grid', label: 'Sound Grid', primary: true },
 ];
 
-const MORE_MENU = [
-  { type: 'label', text: 'Transliteration' },
-  { id: 'breakdown', label: 'Breakdown' },
-  { id: 'samples', label: 'Samples' },
-  { id: 'keyboard', label: 'Keyboard Testing' },
-  { id: 'spelling-practice', label: 'Spelling Practice' },
-  { id: 'reverse', label: 'Reverse Lookup' },
-  { type: 'label', text: 'Script QA' },
-  { id: 'symbols', label: 'Symbols' },
-  { id: 'quiz', label: 'Quiz' },
-  { id: 'encoder-testing', label: 'Pronunciation Testing' },
-  { id: 'pronunciation-validation', label: 'Pronunciation Validation' },
-];
-
-const FONORAN_TABS = [
-  { id: 'home', label: 'Home' },
+// "Builder" = the /language vocabulary-building lab for Fonoran.
+const BUILDER_TABS = [
+  { id: 'home', label: 'About' },
   { id: 'translator', label: 'Translator' },
   { id: 'dictionary', label: 'Dictionary' },
   { id: 'grammar', label: 'Grammar' },
 ];
 
-const FONORAN_MORE_MENU = [
-  { type: 'label', text: 'Experiment' },
-  { id: 'puzzle', label: 'Puzzle Conversation' },
-  { type: 'label', text: 'Vocabulary' },
-  { id: 'roots', label: 'Root Creator' },
-  { id: 'create', label: 'Word Creator' },
-  { id: 'concepts', label: 'Concept Editor' },
-  { type: 'label', text: 'Review' },
-  { id: 'review', label: 'Review' },
-  { type: 'label', text: 'Tools' },
-  { id: 'health', label: 'Health' },
-  { id: 'gaps', label: 'Translation Test' },
-  { id: 'progress', label: 'Lab progress' },
-  { id: 'advanced', label: 'Advanced' },
+const LEARN_TABS = [
+  { id: 'writing', label: 'Writing' },
+  { id: 'reading', label: 'Reading' },
+  { id: 'speaking', label: 'Speaking' },
+  { id: 'listening', label: 'Listening' },
 ];
 
+const LEARN_TITLES = {
+  writing: 'Writing',
+  reading: 'Reading',
+  speaking: 'Speaking',
+  listening: 'Listening',
+};
+
 const SCRIPT_TITLES = {
-  home: 'Home',
+  home: 'About',
   translator: 'Transliterate',
   grid: 'Sound Grid',
   alphabet: 'Alphabet',
-  breakdown: 'Breakdown',
-  samples: 'Samples',
-  keyboard: 'Keyboard Testing',
-  'spelling-practice': 'Spelling Practice',
-  reverse: 'Reverse Lookup',
-  symbols: 'Symbols',
-  quiz: 'Quiz',
-  'encoder-testing': 'Pronunciation Testing',
-  'pronunciation-validation': 'Pronunciation Validation',
-  'open-problems': 'Open Problems',
   docs: 'Documentation',
 };
 
-const FONORAN_TITLES = {
-  home: 'About Fonoran',
+const BUILDER_TITLES = {
+  home: 'About',
   'root-review': 'Root Review',
   concepts: 'Concept Editor',
   translator: 'Translator',
@@ -84,16 +59,33 @@ const FONORAN_TITLES = {
   advanced: 'Advanced',
 };
 
-const MORE_TAB_IDS = new Set(MORE_MENU.filter((i) => i.id).map((i) => i.id));
-const FONORAN_MORE_IDS = new Set(FONORAN_MORE_MENU.filter((i) => i.id).map((i) => i.id));
+const TOOLS_TITLES = {
+  'tools-home': 'Tools',
+  keyboard: 'Keyboard Testing',
+  reverse: 'Reverse Lookup',
+  symbols: 'Symbols',
+  'encoder-testing': 'Pronunciation Testing',
+  'pronunciation-validation': 'Pronunciation Validation',
+};
 
 const PLATFORM_TABS = [
   { id: 'platform', label: 'About' },
-  { id: 'open-problems', label: 'Research' },
+  { id: 'research', label: 'Research', href: '/research' },
+  { id: 'timeline', label: 'Timeline', href: '/research/timeline' },
+  { id: 'open', label: 'Open Questions', href: '/research#open' },
   { id: 'docs', label: 'Docs' },
 ];
 
-/** @typedef {'platform' | 'script' | 'language'} NavContext */
+const PLATFORM_TITLES = {
+  platform: 'Phonetic Writing Platform',
+  research: 'Research Notebook',
+  timeline: 'Research Timeline',
+  open: 'Open Questions',
+  note: 'Research Note',
+  docs: 'Docs',
+};
+
+/** @typedef {'platform' | 'script' | 'language' | 'learn' | 'tools'} NavContext */
 
 let state = {
   context: /** @type {NavContext} */ ('script'),
@@ -105,6 +97,7 @@ let state = {
 let fonoranAuthState = null;
 
 function shouldHideToolsPlatformTab() {
+  // Hide until session confirms the user is signed in (avoids flashing Tools for guests).
   if (!fonoranAuthState) return true;
   if (!fonoranAuthState.toolsGated) return false;
   return !fonoranAuthState.authenticated;
@@ -136,6 +129,7 @@ function docHref(context, path) {
 function platformTabHref(_context, tabId) {
   if (tabId === 'platform') return '/';
   if (tabId === 'script') return '/script';
+  if (tabId === 'learn') return '/learn';
   if (tabId === 'tools') return '/tools';
   return '/language';
 }
@@ -157,6 +151,7 @@ function renderPlatformTabs(context) {
     { id: 'platform', label: 'Fonora' },
     { id: 'script', label: 'Script' },
     { id: 'language', label: 'Language' },
+    { id: 'learn', label: 'Learn' },
     { id: 'tools', label: 'Tools' },
   ];
 
@@ -188,9 +183,12 @@ function renderRow1(context) {
 function renderPlatformRow2(activeTab) {
   const tabs = PLATFORM_TABS.map((t) => {
     const active = t.id === activeTab;
-    return `<button type="button" class="tab-btn${active ? ' tab-btn--active' : ''}" data-platform-tab="${t.id}"${
-      active ? ' aria-current="page"' : ''
-    }>${t.label}</button>`;
+    const cls = `tab-btn${active ? ' tab-btn--active' : ''}`;
+    const activeAttr = active ? ' aria-current="page"' : '';
+    if (t.href) {
+      return `<a href="${escapeAttr(t.href)}" class="${cls}" data-platform-tab="${t.id}"${activeAttr}>${t.label}</a>`;
+    }
+    return `<button type="button" class="${cls}" data-platform-tab="${t.id}"${activeAttr}>${t.label}</button>`;
   }).join('');
 
   return `
@@ -209,96 +207,69 @@ function renderScriptRow2(activeTab) {
       }>${t.label}</button>`,
   ).join('');
 
-  const moreItems = MORE_MENU.map((item) => {
-    if (item.type === 'label') {
-      return `<p class="nav-dropdown-label" role="presentation">${item.text}</p>`;
-    }
-    const active = item.id === activeTab;
-    return `<button type="button" class="tab-btn nav-dropdown-item${active ? ' tab-btn--active' : ''}" data-tab="${item.id}" role="menuitem"${
-      active ? ' aria-current="page"' : ''
-    }>${item.label}</button>`;
-  }).join('');
-
-  const moreActive = MORE_TAB_IDS.has(activeTab);
-
   return `
     <div class="app-header__row app-header__row--tools" data-nav-row="script-tools">
       <nav class="main-nav" aria-label="Script tools">
         <div class="main-nav-primary">${primary}</div>
-        <div class="nav-dropdown${moreActive ? ' nav-dropdown--child-active' : ''}" id="nav-more">
-          <button
-            type="button"
-            class="nav-dropdown-trigger tab-btn"
-            id="nav-more-trigger"
-            aria-expanded="false"
-            aria-haspopup="true"
-            aria-controls="nav-more-menu"
-          >
-            More
-            <span class="nav-dropdown-chevron" aria-hidden="true">▾</span>
-          </button>
-          <div class="nav-dropdown-menu" id="nav-more-menu" role="menu" hidden>${moreItems}</div>
-        </div>
       </nav>
     </div>`;
 }
 
-function renderFonoranRow2(activeTab) {
-  const tabs = FONORAN_TABS.map(
+function renderBuilderRow2(activeTab) {
+  const tabs = BUILDER_TABS.map(
     (t) => `
       <button type="button" class="tab-btn${t.id === activeTab ? ' tab-btn--active' : ''}" data-fonoran-page="${t.id}"${
         t.id === activeTab ? ' aria-current="page"' : ''
       }>${t.label}</button>`,
   ).join('');
 
-  const moreActive = FONORAN_MORE_IDS.has(activeTab);
-  const moreItems = FONORAN_MORE_MENU.map((item) => {
-    if (item.type === 'label') {
-      return `<p class="nav-dropdown-label" role="presentation">${item.text}</p>`;
-    }
-    const active = item.id === activeTab;
-    return `<button type="button" class="tab-btn nav-dropdown-item${active ? ' tab-btn--active' : ''}" data-fonoran-page="${item.id}" role="menuitem"${
-      active ? ' aria-current="page"' : ''
-    }>${item.label}</button>`;
-  }).join('');
-
   return `
     <div class="app-header__row app-header__row--tools" data-nav-row="language-tools">
-      <nav class="main-nav" aria-label="Fonoran tools">
+      <nav class="main-nav" aria-label="Language">
         <div class="main-nav-primary">${tabs}</div>
-        <div class="nav-dropdown${moreActive ? ' nav-dropdown--child-active' : ''}" id="fonoran-nav-more">
-          <button
-            type="button"
-            class="nav-dropdown-trigger tab-btn"
-            id="fonoran-nav-more-trigger"
-            aria-expanded="false"
-            aria-haspopup="true"
-            aria-controls="fonoran-nav-more-menu"
-          >
-            More
-            <span class="nav-dropdown-chevron" aria-hidden="true">▾</span>
-          </button>
-          <div class="nav-dropdown-menu" id="fonoran-nav-more-menu" role="menu" hidden>${moreItems}</div>
-        </div>
+      </nav>
+    </div>`;
+}
+
+function renderLearnRow2(activeTab) {
+  const tabs = LEARN_TABS.map(
+    (t) => `
+      <button type="button" class="tab-btn${t.id === activeTab ? ' tab-btn--active' : ''}" data-learn-tab="${t.id}"${
+        t.id === activeTab ? ' aria-current="page"' : ''
+      }>${t.label}</button>`,
+  ).join('');
+
+  return `
+    <div class="app-header__row app-header__row--tools" data-nav-row="learn-tools">
+      <nav class="main-nav" aria-label="Learn">
+        <div class="main-nav-primary">${tabs}</div>
       </nav>
     </div>`;
 }
 
 function updateDocumentTitle() {
   if (state.context === 'platform') {
-    if (state.activeTab === 'open-problems') {
-      document.title = 'Fonora | Research';
-    } else if (state.activeTab === 'docs') {
+    if (state.activeTab === 'docs') {
       document.title = 'Fonora | Docs';
-    } else {
+    } else if (state.activeTab === 'platform') {
       document.title = 'Fonora | Phonetic Writing Platform';
+    } else {
+      const label = PLATFORM_TITLES[state.activeTab] ?? 'Fonora';
+      document.title =
+        state.activeTab === 'research' ? 'Fonora | Research Notebook' : `Fonora | ${label}`;
     }
   } else if (state.context === 'script') {
     const label = SCRIPT_TITLES[state.activeTab] ?? 'Fonora';
-    document.title = state.activeTab === 'home' ? 'Fonora Script | Universal Phonetic Writing' : `Fonora Script | ${label}`;
+    document.title = state.activeTab === 'home' ? 'Fonora Script | Phonetic Writing' : `Fonora Script | ${label}`;
+  } else if (state.context === 'learn') {
+    const label = LEARN_TITLES[state.activeTab] ?? 'Learn';
+    document.title = `Fonora Learn | ${label}`;
+  } else if (state.context === 'tools') {
+    const label = TOOLS_TITLES[state.activeTab] ?? 'Tools';
+    document.title = state.activeTab === 'tools-home' ? 'Fonora Tools | Home' : `Fonora Tools | ${label}`;
   } else {
-    const label = FONORAN_TITLES[state.activeTab] ?? 'Fonoran';
-    document.title = state.activeTab === 'home' ? 'Fonoran | Experimental Language' : `Fonoran | ${label}`;
+    const label = BUILDER_TITLES[state.activeTab] ?? 'Language Builder';
+    document.title = state.activeTab === 'home' ? 'Language Builder | Fonoran' : `Language Builder | ${label}`;
   }
 }
 
@@ -315,25 +286,8 @@ function syncBootAttributes() {
   html.removeAttribute('data-fonora-page');
 }
 
-function syncStaticMoreMenu(root) {
-  const menu = root.querySelector('#nav-more-menu');
-  if (!menu) return;
-
-  menu.innerHTML = MORE_MENU.map((item) => {
-    if (item.type === 'label') {
-      return `<p class="nav-dropdown-label" role="presentation">${escapeHtml(item.text)}</p>`;
-    }
-    const active = item.id === state.activeTab;
-    return `<button type="button" class="tab-btn nav-dropdown-item${active ? ' tab-btn--active' : ''}" data-tab="${escapeAttr(item.id)}" role="menuitem"${
-      active ? ' aria-current="page"' : ''
-    }>${escapeHtml(item.label)}</button>`;
-  }).join('');
-}
-
 function patchStaticNav(root) {
   root.className = `app-header app-header--${state.context}`;
-
-  syncStaticMoreMenu(root);
 
   root.querySelectorAll('[data-nav-tab]').forEach((el) => {
     const hideTools = el.dataset.navTab === 'tools' && shouldHideToolsPlatformTab();
@@ -372,15 +326,12 @@ function patchStaticNav(root) {
     else el.removeAttribute('aria-current');
   });
 
-  const moreDropdown = root.querySelector('#nav-more');
-  if (moreDropdown) {
-    moreDropdown.classList.toggle('nav-dropdown--child-active', MORE_TAB_IDS.has(state.activeTab));
-  }
-
-  const fonoranMore = root.querySelector('#fonoran-nav-more');
-  if (fonoranMore) {
-    fonoranMore.classList.toggle('nav-dropdown--child-active', FONORAN_MORE_IDS.has(state.activeTab));
-  }
+  root.querySelectorAll('[data-learn-tab].tab-btn').forEach((el) => {
+    const active = el.dataset.learnTab === state.activeTab;
+    el.classList.toggle('tab-btn--active', active);
+    if (active) el.setAttribute('aria-current', 'page');
+    else el.removeAttribute('aria-current');
+  });
 
   const authSlot = root.querySelector('[data-nav-auth]');
   if (authSlot) {
@@ -400,12 +351,14 @@ function render() {
     const contextClass = `app-header--${state.context}`;
     const row2 =
       state.context === 'language'
-        ? renderFonoranRow2(state.activeTab)
+        ? renderBuilderRow2(state.activeTab)
         : state.context === 'script'
           ? renderScriptRow2(state.activeTab)
-          : state.context === 'platform'
-            ? renderPlatformRow2(state.activeTab)
-            : '';
+          : state.context === 'learn'
+            ? renderLearnRow2(state.activeTab)
+            : state.context === 'platform'
+              ? renderPlatformRow2(state.activeTab)
+              : '';
 
     root.className = `app-header ${contextClass}`;
     root.innerHTML = `${renderRow1(state.context)}${row2}`;
@@ -416,7 +369,9 @@ function render() {
   bindNavListeners();
 }
 
-function closeNavDropdown(dropdownId = 'nav-more') {
+const ALL_DROPDOWN_IDS = [];
+
+function closeNavDropdown(dropdownId) {
   const dropdown = document.getElementById(dropdownId);
   const menu = document.getElementById(`${dropdownId}-menu`);
   const trigger = document.getElementById(`${dropdownId}-trigger`);
@@ -426,7 +381,11 @@ function closeNavDropdown(dropdownId = 'nav-more') {
   trigger.setAttribute('aria-expanded', 'false');
 }
 
-function openNavDropdown(dropdownId = 'nav-more') {
+function closeAllNavDropdowns() {
+  ALL_DROPDOWN_IDS.forEach((id) => closeNavDropdown(id));
+}
+
+function openNavDropdown(dropdownId) {
   const dropdown = document.getElementById(dropdownId);
   const menu = document.getElementById(`${dropdownId}-menu`);
   const trigger = document.getElementById(`${dropdownId}-trigger`);
@@ -455,7 +414,7 @@ function dispatchNavEvent(root, type, detail) {
 }
 
 function handleScriptTab(root, tab) {
-  closeNavDropdown('nav-more');
+  closeAllNavDropdowns();
   if (navSelectHandlers.onTab) {
     navSelectHandlers.onTab(tab);
     return;
@@ -509,6 +468,7 @@ function bindNavListeners() {
   });
 
   root.querySelectorAll('[data-platform-tab]').forEach((el) => {
+    if (el.tagName === 'A') return;
     el.addEventListener(
       'click',
       (event) => {
@@ -528,12 +488,25 @@ function bindNavListeners() {
         event.preventDefault();
         const page = el.dataset.fonoranPage;
         if (!page) return;
-        closeNavDropdown('fonoran-nav-more');
+        closeAllNavDropdowns();
         if (navSelectHandlers.onPage) {
           navSelectHandlers.onPage(page);
           return;
         }
         dispatchNavEvent(root, 'universal-nav:page', { page });
+      },
+      { signal },
+    );
+  });
+
+  root.querySelectorAll('[data-learn-tab]').forEach((el) => {
+    el.addEventListener(
+      'click',
+      (event) => {
+        event.preventDefault();
+        const tab = el.dataset.learnTab;
+        if (!tab) return;
+        handleScriptTab(root, tab);
       },
       { signal },
     );
@@ -553,7 +526,7 @@ function bindNavListeners() {
     { signal },
   );
 
-  ['nav-more', 'fonoran-nav-more'].forEach((dropdownId) => {
+  ALL_DROPDOWN_IDS.forEach((dropdownId) => {
     const trigger = document.getElementById(`${dropdownId}-trigger`);
     const dropdown = document.getElementById(dropdownId);
     if (!trigger || !dropdown) return;
@@ -579,7 +552,7 @@ function bindGlobalDismiss() {
   document.addEventListener('click', (event) => {
     const el = event.target instanceof Element ? event.target : event.target?.parentElement;
     if (!el) return;
-    ['nav-more', 'fonoran-nav-more'].forEach((id) => {
+    ALL_DROPDOWN_IDS.forEach((id) => {
       const dropdown = document.getElementById(id);
       if (dropdown && !dropdown.contains(el)) closeNavDropdown(id);
     });
@@ -587,8 +560,7 @@ function bindGlobalDismiss() {
 
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
-      closeNavDropdown('nav-more');
-      closeNavDropdown('fonoran-nav-more');
+      closeAllNavDropdowns();
     }
   });
 }
@@ -601,18 +573,31 @@ export function wireUniversalNav() {
  * @param {{ context?: NavContext, activeTab?: string, mountId?: string }} [options]
  */
 export function initUniversalNav(options = {}) {
+  const normalizedPath = window.location.pathname.replace(/\/$/, '');
   state.context =
     options.context ??
     (window.location.pathname.includes('/language')
       ? 'language'
-      : window.location.pathname.replace(/\/$/, '') === '/script'
-        ? 'script'
-        : !window.location.hash && !isDocsRoute()
-          ? 'platform'
-          : 'script');
+      : normalizedPath === '/learn'
+        ? 'learn'
+        : normalizedPath === '/tools'
+          ? 'tools'
+          : normalizedPath === '/research' || normalizedPath.startsWith('/research/')
+            ? 'platform'
+            : normalizedPath === '/script'
+              ? 'script'
+              : !window.location.hash && !isDocsRoute()
+                ? 'platform'
+                : 'script');
   state.activeTab =
     options.activeTab ??
-    (state.context === 'platform' ? 'platform' : 'home');
+    (state.context === 'platform'
+      ? 'platform'
+      : state.context === 'learn'
+        ? 'writing'
+        : state.context === 'tools'
+          ? 'tools-home'
+          : 'home');
   state.mountId = options.mountId ?? 'app-header-root';
 
   render();
@@ -668,4 +653,4 @@ export function setFonoranAuth(auth) {
   }
 }
 
-export { closeNavDropdown, MORE_TAB_IDS };
+export { closeNavDropdown, closeAllNavDropdowns };

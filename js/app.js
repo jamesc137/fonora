@@ -39,7 +39,6 @@ import { setupPronunciationValidation } from './pronunciation-validation-ui.js';
 import { setupTranslatePlayback, setTranslateSymbols } from './fonora-tts-ui.js';
 import { setupBreakdown, prefillBreakdownFromWordSources } from './breakdown-ui.js';
 import { setupSamples, setupHomeSample, ensureSamplesLoaded } from './samples.js';
-import { setupOpenProblems } from './open-problems-ui.js';
 import { setupDocsViewer, onDocsTabActivated } from './docs-viewer-ui.js';
 import { openDocViewer, DEFAULT_DOC_PATH, docViewerHref, isDocsRoute } from './doc-urls.js';
 import {
@@ -47,8 +46,7 @@ import {
   setActiveTab,
   setNavContext,
   setNavSelectHandlers,
-  closeNavDropdown,
-  MORE_TAB_IDS,
+  closeAllNavDropdowns,
 } from './universal-nav.js';
 import {
   canAccessTools,
@@ -642,7 +640,43 @@ function migrateLegacyUrl() {
     history.replaceState(null, '', `${path}${window.location.search}`);
     return;
   }
-  if (path === '/' && (hash === 'home' || (hash && hash !== 'about' && hash !== 'open-problems' && hash !== 'docs' && document.querySelector(`[data-tab-panel="${hash}"]`)))) {
+  if (path === '/' && hash === 'learn-home') {
+    history.replaceState(null, '', `/learn${window.location.search}`);
+    return;
+  }
+  if (path === '/learn') {
+    if (hash && LEGACY_LEARN_HASH[hash]) {
+      const navTab = LEGACY_LEARN_HASH[hash];
+      const nextHash = navTab === 'writing' ? '' : `#${navTab}`;
+      history.replaceState(null, '', `/learn${nextHash}${window.location.search}`);
+    }
+    return;
+  }
+  if (path === '/tools') {
+    const learnHashes = [
+      'learn-home',
+      'quiz',
+      'breakdown',
+      'samples',
+      'spelling-practice',
+      'writing',
+      'reading',
+      'speaking',
+      'listening',
+    ];
+    if (!hash || learnHashes.includes(hash)) {
+      const navTab =
+        hash && LEGACY_LEARN_HASH[hash]
+          ? LEGACY_LEARN_HASH[hash]
+          : hash === 'writing' || hash === 'reading' || hash === 'speaking' || hash === 'listening'
+            ? hash
+            : 'writing';
+      const nextHash = navTab === 'writing' ? '' : `#${navTab}`;
+      history.replaceState(null, '', `/learn${nextHash}${window.location.search}`);
+      return;
+    }
+  }
+  if (path === '/' && (hash === 'home' || (hash && hash !== 'about' && hash !== 'docs' && document.querySelector(`[data-tab-panel="${hash}"]`)))) {
     const nextHash = hash === 'home' ? '' : `#${hash}`;
     history.replaceState(null, '', `/script${nextHash}${window.location.search}`);
   }
@@ -653,9 +687,86 @@ function isScriptAppPath() {
   return path === '/script';
 }
 
+// /tools is a directory over Script-QA tools that live in this same bundle (Builder/
+// Language tools are real links into /language and never resolve to a local tab here).
+// Learn = learner-facing practice; Tools = QA/debugging (sign-in required when OAuth is configured).
+const LEARN_SKILL_IDS = new Set(['writing', 'reading', 'speaking', 'listening']);
+
+const LEARN_SKILL_PANEL = {
+  writing: 'spelling-practice',
+  reading: 'quiz',
+  speaking: 'speaking',
+  listening: 'samples',
+};
+
+const LEGACY_LEARN_HASH = {
+  'learn-home': 'writing',
+  quiz: 'reading',
+  'spelling-practice': 'writing',
+  samples: 'listening',
+  breakdown: 'speaking',
+};
+
+const LEARN_TAB_IDS = LEARN_SKILL_IDS;
+
+function normalizeLearnTab(tabId) {
+  if (!isLearnPath()) return { navTab: tabId, panelId: tabId };
+  if (LEARN_SKILL_IDS.has(tabId)) {
+    return { navTab: tabId, panelId: LEARN_SKILL_PANEL[tabId] };
+  }
+  const navTab = LEGACY_LEARN_HASH[tabId];
+  if (navTab) {
+    return { navTab, panelId: LEARN_SKILL_PANEL[navTab] };
+  }
+  return { navTab: 'writing', panelId: LEARN_SKILL_PANEL.writing };
+}
+
+const BUILDER_TOOLS_TAB_IDS = new Set([
+  'tools-home',
+  'keyboard',
+  'reverse',
+  'encoder-testing',
+  'pronunciation-validation',
+  'symbols',
+]);
+
+function isLearnPath() {
+  const path = window.location.pathname.replace(/\/$/, '') || '/';
+  return path === '/learn';
+}
+
+function isToolsPath() {
+  const path = window.location.pathname.replace(/\/$/, '') || '/';
+  return path === '/tools';
+}
+
+function currentNavContext() {
+  if (isLearnPath()) return 'learn';
+  if (isToolsPath()) return 'tools';
+  if (isScriptAppPath()) return 'script';
+  return 'platform';
+}
+
+function defaultTabForBase(base) {
+  if (base === '/learn') return 'writing';
+  if (base === '/tools') return 'tools-home';
+  return 'home';
+}
+
 function getTabFromHash() {
   migrateLegacyUrl();
   if (isDocsRoute()) return 'docs';
+  if (isLearnPath()) {
+    const id = window.location.hash.replace(/^#/, '');
+    if (id && LEARN_SKILL_IDS.has(id)) return id;
+    if (id && LEGACY_LEARN_HASH[id]) return LEGACY_LEARN_HASH[id];
+    return defaultTabForBase('/learn');
+  }
+  if (isToolsPath()) {
+    const id = window.location.hash.replace(/^#/, '');
+    if (id && BUILDER_TOOLS_TAB_IDS.has(id)) return id;
+    return defaultTabForBase('/tools');
+  }
   if (isScriptAppPath()) {
     const id = window.location.hash.replace(/^#/, '');
     if (id === 'reader') return 'translator';
@@ -663,16 +774,15 @@ function getTabFromHash() {
       const panel = document.querySelector(`[data-tab-panel="${id}"]`);
       if (panel) return id;
     }
-    return 'home';
+    return defaultTabForBase('/script');
   }
   const id = window.location.hash.replace(/^#/, '');
-  if (id === 'open-problems') return 'open-problems';
   if (id === 'about') return 'platform';
   return 'platform';
 }
 
 function isPlatformTab(tabId) {
-  return tabId === 'platform' || tabId === 'open-problems' || tabId === 'docs';
+  return tabId === 'platform' || tabId === 'docs';
 }
 
 function setHashForTab(tabId) {
@@ -681,13 +791,6 @@ function setHashForTab(tabId) {
   if (isPlatformTab(tabId)) {
     if (tabId === 'platform') {
       const next = `/${window.location.search}`;
-      if (`${window.location.pathname}${window.location.search}${window.location.hash}` !== next) {
-        history.replaceState(null, '', next);
-      }
-      return;
-    }
-    if (tabId === 'open-problems') {
-      const next = `/#open-problems`;
       if (`${window.location.pathname}${window.location.search}${window.location.hash}` !== next) {
         history.replaceState(null, '', next);
       }
@@ -704,8 +807,8 @@ function setHashForTab(tabId) {
     return;
   }
 
-  const base = '/script';
-  const hash = tabId === 'home' ? '' : `#${tabId}`;
+  const base = isLearnPath() ? '/learn' : isToolsPath() ? '/tools' : '/script';
+  const hash = tabId === defaultTabForBase(base) ? '' : `#${tabId}`;
   const next = `${base}${hash}`;
   if (`${window.location.pathname}${window.location.search}${window.location.hash}` !== next) {
     history.replaceState(null, '', next);
@@ -731,20 +834,6 @@ function ensureAppHeaderOffsetObserver() {
   window.addEventListener('resize', syncAppHeaderOffset);
 }
 
-function isToolsPath() {
-  const path = window.location.pathname.replace(/\/$/, '') || '/';
-  return path === '/tools';
-}
-
-const BUILDER_TOOLS_TAB_IDS = new Set([
-  'tools-home',
-  'keyboard',
-  'reverse',
-  'encoder-testing',
-  'pronunciation-validation',
-  'symbols',
-]);
-
 function isGatedToolsTab(tabId) {
   return BUILDER_TOOLS_TAB_IDS.has(tabId);
 }
@@ -758,47 +847,48 @@ function resolveTabForAuth(tabId) {
 
 function showTab(tabId) {
   tabId = resolveTabForAuth(tabId);
-  const previousTab = document.querySelector('.tab-panel--active')?.dataset.tabPanel;
-  const platform = isPlatformTab(tabId);
+  const previousPanel = document.querySelector('.tab-panel--active')?.dataset.tabPanel;
+  const context = currentNavContext();
+  const { navTab, panelId } = normalizeLearnTab(tabId);
 
-  document.documentElement.setAttribute('data-fonora-nav', platform ? 'platform' : 'script');
-  document.documentElement.setAttribute('data-fonora-tab', tabId);
+  document.documentElement.setAttribute('data-fonora-nav', context);
+  document.documentElement.setAttribute('data-fonora-tab', navTab);
 
-  setNavContext(platform ? 'platform' : 'script');
-  setActiveTab(tabId);
+  setNavContext(context);
+  setActiveTab(navTab);
 
   document.querySelectorAll('.tab-panel').forEach((panel) => {
-    panel.hidden = panel.dataset.tabPanel !== tabId;
-    panel.classList.toggle('tab-panel--active', panel.dataset.tabPanel === tabId);
+    panel.hidden = panel.dataset.tabPanel !== panelId;
+    panel.classList.toggle('tab-panel--active', panel.dataset.tabPanel === panelId);
   });
 
-  setHashForTab(tabId);
-  closeNavDropdown();
+  setHashForTab(isLearnPath() ? navTab : tabId);
+  closeAllNavDropdowns();
 
-  if (previousTab !== tabId) {
+  if (previousPanel !== panelId) {
     window.scrollTo(0, 0);
   }
 
-  if (tabId === 'samples') {
+  if (panelId === 'samples') {
     ensureSamplesLoaded().catch(() => {});
   }
 
-  if (tabId === 'breakdown') {
+  if (panelId === 'breakdown') {
     const input = document.getElementById('breakdown-input');
     if (input && !input.value.trim()) {
       prefillBreakdownFromWordSources();
     }
   }
 
-  if (tabId === 'keyboard') {
+  if (panelId === 'keyboard') {
     onKeyboardTestingTabActivated();
   }
 
-  if (tabId === 'spelling-practice') {
+  if (panelId === 'spelling-practice') {
     onSpellingPracticeTabActivated();
   }
 
-  notifyFonoraTabChange(tabId);
+  notifyFonoraTabChange(panelId);
 
   if (tabId === 'docs') {
     onDocsTabActivated();
@@ -818,18 +908,30 @@ function handleNavTabSelect(tab) {
   showTab(tab);
 }
 
+setNavSelectHandlers({
+  onTab: handleNavTabSelect,
+  onPlatformTab: handleNavTabSelect,
+  onSignOut: () => {
+    signOut().then(() => showTab(getTabFromHash()));
+  },
+});
+
 let shellNavWired = false;
 
 function setupTabs() {
   if (shellNavWired) return;
   shellNavWired = true;
 
-  document.querySelectorAll('main [data-tab], .home-page [data-tab], .platform-home [data-tab]').forEach((el) => {
+  document.querySelectorAll('main [data-tab], .home-page [data-tab], .platform-home [data-tab], [data-learn-tab]').forEach((el) => {
     el.addEventListener('click', (event) => {
       if (el.tagName === 'A') event.preventDefault();
       const docPath = el.getAttribute('data-doc-path');
       if (docPath && el.dataset.tab === 'docs') {
         openDocViewer(docPath);
+        return;
+      }
+      if (el.dataset.learnTab) {
+        showTab(el.dataset.learnTab);
         return;
       }
       showTab(el.dataset.tab);
@@ -910,7 +1012,6 @@ function applyRulesBundle(loaded) {
   setupBreakdown(rules);
   setupSamples(rules);
   setupHomeSample(rules);
-  setupOpenProblems();
   setupDocsViewer();
   setupTranslator();
   setupAlphabetLab({
@@ -944,20 +1045,14 @@ function applyRulesBundle(loaded) {
 }
 
 function bootstrapShell() {
-  const initialTab = getTabFromHash();
-  setNavSelectHandlers({
-    onTab: handleNavTabSelect,
-    onPlatformTab: handleNavTabSelect,
-    onSignOut: () => {
-      signOut().then(() => showTab(getTabFromHash()));
-    },
-  });
+  const initialNavTab = resolveTabForAuth(getTabFromHash());
+  const { navTab, panelId } = normalizeLearnTab(initialNavTab);
   initUniversalNav({
-    context: isPlatformTab(initialTab) ? 'platform' : 'script',
-    activeTab: initialTab,
+    context: currentNavContext(),
+    activeTab: isLearnPath() ? navTab : initialNavTab,
   });
   document.querySelectorAll('.tab-panel').forEach((panel) => {
-    const active = panel.dataset.tabPanel === initialTab;
+    const active = panel.dataset.tabPanel === (isLearnPath() ? panelId : initialNavTab);
     panel.hidden = !active;
     panel.classList.toggle('tab-panel--active', active);
   });

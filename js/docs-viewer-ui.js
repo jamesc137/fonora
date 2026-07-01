@@ -1,7 +1,7 @@
 import { escapeHtml, errorMessage } from './utils.js';
 import {
   DEFAULT_DOC_PATH,
-  DOC_CATALOG,
+  getDocCatalog,
   DOC_LAYER_ORDER,
   docViewerHref,
   githubDocUrl,
@@ -39,7 +39,7 @@ function renderSidebar(activePath) {
   if (!sidebar) return;
 
   const sections = DOC_LAYER_ORDER.map((layer) => {
-    const entries = DOC_CATALOG.filter((e) => e.layer === layer.id);
+    const entries = getDocCatalog().filter((e) => e.layer === layer.id);
     if (!entries.length) return '';
     return `
       <section class="doc-viewer-nav-group${layer.id === 'archive' ? ' doc-viewer-nav-group--archive' : ''}">

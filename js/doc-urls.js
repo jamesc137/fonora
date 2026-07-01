@@ -1,8 +1,28 @@
 /** GitHub blob URLs and in-app docs viewer routing. */
 
-import { RESEARCH_NOTES } from './research-notes.js';
+export const GITHUB_REPO = 'https://github.com/jamesc137/fonora';
+export const GITHUB_BLOB_BASE = `${GITHUB_REPO}/blob/main/`;
 
-export const GITHUB_BLOB_BASE = 'https://github.com/jamesc137/fonora/blob/main/';
+/** @param {string} sha */
+export function githubCommitUrl(sha) {
+  const clean = String(sha || '').trim();
+  if (!clean) return GITHUB_REPO;
+  return `${GITHUB_REPO}/commit/${clean}`;
+}
+
+/**
+ * @param {string} repoPath e.g. docs/language-rules.md
+ * @param {string} [ref] branch or commit SHA (default main)
+ */
+export function githubBlobUrl(repoPath, ref = 'main') {
+  const path = String(repoPath || '').replace(/^\//, '');
+  const r = String(ref || 'main').trim() || 'main';
+  return `${GITHUB_REPO}/blob/${r}/${path}`;
+}
+
+export function githubDocUrl(repoPath, ref = 'main') {
+  return githubBlobUrl(repoPath, ref);
+}
 
 export const DEFAULT_DOC_PATH = 'docs/platform-overview.md';
 
@@ -31,19 +51,17 @@ export const DOC_LAYER_ORDER = [
   { id: 'archive', label: 'Archive' },
 ];
 
-/** Research notebook entries, derived from the note index so there is one source of truth. */
-const RESEARCH_DOC_ENTRIES = RESEARCH_NOTES.map((note) => ({
-  path: `docs/research/${note.slug}.md`,
-  label: `${note.code} · ${note.title}`,
-  layer: 'research',
-}));
+/** Populated at runtime from /api/research/notes when docs viewer loads. */
+export let RESEARCH_DOC_ENTRIES = [];
 
-/**
- * Curated doc list for the viewer sidebar.
- * @type {Array<{ path: string, label: string, layer: string }>}
- */
-export const DOC_CATALOG = [
-  { path: 'docs/platform-overview.md', label: 'Platform overview', layer: 'essential' },
+/** @param {Array<{ path: string, label: string, layer: string }>} entries */
+export function setResearchDocEntries(entries) {
+  RESEARCH_DOC_ENTRIES = entries;
+}
+
+function buildDocCatalog() {
+  return [
+    { path: 'docs/platform-overview.md', label: 'Platform overview', layer: 'essential' },
   { path: 'docs/README.md', label: 'Documentation index', layer: 'essential' },
   { path: 'README.md', label: 'Project README', layer: 'essential' },
   { path: 'docs/third-party.md', label: 'Third-party licenses', layer: 'essential' },
@@ -72,7 +90,13 @@ export const DOC_CATALOG = [
   { path: 'docs/FONORA_COLLISION_AUDIT.md', label: 'Collision audit', layer: 'archive' },
   { path: 'docs/IPA_VOWEL_NORMALIZATION_AUDIT.md', label: 'Vowel normalization audit', layer: 'archive' },
   { path: 'docs/FONORA_VOWEL_DECISION_REPORT.md', label: 'Vowel decision report (v2)', layer: 'archive' },
-];
+  ];
+}
+
+/** Curated doc list for the viewer sidebar (includes runtime research entries). */
+export function getDocCatalog() {
+  return [...buildDocCatalog(), ...RESEARCH_DOC_ENTRIES];
+}
 
 /**
  * @param {string} repoPath e.g. docs/language-rules.md
@@ -88,11 +112,6 @@ export function normalizeDocPath(repoPath) {
     return clean;
   }
   throw new Error('Document path not allowed');
-}
-
-export function githubDocUrl(repoPath) {
-  const { path } = splitDocRef(repoPath);
-  return `${GITHUB_BLOB_BASE}${path}`;
 }
 
 /**

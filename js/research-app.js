@@ -2,40 +2,45 @@
  * Fonora research notebook app.
  *
  * Path-routed (for SEO) public laboratory notebook:
- *   /research                -> notebook index (notes grouped by act)
+ *   /research                -> notebook index (notes grouped by phase)
  *   /research#open           -> open questions (live research frontier)
  *   /research/timeline       -> visual dependency graph + chronological spine
  *   /research/notes/<slug>   -> a single research note (markdown + cross-links)
  *
- * Note prose lives in docs/research/<slug>.md; structured metadata lives in
- * js/research-notes.js. This module renders both and injects per-note SEO tags.
+ * Published notes are loaded from /api/research/notes.
  */
 
 import { escapeHtml, errorMessage } from './utils.js';
 import { initUniversalNav, setActiveTab, setNavSelectHandlers } from './universal-nav.js';
 import { refreshAuth, signOut, handleAuthUrlErrors } from './auth-session.js';
-import { renderMarkdown, extractMarkdownTitle } from './markdown-render.js';
+import { renderMarkdown } from './markdown-render.js';
+import { resolveResearchNoteTitle } from './research-note-meta.js';
 import { renderMermaidIn } from './mermaid-render.js';
 import { SITE_ORIGIN } from './fonora-config.js';
 import {
   docViewerHref,
-  githubDocUrl,
+  githubBlobUrl,
+  githubCommitUrl,
   researchHref,
-  researchNoteRepoPath,
   researchCanonical,
   parseResearchLocation,
+  setResearchDocEntries,
 } from './doc-urls.js';
+import { RESEARCH_PHASES, resolveNotePhase } from './research-notes.js';
 import {
-  RESEARCH_ACTS,
-  RESEARCH_NOTES,
+  getPublishedNotes,
   getResearchNote,
   getNoteNeighbors,
   getOpenNotes,
-  notesByAct,
-} from './research-notes.js';
+  loadPublishedNoteBody,
+  loadPublishedNotesFromApi,
+  notesByPhase,
+} from './research-notes-client.js';
 
 const ROOT_ID = 'research-root';
 let loadToken = 0;
+let notesLoaded = false;
+let notesLoadError = null;
 
 /* --------------------------------- SEO ---------------------------------- */
 
@@ -98,19 +103,58 @@ function root() {
   return document.getElementById(ROOT_ID);
 }
 
+function renderLoadError() {
+  const el = root();
+  if (!el) return;
+  el.innerHTML = `
+    <article class="research-page content-page">
+      <header class="research-hero research-hero--compact">
+        <h1 class="research-hero__title">Research notebook unavailable</h1>
+        <p class="research-hero__lead">${escapeHtml(notesLoadError || 'Could not load research notes.')}</p>
+      </header>
+    </article>`;
+  setMeta({
+    title: 'Fonora Research | Unavailable',
+    description: 'The research notebook could not be loaded.',
+    slug: undefined,
+    jsonLd: null,
+  });
+}
+
+async function ensureNotesLoaded() {
+  if (notesLoaded) return true;
+  try {
+    await loadPublishedNotesFromApi();
+    setResearchDocEntries(
+      getPublishedNotes().map((note) => ({
+        path: `research/${note.slug}`,
+        label: `${note.code} · ${note.title}`,
+        layer: 'research',
+      })),
+    );
+    notesLoaded = true;
+    notesLoadError = null;
+    return true;
+  } catch (err) {
+    notesLoadError = errorMessage(err);
+    notesLoaded = false;
+    return false;
+  }
+}
+
 /* ------------------------------ index view ------------------------------ */
 
 function renderIndex() {
   const el = root();
   if (!el) return;
 
-  const acts = notesByAct()
+  const phases = notesByPhase(RESEARCH_PHASES)
     .map(
-      ({ act, notes }) => `
-      <section class="research-act" aria-labelledby="${escapeHtml(act.id)}-h">
-        <header class="research-act__header">
-          <h2 id="${escapeHtml(act.id)}-h" class="research-act__title">${escapeHtml(act.label)}</h2>
-          <p class="research-act__blurb">${escapeHtml(act.blurb)}</p>
+      ({ phase, notes }) => `
+      <section class="research-phase" aria-labelledby="${escapeHtml(phase.id)}-h">
+        <header class="research-phase__header">
+          <h2 id="${escapeHtml(phase.id)}-h" class="research-phase__title">${escapeHtml(phase.label)}</h2>
+          <p class="research-phase__blurb">${escapeHtml(phase.blurb)}</p>
         </header>
         <div class="research-card-grid">${notes.map(noteCard).join('')}</div>
       </section>`,
@@ -133,9 +177,10 @@ function renderIndex() {
           <a class="btn" href="/research#open">Open questions</a>
         </div>
       </header>
-      ${acts}
+      ${phases}
     </article>`;
 
+  const published = getPublishedNotes();
   setMeta({
     title: 'Fonora | Research Notebook',
     description:
@@ -147,7 +192,7 @@ function renderIndex() {
       '@type': 'CollectionPage',
       name: 'Fonora Research Notebook',
       url: researchCanonical(undefined, SITE_ORIGIN),
-      hasPart: RESEARCH_NOTES.map((n) => ({
+      hasPart: published.map((n) => ({
         '@type': 'Article',
         headline: n.title,
         url: researchCanonical(n.slug, SITE_ORIGIN),
@@ -179,8 +224,8 @@ function renderOpen() {
         </p>
       </header>
 
-      <section class="research-act" aria-label="Open research notes">
-        <h2 class="research-act__title">Open research notes</h2>
+      <section class="research-phase" aria-label="Open research notes">
+        <h2 class="research-phase__title">Open research notes</h2>
         ${cards}
       </section>
 
@@ -210,18 +255,19 @@ function renderOpen() {
 /* ----------------------------- timeline view ---------------------------- */
 
 function timelineMermaidSource() {
+  const notes = getPublishedNotes();
   const nid = (slug) => noteId(slug);
   const clean = (s) => String(s).replace(/"/g, '');
   const lines = ['flowchart TB'];
-  RESEARCH_ACTS.forEach((act, ai) => {
-    lines.push(`  subgraph act_${ai} ["${clean(act.label)}"]`);
-    RESEARCH_NOTES.filter((n) => n.act === act.id).forEach((n) => {
+  RESEARCH_PHASES.forEach((phase, pi) => {
+    lines.push(`  subgraph phase_${pi} ["${clean(phase.label)}"]`);
+    notes.filter((n) => resolveNotePhase(n) === phase.id).forEach((n) => {
       lines.push(`    ${nid(n.slug)}["${clean(n.code)}: ${clean(n.title)}"]`);
     });
     lines.push('  end');
   });
-  for (let i = 0; i < RESEARCH_NOTES.length - 1; i += 1) {
-    lines.push(`  ${nid(RESEARCH_NOTES[i].slug)} --> ${nid(RESEARCH_NOTES[i + 1].slug)}`);
+  for (let i = 0; i < notes.length - 1; i += 1) {
+    lines.push(`  ${nid(notes[i].slug)} --> ${nid(notes[i + 1].slug)}`);
   }
   lines.push(`  ${nid('dda-coordinates')} -. "demoted by" .-> ${nid('the-constitution')}`);
   lines.push(`  ${nid('huffman-roots')} -. "demoted by" .-> ${nid('the-constitution')}`);
@@ -229,11 +275,11 @@ function timelineMermaidSource() {
 }
 
 function renderSpine() {
-  return notesByAct()
+  return notesByPhase(RESEARCH_PHASES)
     .map(
-      ({ act, notes }) => `
-      <section class="research-spine__act">
-        <h3 class="research-spine__act-title">${escapeHtml(act.label)}</h3>
+      ({ phase, notes }) => `
+      <section class="research-spine__phase">
+        <h3 class="research-spine__phase-title">${escapeHtml(phase.label)}</h3>
         <ol class="research-spine__list">
           ${notes
             .map(
@@ -275,7 +321,7 @@ async function renderTimeline() {
       </header>
 
       <section class="research-graph" aria-label="Research dependency graph">
-        ${renderMarkdown(diagramMarkdown, { docPath: 'docs/research/timeline.md' })}
+        ${renderMarkdown(diagramMarkdown, { docPath: 'research/timeline' })}
       </section>
 
       <section class="research-spine" aria-label="Chronological research spine">
@@ -298,7 +344,7 @@ async function renderTimeline() {
 
 /* ------------------------------- note view ------------------------------ */
 
-function linkGroup(label, links) {
+function footerSection(label, links) {
   if (!links || !links.length) return '';
   const items = links
     .map(
@@ -307,41 +353,82 @@ function linkGroup(label, links) {
     )
     .join('');
   return `
-    <div class="research-thread__group">
-      <h3 class="research-thread__group-title">${escapeHtml(label)}</h3>
-      <ul class="research-thread__links">${items}</ul>
-    </div>`;
+    <section class="research-note-footer__section">
+      <h3 class="research-note-footer__section-title">${escapeHtml(label)}</h3>
+      <ul class="research-note-footer__list">${items}</ul>
+    </section>`;
+}
+
+function pagerCell(note, direction) {
+  if (!note) {
+    return `<div class="research-note-footer__pager-cell research-note-footer__pager-cell--empty" aria-hidden="true"></div>`;
+  }
+  const isPrev = direction === 'prev';
+  const href = researchHref(note.slug);
+  return `
+    <a class="research-note-footer__pager-cell research-note-footer__pager-link research-note-footer__pager-link--${direction}" href="${escapeHtml(href)}">
+      <span class="research-note-footer__pager-label">${isPrev ? 'Previous' : 'Next'}</span>
+      <span class="research-note-footer__pager-title">${escapeHtml(note.code)} · ${escapeHtml(note.title)}</span>
+    </a>`;
+}
+
+function notePager(prev, next) {
+  if (!prev && !next) return '';
+  return `
+    <nav class="research-note-footer__pager" aria-label="Note navigation">
+      ${pagerCell(prev, 'prev')}
+      ${pagerCell(next, 'next')}
+    </nav>`;
 }
 
 function continueThread(note) {
   const { prev, next } = getNoteNeighbors(note.slug);
+  const ref = note.git_commit || 'main';
 
   const related = (note.related || [])
     .map((slug) => getResearchNote(slug))
     .filter(Boolean)
     .map((n) => ({ label: `${n.code} · ${n.title}`, href: researchHref(n.slug) }));
-  const relatedWithNeighbors = [];
-  if (prev) relatedWithNeighbors.push({ label: `← ${prev.code} · ${prev.title}`, href: researchHref(prev.slug) });
-  if (next) relatedWithNeighbors.push({ label: `${next.code} · ${next.title} →`, href: researchHref(next.slug) });
-  relatedWithNeighbors.push(...related);
 
   const docs = (note.docs || []).map((d) => ({ label: d.label, href: docViewerHref(d.path) }));
   const tools = (note.tools || []).map((t) => ({ label: t.label, href: t.href }));
   const source = (note.source || []).map((s) => ({
     label: s.label,
-    href: githubDocUrl(s.path),
+    href: githubBlobUrl(s.path, ref),
     external: true,
   }));
 
+  const commitLink = note.git_commit
+    ? [
+        {
+          label: `Commit ${note.git_commit.slice(0, 7)}`,
+          href: githubCommitUrl(note.git_commit),
+          external: true,
+        },
+      ]
+    : [];
+
+  const sections = [
+    footerSection('Related research', related),
+    footerSection('Reference docs', docs),
+    footerSection('Try it', tools),
+    footerSection('Source', source),
+    footerSection('Repository', commitLink),
+  ]
+    .filter(Boolean)
+    .join('');
+
+  const meta = sections
+    ? `<div class="research-note-footer__meta">${sections}</div>`
+    : '';
+
+  const pager = notePager(prev, next);
+  if (!pager && !meta) return '';
+
   return `
-    <footer class="research-thread" aria-label="Continue the thread">
-      <h2 class="research-thread__title">Continue the thread</h2>
-      <div class="research-thread__groups">
-        ${linkGroup('Related research', relatedWithNeighbors)}
-        ${linkGroup('Reference docs', docs)}
-        ${linkGroup('Try it', tools)}
-        ${linkGroup('Source', source)}
-      </div>
+    <footer class="research-note-footer">
+      ${pager}
+      ${meta}
     </footer>`;
 }
 
@@ -370,18 +457,17 @@ async function renderNote(slug) {
     return;
   }
 
-  const repoPath = researchNoteRepoPath(slug);
   el.innerHTML = '<p class="research-loading">Loading note…</p>';
 
   let bodyHtml = '';
   let pageTitle = note.title;
   try {
-    const res = await fetch(`/${repoPath}`);
-    if (!res.ok) throw new Error(`Could not load ${repoPath} (HTTP ${res.status})`);
-    const markdown = await res.text();
+    const payload = await loadPublishedNoteBody(slug);
     if (token !== loadToken) return;
-    pageTitle = extractMarkdownTitle(markdown) || note.title;
-    bodyHtml = renderMarkdown(markdown, { docPath: repoPath, skipTitle: true });
+    const markdown = payload.body || '';
+    const meta = payload.metadata || note;
+    pageTitle = resolveResearchNoteTitle(markdown, meta.title);
+    bodyHtml = renderMarkdown(markdown, { docPath: `research/${slug}`, skipTitle: true });
   } catch (err) {
     if (token !== loadToken) return;
     bodyHtml = `<p class="research-error">${escapeHtml(errorMessage(err))}</p>`;
@@ -420,7 +506,9 @@ async function renderNote(slug) {
       url: researchCanonical(note.slug, SITE_ORIGIN),
       datePublished: note.date,
       dateModified: note.date,
-      articleSection: (RESEARCH_ACTS.find((a) => a.id === note.act) || {}).label || 'Research',
+      articleSection:
+        (RESEARCH_PHASES.find((p) => p.id === resolveNotePhase(note)) || {}).label ||
+        'Research',
       author: { '@type': 'Person', name: 'James Calhoun' },
       publisher: { '@type': 'Organization', name: 'Fonora', url: SITE_ORIGIN },
       isPartOf: {
@@ -441,6 +529,12 @@ function currentTab(view) {
 }
 
 async function route() {
+  const ok = await ensureNotesLoaded();
+  if (!ok) {
+    renderLoadError();
+    return;
+  }
+
   const parsed = parseResearchLocation() || { view: 'index' };
   setActiveTab(currentTab(parsed.view));
 

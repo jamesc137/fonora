@@ -39,6 +39,7 @@
     "fonoran:explore": "node -e \"console.log('Open http://localhost:' + (process.env.PORT||8000) + '/language/')\"",
     "fonoran:import": "node scripts/fonoran-import-json.js",
     "fonoran:export": "node scripts/fonoran-export-json.js",
+    "research:import": "node scripts/research-notes-import-static.js",
     "fonoran:snapshot:export": "node scripts/fonoran-snapshot-export.js",
     "fonoran:snapshot:import": "node scripts/fonoran-snapshot-import.js",
     "fonoran:roots": "node tools/fonoran-english-roots-build.js",

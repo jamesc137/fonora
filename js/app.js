@@ -40,6 +40,7 @@ import { setupTranslatePlayback, setTranslateSymbols } from './fonora-tts-ui.js'
 import { setupBreakdown, prefillBreakdownFromWordSources } from './breakdown-ui.js';
 import { setupSamples, setupHomeSample, ensureSamplesLoaded } from './samples.js';
 import { setupDocsViewer, onDocsTabActivated } from './docs-viewer-ui.js';
+import { onResearchNotesTabActivated } from './research-notes-editor.js';
 import { openDocViewer, DEFAULT_DOC_PATH, docViewerHref, isDocsRoute } from './doc-urls.js';
 import {
   initUniversalNav,
@@ -728,6 +729,7 @@ const BUILDER_TOOLS_TAB_IDS = new Set([
   'encoder-testing',
   'pronunciation-validation',
   'symbols',
+  'research-notes',
 ]);
 
 function isLearnPath() {
@@ -892,6 +894,10 @@ function showTab(tabId) {
 
   if (tabId === 'docs') {
     onDocsTabActivated();
+  }
+
+  if (panelId === 'research-notes') {
+    onResearchNotesTabActivated();
   }
 
   requestAnimationFrame(syncAppHeaderOffset);

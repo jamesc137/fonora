@@ -248,6 +248,19 @@ createServer(async (req, res) => {
     }
 
     if (isDocsViewerRoute(url.pathname)) {
+      const bare = url.pathname.replace(/\/$/, '') || '/';
+      // /docs is the in-app viewer shell; the repo also has a docs/ directory on disk.
+      if (bare === '/docs') {
+        const indexPath = join(root, 'index.html');
+        const body = await readFile(indexPath);
+        res.writeHead(200, {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-cache',
+          ...SECURITY_HEADERS,
+        });
+        res.end(body);
+        return;
+      }
       const staticPath = resolveFilePath(normalizePathname(url.pathname));
       if (!staticPath || !existsSync(staticPath)) {
         const indexPath = join(root, 'index.html');

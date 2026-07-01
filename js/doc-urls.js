@@ -1,8 +1,13 @@
 /** GitHub blob URLs and in-app docs viewer routing. */
 
+import { RESEARCH_NOTES } from './research-notes.js';
+
 export const GITHUB_BLOB_BASE = 'https://github.com/jamesc137/fonora/blob/main/';
 
 export const DEFAULT_DOC_PATH = 'docs/platform-overview.md';
+
+/** Base path for the public research notebook (path-routed for SEO). */
+export const RESEARCH_BASE = '/research';
 
 const ALLOWED_EXACT = new Set(['CONTRIBUTING.md', 'README.md']);
 const ALLOWED_PREFIX = 'docs/';
@@ -22,8 +27,16 @@ export const DOC_LAYER_ORDER = [
   { id: 'essential', label: 'Essential' },
   { id: 'script', label: 'Script layer' },
   { id: 'language', label: 'Language layer' },
+  { id: 'research', label: 'Research notebook' },
   { id: 'archive', label: 'Archive' },
 ];
+
+/** Research notebook entries, derived from the note index so there is one source of truth. */
+const RESEARCH_DOC_ENTRIES = RESEARCH_NOTES.map((note) => ({
+  path: `docs/research/${note.slug}.md`,
+  label: `${note.code} · ${note.title}`,
+  layer: 'research',
+}));
 
 /**
  * Curated doc list for the viewer sidebar.
@@ -35,7 +48,6 @@ export const DOC_CATALOG = [
   { path: 'README.md', label: 'Project README', layer: 'essential' },
   { path: 'docs/third-party.md', label: 'Third-party licenses', layer: 'essential' },
   { path: 'docs/deploy.md', label: 'Deploy & PostgreSQL', layer: 'essential' },
-  { path: 'docs/open-problems.md', label: 'Open problems', layer: 'essential' },
   { path: 'CONTRIBUTING.md', label: 'Contributing', layer: 'essential' },
 
   { path: 'docs/language-rules.md', label: 'Encoding rules', layer: 'script' },
@@ -49,12 +61,13 @@ export const DOC_CATALOG = [
   { path: 'docs/fonoran-grammar.md', label: 'Fonoran grammar', layer: 'language' },
   { path: 'docs/fonoran-interpretive-translator.md', label: 'Interpretive translator', layer: 'language' },
 
+  ...RESEARCH_DOC_ENTRIES,
+
   { path: 'docs/fonoran-gen3.md', label: 'DDA Gen 3 (archive)', layer: 'archive' },
   { path: 'docs/fonoran-gen3-1.md', label: 'Gen 3.1 phonetic layer', layer: 'archive' },
   { path: 'docs/fonoran-generator-archive.md', label: 'Generator archive', layer: 'archive' },
   { path: 'docs/fonoran-semantic-foundation.md', label: 'Semantic foundation', layer: 'archive' },
   { path: 'docs/fonoran-primitive-roots-report.md', label: 'Primitive roots report', layer: 'archive' },
-  { path: 'docs/fonoran-root-workflow.md', label: 'Root workflow (redirect)', layer: 'archive' },
   { path: 'docs/FONORA_CLEANUP_AUDIT.md', label: 'Cleanup audit (2026)', layer: 'archive' },
   { path: 'docs/FONORA_COLLISION_AUDIT.md', label: 'Collision audit', layer: 'archive' },
   { path: 'docs/IPA_VOWEL_NORMALIZATION_AUDIT.md', label: 'Vowel normalization audit', layer: 'archive' },
@@ -235,4 +248,54 @@ export function openDocViewer(repoPath) {
     window.showTab('docs');
   }
   return path;
+}
+
+/* ------------------------------------------------------------------ *
+ * Research notebook routing (/research, /research/timeline, notes)
+ * ------------------------------------------------------------------ */
+
+/** Repo path for a research note's markdown source. */
+export function researchNoteRepoPath(slug) {
+  return `docs/research/${String(slug || '').replace(/[^a-z0-9-]/gi, '')}.md`;
+}
+
+/**
+ * Canonical href for a research view.
+ * @param {string} [slug] omit for the index, 'timeline' for the timeline, otherwise a note slug
+ */
+export function researchHref(slug) {
+  if (!slug) return RESEARCH_BASE;
+  if (slug === 'timeline') return `${RESEARCH_BASE}/timeline`;
+  if (slug === 'open') return `${RESEARCH_BASE}#open`;
+  return `${RESEARCH_BASE}/notes/${slug}`;
+}
+
+/** Absolute canonical URL for a research view (for SEO tags / sitemap). */
+export function researchCanonical(slug, origin = 'https://fonora.org') {
+  return `${origin}${researchHref(slug)}`;
+}
+
+/**
+ * @param {Pick<Location, 'pathname' | 'hash'>} [loc]
+ * @returns {{ view: 'index' | 'open' | 'timeline' | 'note', slug?: string } | null}
+ */
+export function parseResearchLocation(loc = window.location) {
+  const path = loc.pathname.replace(/\/+$/, '') || '/';
+  if (path === RESEARCH_BASE) {
+    return { view: loc.hash.replace(/^#/, '') === 'open' ? 'open' : 'index' };
+  }
+  if (path === `${RESEARCH_BASE}/timeline`) {
+    return { view: 'timeline' };
+  }
+  if (path.startsWith(`${RESEARCH_BASE}/notes/`)) {
+    const slug = decodeURIComponent(path.slice(`${RESEARCH_BASE}/notes/`.length).replace(/\/+$/, ''));
+    return { view: 'note', slug };
+  }
+  return null;
+}
+
+/** @param {Pick<Location, 'pathname'>} [loc] */
+export function isResearchRoute(loc = window.location) {
+  const path = loc.pathname.replace(/\/+$/, '') || '/';
+  return path === RESEARCH_BASE || path.startsWith(`${RESEARCH_BASE}/`);
 }

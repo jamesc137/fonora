@@ -19,14 +19,13 @@
     'docs',
   ]);
 
-  const LEARN_TABS = new Set(['writing', 'reading', 'speaking', 'listening']);
-  const LEGACY_LEARN_HASH = {
-    'learn-home': 'writing',
-    quiz: 'reading',
-    'spelling-practice': 'writing',
-    samples: 'listening',
-    breakdown: 'speaking',
-  };
+  const learnRouting = window.FONORA_LEARN_ROUTING;
+  if (!learnRouting) {
+    throw new Error('learn-routing-data.js must load before nav-boot.js');
+  }
+  const LEARN_TABS = new Set(learnRouting.LEARN_SKILL_IDS);
+  const LEGACY_LEARN_HASH = learnRouting.LEGACY_LEARN_HASH;
+  const LEARN_DEFAULT_TAB = learnRouting.LEARN_DEFAULT_TAB;
 
   const TOOLS_TABS = new Set([
     'tools-home',
@@ -87,8 +86,9 @@
   }
 
   if (path === '/learn' || path.startsWith('/learn/')) {
-    let tab = 'writing';
-    if (hash && LEARN_TABS.has(hash)) tab = hash;
+    let tab = LEARN_DEFAULT_TAB;
+    if (hash && hash === LEARN_DEFAULT_TAB) tab = LEARN_DEFAULT_TAB;
+    else if (hash && LEARN_TABS.has(hash)) tab = hash;
     else if (hash && LEGACY_LEARN_HASH[hash]) tab = LEGACY_LEARN_HASH[hash];
     html.setAttribute('data-fonora-nav', 'learn');
     html.setAttribute('data-fonora-tab', tab);
@@ -96,22 +96,12 @@
   }
 
   if (path === '/tools' || path.startsWith('/tools/')) {
-    const learnHashes = [
-      'learn-home',
-      'quiz',
-      'breakdown',
-      'samples',
-      'spelling-practice',
-      'writing',
-      'reading',
-      'speaking',
-      'listening',
-    ];
-    if (hash && learnHashes.includes(hash)) {
-      let tab = 'writing';
-      if (LEARN_TABS.has(hash)) tab = hash;
+    if (hash && learnRouting.LEARN_REDIRECT_HASHES.includes(hash)) {
+      let tab = LEARN_DEFAULT_TAB;
+      if (hash === LEARN_DEFAULT_TAB) tab = LEARN_DEFAULT_TAB;
+      else if (LEARN_TABS.has(hash)) tab = hash;
       else if (LEGACY_LEARN_HASH[hash]) tab = LEGACY_LEARN_HASH[hash];
-      const nextHash = tab === 'writing' ? '' : `#${tab}`;
+      const nextHash = tab === LEARN_DEFAULT_TAB ? '' : `#${tab}`;
       window.location.replace(`/learn${nextHash}${window.location.search}`);
       return;
     }

@@ -50,6 +50,15 @@ import {
   closeAllNavDropdowns,
 } from './universal-nav.js';
 import {
+  LEARN_SKILL_IDS,
+  LEGACY_LEARN_HASH,
+  LEARN_DEFAULT_TAB,
+  LEARN_REDIRECT_HASHES,
+  normalizeLearnTab as resolveLearnTab,
+  learnNavTabToHash,
+} from './learn-routing.js';
+import { mountSiteFooter } from './site-footer.js';
+import {
   canAccessTools,
   refreshAuth,
   signOut,
@@ -648,31 +657,20 @@ function migrateLegacyUrl() {
   if (path === '/learn') {
     if (hash && LEGACY_LEARN_HASH[hash]) {
       const navTab = LEGACY_LEARN_HASH[hash];
-      const nextHash = navTab === 'writing' ? '' : `#${navTab}`;
+      const nextHash = learnNavTabToHash(navTab);
       history.replaceState(null, '', `/learn${nextHash}${window.location.search}`);
     }
     return;
   }
   if (path === '/tools') {
-    const learnHashes = [
-      'learn-home',
-      'quiz',
-      'breakdown',
-      'samples',
-      'spelling-practice',
-      'writing',
-      'reading',
-      'speaking',
-      'listening',
-    ];
-    if (hash && learnHashes.includes(hash)) {
+    if (hash && LEARN_REDIRECT_HASHES.includes(hash)) {
       const navTab =
-        LEGACY_LEARN_HASH[hash]
-          ? LEGACY_LEARN_HASH[hash]
-          : hash === 'writing' || hash === 'reading' || hash === 'speaking' || hash === 'listening'
+        hash === LEARN_DEFAULT_TAB
+          ? LEARN_DEFAULT_TAB
+          : LEARN_SKILL_IDS.has(hash)
             ? hash
-            : 'writing';
-      const nextHash = navTab === 'writing' ? '' : `#${navTab}`;
+            : LEGACY_LEARN_HASH[hash] ?? LEARN_DEFAULT_TAB;
+      const nextHash = learnNavTabToHash(navTab);
       history.replaceState(null, '', `/learn${nextHash}${window.location.search}`);
       return;
     }
@@ -688,38 +686,10 @@ function isScriptAppPath() {
   return path === '/script';
 }
 
-// /tools is a directory over Script-QA tools that live in this same bundle (Builder/
-// Language tools are real links into /language and never resolve to a local tab here).
 // Learn = learner-facing practice; Tools = QA/debugging (sign-in required when OAuth is configured).
-const LEARN_SKILL_IDS = new Set(['writing', 'reading', 'speaking', 'listening']);
-
-const LEARN_SKILL_PANEL = {
-  writing: 'spelling-practice',
-  reading: 'quiz',
-  speaking: 'speaking',
-  listening: 'samples',
-};
-
-const LEGACY_LEARN_HASH = {
-  'learn-home': 'writing',
-  quiz: 'reading',
-  'spelling-practice': 'writing',
-  samples: 'listening',
-  breakdown: 'speaking',
-};
-
-const LEARN_TAB_IDS = LEARN_SKILL_IDS;
-
 function normalizeLearnTab(tabId) {
   if (!isLearnPath()) return { navTab: tabId, panelId: tabId };
-  if (LEARN_SKILL_IDS.has(tabId)) {
-    return { navTab: tabId, panelId: LEARN_SKILL_PANEL[tabId] };
-  }
-  const navTab = LEGACY_LEARN_HASH[tabId];
-  if (navTab) {
-    return { navTab, panelId: LEARN_SKILL_PANEL[navTab] };
-  }
-  return { navTab: 'writing', panelId: LEARN_SKILL_PANEL.writing };
+  return resolveLearnTab(tabId);
 }
 
 const BUILDER_TOOLS_TAB_IDS = new Set([
@@ -750,7 +720,7 @@ function currentNavContext() {
 }
 
 function defaultTabForBase(base) {
-  if (base === '/learn') return 'writing';
+  if (base === '/learn') return LEARN_DEFAULT_TAB;
   if (base === '/tools') return 'tools-home';
   return 'home';
 }
@@ -760,7 +730,7 @@ function getTabFromHash() {
   if (isDocsRoute()) return 'docs';
   if (isLearnPath()) {
     const id = window.location.hash.replace(/^#/, '');
-    if (id && LEARN_SKILL_IDS.has(id)) return id;
+    if (id && (LEARN_SKILL_IDS.has(id) || id === LEARN_DEFAULT_TAB)) return id;
     if (id && LEGACY_LEARN_HASH[id]) return LEGACY_LEARN_HASH[id];
     return defaultTabForBase('/learn');
   }

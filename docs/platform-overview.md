@@ -75,7 +75,7 @@ intertwined by design — splitting the data model is explicitly out of scope fo
 
 1. [fonoran-constitution.md](fonoran-constitution.md) — philosophy, the campfire test, the tiered language
 2. [`/language`](/language) — About Fonoran, then Translator / Dictionary / Grammar
-3. [`/tools`](/tools) — Learn the Sounds, Breakdown, Samples
+3. [`/learn`](/learn) — reading, breakdown, samples, and spelling practice
 4. [fonoran-grammar.md](fonoran-grammar.md)
 
 ### Build the language
